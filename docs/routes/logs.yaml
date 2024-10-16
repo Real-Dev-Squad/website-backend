@@ -1,0 +1,89 @@
+paths:
+  /logs:
+    get:
+      summary: Get logs
+      description: Fetches all logs
+      tags:
+        - Logs
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Fetched the logs successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Message describing the response
+                    example: All Logs fetched successfully
+                  data:
+                    type: array
+                    items:
+                      $ref: "../components.yaml#/components/schemas/Log"
+                  next:
+                    type: string
+                    description: URL for the next page of logs
+                    example: /logs?page=2
+                  prev:
+                    type: string
+                    description: URL for the previous page of logs
+                    example: /logs?page=1
+        401:
+          description: User is not authorized to view the logs
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/401-Unauthorized"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
+
+  /logs/{type}:
+    get:
+      summary: Get logs by type
+      description: Fetches logs by type
+      tags:
+        - Logs
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: type
+          required: true
+          schema:
+            type: string
+          description: Type of log to fetch
+      responses:
+        200:
+          description: Fetched the logs successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Message describing the response
+                    example: Logs fetched successfully
+                  logs:
+                    type: array
+                    items:
+                      $ref: "../components.yaml#/components/schemas/Log"
+        401:
+          description: User is not authorized to view the logs
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/401-Unauthorized"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"

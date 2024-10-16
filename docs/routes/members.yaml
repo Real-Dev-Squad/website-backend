@@ -1,0 +1,243 @@
+paths:
+  /members:
+    get:
+      summary: Returns the members list
+      description: Returns the members list present on the server
+      tags:
+        - Members
+      responses:
+        200:
+          description: A list of members
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    desciption: message describing the status of the request
+                  members:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Unique id of the member
+                        github_created_at:
+                          type: number
+                          description: Timestamp of the github id creation
+                        incompleteUserDetails:
+                          type: boolean
+                          description: Indicated if user has filled in all the details
+                        github_display_name:
+                          type: string
+                          description: The name of the user displayed on their github profile
+                        updated_at:
+                          type: string
+                          format: date-time
+                          description: Last updated timestamp of the member
+                        roles:
+                          type: object
+                          properties:
+                            archived:
+                              type: boolean
+                              description: Indicates if the member is archived or not
+                            in_discord:
+                              type: boolean
+                              description: Indicates if the member is in discord or not
+                        created_at:
+                          type: number
+                          description: Timestamp of the member creation
+                        github_id:
+                          type: string
+                          description: Github id of the member
+                        github_user_id:
+                          type: string
+                          description: Github user id of the member
+                        isMember:
+                          type: boolean
+                          description: Indicates if the user is a member or not
+
+  /members/idle:
+    get:
+      summary: Returns the idle members list
+      description: Returns the idle members list present on the server
+      tags:
+        - Members
+      responses:
+        200:
+          description: A list of idle members
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    desciption: message describing the status of the request
+                  idleMemberUserNames:
+                    type: array
+                    items:
+                      type: string
+                      description: Username of the idle member
+
+  /members/intro/{username}:
+    post:
+      summary: Adds a recruiter to the recruiters collection
+      description: Adds a recruiter to the recruiters collection
+      tags:
+        - Members
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+            description: The username of the recruiter to be added to the intro list
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components.yaml#/components/schemas/Recruiter"
+      responses:
+        200:
+          description: Recruiter added to the intro list successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    desciption: message describing the status of the request
+                  result:
+                    type: object
+                    properties:
+                      recruiterId:
+                        type: string
+                        description: Id of the recruiter added
+                      recruiterName:
+                        type: string
+                        description: Name of the recruiter added
+                      userInfo:
+                        type: string
+                        description: User info (contactinated first name last name and email)
+                      timestamp:
+                        type: number
+                        description: Timestamp of the recruiter addition
+
+  /members/intro:
+    get:
+      summary: Returns the list of recruiters
+      description: Returns the list of recruiters
+      tags:
+        - Members
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: A list of all the recruiters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    desciption: message describing the status of the request
+                  recruiters:
+                    type: array
+                    items:
+                      $ref: "../components.yaml#/components/schemas/Recruiter"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/401-Unauthorized"
+
+  /members/moveToMembers/{username}:
+    patch:
+      summary: Moves a recruiter from the intro list to the members list
+      description: Moves a recruiter from the intro list to the members list
+      tags:
+        - Members
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+            description: The username of the recruiter to be moved to the members list
+      security:
+        - bearerAuth: []
+      responses:
+        204:
+          description: Recruiter moved to the members list successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    desciption: message describing the status of the request
+        400:
+          description: User is already a member
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/400-BadRequest"
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/401-Unauthorized"
+        404:
+          description: Recruiter not found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+
+  /members/archiveMembers/{username}:
+    patch:
+      summary: Archives a member
+      description: Archives a member
+      tags:
+        - Members
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+            description: The username of the member to be archived
+      security:
+        - bearerAuth: []
+      responses:
+        204:
+          description: Member archived successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    desciption: message describing the status of the request
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/401-Unauthorized"
+        404:
+          description: Member not found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
