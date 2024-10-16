@@ -125,11 +125,10 @@ const addUserToGroup = async (groupId, userId) => {
 
     // Send the command to AWS Identity Store
     const response = await client.send(command);
-    return response; // Return the response for further processing if needed
+    return response;
   } catch (error) {
-    // Log an error message if the operation fails
     logger.error("Error adding user to group:", error);
-    throw new Error(`Failed to add user to group: ${error.message}`); // Re-throw with a descriptive message
+    throw new Error(`Failed to add user to group: ${error.message}`);
   }
 };
 
@@ -146,26 +145,24 @@ const fetchAwsUserIdByUsername = async (username) => {
       IdentityStoreId: identityStoreId,
       Filters: [
         {
-          AttributePath: "UserName",  // Filter by UserName attribute
-          AttributeValue: username,   // The username value to search for
+          AttributePath: "UserName", // Filter by UserName attribute
+          AttributeValue: username, // The username value to search for
         },
       ],
     });
-    console.log("COmmand passed = ", username);
     // Send the command to AWS
     const response = await client.send(command);
 
     // Check if the user was found
     if (response.Users && response.Users.length > 0) {
       const userId = response.Users[0].UserId;
-      console.log(`UserId for username "${username}" is: ${userId}`);
       return userId;
     } else {
-      console.log(`No user found with username: ${username}`);
+      logger.info(`User not found with given username ${username} in AWS`);
       return null;
     }
   } catch (error) {
-    console.error("Error fetching UserId:", error);
+    logger.error(`Error while fetching user by username ${error}`);
     return null;
   }
 };
