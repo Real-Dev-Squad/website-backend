@@ -1,4 +1,5 @@
 const chai = require("chai");
+const Sinon = require("sinon");
 const { expect } = chai;
 const { removeDiscordRole } = require("../../../utils/removeDiscordRole");
 const addUser = require("../../utils/addUser");
@@ -14,6 +15,7 @@ describe("removeDiscordRole", function () {
   let discordId;
   let roleid;
   let rolename;
+  let fetchStub;
 
   beforeEach(async function () {
     userData[0].roles = { archived: false, in_discord: true };
@@ -30,13 +32,20 @@ describe("removeDiscordRole", function () {
     rolename = groupData[0].rolename;
     await memberRoleModel.add({ roleid, userid: discordId });
     await Promise.all(addRolePromises);
+
+    fetchStub = Sinon.stub(global, "fetch");
   });
 
   afterEach(async function () {
     await cleanDb();
+    fetchStub.restore();
   });
 
   it("should remove discord role successfully", async function () {
+    fetchStub.returns(
+      Promise.resolve({ json: () => Promise.resolve({ success: true, message: "Role deleted successfully" }) })
+    );
+
     const isDiscordRoleRemoved = await removeDiscordRole(userData[0], discordId, roleid, rolename);
 
     expect(isDiscordRoleRemoved.success).to.be.equal(true);
@@ -88,7 +97,7 @@ describe("removeDiscordRole", function () {
   });
 
   it("should throw an error if role deletion failed", async function () {
-    discordId = "randomDiscordId";
+    fetchStub.rejects(new Error("Role deletion failed"));
 
     try {
       await removeDiscordRole(userData[0], discordId, roleid, rolename);

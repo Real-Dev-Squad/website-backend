@@ -15,8 +15,6 @@ const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
 const firestore = require("../../utils/firestore");
 const userData = require("../fixtures/user/user")();
 const userModel = firestore.collection("users");
-const discordRolesModel = firestore.collection("discord-roles");
-const memberRoleModel = firestore.collection("member-group-roles");
 const tasksModel = firestore.collection("tasks");
 const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../../constants/external-accounts");
 const removeDiscordRoleUtils = require("../../utils/removeDiscordRole");
@@ -451,21 +449,12 @@ describe("External Accounts", function () {
 
   describe("PATCH /external-accounts/link/:token", function () {
     let newUserJWT;
-    let discordId;
-    let roleid;
-    let rolename;
 
     beforeEach(async function () {
       const userId = await addUser(userData[3]);
       newUserJWT = authService.generateAuthToken({ userId });
       await externalAccountsModel.addExternalAccountData(externalAccountData[2]);
       await externalAccountsModel.addExternalAccountData(externalAccountData[3]);
-
-      discordId = externalAccountData[2].attributes.discordId;
-      roleid = "unverifiedRoleId";
-      rolename = "unverified";
-      await discordRolesModel.add({ rolename, roleid });
-      await memberRoleModel.add({ roleid, userid: discordId });
     });
 
     afterEach(async function () {
@@ -549,6 +538,11 @@ describe("External Accounts", function () {
       expect(getUserResponseBeforeUpdate.body).to.not.have.property("discordId");
       expect(getUserResponseBeforeUpdate.body).to.not.have.property("discordJoinedAt");
 
+      const removeDiscordRoleStub = Sinon.stub(removeDiscordRoleUtils, "removeDiscordRole").resolves({
+        success: true,
+        message: "Role deleted successfully",
+      });
+
       const response = await chai
         .request(app)
         .patch(`/external-accounts/link/${externalAccountData[2].token}`)
@@ -556,12 +550,6 @@ describe("External Accounts", function () {
         .set("Cookie", `${cookieName}=${newUserJWT}`);
 
       expect(response).to.have.status(204);
-
-      const unverifiedRoleExists = await memberRoleModel
-        .where("roleid", "==", roleid)
-        .where("userid", "==", discordId)
-        .get();
-      expect(unverifiedRoleExists.empty).to.equal(true);
 
       const updatedUserDetails = await chai
         .request(app)
@@ -571,6 +559,8 @@ describe("External Accounts", function () {
       expect(updatedUserDetails.body.roles.in_discord).to.equal(true);
       expect(updatedUserDetails.body).to.have.property("discordId");
       expect(updatedUserDetails.body).to.have.property("discordJoinedAt");
+
+      removeDiscordRoleStub.restore();
     });
 
     it("Should return 500 when removeDiscordRole fails because role doesn't exist", async function () {
