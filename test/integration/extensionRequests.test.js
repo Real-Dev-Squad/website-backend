@@ -921,6 +921,57 @@ describe("Extension Requests", function () {
         });
     });
 
+    it("User should be able to update the extensionRequest for the given extensionRequestId", function (done) {
+      chai
+        .request(app)
+        .patch(`/extension-requests/${extensionRequestId4}?dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          title: "new-title",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(204);
+          return done();
+        });
+    });
+
+    it("User should not be able to update the extensionRequest if already approved", function (done) {
+      chai
+        .request(app)
+        .patch(`/extension-requests/${extensionRequestId1}?dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          title: "new-title",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          return done();
+        });
+    });
+
+    it("Super user should not be able to update the extensionRequest if already approved", function (done) {
+      chai
+        .request(app)
+        .patch(`/extension-requests/${extensionRequestId1}?dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          title: "new-title",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          return done();
+        });
+    });
+
     it("Should return 400 if assignee of the extensionrequest is upated with a different user", function (done) {
       chai
         .request(app)

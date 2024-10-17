@@ -202,10 +202,20 @@ const getSelfExtensionRequests = async (req, res) => {
  * @param res {Object} - Express response object
  */
 const updateExtensionRequest = async (req, res) => {
+  const { dev } = req.query;
+  const isDev = dev ? Boolean(dev) : false;
   try {
     const extensionRequest = await extensionRequestsQuery.fetchExtensionRequest(req.params.id);
     if (!extensionRequest.extensionRequestData) {
       return res.boom.notFound("Extension Request not found");
+    }
+
+    if (
+      isDev &&
+      !req.userData?.roles.super_user &&
+      extensionRequest.extensionRequestData.status === EXTENSION_REQUEST_STATUS.APPROVED
+    ) {
+      return res.boom.badRequest("Extension Request cannot be updated");
     }
 
     if (req.body.assignee) {
