@@ -10,7 +10,7 @@ const {
   updateExtensionRequestStatus,
   getExtensionRequestsValidator,
 } = require("../middlewares/validators/extensionRequests");
-const { default: skipIfDev } = require("../middlewares/skipAuthorizeRolesWrapper");
+const skipAuthorizeRolesUnderFF = require("../middlewares/skipAuthorizeRolesWrapper");
 
 router.post("/", authenticate, createExtensionRequest, extensionRequests.createTaskExtensionRequest);
 router.get("/", authenticate, getExtensionRequestsValidator, extensionRequests.fetchExtensionRequests);
@@ -19,7 +19,7 @@ router.get("/:id", authenticate, authorizeRoles([SUPERUSER, APPOWNER]), extensio
 router.patch(
   "/:id",
   authenticate,
-  skipIfDev(authorizeRoles([SUPERUSER, APPOWNER])),
+  skipAuthorizeRolesUnderFF(authorizeRoles([SUPERUSER, APPOWNER])),
   updateExtensionRequest,
   extensionRequests.updateExtensionRequest
 );
