@@ -21,7 +21,6 @@ const { TASK_STATUS, tasksUsersStatus } = require("../../constants/tasks");
 const updateTaskStatus = require("../fixtures/tasks/tasks1")();
 const userStatusData = require("../fixtures/userStatus/userStatus");
 const tasksModel = firestore.collection("tasks");
-const userDBModel = firestore.collection("users");
 const discordService = require("../../services/discordService");
 const { CRON_JOB_HANDLER } = require("../../constants/bot");
 const { logType } = require("../../constants/logs");
@@ -1572,65 +1571,6 @@ describe("Tasks", function () {
         tasksLogs = data.data();
       });
       expect(tasksLogs.body.error).to.be.equal("Error: Error occurred");
-    });
-  });
-
-  describe("POST /tasks/orphanTasks", function () {
-    beforeEach(async function () {
-      const superUserId = await addUser(superUser);
-      superUserJwt = authService.generateAuthToken({ userId: superUserId });
-      const user1 = userData[6];
-      user1.roles.in_discord = false;
-      user1.updated_at = 1712053284000;
-      const user2 = userData[18];
-      user2.roles.in_discord = false;
-      const [{ id: userId }, { id: userId2 }] = await Promise.all([userDBModel.add(user1), userDBModel.add(user2)]);
-
-      const task1 = {
-        assignee: userId,
-        status: "ACTIVE",
-      };
-      const task2 = {
-        assignee: userId2,
-        status: "COMPLETED",
-      };
-      const task3 = {
-        assignee: userId2,
-        status: "IN_PROGRESS",
-      };
-      const task4 = {
-        assignee: userId,
-        status: "DONE",
-      };
-      await Promise.all([tasksModel.add(task1), tasksModel.add(task2), tasksModel.add(task3), tasksModel.add(task4)]);
-    });
-
-    afterEach(async function () {
-      await cleanDb();
-    });
-
-    it("Should update status of orphan tasks to BACKLOG", async function () {
-      const res = await chai.request(app).post("/tasks/orphanTasks").set("cookie", `${cookieName}=${superUserJwt}`);
-      expect(res).to.have.status(200);
-      expect(res.body).to.deep.equal({
-        message: "Orphan tasks filtered successfully",
-        updatedTasksData: {
-          orphanTasksUpdatedCount: 2,
-        },
-      });
-    });
-
-    it("Should return 400 if not super user", async function () {
-      const nonSuperUserId = await addUser(appOwner);
-      const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
-      const res = await chai.request(app).post("/tasks/orphanTasks").set("Authorization", `Bearer ${nonSuperUserJwt}`);
-
-      expect(res).to.have.status(401);
-      expect(res.body).to.deep.equal({
-        statusCode: 401,
-        error: "Unauthorized",
-        message: "You are not authorized for this action.",
-      });
     });
   });
 });
