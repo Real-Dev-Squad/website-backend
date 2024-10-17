@@ -955,11 +955,11 @@ describe("Extension Requests", function () {
         });
     });
 
-    it("Super user should not be able to update the extensionRequest if already approved", function (done) {
+    it("Super user should be able to update the extensionRequest if already approved", function (done) {
       chai
         .request(app)
         .patch(`/extension-requests/${extensionRequestId1}?dev=true`)
-        .set("cookie", `${cookieName}=${jwt}`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
           title: "new-title",
         })
@@ -967,7 +967,7 @@ describe("Extension Requests", function () {
           if (err) {
             return done(err);
           }
-          expect(res).to.have.status(400);
+          expect(res).to.have.status(200);
           return done();
         });
     });

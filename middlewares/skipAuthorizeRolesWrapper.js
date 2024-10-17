@@ -1,4 +1,4 @@
-const skipIfDev = (authorizeMiddleware) => {
+const skipAuthorizeRolesUnderFF = (authorizeMiddleware) => {
   return (req, res, next) => {
     const { dev } = req.query;
     const isDev = dev ? Boolean(dev) : false;
@@ -10,4 +10,4 @@ const skipIfDev = (authorizeMiddleware) => {
   };
 };
 
-export default skipIfDev;
+module.exports = skipAuthorizeRolesUnderFF;
