@@ -1,7 +1,7 @@
 const skipAuthorizeRolesUnderFF = (authorizeMiddleware) => {
   return (req, res, next) => {
     const { dev } = req.query;
-    const isDev = dev ? Boolean(dev) : false;
+    const isDev = dev === "true";
     if (isDev) {
       next();
     } else {

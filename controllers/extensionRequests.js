@@ -203,7 +203,7 @@ const getSelfExtensionRequests = async (req, res) => {
  */
 const updateExtensionRequest = async (req, res) => {
   const { dev } = req.query;
-  const isDev = dev ? Boolean(dev) : false;
+  const isDev = dev === "true";
   try {
     const extensionRequest = await extensionRequestsQuery.fetchExtensionRequest(req.params.id);
     if (!extensionRequest.extensionRequestData) {
