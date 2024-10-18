@@ -409,8 +409,9 @@ const setRoleToUsersWith31DaysPlusOnboarding = async (req, res) => {
 
 const generateInviteForUser = async (req, res) => {
   try {
-    const { userId } = req.query;
+    const { userId, dev } = req.query;
     const userIdForInvite = userId || req.userData.id;
+    let inviteLink = "";
 
     const modelResponse = await discordRolesModel.getUserDiscordInvite(userIdForInvite);
 
@@ -437,14 +438,25 @@ const generateInviteForUser = async (req, res) => {
     const discordInviteResponse = await response.json();
 
     const inviteCode = discordInviteResponse.data.code;
-    const inviteLink = `discord.gg/${inviteCode}`;
+    inviteLink = `discord.gg/${inviteCode}`;
 
-    await discordRolesModel.addInviteToInviteModel({ userId: userIdForInvite, inviteLink });
+    if (dev) {
+      const purpose = req.body.purpose;
+      await discordRolesModel.addInviteToInviteModel({ userId: userIdForInvite, inviteLink, purpose });
 
-    return res.status(201).json({
-      message: "invite generated successfully",
-      inviteLink,
-    });
+      return res.status(201).json({
+        message: "invite generated successfully",
+        inviteLink,
+        purpose,
+      });
+    } else {
+      await discordRolesModel.addInviteToInviteModel({ userId: userIdForInvite, inviteLink });
+
+      return res.status(201).json({
+        message: "invite generated successfully",
+        inviteLink,
+      });
+    }
   } catch (err) {
     logger.error(`Error in generating invite for user: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
