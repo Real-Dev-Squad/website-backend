@@ -35,6 +35,13 @@ module.exports = {
     "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
     "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-hqc2v%40dev-rds.iam.gserviceaccount.com"
   }`,
+
+  emailServiceConfig: {
+    email: "<RDS_EMAIL>",
+    password: "<EMAIL PASSWORD GENERATED AFTER 2FA>",
+    host: "<smtp host>",
+    port: "<number>",
+  },
   services: {
     rdsApi: {
       baseUrl: `http://localhost:${port}`,

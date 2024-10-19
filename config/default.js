@@ -32,6 +32,13 @@ module.exports = {
     clientSecret: "<clientSecret>",
   },
 
+  emailServiceConfig: {
+    email: "<RDS_EMAIL>",
+    password: "<EMAIL PASSWORD GENERATED AFTER 2FA>",
+    host: "<smtp host>",
+    port: "<number>",
+  },
+
   firestore: `{
     "type": "service_account",
     "project_id": "<project-name>",
