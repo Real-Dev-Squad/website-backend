@@ -967,7 +967,7 @@ describe("Extension Requests", function () {
           if (err) {
             return done(err);
           }
-          expect(res).to.have.status(200);
+          expect(res).to.have.status(204);
           return done();
         });
     });
