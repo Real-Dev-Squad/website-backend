@@ -216,7 +216,7 @@ const updateExtensionRequest = async (req, res) => {
       (extensionRequest.extensionRequestData.status === EXTENSION_REQUEST_STATUS.APPROVED ||
         extensionRequest.extensionRequestData.status === EXTENSION_REQUEST_STATUS.DENIED)
     ) {
-      return res.boom.badRequest("Extension Request cannot be updated");
+      return res.boom.badRequest("Only pending extension request can be updated");
     }
 
     if (req.body.assignee) {
