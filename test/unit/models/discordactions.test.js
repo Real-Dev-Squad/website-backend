@@ -23,6 +23,7 @@ const {
   isGroupRoleExists,
   addGroupRoleToMember,
   deleteRoleFromDatabase,
+  deleteGroupRole,
   updateDiscordImageForVerification,
   enrichGroupDataWithMembershipInfo,
   fetchGroupToUserMapping,
@@ -184,6 +185,49 @@ describe("discordactions", function () {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal("Database error");
       });
+    });
+  });
+
+  describe("deleteGroupRole", function () {
+    let roleRefStub;
+    let firestoreStub;
+
+    beforeEach(function () {
+      roleRefStub = {
+        update: sinon.stub().resolves(),
+      };
+
+      firestoreStub = {
+        collection: sinon.stub().returns({
+          doc: sinon.stub().returns(roleRefStub),
+        }),
+      };
+
+      sinon.stub(admin, "firestore").returns(firestoreStub);
+    });
+
+    it("should mark the group role as deleted", async function () {
+      const result = await deleteGroupRole("testGroupId", "userId");
+      expect(result.isSuccess).to.equal(true);
+      expect(roleRefStub.update.calledOnce).to.be.equal(true);
+      expect(
+        roleRefStub.update.calledWith({
+          isDeleted: true,
+          deletedAt: sinon.match.any,
+          deletedBy: "userId",
+        })
+      ).tto.be.equal(true);
+    });
+
+    it("should return isSuccess false if an error occurs", async function () {
+      roleRefStub.update.rejects(new Error("Database error"));
+      const result = await deleteGroupRole("testGroupId", "userId");
+      expect(result.isSuccess).to.equal(false);
+      expect(roleRefStub.update.calledOnce).to.be.equal(true);
+    });
+
+    afterEach(function () {
+      sinon.restore();
     });
   });
 
