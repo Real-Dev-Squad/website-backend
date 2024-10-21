@@ -213,8 +213,7 @@ const updateExtensionRequest = async (req, res) => {
     if (
       isDev &&
       !req.userData?.roles.super_user &&
-      (extensionRequest.extensionRequestData.status === EXTENSION_REQUEST_STATUS.APPROVED ||
-        extensionRequest.extensionRequestData.status === EXTENSION_REQUEST_STATUS.DENIED)
+      extensionRequest.extensionRequestData.status !== EXTENSION_REQUEST_STATUS.PENDING
     ) {
       return res.boom.badRequest("Only pending extension request can be updated");
     }
