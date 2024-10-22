@@ -392,17 +392,11 @@ const generateUsername = async (req, res) => {
  */
 /**
  * @deprecated
- * WARNING: This API endpoint is deprecated and will be removed in future versions.
+ * WARNING: This API endpoint is being deprecated and will be removed in future versions.
  * Please use the updated API endpoint: `/users?profile=true` for retrieving user profile details.
  *
- * For more information, refer to this discussion:
+ * For more information, refer to this PR:
  * https://github.com/Real-Dev-Squad/website-backend/pull/2201
- *
- * Example usage of the new API: GET /users?profile=true
- *
- * The `X-Deprecation-Warning` header will be set in the response with a message,
- * and the `Sunset` header will specify the date when this API will no longer be available.
- * However, the endpoint will remain available for a grace period to allow users to transition to the new endpoint.
  *
  * This API is kept temporarily for backward compatibility.
  */
@@ -413,13 +407,10 @@ const getSelfDetails = async (req, res) => {
         userdata: req.userData,
       });
 
-      const warningMessage =
-        "WARNING: This endpoint is deprecated and will be removed in the future. Please use /users?profile=true to get the updated profile details.";
-      const sunsetDate = new Date("2024-11-03T23:59:59Z");
-
-      res.set("X-Deprecation-Warning", warningMessage);
-      res.set("Sunset", sunsetDate.toUTCString());
-
+      res.set(
+        "X-Deprecation-Warning",
+        "WARNING: This endpoint is deprecated and will be removed in the future. Please use /users?profile=true to get the updated profile details."
+      );
       return res.send(user);
     }
     return res.boom.notFound("User doesn't exist");

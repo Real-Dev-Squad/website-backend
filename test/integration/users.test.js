@@ -978,12 +978,11 @@ describe("Users", function () {
           expect(res.body).to.not.have.property("phone");
           expect(res.body).to.not.have.property("email");
           expect(res.body).to.not.have.property("chaincode");
-
           expect(res).to.have.header(
             "X-Deprecation-Warning",
             "WARNING: This endpoint is deprecated and will be removed in the future. Please use /users?profile=true to get the updated profile details."
           );
-          expect(res).to.have.header("Sunset", "Sun, 03 Nov 2024 23:59:59 GMT");
+
           return done();
         });
     });
