@@ -2,6 +2,7 @@ import express from "express";
 const app = express.Router();
 import { devFlagMiddleware } from "../middlewares/devFlag";
 
+app.use("/aws-access",require("./awsAccess"))
 app.use("/answers", require("./answers"));
 app.use("/auctions", require("./auctions"));
 app.use("/arts", require("./arts"));

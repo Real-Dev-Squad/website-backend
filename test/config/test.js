@@ -23,6 +23,13 @@ module.exports = {
     clientId: "clientId",
     clientSecret: "clientSecret",
   },
+  aws: {
+    region: "us-east-1",
+    access_key: "test-access-key",
+    secret_key: "test-secret-key",
+    identity_store_id: "test-identity-store-id",
+  },
+
   firestore: `{
     "type": "service_account",
     "project_id": "test-project-id-for-emulator",
