@@ -202,10 +202,20 @@ const getSelfExtensionRequests = async (req, res) => {
  * @param res {Object} - Express response object
  */
 const updateExtensionRequest = async (req, res) => {
+  const { dev } = req.query;
+  const isDev = dev === "true";
   try {
     const extensionRequest = await extensionRequestsQuery.fetchExtensionRequest(req.params.id);
     if (!extensionRequest.extensionRequestData) {
       return res.boom.notFound("Extension Request not found");
+    }
+
+    if (
+      isDev &&
+      !req.userData?.roles.super_user &&
+      extensionRequest.extensionRequestData.status !== EXTENSION_REQUEST_STATUS.PENDING
+    ) {
+      return res.boom.badRequest("Only pending extension request can be updated");
     }
 
     if (req.body.assignee) {
