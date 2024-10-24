@@ -12,7 +12,7 @@ const ROLE_LEVEL = {
 };
 
 const KEYS_NOT_ALLOWED = {
-  public: ["email", "phone", "chaincode"],
+  public: ["email", "phone", "chaincode",],
   internal: ["phone", "chaincode"],
   private: ["chaincode"],
   confidential: [],
