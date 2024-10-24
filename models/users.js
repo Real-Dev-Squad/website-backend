@@ -24,6 +24,8 @@ const admin = require("firebase-admin");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { AUTHORITIES } = require("../constants/authorities");
 const { formatUsername } = require("../utils/username");
+const { logType } = require("../constants/logs");
+const logsQuery = require("./logs");
 
 /**
  * Adds or updates the user data
@@ -48,6 +50,13 @@ const addOrUpdate = async (userData, userId = null) => {
           },
           { merge: true }
         );
+
+        const logData = {
+          type: logType.USER_DETAILS_UPDATED,
+          meta: { userId: userId },
+          body: userData,
+        };
+        await logsQuery.addLog(logData.type, logData.meta, logData.body);
       }
 
       return { isNewUser, userId };
@@ -63,6 +72,14 @@ const addOrUpdate = async (userData, userId = null) => {
     }
     if (user && !user.empty && user.docs !== null) {
       await userModel.doc(user.docs[0].id).set({ ...userData, updated_at: Date.now() }, { merge: true });
+
+      const logData = {
+        type: logType.USER_DETAILS_UPDATED,
+        meta: { userId: user.docs[0].id },
+        body: userData,
+      };
+      await logsQuery.addLog(logData.type, logData.meta, logData.body);
+
       const data = user.docs[0].data();
       return {
         isNewUser: false,
