@@ -390,13 +390,27 @@ const generateUsername = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-
+/**
+ * @deprecated
+ * WARNING: This API endpoint is being deprecated and will be removed in future versions.
+ * Please use the updated API endpoint: `/users?profile=true` for retrieving user profile details.
+ *
+ * For more information, refer to this PR:
+ * https://github.com/Real-Dev-Squad/website-backend/pull/2201
+ *
+ * This API is kept temporarily for backward compatibility.
+ */
 const getSelfDetails = async (req, res) => {
   try {
     if (req.userData) {
       const user = await dataAccess.retrieveUsers({
         userdata: req.userData,
       });
+
+      res.set(
+        "X-Deprecation-Warning",
+        "WARNING: This endpoint is deprecated and will be removed in the future. Please use /users?profile=true to get the updated profile details."
+      );
       return res.send(user);
     }
     return res.boom.notFound("User doesn't exist");
