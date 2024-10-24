@@ -7,9 +7,9 @@ const emailServiceConfig = config.get("emailServiceConfig");
 
 export const subscribe = async (req: CustomRequest, res: CustomResponse) => {
     const { email } = req.body;
-    const phoneNumber = req.body.phoneNumber || null;
+    const phone = req.body.phone || null;
     const userId = req.userData.id;
-    const data = { email, isSubscribed: true, phoneNumber };
+    const data = { email, isSubscribed: true, phone };
     const userAlreadySubscribed = req.userData.isSubscribed;
   try {
     if (userAlreadySubscribed) {

@@ -16,7 +16,7 @@ describe("Middleware | Validators | Subscription", function () {
 
   it("should call next function when a valid request body is passed", async function () {
     req.body = {
-      phoneNumber: "+911234567890",
+      phone: "+911234567890",
       email: "test@example.com",
     };
 
@@ -27,7 +27,7 @@ describe("Middleware | Validators | Subscription", function () {
     expect(res.json.called).to.be.equal(false);
   });
 
-  it("should not return an error when phoneNumber is missing", async function () {
+  it("should not return an error when phone is missing", async function () {
     req.body = {
       email: "test@example.com",
     };
@@ -40,7 +40,7 @@ describe("Middleware | Validators | Subscription", function () {
 
   it("should return a 400 error when email is missing", async function () {
     req.body = {
-      phoneNumber: "+911234567890",
+      phone: "+911234567890",
     };
 
     validateSubscribe(req, res, nextSpy);
@@ -51,7 +51,7 @@ describe("Middleware | Validators | Subscription", function () {
     expect(res.json.firstCall.args[0]).to.have.property("error").that.includes('"email" is required');
   });
 
-  it("should return a 400 error when both phoneNumber and email are missing", async function () {
+  it("should return a 400 error when both phone and email are missing", async function () {
     req.body = {};
 
     validateSubscribe(req, res, nextSpy);
@@ -63,7 +63,7 @@ describe("Middleware | Validators | Subscription", function () {
 
   it("should return a 400 error when email is not in correct format", async function () {
     req.body = {
-      phoneNumber: "+911234567890",
+      phone: "+911234567890",
       email: "invalid-email",
     };
 
@@ -77,9 +77,9 @@ describe("Middleware | Validators | Subscription", function () {
       .that.includes('"email" with value "invalid-email" fails to match the required pattern');
   });
 
-  it("should not return an error when phoneNumber is in correct format", async function () {
+  it("should not return an error when phone is in correct format", async function () {
     req.body = {
-      phoneNumber: "+911234567890",
+      phone: "+911234567890",
       email: "test@example.com",
     };
 
@@ -89,9 +89,9 @@ describe("Middleware | Validators | Subscription", function () {
     expect(res.json.called).to.be.equal(false);
   });
 
-  it("should trim and validate phoneNumber if it contains leading or trailing spaces", async function () {
+  it("should trim and validate phone if it contains leading or trailing spaces", async function () {
     req.body = {
-      phoneNumber: "   +911234567890   ",
+      phone: "   +911234567890   ",
       email: "test@example.com",
     };
 
@@ -100,12 +100,12 @@ describe("Middleware | Validators | Subscription", function () {
     expect(nextSpy.calledOnce).to.be.equal(true);
     expect(res.status.called).to.be.equal(false);
     expect(res.json.called).to.be.equal(false);
-    expect(req.body.phoneNumber).to.equal("+911234567890");
+    expect(req.body.phone).to.equal("+911234567890");
   });
 
-  it("should return a 400 error when phoneNumber is in incorrect format", async function () {
+  it("should return a 400 error when phone is in incorrect format", async function () {
     req.body = {
-      phoneNumber: "invalid-number",
+      phone: "invalid-number",
       email: "test@example.com",
     };
 
@@ -116,6 +116,6 @@ describe("Middleware | Validators | Subscription", function () {
     expect(res.json.calledOnce).to.be.equal(true);
     expect(res.json.firstCall.args[0])
       .to.have.property("error")
-      .that.includes('"phoneNumber" with value "invalid-number" fails to match the required pattern');
+      .that.includes('"phone" with value "invalid-number" fails to match the required pattern');
   });
 });
