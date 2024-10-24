@@ -7,7 +7,7 @@
     "ui": {
       "host": "0.0.0.0",
       "enabled": true,
-      "port": 4200
+      "port": 4000
     }
   }
 }
