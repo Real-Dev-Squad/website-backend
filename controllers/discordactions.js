@@ -8,6 +8,7 @@ const { fetchAllUsers, fetchUser } = require("../models/users");
 const { generateCloudFlareHeaders } = require("../utils/discord-actions");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 const discordMavenRoleId = config.get("discordMavenRoleId");
+const crypto = require("crypto");
 
 const { setUserDiscordNickname, getDiscordMembers } = discordServices;
 
@@ -407,17 +408,30 @@ const setRoleToUsersWith31DaysPlusOnboarding = async (req, res) => {
   }
 };
 
+const generateRandomId = () => {
+  return crypto.randomBytes(16).toString("hex");
+};
+
 const generateInviteForUser = async (req, res) => {
   try {
-    const { userId } = req.query;
+    const { userId, dev } = req.query;
     const userIdForInvite = userId || req.userData.id;
+    let inviteLink = "";
+    let randomId = "";
 
-    const modelResponse = await discordRolesModel.getUserDiscordInvite(userIdForInvite);
-
-    if (!modelResponse.notFound) {
-      return res.status(409).json({
-        message: "User invite is already present!",
-      });
+    if (!dev) {
+      const modelResponse = await discordRolesModel.getUserDiscordInvite(userIdForInvite);
+      if (!modelResponse.notFound) {
+        return res.status(409).json({
+          message: "User invite is already present!",
+        });
+      }
+    } else {
+      const modelResponse = await discordRolesModel.getUserDiscordInvite(userIdForInvite);
+      if (!modelResponse.notFound) {
+        // Generate a random ID
+        randomId = generateRandomId();
+      }
     }
 
     const channelId = config.get("discordNewComersChannelId");
@@ -437,14 +451,27 @@ const generateInviteForUser = async (req, res) => {
     const discordInviteResponse = await response.json();
 
     const inviteCode = discordInviteResponse.data.code;
-    const inviteLink = `discord.gg/${inviteCode}`;
+    inviteLink = `discord.gg/${inviteCode}`;
 
-    await discordRolesModel.addInviteToInviteModel({ userId: userIdForInvite, inviteLink });
+    if (dev) {
+      const purpose = req.body.purpose;
+      await discordRolesModel.addInviteToInviteModel({ userId: randomId || userIdForInvite, inviteLink, purpose });
 
-    return res.status(201).json({
-      message: "invite generated successfully",
-      inviteLink,
-    });
+      return res.status(201).json({
+        message: "invite generated successfully",
+        inviteLink,
+        purpose,
+        userId,
+      });
+    } else {
+      await discordRolesModel.addInviteToInviteModel({ userId: userIdForInvite, inviteLink });
+
+      return res.status(201).json({
+        message: "invite generated successfully",
+        inviteLink,
+        userId,
+      });
+    }
   } catch (err) {
     logger.error(`Error in generating invite for user: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
