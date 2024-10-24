@@ -250,10 +250,20 @@ const fetchAllLogs = async (query) => {
   }
 };
 
+const updateLogs = async (type, meta, body) => {
+  try {
+    return await logsModel.add("log");
+  } catch (err) {
+    logger.error("Error in aupdating logs", err);
+    throw new Error(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   addLog,
   fetchLogs,
   fetchCacheLogs,
   fetchLastAddedCacheLog,
   fetchAllLogs,
+  updateLogs,
 };
