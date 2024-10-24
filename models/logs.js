@@ -164,7 +164,7 @@ const fetchLastAddedCacheLog = async (id) => {
 };
 
 const fetchAllLogs = async (query) => {
-  let { type, prev, next, page, size = SIZE, format, userId, username, startDate, endDate } = query;
+  let { type, prev, next, page, size = SIZE, format } = query;
   size = parseInt(size);
   page = parseInt(page);
 
@@ -174,21 +174,6 @@ const fetchAllLogs = async (query) => {
     if (type) {
       const logType = type.split(",");
       if (logType.length >= 1) requestQuery = requestQuery.where("type", "in", logType);
-    }
-
-    if (userId) {
-      requestQuery = requestQuery.where("meta.userId", "==", userId);
-    }
-
-    if (username) {
-      requestQuery = requestQuery.where("meta.username", "==", username);
-    }
-
-    if (startDate) {
-      requestQuery = requestQuery.where("timestamp", ">=", parseInt(startDate));
-    }
-    if (endDate) {
-      requestQuery = requestQuery.where("timestamp", "<=", parseInt(endDate));
     }
 
     requestQuery = requestQuery.orderBy("timestamp", "desc");
