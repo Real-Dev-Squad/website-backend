@@ -108,7 +108,7 @@ describe("/logs", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body.message).to.equal("All Logs fetched successfully");
-          expect(res.body.data).to.lengthOf(7);
+          expect(res.body.data).to.lengthOf(9);
           return done();
         });
     });

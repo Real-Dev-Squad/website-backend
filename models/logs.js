@@ -205,14 +205,12 @@ const fetchAllLogs = async (query) => {
       const last = snapshot.docs[snapshot.docs.length - 1];
       nextDoc = await requestQuery.startAfter(last).limit(1).get();
     }
-
     const allLogs = [];
     if (!snapshot.empty) {
       snapshot.forEach((doc) => {
         allLogs.push({ ...doc.data() });
       });
     }
-
     if (allLogs.length === 0) {
       return {
         allLogs: [],
@@ -221,7 +219,6 @@ const fetchAllLogs = async (query) => {
         page: page ? page + 1 : null,
       };
     }
-
     if (format === "feed") {
       let logsData = [];
       const userList = await getUsersListFromLogs(allLogs);
@@ -234,7 +231,6 @@ const fetchAllLogs = async (query) => {
         if (!Object.keys(formattedLogs).length) return null;
         return { ...formattedLogs, type: data.type, timestamp: convertTimestamp(data.timestamp) };
       });
-
       return {
         allLogs: logsData.filter((log) => log),
         prev: prevDoc.empty ? null : prevDoc.docs[0].id,
