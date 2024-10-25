@@ -106,6 +106,15 @@ describe("Task Requests", function () {
             return res;
           });
       });
+
+      it("should fetch the task request when some user field is missing", async function () {
+        const userId = await addUser(userData[19]);
+        const taskId = (await tasksModel.updateTask(taskData[0])).taskId;
+        await taskRequestsModel.addOrUpdate(taskId, userId);
+        const res = await chai.request(app).get(`/taskRequests`).set("cookie", `${cookieName}=${jwt}`);
+        expect(res).to.have.status(200);
+        expect(res.body.message).to.be.equal("Task requests returned successfully");
+      });
     });
 
     describe("When the user is not a super user", function () {
