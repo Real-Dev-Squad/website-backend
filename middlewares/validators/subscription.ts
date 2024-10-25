@@ -8,11 +8,11 @@ export const validateSubscribe = (req: CustomRequest, res: CustomResponse, next:
     if(req.body.email){
       req.body.email = req.body.email.trim();
     }
-     if (req.body.phoneNumber) {
-       req.body.phoneNumber = req.body.phoneNumber.trim();
+     if (req.body.phone) {
+       req.body.phone = req.body.phone.trim();
      }
   const subscribeSchema = Joi.object({
-    phoneNumber: Joi.string().allow('').optional().regex(phoneNumberRegex), 
+    phone: Joi.string().allow('').optional().regex(phoneNumberRegex), 
     email: Joi.string().required().regex(emailRegex)
   });
   const { error } = subscribeSchema.validate(req.body);
