@@ -25,7 +25,7 @@ const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { AUTHORITIES } = require("../constants/authorities");
 const { formatUsername } = require("../utils/username");
 const { logType } = require("../constants/logs");
-const logsQuery = require("./logs");
+const { addLog } = require("../services/logService");
 
 /**
  * Adds or updates the user data
@@ -56,7 +56,7 @@ const addOrUpdate = async (userData, userId = null) => {
           meta: { userId: userId },
           body: userData,
         };
-        await logsQuery.addLog(logData.type, logData.meta, logData.body);
+        await addLog(logData.type, logData.meta, logData.body);
       }
 
       return { isNewUser, userId };
@@ -78,7 +78,7 @@ const addOrUpdate = async (userData, userId = null) => {
         meta: { userId: user.docs[0].id },
         body: userData,
       };
-      await logsQuery.addLog(logData.type, logData.meta, logData.body);
+      await addLog(logData.type, logData.meta, logData.body);
 
       const data = user.docs[0].data();
       return {
