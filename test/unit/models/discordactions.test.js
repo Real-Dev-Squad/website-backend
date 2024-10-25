@@ -1,3 +1,4 @@
+import { generateDiscordInviteLink } from "../../../utils/discord-actions";
 const chai = require("chai");
 const expect = chai.expect;
 const sinon = require("sinon");
@@ -799,6 +800,54 @@ describe("discordactions", function () {
     it("should return notFound true, if the invite for user doesn't exist", async function () {
       const invite = await getUserDiscordInvite("kfjkasdafdfdsfl");
       expect(invite.notFound).to.be.equal(true);
+    });
+  });
+
+  describe("generateInviteForUser", function () {
+    let fetchStub;
+
+    beforeEach(async function () {
+      fetchStub = sinon.stub(global, "fetch");
+    });
+
+    afterEach(function () {
+      fetchStub.restore();
+    });
+
+    it("should return the invite link and purpose", async function () {
+      const inviteLink = "discord.gg/xyz";
+      const discordInviteLink = {
+        data: {
+          code: "xyz",
+        },
+      };
+      fetchStub.resolves({
+        ok: true,
+        json: () => discordInviteLink,
+      });
+
+      const result = await generateDiscordInviteLink();
+      expect(result).to.be.equal(inviteLink);
+
+      const inviteObject = { userId: "123456", inviteLink: "discord.gg/xyz", purpose: "testing" };
+      await addInviteToInviteModel(inviteObject);
+
+      const invite = await getUserDiscordInvite("123456");
+      expect(invite).to.have.property("id");
+      expect(invite.notFound).to.be.equal(false);
+      expect(invite.userId).to.be.equal("123456");
+      expect(invite.inviteLink).to.be.equal("discord.gg/xyz");
+      expect(invite.purpose).to.be.equal("testing");
+    });
+
+    it("should resolve with an error", async function () {
+      const error = new Error("Error");
+      fetchStub.rejects(error);
+      try {
+        await generateDiscordInviteLink();
+      } catch (err) {
+        expect(err).to.be.equal(error);
+      }
     });
   });
 
