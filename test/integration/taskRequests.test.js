@@ -1019,7 +1019,7 @@ describe("Task Requests", function () {
         .request(app)
         .post(url)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send(mockData.taskRequestData);
+        .send({ ...mockData.taskRequestData, userId });
       expect(res).to.have.status(201);
       expect(res.body.message).to.equal("Task request successful.");
     });
@@ -1031,7 +1031,7 @@ describe("Task Requests", function () {
         .request(app)
         .post(url)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send(mockData.taskRequestData);
+        .send({ ...mockData.taskRequestData, userId });
       expect(res).to.have.status(200);
       expect(res.body.message).to.equal("Task request successful.");
     });
@@ -1043,13 +1043,18 @@ describe("Task Requests", function () {
         .request(app)
         .post(url)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send(mockData.taskRequestData);
+        .send({ ...mockData.taskRequestData, userId });
       expect(res).to.have.status(409);
       expect(res.body.message).to.equal("Task exists for the given issue.");
     });
 
     it("should allow users to request the same task (Assignment)", async function () {
-      const requestData = { ...mockData.taskRequestData, requestType: TASK_REQUEST_TYPE.ASSIGNMENT, taskId: "abc" };
+      const requestData = {
+        ...mockData.taskRequestData,
+        requestType: TASK_REQUEST_TYPE.ASSIGNMENT,
+        taskId: "abc",
+        userId,
+      };
       fetchTaskStub.resolves({ taskData: { ...taskData, id: requestData.taskId } });
       createRequestStub.resolves({ id: "request123", taskRequest: mockData.existingTaskRequest, isCreate: false });
       const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
@@ -1061,6 +1066,7 @@ describe("Task Requests", function () {
       const requestData = {
         ...mockData.taskRequestData,
         externalIssueUrl: "https://api.github.com/repos/Real-Dev-Squad/website/atus/issues/1564672",
+        userId,
       };
       const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
       expect(res.body.message).to.equal("Issue does not exist");
@@ -1073,7 +1079,7 @@ describe("Task Requests", function () {
         .request(app)
         .post(url)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send(mockData.taskRequestData);
+        .send({ ...mockData.taskRequestData, userId });
       expect(res.body.message).to.equal("Issue does not exist");
       expect(res).to.have.status(400);
     });
@@ -1082,6 +1088,7 @@ describe("Task Requests", function () {
       const requestData = {
         ...mockData.taskRequestData,
         proposedStartDate: mockData.taskRequestData.proposedDeadline + 10000,
+        userId,
       };
       const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
       expect(res.body.message).to.equal("Task deadline cannot be before the start date");
@@ -1096,7 +1103,7 @@ describe("Task Requests", function () {
     });
 
     it("should handle user not found", async function () {
-      const requestData = { ...mockData.taskRequestData };
+      const requestData = { ...mockData.taskRequestData, userId };
       getUsernameStub.resolves(null);
       const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
       expect(res.body.message).to.equal("User not found");
@@ -1104,7 +1111,12 @@ describe("Task Requests", function () {
     });
 
     it("should handle task not found (Assignment)", async function () {
-      const requestData = { ...mockData.taskRequestData, taskId: "abc", requestType: TASK_REQUEST_TYPE.ASSIGNMENT };
+      const requestData = {
+        ...mockData.taskRequestData,
+        taskId: "abc",
+        requestType: TASK_REQUEST_TYPE.ASSIGNMENT,
+        userId,
+      };
       fetchTaskStub.resolves({ taskData: null });
       const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
       expect(res).to.have.status(400);
@@ -1119,7 +1131,11 @@ describe("Task Requests", function () {
         isCreate: true,
         alreadyRequesting: false,
       });
-      await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(mockData.taskRequestData);
+      await chai
+        .request(app)
+        .post(url)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...mockData.taskRequestData, userId });
       const logsRef = await logsModel.where("type", "==", "taskRequests").get();
       let taskRequestLogs;
       logsRef.forEach((data) => {

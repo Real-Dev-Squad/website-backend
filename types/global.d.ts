@@ -37,7 +37,7 @@ export type userData = {
   username: string;
   updated_at: number;
   isSubscribed: boolean;
-  phoneNumber: string | null;
+  phone: string | null;
   email: string;
 };
 
