@@ -131,8 +131,8 @@ const getJoinData = async (userId) => {
     const joinData = await joinModel.where("userId", "==", userId).limit(1).get();
     joinData.forEach((data) => {
       userData.push({
-        id: data.id,
         ...data.data(),
+        id: data.id,
       });
     });
     return userData;
@@ -246,7 +246,7 @@ const fetchPaginatedUsers = async (query) => {
         const userId = doc.id;
         if (!userMap.has(userId)) {
           userMap.set(userId, doc.data());
-          allUsers.push({ id: userId, ...doc.data() });
+          allUsers.push({ ...doc.data(), id: userId });
         }
       });
     };
@@ -288,8 +288,8 @@ const fetchUsers = async (usernames = []) => {
     snapshots.forEach((snapshot) => {
       snapshot.forEach((doc) => {
         users.push({
-          id: doc.id,
           ...doc.data(),
+          id: doc.id,
         });
       });
     });
@@ -346,8 +346,8 @@ const fetchUser = async ({ userId = null, username = null, githubUsername = null
     return {
       userExists: !!userData,
       user: {
-        id,
         ...userData,
+        id,
       },
     };
   } catch (err) {
@@ -512,7 +512,7 @@ const fetchUserSkills = async (id) => {
 
     if (!data.empty) {
       data.forEach((doc) => {
-        skills.push({ id: doc.id, ...doc.data() });
+        skills.push({ ...doc.data(), id: doc.id });
       });
     }
     return { skills };
@@ -611,8 +611,8 @@ const getUsersBasedOnFilter = async (query) => {
     const snapshot = await userModel.where(`roles.${roleQuery}`, "==", true).get();
     snapshot.forEach((doc) => {
       filteredUsers.push({
-        id: doc.id,
         ...doc.data(),
+        id: doc.id,
       });
     });
 
@@ -627,8 +627,8 @@ const getUsersBasedOnFilter = async (query) => {
     const snapshot = await userModel.where("discordId", "!=", null).get();
     snapshot.forEach((doc) => {
       filteredUsers.push({
-        id: doc.id,
         ...doc.data(),
+        id: doc.id,
       });
     });
 
@@ -671,8 +671,8 @@ const getDiscordUsers = async () => {
       const userData = user.data();
       if (userData?.discordId)
         users.push({
-          id: user.id,
           ...userData,
+          id: user.id,
         });
     });
     return users;
@@ -749,8 +749,8 @@ const fetchUserByIds = async (userIds = []) => {
     documents.forEach((snapshot) => {
       if (snapshot.exists) {
         users.push({
-          id: snapshot.id,
           ...snapshot.data(),
+          id: snapshot.id,
         });
       }
     });
@@ -805,8 +805,8 @@ const getUsersByRole = async (role) => {
     usersRef.docs.forEach((user) => {
       const userData = user.data();
       users.push({
-        id: user.id,
         ...userData,
+        id: user.id,
       });
     });
     return users;
@@ -850,8 +850,8 @@ const fetchUserForKeyValue = async (documentKey, value) => {
       const userData = user.data();
       if (userData)
         users.push({
-          id: user.id,
           ...userData,
+          id: user.id,
         });
     });
     return users;
@@ -883,8 +883,8 @@ const fetchUsersListForMultipleValues = async (documentKey, valueList) => {
         const userData = user.data();
         if (userData)
           users.push({
-            id: user.id,
             ...userData,
+            id: user.id,
           });
       });
     }
@@ -907,8 +907,8 @@ const getNonNickNameSyncedUsers = async () => {
       const userData = user.data();
       if (userData?.discordId)
         users.push({
-          id: user.id,
           ...userData,
+          id: user.id,
         });
     });
     return users;

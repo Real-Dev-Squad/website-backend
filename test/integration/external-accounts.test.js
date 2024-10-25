@@ -308,9 +308,9 @@ describe("External Accounts", function () {
     });
 
     it("Should Archive Users With Archived as False and Not in RDS Discord Server", async function () {
-      await userModel.add(usersFromRds[4]); // nonArchivedAndNotInDiscord
+      const doc = await userModel.add(usersFromRds[4]); // nonArchivedAndNotInDiscord
 
-      const userId = usersFromRds[4].id;
+      const userId = doc.id;
       const task1 = {
         assignee: userId,
         status: "ACTIVE",
