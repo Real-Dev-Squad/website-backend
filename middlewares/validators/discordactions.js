@@ -40,8 +40,24 @@ const validateUpdateUsersNicknameStatusBody = async (req, res, next) => {
   }
 };
 
+export const validateGenerateInviteForUserBody = async (req, res, next) => {
+  const schema = Joi.object().strict().keys({
+    purpose: Joi.string().trim(),
+  });
+
+  try {
+    await schema.validateAsync(req.body, { abortEarly: false });
+    next();
+  } catch (error) {
+    const errorMessages = error.details.map((detail) => detail.message);
+    logger.error(`Error while validating invite creation payload: ${errorMessages}`);
+    res.boom.badRequest(errorMessages);
+  }
+};
+
 module.exports = {
   validateGroupRoleBody,
   validateMemberRoleBody,
   validateUpdateUsersNicknameStatusBody,
+  validateGenerateInviteForUserBody,
 };

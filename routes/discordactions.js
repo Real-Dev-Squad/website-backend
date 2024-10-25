@@ -20,6 +20,7 @@ const {
   validateGroupRoleBody,
   validateMemberRoleBody,
   validateUpdateUsersNicknameStatusBody,
+  validateGenerateInviteForUserBody,
 } = require("../middlewares/validators/discordactions");
 const checkIsVerifiedDiscord = require("../middlewares/verifydiscord");
 const checkCanGenerateDiscordLink = require("../middlewares/checkCanGenerateDiscordLink");
@@ -36,7 +37,13 @@ router.post("/groups", authenticate, checkIsVerifiedDiscord, validateGroupRoleBo
 router.get("/groups", authenticate, checkIsVerifiedDiscord, getAllGroupRoles);
 router.post("/roles", authenticate, checkIsVerifiedDiscord, validateMemberRoleBody, addGroupRoleToMember);
 router.get("/invite", authenticate, getUserDiscordInvite);
-router.post("/invite", authenticate, checkCanGenerateDiscordLink, generateInviteForUser);
+router.post(
+  "/invite",
+  authenticate,
+  checkCanGenerateDiscordLink,
+  generateInviteForUser,
+  validateGenerateInviteForUserBody
+);
 router.delete("/roles", authenticate, checkIsVerifiedDiscord, deleteRole);
 router.get("/roles", authenticate, checkIsVerifiedDiscord, getGroupsRoleId);
 router.patch(
