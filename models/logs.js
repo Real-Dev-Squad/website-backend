@@ -225,7 +225,6 @@ const fetchAllLogs = async (query) => {
       const taskIdList = await getTasksFromLogs(allLogs);
       const usersMap = mapify(userList, "id");
       const tasksMap = mapify(taskIdList, "id");
-
       logsData = allLogs.map((data) => {
         const formattedLogs = formatLogsForFeed(data, usersMap, tasksMap);
         if (!Object.keys(formattedLogs).length) return null;
