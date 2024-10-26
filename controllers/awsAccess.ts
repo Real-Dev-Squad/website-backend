@@ -27,7 +27,7 @@ export const addUserToGroupController = async (req, res) => {
       }
 
       let userAdditionResponse = await addUserToGroup(groupId, awsUserId)
-      console.log("User addition response ", userAdditionResponse);
+
       if (userAdditionResponse.conflict){
         return res.status(200).json({
           message: `User ${userId} is already part of the AWS group, please try signing in.`
