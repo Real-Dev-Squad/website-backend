@@ -43,10 +43,10 @@ const transformTaskRequests = async (taskRequestsList: TaskRequestType[]) => {
   taskRequestsList.forEach((data) => {
     data.users = data.users.map((userData) => {
       const user = usersMap.get(userData.userId);
-      const username = user?.username || 'Undefined';
-      const firstName = user?.first_name || 'Undefined';
-      const lastName = user?.last_name || 'Undefined';
-      const picture = user?.picture || null;
+      const username = user?.username 
+      const firstName = user?.first_name 
+      const lastName = user?.last_name
+      const picture = user?.picture;
 
       return { ...userData, username, first_name: firstName, last_name: lastName, picture };
     });
