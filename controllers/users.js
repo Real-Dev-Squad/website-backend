@@ -116,20 +116,16 @@ const getUsers = async (req, res) => {
     const profile = req.query.profile === "true";
 
     if (profile) {
-      if (dev) {
-        if (!req.userData.id) {
-          return res.boom.badRequest("User ID not provided.");
-        }
+      if (!req.userData.id) {
+        return res.boom.badRequest("User ID not provided.");
+      }
 
-        try {
-          const result = await dataAccess.retrieveUsers({ id: req.userData.id });
-          return res.send(result.user);
-        } catch (error) {
-          logger.error(`Error while fetching user: ${error}`);
-          return res.boom.serverUnavailable(INTERNAL_SERVER_ERROR);
-        }
-      } else {
-        return res.boom.badRequest("Route not found");
+      try {
+        const result = await dataAccess.retrieveUsers({ id: req.userData.id });
+        return res.send(result.user);
+      } catch (error) {
+        logger.error(`Error while fetching user: ${error}`);
+        return res.boom.serverUnavailable(INTERNAL_SERVER_ERROR);
       }
     }
 
