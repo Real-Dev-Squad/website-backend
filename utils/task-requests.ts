@@ -46,7 +46,7 @@ const transformTaskRequests = async (taskRequestsList: TaskRequestType[]) => {
       const username = user?.username 
       const firstName = user?.first_name 
       const lastName = user?.last_name
-      const picture = user?.picture || undefined;
+      const picture = user?.picture;
 
       return { ...userData, username, first_name: firstName, last_name: lastName, picture };
     });
