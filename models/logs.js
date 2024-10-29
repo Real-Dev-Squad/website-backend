@@ -4,7 +4,7 @@ const logsModel = firestore.collection("logs");
 const admin = require("firebase-admin");
 const { logType, ERROR_WHILE_FETCHING_LOGS } = require("../constants/logs");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const { getFullName } = require("../utils/users");
+const { getFullName, getUserId } = require("../utils/users");
 const {
   getUsersListFromLogs,
   formatLogsForFeed,
@@ -164,16 +164,30 @@ const fetchLastAddedCacheLog = async (id) => {
 };
 
 const fetchAllLogs = async (query) => {
-  let { type, prev, next, page, size = SIZE, format } = query;
+  let { type, prev, next, page, size = SIZE, format, userId, username, startDate, endDate } = query;
   size = parseInt(size);
   page = parseInt(page);
 
   try {
     let requestQuery = logsModel;
 
+    if (username) {
+      userId = await getUserId(username);
+      requestQuery = requestQuery.where("meta.userId", "==", userId);
+    }
+
     if (type) {
       const logType = type.split(",");
       if (logType.length >= 1) requestQuery = requestQuery.where("type", "in", logType);
+    }
+
+    if (startDate) {
+      const startTimestamp = { _seconds: parseInt(startDate / 1000), _nanoseconds: 0 };
+      requestQuery = requestQuery.where("timestamp", ">=", startTimestamp);
+    }
+    if (endDate) {
+      const endTimestamp = { _seconds: parseInt(endDate / 1000), _nanoseconds: 0 };
+      requestQuery = requestQuery.where("timestamp", "<=", endTimestamp);
     }
 
     requestQuery = requestQuery.orderBy("timestamp", "desc");
