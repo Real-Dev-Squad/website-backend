@@ -817,6 +817,27 @@ describe("Discord actions", function () {
       expect(res.body.message).to.be.equal("User should be super user to generate link for other users");
     });
 
+    it("Should return the invite and the purpose for other user if the dev=true is provided in the query and the user is super user", async function () {
+      fetchStub.returns(
+        Promise.resolve({
+          status: 201,
+          json: () => Promise.resolve({ data: { code: "xyz" } }),
+        })
+      );
+
+      const res = await chai
+        .request(app)
+        .post(`/discord-actions/invite?dev=true`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send({
+          purpose: "testing",
+        });
+      expect(res).to.have.status(201);
+      expect(res.body.message).to.be.equal("invite generated successfully");
+      expect(res.body.inviteLink).to.be.equal("discord.gg/xyz");
+      expect(res.body.purpose).to.be.equal("testing");
+    });
+
     // eslint-disable-next-line mocha/no-skipped-tests
     it.skip("should return 403 if the user has discord id in their user object, which means user is already in discord", async function () {
       const res = await chai
