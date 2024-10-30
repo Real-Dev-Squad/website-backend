@@ -41,8 +41,8 @@ router.post(
   "/invite",
   authenticate,
   checkCanGenerateDiscordLink,
-  generateInviteForUser,
-  validateGenerateInviteForUserBody
+  validateGenerateInviteForUserBody,
+  generateInviteForUser
 );
 router.delete("/roles", authenticate, checkIsVerifiedDiscord, deleteRole);
 router.get("/roles", authenticate, checkIsVerifiedDiscord, getGroupsRoleId);

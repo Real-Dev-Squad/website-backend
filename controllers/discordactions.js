@@ -461,7 +461,6 @@ const generateInviteForUser = async (req, res) => {
         message: "invite generated successfully",
         inviteLink,
         purpose,
-        userId,
       });
     } else {
       await discordRolesModel.addInviteToInviteModel({ userId: userIdForInvite, inviteLink });
@@ -469,7 +468,6 @@ const generateInviteForUser = async (req, res) => {
       return res.status(201).json({
         message: "invite generated successfully",
         inviteLink,
-        userId,
       });
     }
   } catch (err) {
