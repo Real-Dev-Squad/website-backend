@@ -1,239 +1,204 @@
 import chai, {expect} from "chai";
 import sinon from 'sinon';
 import chaiHttp from 'chai-http';
-const app = require("../../server");
-
-const userQuery = require("../../models/users");
-const authorizeBot = require("../../middlewares/authorizeBot")
-import * as dataAccess from '../../services/dataAccessLayer'
 import { addUserToGroupController } from '../../controllers/awsAccess';
 import * as awsFunctions from '../../utils/awsFunctions';
 import { PROFILE_SVC_GITHUB_URL } from '../../constants/urls';
+
+const app = require("../../server");
+const userData = require("../fixtures/user/user")();
+// import { verifyDiscordBot } from "../../middlewares/authorizeBot";
+const authorizeBot = require("../../middlewares/authorizeBot");
+const dataAccess = require("../../services/dataAccessLayer");
+const addUser = require("../utils/addUser");
+const cleanDb = require("../utils/cleanDb");
 const { ROLE_LEVEL, KEYS_NOT_ALLOWED, ACCESS_LEVEL } = require("../../constants/userDataLevels");
+const { CLOUDFLARE_WORKER } = require("../../constants/bot")
+
 
 chai.use(chaiHttp);
 
-describe('AWS Group Controller Integration Tests', () => {
-    let retrieveUsersStub: sinon.SinonStub;
-    let fetchAwsUserIdByUsernameStub: sinon.SinonStub;
-    let createUserStub: sinon.SinonStub;
-    let addUserToGroupStub: sinon.SinonStub;
-    let verifyTokenStub: sinon.SinonStub;
-  
+describe('addUserToGroupController', function(){
+
+
   beforeEach(() => {
-    fetchAwsUserIdByUsernameStub = sinon.stub(awsFunctions, "fetchAwsUserIdByUsername");
-    createUserStub = sinon.stub(awsFunctions, "createUser");
-    addUserToGroupStub = sinon.stub(awsFunctions, "addUserToGroup");
-    retrieveUsersStub = sinon.stub(dataAccess, "retrieveUsers");
-    verifyTokenStub = sinon.stub(authorizeBot, "verifyDiscordBot");
-  });
 
-  afterEach(() => {
-    // Restore all stubs
-    sinon.restore();
-  });
-
-  const mockValidUser = {
-    user: {
-      username: 'testuser',
-      email: 'test@example.com',
-      discordId: '123456'
-    }
-  };
-  const mockUser = {
-    user: {
-      id: "user-id-1",
-      username: "testuser",
-      email: "test@example.com",
-      discordId: "123456"
-    }
-  };
-
-  const mockRequest = {
-    groupId: 'group-123',
-    userId: '123456'
-  };
+  })
   
-  it("should return 400 if the user is not found", async () => {
-    retrieveUsersStub.resolves(null);
+  afterEach(() => {
+    sinon.restore();
+    cleanDb();
+  });
+  /**
+   * How can I stub the verify discord token
+   * 
+   */
 
-    const res = await chai.request(app)
-        .post("/aws-access")
-        .send({ groupId: "test-group", userId: "test-user" });
+  it('should return 400 when user email is missing',async function() {
+    await addUser(userData[20]);
 
-    expect(res).to.have.status(400);
-    expect(res.body).to.deep.equal({ error: "User not found" });
-    });
+    sinon.stub(authorizeBot, "verifyDiscordBot").resolves({ name: CLOUDFLARE_WORKER });
+    // sinon.stub(awsFunctions, "createUser").resolves({ UserId: "new-aws-user-id" });
+    // sinon.stub(awsFunctions, "addUserToGroup").resolves({ conflict: false });
+
+    const res = await chai
+      .request(app)
+      .post('/aws-access')
+      .set('Authorization', 'Bearer valid-bot-token')
+      .send({
+        groupId: 'test-group-id',
+        userId: '30030'
+      })
+    expect(res.status).to.be.equal(400);
+    expect(res.body).to.have.property('error')
+        .that.equals(`User email is required to create an AWS user. Please update your email by setting up Profile service, url : ${PROFILE_SVC_GITHUB_URL}`);
+  });
+  
+  it ("Should return 404 if the user given discord Id is not found", async function(){
+    await addUser(userData[20]);
+
+    const res = await chai
+      .request(app)
+      .post('/aws-access')
+      .set('Authorization', 'Bearer valid-bot-token')
+      .send({
+        groupId: 'test-group-id',
+        userId: '293809230'
+      })
+      console.log("response body ", res.body);
+      expect(res.status).to.be.equal(404);
+      expect(res.body).to.have.property('error')
+          .that.equals(`User not found`);
+  });
+
+
+  // it ("Should throw an error if the token is invalid"){
+
+  // }
+  // it ("Should create user and add to group, if the user is not present in AWS already"){
+
+  // }
+  // it ("Should add the user to the group if the user is already part of AWS account"){
+
+  // }
+  // it ("Should return the signin URL if the user is already added to the group"){
+
+  // }
+  // it ("Should return error if something fails in between of the interaction with AWS APIs"){
+
+  // }
 });
+//   it('should return 400 when user email is missing', async () => {
+//     const userInfoData = await dataAccess.retrieveUsers({ discordId: userId, level: userDataLevels.ACCESS_LEVEL.INTERNAL, role: 'cloudfare_worker'});
 
-//   describe('POST /aws-access', () => {
-//     it("should reject requests without authorization header", async function(done) {
-//         chai
-//           .request(app)
-//           .post("/aws-access")
-//           .send({
-//             groupId: "test-group-id",
-//             userId: "test-discord-id"
-//           })
-//           .end((err, res) => {
-//             if (err){
-//                 return done(err);
-//             }
-//             expect(res).to.have.status(400);
-//             expect(res.body.error).to.equal("Invalid Request");
-//             return done();
-//           });
-//       });
+//     await addUserToGroupController(req, res);
 
-    // it('should successfully create and add new user to AWS group', function(done) {
-    //     userQueryStub.withArgs({ discordId: "test-discord-id" }).resolves(mockUser);
-        
-    //     // mock aws functions
-    //     fetchAwsUserStub.resolves(null);
-    //     createUserStub.resolves({ UserId: "new-aws-user-id" });
-    //     addUserToGroupStub.resolves({ success: true });
-        
-    //     chai
-    //     .request(app)
-    //     .post("/aws-access")
-    //     .set('Authorization', 'Bearer test-discord-bot-token')
-    //     .send(mockRequest)
-    //     .end((error, response) => {
-    //         if (error){
-    //             return done(error);
-    //         }
-    //         console.log("The response is", response);
-    //         expect(response).to.have.status(200);
-    //         expect(response.body).should.be.an('object');
-    //         expect(response.body).should.have.property('message').equal(`User ${mockRequest.userId} successfully added to group ${mockRequest.groupId}.`);
-    //         expect(createUserStub.calledOnce).to.be.true;
-    //         expect(addUserToGroupStub.calledOnce).to.be.true;
-            
-    //         return done();
-    //     });
-    // });
-
-        
-
-//     it('should add existing AWS user to group without creating new user', async () => {
-//       // Setup stubs
-//       dataAccessStub.resolves(mockValidUser);
-//       fetchAwsUserStub.resolves('existing-aws-user-123');
-//       addUserToGroupStub.resolves({ success: true });
-
-//       const response = await request(app)
-//         .post('/aws-access')
-//         .send(mockRequest);
-
-//       // Assertions
-//       expect(response.status).to.equal(200);
-//       expect(response.body.message).to.equal(
-//         `User ${mockRequest.userId} successfully added to group ${mockRequest.groupId}.`
-//       );
-
-//       // Verify createUser was not called
-//       expect(createUserStub.called).to.be.false;
-//       expect(addUserToGroupStub.calledWith(
-//         mockRequest.groupId,
-//         'existing-aws-user-123'
-//       )).to.be.true;
-//     });
-
-//     it('should handle case when user is already in group', async () => {
-//       // Setup stubs
-//       dataAccessStub.resolves(mockValidUser);
-//       fetchAwsUserStub.resolves('existing-aws-user-123');
-//       addUserToGroupStub.resolves({ conflict: true });
-
-//       const response = await request(app)
-//         .post('/aws-access')
-//         .send(mockRequest);
-
-//       // Assertions
-//       expect(response.status).to.equal(200);
-//       expect(response.body.message).to.equal(
-//         `User ${mockRequest.userId} is already part of the AWS group, please try signing in.`
-//       );
-//     });
-
-//     it('should return 404 when user is not found', async () => {
-//       // Setup stubs
-//       dataAccessStub.resolves(null);
-
-//       const response = await request(app)
-//         .post('/aws-access')
-//         .send(mockRequest);
-
-//       // Assertions
-//       expect(response.status).to.equal(404);
-//       expect(response.body.error).to.equal('User not found');
-
-//       // Verify AWS functions were not called
-//       expect(fetchAwsUserStub.called).to.be.false;
-//       expect(createUserStub.called).to.be.false;
-//       expect(addUserToGroupStub.called).to.be.false;
-//     });
-
-//     it('should return 400 when user has no email', async () => {
-//       // Setup user without email
-//       const userWithoutEmail = {
-//         user: {
-//           username: 'testuser',
-//           discordId: '123456'
-//         }
-//       };
-
-//       dataAccessStub.resolves(userWithoutEmail);
-
-//       const response = await request(app)
-//         .post('/aws-access')
-//         .send(mockRequest);
-
-//       // Assertions
-//       expect(response.status).to.equal(400);
-//       expect(response.body.error).to.equal(
-//         `User email is required to create an AWS user. Please update your email by setting up Profile service, url : ${PROFILE_SVC_GITHUB_URL}`
-//       );
-
-//       // Verify AWS functions were not called
-//       expect(fetchAwsUserStub.called).to.be.false;
-//       expect(createUserStub.called).to.be.false;
-//       expect(addUserToGroupStub.called).to.be.false;
-//     });
-
-//     it('should handle AWS errors gracefully', async () => {
-//       // Setup stubs
-//       dataAccessStub.resolves(mockValidUser);
-//       fetchAwsUserStub.rejects(new Error('AWS Connection Error'));
-
-//       const response = await request(app)
-//         .post('/aws-access')
-//         .send(mockRequest);
-
-//       // Assertions
-//       expect(response.status).to.equal(500);
-//       expect(response.body.error).to.exist;
-//     });
-
-//     it('should handle invalid request body', async () => {
-//       const response = await request(app)
-//         .post('/aws-access')
-//         .send({});  // Empty request body
-
-//       expect(response.status).to.equal(400);
-//       expect(response.body.error).to.exist;
-//     });
-
-//     it('should handle network timeout errors', async () => {
-//       // Setup timeout simulation
-//       dataAccessStub.resolves(mockValidUser);
-//       fetchAwsUserStub.rejects(new Error('Network timeout'));
-
-//       const response = await request(app)
-//         .post('/aws-access')
-//         .send(mockRequest);
-
-//       expect(response.status).to.equal(500);
-//       expect(response.body.error).to.include('Network timeout');
-//     });
+//     expect(res.status.calledWith(400)).to.be.true;
+//     expect(res.json.calledWith({
+//       error: `User email is required to create an AWS user. Please update your email by setting up Profile service, url : ${PROFILE_SVC_GITHUB_URL}`,
+//     })).to.be.true;
 //   });
+
+//   it('should create a new AWS user when AWS user is not found', async () => {
+//     // sinon.stub(dataAccess, 'retrieveUsers').resolves({
+//     //   user: { username: 'test-username', email: 'test@example.com' },
+//     // });
+
+//     sinon.stub(awsFunctions, 'fetchAwsUserIdByUsername').resolves(null);
+//     sinon.stub(awsFunctions, 'createUser').resolves({ UserId: 'new-aws-user-id' });
+//     sinon.stub(awsFunctions, 'addUserToGroup').resolves({ conflict: false });
+
+//     chai
+//     .request(app)
+//     .post("/aws-access")
+//     .set('Authorization', 'Bearer valid-bot-token');
+
+//     // expect(awsFunctions.createUser.calledOnceWith('test-username', 'test@example.com')).to.be.true;
+//     // console.log(`The res is ${res.status} and json is ${res.json()}`);
+//     expect(res).to.have.status(200);
+//     expect(res.body.message).to.be.equal('User test-user-id successfully added to group test-group-id.');
+//   });
+
+//   it('should return conflict message if user is already part of the AWS group', async () => {
+//     // sinon.stub(dataAccess, 'retrieveUsers').resolves({
+//     //   user: { username: 'test-username', email: 'test@example.com' },
+//     // });
+
+//     sinon.stub(awsFunctions, 'fetchAwsUserIdByUsername').resolves('existing-aws-user-id');
+//     sinon.stub(awsFunctions, 'addUserToGroup').resolves({ conflict: true });
+
+//     await addUserToGroupController(req, res);
+
+//     // expect(awsFunctions.addUserToGroup.calledOnceWith('test-group-id', 'existing-aws-user-id')).to.be.true;
+//     expect(res.status.calledWith(200)).to.be.true;
+//     expect(res.json.calledWith({
+//       message: `User test-user-id is already part of the AWS group, please try signing in.`,
+//     })).to.be.true;
+//   });
+
+//   it('should handle errors correctly and log them', async () => {
+//     const error = new Error('Test Error');
+//     // sinon.stub(dataAccess, 'retrieveUsers').resolves({
+//     //   user: { username: 'test-username', email: 'test@example.com' },
+//     // });
+
+//     sinon.stub(awsFunctions, 'fetchAwsUserIdByUsername').throws(error);
+//     const loggerStub = sinon.stub(console, 'error');
+
+//     try {
+//       await addUserToGroupController(req, res);
+//     } catch (err) {
+//       expect(loggerStub.calledWith(`Error in adding user - test-user-id to AWS group - test-group-id error - ${error}`)).to.be.true;
+//     }
+//   });
+
+// });
+
+// describe('verifyDiscordBot Middleware', () => {
+//   let verifyTokenStub;
+
+//   beforeEach(() => {
+//     // Stub the botVerification.verifyToken method
+//     verifyTokenStub = sinon.stub(verifyDiscordBot, 'verifyToken');
+//   });
+
+//   afterEach(() => {
+//     sinon.restore();
+//   });
+
+//   it('should allow access when a valid bot token is provided', function(done) {
+//     // Mock verifyToken to return expected data
+//     verifyTokenStub.resolves({ name: CLOUDFLARE_WORKER });
+
+//     chai
+//       .request(app)
+//       .post('/aws-access')
+//       .set('Authorization', 'Bearer valid-bot-token')
+//       .end((err, res) => {
+//         if (err){
+//           return done(err);
+//         }
+//         expect(verifyTokenStub.calledOnceWith('valid-bot-token')).to.be.true;
+//         expect(res).to.have.status(200);
+//         return done();
+//       });
+//     });
+
+//   it('should return 401 when an invalid bot token is provided', function(done) {
+//     // Mock verifyToken to throw an invalid token error
+//     verifyTokenStub.throws(new Error('invalid token'));
+
+//     chai
+//       .request(app)
+//       .post('/aws-access')
+//       .end((err, res) => {
+//         if (err){
+//           return done(err);
+//         }
+//         expect(verifyTokenStub.calledOnceWith('invalid-bot-token')).to.be.true;
+//         expect(res).to.have.status(401);
+//         expect(res.body).to.deep.equal({ message: 'Unauthorized Bot' });
+//         return done();
+//       })
+//   });
+// })
