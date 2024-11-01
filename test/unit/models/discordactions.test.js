@@ -188,49 +188,6 @@ describe("discordactions", function () {
     });
   });
 
-  describe("deleteGroupRole", function () {
-    let roleRefStub;
-    let firestoreStub;
-
-    beforeEach(function () {
-      roleRefStub = {
-        update: sinon.stub().resolves(),
-      };
-
-      firestoreStub = {
-        collection: sinon.stub().returns({
-          doc: sinon.stub().returns(roleRefStub),
-        }),
-      };
-
-      sinon.stub(admin, "firestore").returns(firestoreStub);
-    });
-
-    it("should mark the group role as deleted", async function () {
-      const result = await deleteGroupRole("testGroupId", "userId");
-      expect(result.isSuccess).to.equal(true);
-      expect(roleRefStub.update.calledOnce).to.be.equal(true);
-      expect(
-        roleRefStub.update.calledWith({
-          isDeleted: true,
-          deletedAt: sinon.match.any,
-          deletedBy: "userId",
-        })
-      ).tto.be.equal(true);
-    });
-
-    it("should return isSuccess false if an error occurs", async function () {
-      roleRefStub.update.rejects(new Error("Database error"));
-      const result = await deleteGroupRole("testGroupId", "userId");
-      expect(result.isSuccess).to.equal(false);
-      expect(roleRefStub.update.calledOnce).to.be.equal(true);
-    });
-
-    afterEach(function () {
-      sinon.restore();
-    });
-  });
-
   describe("addGroupRoleToMember", function () {
     let getStub, addStub;
 
@@ -283,6 +240,66 @@ describe("discordactions", function () {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal("Database error");
       });
+    });
+  });
+
+  describe("deleteGroupRole", function () {
+    const groupId = "1234";
+    const deletedBy = "4321";
+    let firestoreOriginal;
+
+    beforeEach(async function () {
+      firestoreOriginal = admin.firestore;
+
+      const roleRef = admin.firestore().collection("discord-roles").doc(groupId);
+      await roleRef.set({
+        isDeleted: false,
+      });
+    });
+
+    it("should mark the group role as deleted", async function () {
+      const result = await deleteGroupRole(groupId, deletedBy);
+
+      const updatedDoc = await admin.firestore().collection("discord-roles").doc(groupId).get();
+
+      const data = updatedDoc.data();
+      expect(data.isDeleted).to.equal(true);
+      expect(data.deletedBy).to.equal(deletedBy);
+      expect(data.deletedAt).to.be.an.instanceof(admin.firestore.Timestamp);
+      expect(result.isSuccess).to.equal(true);
+    });
+
+    it("should return isSuccess as false if Firestore update fails", async function () {
+      delete require.cache[require.resolve("firebase-admin")];
+
+      const mockFirestore = {
+        collection: () => ({
+          doc: () => ({
+            update: async () => {
+              throw new Error("Database error");
+            },
+          }),
+        }),
+      };
+      // Replacing firestore implementation with our mock
+      Object.defineProperty(admin, "firestore", {
+        configurable: true,
+        get: () => () => mockFirestore,
+      });
+
+      const result = await deleteGroupRole(groupId, deletedBy);
+      expect(result.isSuccess).to.equal(false);
+    });
+
+    afterEach(async function () {
+      // Restoring original firestore implementation
+      Object.defineProperty(admin, "firestore", {
+        configurable: true,
+        value: firestoreOriginal,
+      });
+
+      const roleRef = admin.firestore().collection("discord-roles").doc(groupId);
+      await roleRef.delete();
     });
   });
 

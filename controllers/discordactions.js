@@ -86,6 +86,8 @@ const deleteGroupRole = async (req, res) => {
 
     const roleData = existingRoles.docs[0].data();
 
+    // To be implemented later after availability of Discord API
+
     // const discordDeletionSuccess = await discordServices.deleteGroupRoleFromDiscord(roleid);
 
     // if (!discordDeletionSuccess) {

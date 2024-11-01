@@ -118,36 +118,29 @@ const setUserDiscordNickname = async (userName, discordId) => {
  * @throws {Error} If the deletion fails or there's a network error
  */
 
-const deleteGroupRoleFromDiscord = async (roleId) => {
-  try {
-    const authToken = generateAuthTokenForCloudflare();
-    // console.log(`Attempting to delete role with ID: ${roleId}`);
-    const response = await fetch(`${DISCORD_BASE_URL}/roles/${roleId}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${authToken}`,
-      },
-    });
+// To be implemented later after availability of Discord API
 
-    if (!response.ok) {
-      // const errorResponse = await response.json();
+// const deleteGroupRoleFromDiscord = async (roleId) => {
+//   try {
+//     const authToken = generateAuthTokenForCloudflare();
+//     const response = await fetch(`URL`, {
+//       method: "DELETE",
+//       headers: {
+//         "Content-Type": "application/json",
+//         Authorization: `Bearer ${authToken}`,
+//       },
+//     });
 
-      // console.error(`Response status: ${response.status}`);
-      // console.error(`Response body: ${JSON.stringify(errorResponse)}`);
-      throw new Error(`Failed to delete role from discord`);
-    }
-
-    const result = await response.json();
-    // console.log(`Successfully deleted role: ${JSON.stringify(result)}`);
-
-    return result;
-  } catch (err) {
-    logger.error(`Error deleting role from Discord: ${err.message}`);
-    // console.error(`Full error: ${err}`);
-    throw new Error(err);
-  }
-};
+//     if (!response.ok) {
+//       throw new Error(`Failed to delete role from discord`);
+//     }
+//     const result = await response.json();
+//     return result;
+//   } catch (err) {
+//     logger.error(`Error deleting role from Discord: ${err.message}`);
+//     throw new Error(err);
+//   }
+// };
 
 module.exports = {
   getDiscordMembers,
@@ -156,5 +149,5 @@ module.exports = {
   addRoleToUser,
   removeRoleFromUser,
   setUserDiscordNickname,
-  deleteGroupRoleFromDiscord,
+  // deleteGroupRoleFromDiscord,
 };
