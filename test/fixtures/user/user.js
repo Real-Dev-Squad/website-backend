@@ -54,7 +54,6 @@ module.exports = () => {
       twitter_id: "whatifi",
       discordJoinedAt: "2023-04-06T01:47:34.488000+00:00",
       phone: "1234567891",
-      email: "abc1@gmail.com",
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
         url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
@@ -428,33 +427,6 @@ module.exports = () => {
       discordJoinedAt: "2023-04-06T01:47:34.488000+00:00",
       phone: "1234567890",
       email: "abc@gmail.com",
-      status: "active",
-      tokens: {
-        githubAccessToken: "githubAccessToken",
-      },
-      roles: {
-        restricted: false,
-        app_owner: true,
-        archived: true,
-      },
-      picture: {
-        publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
-        url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
-      },
-    },
-    {
-      username: "John",
-      first_name: "John",
-      last_name: "Doe",
-      yoe: 2,
-      id: 21,
-      img: "./img.png",
-      linkedin_id: "_",
-      discordId: "30030",
-      github_id: "xfasrfsd",
-      github_display_name: "vinayak-trivedi",
-      discordJoinedAt: "2023-04-06T01:47:34.488000+00:00",
-      phone: "1234567890",
       status: "active",
       tokens: {
         githubAccessToken: "githubAccessToken",

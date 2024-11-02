@@ -99,7 +99,6 @@ import {
     try {
       const command = new CreateUserCommand(params);
       const response = await client.send(command);
-      console.info(`The response from create user ${response}`);
       return response;
     } catch (error) {
       console.error(`The error from create user ${error}`);
