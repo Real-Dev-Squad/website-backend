@@ -72,59 +72,67 @@ const createGroupRole = async (req, res) => {
  * @returns {Promise<void>}
  */
 const deleteGroupRole = async (req, res) => {
-  try {
-    const { groupId } = req.params;
-    const { roleid } = req.body;
+  const isDevMode = req.query.dev === "true";
 
-    const { roleExists, existingRoles } = await discordRolesModel.isGroupRoleExists({ roleid });
+  if (isDevMode) {
+    try {
+      const { groupId } = req.params;
+      const { roleid } = req.body;
 
-    if (!roleExists) {
-      return res.status(404).json({
-        error: "Group role not found",
+      const { roleExists, existingRoles } = await discordRolesModel.isGroupRoleExists({ roleid });
+
+      if (!roleExists) {
+        return res.status(404).json({
+          error: "Group role not found",
+        });
+      }
+
+      const roleData = existingRoles.docs[0].data();
+
+      // To be implemented later after availability of Discord API
+
+      // const discordDeletionSuccess = await discordServices.deleteGroupRoleFromDiscord(roleid);
+
+      // if (!discordDeletionSuccess) {
+      //   console.log(`Failed to delete role from Discord with ID: ${roleid}`);
+      //   return res.status(500).json({
+      //     error: "Failed to delete role from Discord server",
+      //   });
+      // }
+
+      const { isSuccess } = await discordRolesModel.deleteGroupRole(groupId, req.userData.id);
+
+      if (isSuccess) {
+        const groupDeletionLog = {
+          type: "group-role-deletion",
+          meta: {
+            userId: req.userData.id,
+          },
+          body: {
+            groupId: groupId,
+            roleName: roleData.rolename,
+            discordRoleId: roleid,
+            action: "delete",
+          },
+        };
+        await addLog(groupDeletionLog.type, groupDeletionLog.meta, groupDeletionLog.body);
+        return res.status(200).json({
+          message: "Group role deleted succesfully",
+        });
+      } else {
+        return res.status(400).json({
+          error: "Group role deletion failed",
+        });
+      }
+    } catch (error) {
+      logger.error(`Error while deleting group role: ${error}`);
+      return res.status(500).json({
+        error: "Internal server error",
       });
     }
-
-    const roleData = existingRoles.docs[0].data();
-
-    // To be implemented later after availability of Discord API
-
-    // const discordDeletionSuccess = await discordServices.deleteGroupRoleFromDiscord(roleid);
-
-    // if (!discordDeletionSuccess) {
-    //   console.log(`Failed to delete role from Discord with ID: ${roleid}`);
-    //   return res.status(500).json({
-    //     error: "Failed to delete role from Discord server",
-    //   });
-    // }
-
-    const { isSuccess } = await discordRolesModel.deleteGroupRole(groupId, req.userData.id);
-
-    if (isSuccess) {
-      const groupDeletionLog = {
-        type: "group-role-deletion",
-        meta: {
-          userId: req.userData.id,
-        },
-        body: {
-          groupId: groupId,
-          roleName: roleData.rolename,
-          discordRoleId: roleid,
-          action: "delete",
-        },
-      };
-      await addLog(groupDeletionLog.type, groupDeletionLog.meta, groupDeletionLog.body);
-      return res.status(200).json({
-        message: "Group role deleted succesfully",
-      });
-    } else {
-      return res.status(400).json({
-        error: "Group role deletion failed",
-      });
-    }
-  } catch (error) {
-    logger.error(`Error while deleting group role: ${error}`);
-    return res.status(500).json({
-      error: "Internal server error",
+  } else {
+    return res.status(403).json({
+      error: "Feature not available in production mode.",
     });
   }
 };
