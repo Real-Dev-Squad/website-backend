@@ -15,12 +15,11 @@ export const addUserToGroupController = async (req, res) => {
         return res.status(400).json({ error: `User email is required to create an AWS user. Please update your email by setting up Profile service, url : ${PROFILE_SVC_GITHUB_URL}` });
       }
       
-      const userInfoAWS = await fetchAwsUserIdByUsername(userInfoData.user.username);
+      let awsUserId = await fetchAwsUserIdByUsername(userInfoData.user.username);
       
-      let awsUserId = userInfoAWS;
       let userCreationResponse = null;
       
-      if (userInfoAWS === null){
+      if (awsUserId === null){
         // We need to create the user in AWS before and then fetch its Id
         userCreationResponse = await createUser(userInfoData.user.username, userInfoData.user.email);
         awsUserId = userCreationResponse.UserId;
