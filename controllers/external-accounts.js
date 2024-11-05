@@ -76,7 +76,9 @@ const linkExternalAccount = async (req, res) => {
       await discordServices.removeRoleFromUser(unverifiedRoleId, attributes.discordId, req.userData);
     } catch (error) {
       logger.error(`Error getting external account data: ${error}`);
-      return res.status(500).json({ message: `Role Deletion failed. Please contact admin.` });
+      return res.boom.internal("Role Deletion failed. Please contact admin.", {
+        message: "Role Deletion failed. Please contact admin.",
+      });
     }
 
     return res.status(204).json({ message: "Your discord profile has been linked successfully" });
