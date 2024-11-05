@@ -4,6 +4,8 @@ const { getDiscordMembers } = require("../services/discordService");
 const { addOrUpdate, getUsersByRole, updateUsersInBatch } = require("../models/users");
 const { retrieveDiscordUsers, fetchUsersForKeyValues } = require("../services/dataAccessLayer");
 const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../constants/external-accounts");
+const discordServices = require("../services/discordService");
+const config = require("config");
 const logger = require("../utils/logger");
 const { markUnDoneTasksOfArchivedUsersBacklog } = require("../models/tasks");
 
@@ -68,6 +70,16 @@ const linkExternalAccount = async (req, res) => {
       },
       userId
     );
+
+    try {
+      const unverifiedRoleId = config.get("discordUnverifiedRoleId");
+      await discordServices.removeRoleFromUser(unverifiedRoleId, attributes.discordId, req.userData);
+    } catch (error) {
+      logger.error(`Error getting external account data: ${error}`);
+      return res.boom.internal("Role Deletion failed. Please contact admin.", {
+        message: "Role Deletion failed. Please contact admin.",
+      });
+    }
 
     return res.status(204).json({ message: "Your discord profile has been linked successfully" });
   } catch (error) {
