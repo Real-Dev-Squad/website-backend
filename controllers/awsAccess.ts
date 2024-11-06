@@ -3,7 +3,7 @@ import {addUserToGroup, createUser, fetchAwsUserIdByUsername} from "../utils/aws
 const dataAccess = require("../services/dataAccessLayer");
 const userDataLevels = require('../constants/userDataLevels');
 
-export const addUserToGroupController = async (req, res) => {
+export const addUserToAWSGroup = async (req, res) => {
     const { groupId, userId } = req.body;
 
     try {

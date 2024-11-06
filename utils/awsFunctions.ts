@@ -37,39 +37,6 @@ import {
   }
   
   /**
-   * Lists users from AWS Identity Store filtered by username.
-   * @param {string} username - Username to filter users by
-   * @returns {Promise<string | null>} - UserId if found, otherwise null
-   */
-  export const fetchUserIdFromUsername = async (username: string): Promise<string | null> => {
-    const client = configureAWSCredentials();
-  
-    const getUserByIdCommand: ListUsersCommandInput = {
-      IdentityStoreId: identityStoreId,
-      Filters: [
-        {
-          AttributePath: "Username",
-          AttributeValue: username,
-        },
-      ],
-    };
-  
-    try {
-      const response = await client.send(new ListUsersCommand(getUserByIdCommand));
-  
-      if (response.Users && response.Users.length > 0) {
-        const userId = response.Users[0].UserId!;
-        return userId;
-      } else {
-        console.error("No users found for the provided username.");
-        return null;
-      }
-    } catch (err) {
-      throw new Error(`Failed to list users: ${err instanceof Error ? err.message : String(err)}`);
-    }
-  };
-  
-  /**
    * Creates the user in the Identity store.
    * @param {string} username - The username to create.
    * @param {string} email - The email to associate with the user.
@@ -154,19 +121,17 @@ export const addUserToGroup = async (groupId: string, awsUserId: string): Promis
         },
       ],
     };
-  
+    
+    let response;
     try {
-      const response = await client.send(new ListUsersCommand(params));
-  
-      if (response.Users && response.Users.length > 0) {
-        const userId = response.Users[0].UserId!;
-        return userId;
-      } else {
-        console.info(`User not found with given username ${username} in AWS`);
-        return null;
-      }
-    } catch (error) {
-      console.error(`Error while fetching user by username: ${error}`);
+      response = await client.send(new ListUsersCommand(params));
+    } catch (err) {
+      throw new Error(`Error while fetching user by username: ${err instanceof Error ? err.message : String(err)}`);
+    }
+    if (response.Users && response.Users.length > 0) {
+      const userId = response.Users[0].UserId!;
+      return userId;
+    } else {
       return null;
     }
   };

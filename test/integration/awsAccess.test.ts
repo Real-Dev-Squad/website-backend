@@ -2,6 +2,7 @@ import chai, {expect} from "chai";
 import sinon from 'sinon';
 import chaiHttp from 'chai-http';
 import * as awsFunctions from '../../utils/awsFunctions';
+import bot from "../utils/generateBotToken";
 import { PROFILE_SVC_GITHUB_URL } from '../../constants/urls';
 
 const app = require("../../server");
@@ -14,7 +15,15 @@ const { CLOUDFLARE_WORKER } = require("../../constants/bot")
 
 chai.use(chaiHttp);
 
-describe('addUserToGroupController', function(){
+describe('addUserToAWSGroup', function(){
+  let req: any;
+  beforeEach(() => {
+    req = {
+      headers: {},
+    };
+    const jwtToken = bot.generateToken({ name: CLOUDFLARE_WORKER });
+    req.headers.authorization = `Bearer ${jwtToken}`;
+  })
   afterEach(() => {
     sinon.restore();
     cleanDb();
@@ -22,12 +31,11 @@ describe('addUserToGroupController', function(){
 
   it('should return 400 when user email is missing',async function() {
     await addUser(userData[1]);
-    sinon.stub(authorizeBot, "verifyDiscordBot").resolves({ name: CLOUDFLARE_WORKER });
 
     const res = await chai
       .request(app)
       .post('/aws-access')
-      .set('Authorization', 'Bearer valid-bot-token')
+      .set('Authorization', req.headers.authorization)
       .send({
         groupId: 'test-group-id',
         userId: '30030'
@@ -36,74 +44,55 @@ describe('addUserToGroupController', function(){
     expect(res.body).to.have.property('error')
         .that.equals(`User email is required to create an AWS user. Please update your email by setting up Profile service, url : ${PROFILE_SVC_GITHUB_URL}`);
   });
-  
-  // // Here the error is coming wrong
-  // it.skip("Should return 404 if the user given discord Id is not found", async function(){
-  //   cleanDb();
-
-  //   sinon.stub(authorizeBot, "verifyDiscordBot").resolves({ name: CLOUDFLARE_WORKER });
-  //   const res = await chai
-  //     .request(app)
-  //     .post('/aws-access')
-  //     .set('Authorization', 'Bearer valid-bot-token')
-  //     .send({
-  //       groupId: 'test-group-id',
-  //       userId: '293809230'
-  //     })
-      
-  //     expect(res.status).to.be.equal(400);
-  //     expect(res.body).to.have.property('error')
-  //         .that.equals(`User not found`);
-  // });
 
   it("Should create user and add to group, if the user is not present in AWS already", async function(){
     await addUser(userData[0]);
-    sinon.stub(authorizeBot, "verifyDiscordBot").resolves({ name: CLOUDFLARE_WORKER });
     sinon.stub(awsFunctions, "createUser").resolves({ UserId: "new-aws-user-id" });
     sinon.stub(awsFunctions, "addUserToGroup").resolves({ conflict: false });
 
     const res = await chai
     .request(app)
     .post('/aws-access')
-    .set('Authorization', 'Bearer valid-bot-token')
+    .set('Authorization', req.headers.authorization)
     .send({
       groupId: 'test-group-id',
       userId: '12345'
     })
-    console.log("The response ", res);
+
     expect(res.body).to.have.property('message', 
       'User 12345 successfully added to group test-group-id.'
     );
+
   });
   it("Should add the user to the group if the user is already part of AWS account", async function(){
     await addUser(userData[0]);
-    sinon.stub(authorizeBot, "verifyDiscordBot").resolves({ name: CLOUDFLARE_WORKER });
     sinon.stub(awsFunctions, "createUser").resolves({ UserId: "existing-user-id-123" });
     sinon.stub(awsFunctions, "addUserToGroup").resolves({ conflict: false });
 
     const res = await chai
     .request(app)
     .post('/aws-access')
-    .set('Authorization', 'Bearer valid-bot-token')
+    .set('Authorization', req.headers.authorization)
     .send({
       groupId: 'test-group-id',
       userId: '12345'
     })
+    console.log("response", res);
     expect(res.body).to.have.property('message', 
       'User 12345 successfully added to group test-group-id.'
     );
-    
+
   });
+
   it("Should return the signin URL if the user is already added to the group", async function() {
     await addUser(userData[0]);
-    sinon.stub(authorizeBot, "verifyDiscordBot").resolves({ name: CLOUDFLARE_WORKER });
     sinon.stub(awsFunctions, "createUser").resolves({ UserId: "existing-user-id-123" });
     sinon.stub(awsFunctions, "addUserToGroup").resolves({ conflict: true });
 
     const res = await chai
     .request(app)
     .post('/aws-access')
-    .set('Authorization', 'Bearer valid-bot-token')
+    .set('Authorization', req.headers.authorization)
     .send({
       groupId: 'test-group-id',
       userId: '12345'

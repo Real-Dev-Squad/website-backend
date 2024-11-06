@@ -7,7 +7,6 @@ import {
   CreateGroupMembershipCommand,
 } from "@aws-sdk/client-identitystore";
 import {
-  fetchUserIdFromUsername,
   createUser,
   addUserToGroup,
   fetchAwsUserIdByUsername,
@@ -28,7 +27,7 @@ describe('AWS Identity Store Functions', () => {
     sinon.restore();
   });
 
-  describe('fetchUserIdFromUsername', () => {
+  describe('fetchAwsUserIdByUsername', () => {
     it('should return userId when user is found', async () => {
       const mockResponse = {
         Users: [{
@@ -38,7 +37,7 @@ describe('AWS Identity Store Functions', () => {
       };
       sendStub.resolves(mockResponse);
 
-      const result = await fetchUserIdFromUsername('testuser');
+      const result = await fetchAwsUserIdByUsername('testuser');
       expect(result).to.equal('test-user-id-123');
       expect(sendStub.calledOnce).to.be.true;
       expect(sendStub.firstCall.args[0]).to.be.instanceOf(ListUsersCommand);
@@ -48,7 +47,7 @@ describe('AWS Identity Store Functions', () => {
       const mockResponse = { Users: [] };
       sendStub.resolves(mockResponse);
 
-      const result = await fetchUserIdFromUsername('nonexistentuser');
+      const result = await fetchAwsUserIdByUsername('nonexistentuser');
       expect(result).to.be.null;
     });
 
@@ -56,11 +55,11 @@ describe('AWS Identity Store Functions', () => {
       sendStub.rejects(new Error('AWS Error'));
 
       try {
-        await fetchUserIdFromUsername('testuser');
+        await fetchAwsUserIdByUsername('testuser');
         expect.fail('Should have thrown an error');
       } catch (error) {
         expect(error).to.be.instanceOf(Error);
-        expect((error as Error).message).to.include('Failed to list users');
+        expect((error as Error).message).to.include('Error while fetching user by username');
       }
     });
   });
@@ -122,37 +121,6 @@ describe('AWS Identity Store Functions', () => {
         expect(error).to.be.instanceOf(Error);
         expect((error as Error).message).to.include('Failed to add user to group');
       }
-    });
-  });
-  describe('fetchAwsUserIdByUsername', () => {
-    it('should return userId when user exists', async () => {
-      const mockResponse = {
-        Users: [{
-          UserId: 'aws-user-id-123',
-          UserName: 'awsuser'
-        }]
-      };
-      sendStub.resolves(mockResponse);
-
-      const result = await fetchAwsUserIdByUsername('awsuser');
-      expect(result).to.equal('aws-user-id-123');
-      expect(sendStub.calledOnce).to.be.true;
-      expect(sendStub.firstCall.args[0]).to.be.instanceOf(ListUsersCommand);
-    });
-
-    it('should return null when user does not exist', async () => {
-      const mockResponse = { Users: [] };
-      sendStub.resolves(mockResponse);
-
-      const result = await fetchAwsUserIdByUsername('nonexistentuser');
-      expect(result).to.be.null;
-    });
-
-    it('should return null when AWS call fails', async () => {
-      sendStub.rejects(new Error('AWS Error'));
-
-      const result = await fetchAwsUserIdByUsername('awsuser');
-      expect(result).to.be.null;
     });
   });
 });

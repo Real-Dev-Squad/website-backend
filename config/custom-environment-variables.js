@@ -14,19 +14,15 @@ module.exports = {
   aws: {
     region: {
       __name: "AWS_REGION",
-      __format: "string",
     },
     access_key: {
       __name: "AWS_ACCESS_KEY",
-      __format: "string",
     },
     secret_key: {
       __name: "AWS_SECRET_KEY",
-      __format: "string",
     },
     identity_store_id: {
       __name: "IDENTITY_STORE_ID",
-      __format: "string",
     },
   },
 
