@@ -16,6 +16,7 @@ chai.use(chaiHttp);
 
 describe('addUserToAWSGroup', function(){
   let req: any;
+  const AWS_ACCESS_API_URL = `/aws-access?dev=true`
   
   beforeEach(async () => {
     await addUser(userData[0]);
@@ -35,7 +36,7 @@ describe('addUserToAWSGroup', function(){
   it('should return 400 and user not found with wrong discord Id passed', function(done){
     const res = chai
     .request(app)
-    .post('/aws-access')
+    .post(AWS_ACCESS_API_URL)
     .set('Authorization', req.headers.authorization)
     .send({
       groupId: 'test-group-id',
@@ -55,7 +56,7 @@ describe('addUserToAWSGroup', function(){
   it('should return 400 when user email is missing', function(done) {    
     const res = chai
       .request(app)
-      .post('/aws-access')
+      .post(AWS_ACCESS_API_URL)
       .set('Authorization', req.headers.authorization)
       .send({
         groupId: 'test-group-id',
@@ -80,7 +81,7 @@ describe('addUserToAWSGroup', function(){
 
     const res = chai
     .request(app)
-    .post('/aws-access')
+    .post(AWS_ACCESS_API_URL)
     .set('Authorization', req.headers.authorization)
     .send({
       groupId: 'test-group-id',
@@ -104,7 +105,7 @@ describe('addUserToAWSGroup', function(){
     
     const res =  chai
     .request(app)
-    .post('/aws-access')
+    .post(AWS_ACCESS_API_URL)
     .set('Authorization', req.headers.authorization)
     .send({
       groupId: 'test-group-id',
@@ -128,7 +129,7 @@ describe('addUserToAWSGroup', function(){
     
     const res = chai
     .request(app)
-    .post('/aws-access')
+    .post(AWS_ACCESS_API_URL)
     .set('Authorization', req.headers.authorization)
     .send({
       groupId: 'test-group-id',
