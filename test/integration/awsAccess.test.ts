@@ -12,45 +12,73 @@ const addUser = require("../utils/addUser");
 const cleanDb = require("../utils/cleanDb");
 const { CLOUDFLARE_WORKER } = require("../../constants/bot")
 
-
 chai.use(chaiHttp);
 
 describe('addUserToAWSGroup', function(){
   let req: any;
-  beforeEach(() => {
+  
+  beforeEach(async () => {
+    await addUser(userData[0]);
+    await addUser(userData[1]);
+    sinon.restore();
     req = {
       headers: {},
     };
     const jwtToken = bot.generateToken({ name: CLOUDFLARE_WORKER });
     req.headers.authorization = `Bearer ${jwtToken}`;
   })
-  afterEach(() => {
-    sinon.restore();
-    cleanDb();
+  
+  afterEach(async () => {
+    await cleanDb();
   });
 
-  it('should return 400 when user email is missing',async function() {
-    await addUser(userData[1]);
+  it('should return 400 and user not found with wrong discord Id passed', function(done){
+    const res = chai
+    .request(app)
+    .post('/aws-access')
+    .set('Authorization', req.headers.authorization)
+    .send({
+      groupId: 'test-group-id',
+      userId: '3000230293'
+    })
+    .end((err, res) => {
+      if (err) {
+        return done(err);
+      }
+      expect(res.status).to.be.equal(400);
+      expect(res.body).to.have.property('error')
+          .that.equals(`User not found`);
+      return done();
+    })
+  });
 
-    const res = await chai
+  it('should return 400 when user email is missing', function(done) {    
+    const res = chai
       .request(app)
       .post('/aws-access')
       .set('Authorization', req.headers.authorization)
       .send({
         groupId: 'test-group-id',
-        userId: '30030'
+        userId: '1234567890'
       })
-    expect(res.status).to.be.equal(400);
-    expect(res.body).to.have.property('error')
-        .that.equals(`User email is required to create an AWS user. Please update your email by setting up Profile service, url : ${PROFILE_SVC_GITHUB_URL}`);
+      .end((err, res) => {
+        if (err) {
+          return done(err);
+        }
+        expect(res.status).to.be.equal(400);
+        expect(res.body).to.have.property('error')
+            .that.equals(`User email is required to create an AWS user. Please update your email by setting up Profile service, url : ${PROFILE_SVC_GITHUB_URL}`);
+        return done();
+      });
   });
+  
 
-  it("Should create user and add to group, if the user is not present in AWS already", async function(){
-    await addUser(userData[0]);
+  it("Should create user and add to group, if the user is not present in AWS already", function(done){
     sinon.stub(awsFunctions, "createUser").resolves({ UserId: "new-aws-user-id" });
     sinon.stub(awsFunctions, "addUserToGroup").resolves({ conflict: false });
+    sinon.stub(awsFunctions, "fetchAwsUserIdByUsername").resolves(null);
 
-    const res = await chai
+    const res = chai
     .request(app)
     .post('/aws-access')
     .set('Authorization', req.headers.authorization)
@@ -58,18 +86,23 @@ describe('addUserToAWSGroup', function(){
       groupId: 'test-group-id',
       userId: '12345'
     })
-
-    expect(res.body).to.have.property('message', 
-      'User 12345 successfully added to group test-group-id.'
-    );
-
+    .end((err, res) => {
+      if (err) {
+        return done(err);
+      }
+      expect(res.status).to.be.equal(200);
+      expect(res.body).to.have.property('message', 
+        `User 12345 successfully added to group test-group-id.`
+      );
+      return done();
+    });
   });
-  it("Should add the user to the group if the user is already part of AWS account", async function(){
-    await addUser(userData[0]);
-    sinon.stub(awsFunctions, "createUser").resolves({ UserId: "existing-user-id-123" });
+  
+  it("Should add the user to the group if the user is already part of AWS account", function(done){
     sinon.stub(awsFunctions, "addUserToGroup").resolves({ conflict: false });
-
-    const res = await chai
+    sinon.stub(awsFunctions, "fetchAwsUserIdByUsername").resolves("existing-user-id-123");
+    
+    const res =  chai
     .request(app)
     .post('/aws-access')
     .set('Authorization', req.headers.authorization)
@@ -77,19 +110,23 @@ describe('addUserToAWSGroup', function(){
       groupId: 'test-group-id',
       userId: '12345'
     })
-    console.log("response", res);
-    expect(res.body).to.have.property('message', 
-      'User 12345 successfully added to group test-group-id.'
-    );
-
+    .end((err, res) => {
+      if (err) {
+        return done(err);
+      }
+      expect(res.status).to.be.equal(200)
+      expect(res.body).to.have.property('message', 
+        'User 12345 successfully added to group test-group-id.'
+      );
+      return done();
+    });
   });
 
-  it("Should return the signin URL if the user is already added to the group", async function() {
-    await addUser(userData[0]);
-    sinon.stub(awsFunctions, "createUser").resolves({ UserId: "existing-user-id-123" });
+  it("Should return the signin URL if the user is already added to the group", function(done) {
     sinon.stub(awsFunctions, "addUserToGroup").resolves({ conflict: true });
-
-    const res = await chai
+    sinon.stub(awsFunctions, "fetchAwsUserIdByUsername").resolves("existing-user-id-123");
+    
+    const res = chai
     .request(app)
     .post('/aws-access')
     .set('Authorization', req.headers.authorization)
@@ -97,9 +134,15 @@ describe('addUserToAWSGroup', function(){
       groupId: 'test-group-id',
       userId: '12345'
     })
-
-    expect(res.body).to.have.property('message', 
-      'User 12345 is already part of the AWS group, please try signing in.'
-    );
+    .end((err, res) => {
+      if (err) {
+        return done(err);
+      }
+      expect(res.status).to.be.equal(200);
+      expect(res.body).to.have.property('message', 
+        'User 12345 is already part of the AWS group, please try signing in.'
+      );
+      return done();
+    });
   });
 });

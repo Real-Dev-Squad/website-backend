@@ -8,8 +8,7 @@ export const addUserToAWSGroup = async (req, res) => {
 
     try {
       const userInfoData = await dataAccess.retrieveUsers({ discordId: userId, level: userDataLevels.ACCESS_LEVEL.INTERNAL, role: 'cloudfare_worker'});
-      
-      if (!userInfoData) {
+      if (!userInfoData.userExists) {
         return res.status(400).json({ error: "User not found" });
       } else if(!userInfoData.user.email) {
         return res.status(400).json({ error: `User email is required to create an AWS user. Please update your email by setting up Profile service, url : ${PROFILE_SVC_GITHUB_URL}` });
