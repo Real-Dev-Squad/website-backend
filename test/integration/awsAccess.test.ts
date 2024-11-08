@@ -16,7 +16,7 @@ chai.use(chaiHttp);
 
 describe('addUserToAWSGroup', function(){
   let req: any;
-  const AWS_ACCESS_API_URL = `/aws-access?dev=true`
+  const AWS_ACCESS_API_URL = `/aws/groups/access?dev=true`
   
   beforeEach(async () => {
     await addUser(userData[0]);

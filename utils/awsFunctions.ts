@@ -65,8 +65,7 @@ import {
   
     try {
       const command = new CreateUserCommand(params);
-      const response = await client.send(command);
-      return response;
+      return (await client.send(command));
     } catch (error) {
       console.error(`The error from create user ${error}`);
       throw new Error(`Failed to create user: ${error instanceof Error ? error.message : String(error)}`);
@@ -92,8 +91,7 @@ export const addUserToGroup = async (groupId: string, awsUserId: string): Promis
   
     try {
       const command = new CreateGroupMembershipCommand(params);
-      const response = await client.send(command);
-      return response;
+      return (await client.send(command));
     } catch (error) {
       console.error("Error adding user to group:", error);
       if (error.__type === 'ConflictException'){
