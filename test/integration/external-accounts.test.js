@@ -16,6 +16,7 @@ const firestore = require("../../utils/firestore");
 const userData = require("../fixtures/user/user")();
 const userModel = firestore.collection("users");
 const tasksModel = firestore.collection("tasks");
+const discordServices = require("../../services/discordService");
 const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../../constants/external-accounts");
 chai.use(chaiHttp);
 const cookieName = config.get("userToken.cookieName");
@@ -537,6 +538,8 @@ describe("External Accounts", function () {
       expect(getUserResponseBeforeUpdate.body).to.not.have.property("discordId");
       expect(getUserResponseBeforeUpdate.body).to.not.have.property("discordJoinedAt");
 
+      const removeRoleFromUserStub = Sinon.stub(discordServices, "removeRoleFromUser").resolves();
+
       const response = await chai
         .request(app)
         .patch(`/external-accounts/link/${externalAccountData[2].token}`)
@@ -553,6 +556,27 @@ describe("External Accounts", function () {
       expect(updatedUserDetails.body.roles.in_discord).to.equal(true);
       expect(updatedUserDetails.body).to.have.property("discordId");
       expect(updatedUserDetails.body).to.have.property("discordJoinedAt");
+
+      removeRoleFromUserStub.restore();
+    });
+
+    it("Should return 500 when unverified role deletion failed", async function () {
+      await externalAccountsModel.addExternalAccountData(externalAccountData[2]);
+
+      const removeRoleFromUserStub = Sinon.stub(discordServices, "removeRoleFromUser").rejects();
+
+      const response = await chai
+        .request(app)
+        .patch(`/external-accounts/link/${externalAccountData[2].token}`)
+        .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
+        .set("Cookie", `${cookieName}=${newUserJWT}`);
+
+      expect(response).to.have.status(500);
+      expect(response.body).to.be.an("object");
+      expect(response.body).to.have.property("message");
+      expect(response.body.message).to.equal(`Role Deletion failed. Please contact admin.`);
+
+      removeRoleFromUserStub.restore();
     });
   });
 });
