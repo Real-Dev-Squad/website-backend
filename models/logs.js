@@ -250,12 +250,64 @@ const fetchAllLogs = async (query) => {
   }
 };
 
-const updateLogs = async (type, meta, body) => {
+const updateLogs = async () => {
+  const batchSize = 500;
+  let lastDoc = null;
+  let isCompleted = false;
+
+  const summary = {
+    totalLogsProcessed: 0,
+    totalLogsUpdated: 0,
+    totalOperationsFailed: 0,
+    failedLogDetails: [],
+  };
+
   try {
-    return await logsModel.add("log");
-  } catch (err) {
-    logger.error("Error in aupdating logs", err);
-    throw new Error(INTERNAL_SERVER_ERROR);
+    while (!isCompleted) {
+      let query = logsModel.orderBy("timestamp").limit(batchSize);
+      if (lastDoc) {
+        query = query.startAfter(lastDoc);
+      }
+      const snapshot = await query.get();
+
+      if (snapshot.empty) {
+        isCompleted = true;
+        continue;
+      }
+
+      const batch = firestore.batch();
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.meta && data.meta.createdBy) {
+          const updatedMeta = {
+            ...data.meta,
+            userId: data.meta.createdBy,
+          };
+          delete updatedMeta.createdBy;
+
+          batch.update(doc.ref, { meta: updatedMeta });
+          summary.totalLogsUpdated++;
+        }
+        summary.totalLogsProcessed++;
+      });
+
+      try {
+        await batch.commit();
+      } catch (err) {
+        logger.error("Batch update failed for logs collection:", err);
+        summary.totalOperationsFailed += snapshot.docs.length;
+        summary.failedLogDetails.push(...snapshot.docs.map((doc) => doc.id));
+      }
+
+      lastDoc = snapshot.docs[snapshot.docs.length - 1];
+      isCompleted = snapshot.docs.length < batchSize;
+    }
+
+    logger.info("Migration completed:", summary);
+    return summary;
+  } catch (error) {
+    logger.error("Error during logs migration:", error);
+    throw error;
   }
 };
 
