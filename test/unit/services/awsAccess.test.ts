@@ -16,7 +16,6 @@ describe('AWS Identity Store Functions', () => {
   let sendStub: sinon.SinonStub;
 
   beforeEach(() => {
-    // Reset all stubs before each test
     sinon.restore();
     
     // Create a stub for the send method

@@ -127,7 +127,7 @@ export const addUserToGroup = async (groupId: string, awsUserId: string): Promis
       throw new Error(`Error while fetching user by username: ${err instanceof Error ? err.message : String(err)}`);
     }
     if (response.Users && response.Users.length > 0) {
-      const userId = response.Users[0].UserId!;
+      const userId = response.Users[0].UserId;
       return userId;
     } else {
       return null;
