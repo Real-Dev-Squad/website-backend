@@ -904,10 +904,10 @@ describe("Users", function () {
         });
     });
 
-    it("Should return the logged-in user's details when profile and dev is true", function (done) {
+    it("Should return the logged-in user's details when profile is true", function (done) {
       chai
         .request(app)
-        .get("/users?profile=true&dev=true")
+        .get("/users?profile=true")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -923,26 +923,10 @@ describe("Users", function () {
         });
     });
 
-    it("Should throw an error when there is no feature flag given", function (done) {
-      chai
-        .request(app)
-        .get("/users?profile=true")
-        .set("cookie", `${cookieName}=${jwt}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(400);
-          expect(res.body).to.be.an("object");
-          expect(res.body.message).to.equal("Route not found");
-          return done();
-        });
-    });
-
     it("Should return 401 if not logged in", function (done) {
       chai
         .request(app)
-        .get("/users?profile=true&dev=true")
+        .get("/users?profile=true")
         .set("cookie", `${cookieName}=invalid_token`)
         .end((err, res) => {
           if (err) {
@@ -978,6 +962,11 @@ describe("Users", function () {
           expect(res.body).to.not.have.property("phone");
           expect(res.body).to.not.have.property("email");
           expect(res.body).to.not.have.property("chaincode");
+          expect(res).to.have.header(
+            "X-Deprecation-Warning",
+            "WARNING: This endpoint is deprecated and will be removed in the future. Please use /users?profile=true to get the updated profile details."
+          );
+
           return done();
         });
     });

@@ -116,20 +116,16 @@ const getUsers = async (req, res) => {
     const profile = req.query.profile === "true";
 
     if (profile) {
-      if (dev) {
-        if (!req.userData.id) {
-          return res.boom.badRequest("User ID not provided.");
-        }
+      if (!req.userData.id) {
+        return res.boom.badRequest("User ID not provided.");
+      }
 
-        try {
-          const result = await dataAccess.retrieveUsers({ id: req.userData.id });
-          return res.send(result.user);
-        } catch (error) {
-          logger.error(`Error while fetching user: ${error}`);
-          return res.boom.serverUnavailable(INTERNAL_SERVER_ERROR);
-        }
-      } else {
-        return res.boom.badRequest("Route not found");
+      try {
+        const result = await dataAccess.retrieveUsers({ id: req.userData.id });
+        return res.send(result.user);
+      } catch (error) {
+        logger.error(`Error while fetching user: ${error}`);
+        return res.boom.serverUnavailable(INTERNAL_SERVER_ERROR);
       }
     }
 
@@ -390,13 +386,27 @@ const generateUsername = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-
+/**
+ * @deprecated
+ * WARNING: This API endpoint is being deprecated and will be removed in future versions.
+ * Please use the updated API endpoint: `/users?profile=true` for retrieving user profile details.
+ *
+ * For more information, refer to this PR:
+ * https://github.com/Real-Dev-Squad/website-backend/pull/2201
+ *
+ * This API is kept temporarily for backward compatibility.
+ */
 const getSelfDetails = async (req, res) => {
   try {
     if (req.userData) {
       const user = await dataAccess.retrieveUsers({
         userdata: req.userData,
       });
+
+      res.set(
+        "X-Deprecation-Warning",
+        "WARNING: This endpoint is deprecated and will be removed in the future. Please use /users?profile=true to get the updated profile details."
+      );
       return res.send(user);
     }
     return res.boom.notFound("User doesn't exist");

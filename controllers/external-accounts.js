@@ -4,10 +4,10 @@ const { getDiscordMembers } = require("../services/discordService");
 const { addOrUpdate, getUsersByRole, updateUsersInBatch } = require("../models/users");
 const { retrieveDiscordUsers, fetchUsersForKeyValues } = require("../services/dataAccessLayer");
 const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../constants/external-accounts");
-const { DISCORD_ROLES } = require("../constants/discordRoles");
+const discordServices = require("../services/discordService");
+const config = require("config");
 const logger = require("../utils/logger");
 const { markUnDoneTasksOfArchivedUsersBacklog } = require("../models/tasks");
-const removeDiscordRoleUtils = require("../utils/removeDiscordRole");
 
 const addExternalAccountData = async (req, res) => {
   const createdOn = Date.now();
@@ -48,7 +48,6 @@ const getExternalAccountData = async (req, res) => {
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
-
 const linkExternalAccount = async (req, res) => {
   try {
     const { id: userId, roles } = req.userData;
@@ -72,16 +71,13 @@ const linkExternalAccount = async (req, res) => {
       userId
     );
 
-    const unverifiedRoleRemovalResponse = await removeDiscordRoleUtils.removeDiscordRole(
-      req.userData,
-      attributes.discordId,
-      undefined,
-      DISCORD_ROLES.UNVERIFIED
-    );
-
-    if (!unverifiedRoleRemovalResponse.success) {
-      return res.status(500).json({
-        message: `User details updated but ${unverifiedRoleRemovalResponse.message}. Please contact admin`,
+    try {
+      const unverifiedRoleId = config.get("discordUnverifiedRoleId");
+      await discordServices.removeRoleFromUser(unverifiedRoleId, attributes.discordId, req.userData);
+    } catch (error) {
+      logger.error(`Error getting external account data: ${error}`);
+      return res.boom.internal("Role Deletion failed. Please contact admin.", {
+        message: "Role Deletion failed. Please contact admin.",
       });
     }
 
