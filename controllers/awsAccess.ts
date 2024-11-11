@@ -38,6 +38,8 @@ export const addUserToAWSGroup = async (req, res) => {
         });
     } catch (error) {
       logger.error(`Error in adding user - ${userId} to AWS group - ${groupId} error - ${error}`);
-      throw error;
+        return res.status(500).json({
+          error: `Something went wrong, please try again`
+        });
     }
 };
