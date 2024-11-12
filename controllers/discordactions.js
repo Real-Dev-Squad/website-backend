@@ -77,7 +77,18 @@ const deleteGroupRole = async (req, res) => {
   if (isDevMode) {
     try {
       const { groupId } = req.params;
-      const { roleid } = req.body;
+
+      const getRoleId = async (groupId) => {
+        try {
+          const roleDoc = await admin.firestore().collection("discord-roles").doc(groupId).get();
+          return roleDoc.data().roleid;
+        } catch (error) {
+          logger.error("Error fetching roleId by groupId", error);
+          throw error;
+        }
+      };
+
+      const roleid = await getRoleId(groupId);
 
       const { roleExists, existingRoles } = await discordRolesModel.isGroupRoleExists({ roleid });
 
@@ -94,7 +105,6 @@ const deleteGroupRole = async (req, res) => {
       // const discordDeletionSuccess = await discordServices.deleteGroupRoleFromDiscord(roleid);
 
       // if (!discordDeletionSuccess) {
-      //   console.log(`Failed to delete role from Discord with ID: ${roleid}`);
       //   return res.status(500).json({
       //     error: "Failed to delete role from Discord server",
       //   });

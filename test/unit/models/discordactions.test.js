@@ -281,7 +281,7 @@ describe("discordactions", function () {
           }),
         }),
       };
-      // Replacing firestore implementation with our mock
+
       Object.defineProperty(admin, "firestore", {
         configurable: true,
         get: () => () => mockFirestore,
@@ -292,7 +292,6 @@ describe("discordactions", function () {
     });
 
     afterEach(async function () {
-      // Restoring original firestore implementation
       Object.defineProperty(admin, "firestore", {
         configurable: true,
         value: firestoreOriginal,
