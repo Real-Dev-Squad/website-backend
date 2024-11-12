@@ -202,6 +202,40 @@ describe("/logs", function () {
         });
     });
   });
+
+  describe("Update logs", function () {
+    it("should run the migration and update logs successfully", async function () {
+      const res = await chai
+        .request(app)
+        .post("/logs/migration")
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send();
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.an("object");
+      expect(res.body.response).to.have.property("totalLogsProcessed").that.is.a("number");
+      expect(res.body.response).to.have.property("totalLogsUpdated").that.is.a("number");
+      expect(res.body.response).to.have.property("totalOperationsFailed").that.is.a("number");
+      expect(res.body.response).to.have.property("failedLogDetails").that.is.an("array");
+
+      expect(res.body.response.totalLogsProcessed).to.be.at.least(0);
+      expect(res.body.response.totalLogsUpdated).to.be.lessThanOrEqual(res.body.response.totalLogsProcessed);
+
+      expect(res.body.response).to.have.all.keys(
+        "totalLogsProcessed",
+        "totalLogsUpdated",
+        "totalOperationsFailed",
+        "failedLogDetails"
+      );
+    });
+
+    it("should return error if unauthorized user tries to run migration", async function () {
+      const res = await chai.request(app).post("/logs/migration").set("cookie", `${cookieName}=invalidToken`).send();
+
+      expect(res).to.have.status(401);
+      expect(res.body).to.have.property("error").that.is.a("string");
+    });
+  });
 });
 
 async function addLogs() {
