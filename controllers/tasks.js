@@ -371,9 +371,9 @@ const updateTaskStatus = async (req, res, next) => {
     const taskLog = {
       type: "task",
       meta: {
-        userId,
-        taskId,
-        username,
+        userId: userId,
+        taskId: taskId,
+        username: username,
       },
       body: {
         subType: "update",

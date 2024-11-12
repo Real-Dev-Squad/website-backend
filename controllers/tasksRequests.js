@@ -104,7 +104,7 @@ const addTaskRequests = async (req, res) => {
       meta: {
         taskRequestId: newTaskRequest.id,
         action: "create",
-        createdBy: req.userData.id,
+        userId: req.userData.id,
         createdAt: Date.now(),
         lastModifiedBy: req.userData.id,
         lastModifiedAt: Date.now(),
@@ -206,7 +206,7 @@ const updateTaskRequests = async (req, res) => {
         taskRequestId: taskRequestId,
         action: "update",
         subAction: action,
-        createdBy: req.userData.id,
+        userId: req.userData.id,
         createdAt: Date.now(),
         lastModifiedBy: req.userData.id,
         lastModifiedAt: Date.now(),
