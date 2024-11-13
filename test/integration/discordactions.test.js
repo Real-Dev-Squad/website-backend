@@ -213,6 +213,85 @@ describe("Discord actions", function () {
     });
   });
 
+  describe("DELETE /discord-actions/groups/:groupId", function () {
+    let groupId;
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    const roleData = groupData[0];
+
+    beforeEach(async function () {
+      const docRef = await discordRoleModel.add(roleData);
+      groupId = docRef.id;
+
+      superUserId = await addUser(superUser);
+      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+
+      sinon.stub(discordRolesModel, "deleteGroupRole").resolves({ isSuccess: true });
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should return 403 when not in dev mode", function (done) {
+      chai
+        .request(app)
+        .delete(`/discord-actions/groups/${groupId}`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          expect(res).to.have.status(403);
+          expect(res.body.error).to.equal("Feature not available in production mode.");
+          done(err);
+        });
+    });
+
+    it("should successfully delete a group role", function (done) {
+      sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
+        roleExists: true,
+        existingRoles: {
+          docs: [{ data: () => ({ ...roleData, roleid: roleData.roleid }) }],
+        },
+      });
+      chai
+        .request(app)
+        .delete(`/discord-actions/groups/${groupId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.equal("Group role deleted succesfully");
+          done(err);
+        });
+    });
+
+    it("should return 400 when deletion fails", function (done) {
+      sinon.restore();
+      sinon.stub(discordRolesModel, "deleteGroupRole").resolves({ isSuccess: false });
+      chai
+        .request(app)
+        .delete(`/discord-actions/groups/${groupId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          expect(res).to.have.status(400);
+          expect(res.body.error).to.equal("Group role deletion failed");
+          done(err);
+        });
+    });
+
+    it("should return 500 when an internal error occurs", function (done) {
+      sinon.restore();
+      sinon.stub(discordRolesModel, "isGroupRoleExists").throws(new Error("Database error"));
+      chai
+        .request(app)
+        .delete(`/discord-actions/groups/${groupId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          expect(res).to.have.status(500);
+          expect(res.body.error).to.equal("Internal server error");
+          done(err);
+        });
+    });
+  });
+
   describe("POST /discord-actions/roles", function () {
     let roleid;
 
