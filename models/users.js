@@ -24,7 +24,9 @@ const admin = require("firebase-admin");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { AUTHORITIES } = require("../constants/authorities");
 const { formatUsername } = require("../utils/username");
-
+const tasksModel = firestore.collection("tasks");
+const { TASK_STATUS } = require("../constants/tasks");
+const { COMPLETED, DONE } = TASK_STATUS;
 /**
  * Adds or updates the user data
  *
@@ -1013,6 +1015,36 @@ const updateUsersWithNewUsernames = async () => {
   }
 };
 
+const fetchUsersWithAbandonedTasks = async () => {
+  try {
+    const COMPLETED_STATUSES = [DONE, COMPLETED];
+    const eligibleUsersWithTasks = [];
+
+    const userSnapshot = await userModel
+      .where("roles.archived", "==", true)
+      .where("roles.in_discord", "==", false)
+      .get();
+
+    for (const userDoc of userSnapshot.docs) {
+      const user = userDoc.data();
+
+      // Check if the user has any tasks with status not in [Done, Complete]
+      const abandonedTasksQuerySnapshot = await tasksModel
+        .where("assigneeId", "==", user.id)
+        .where("status", "not-in", COMPLETED_STATUSES)
+        .get();
+
+      if (!abandonedTasksQuerySnapshot.empty) {
+        eligibleUsersWithTasks.push(user);
+      }
+    }
+    return eligibleUsersWithTasks;
+  } catch (error) {
+    logger.error(`Error in getting users who abandoned tasks:  ${error}`);
+    throw error;
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -1042,4 +1074,5 @@ module.exports = {
   fetchUserForKeyValue,
   getNonNickNameSyncedUsers,
   updateUsersWithNewUsernames,
+  fetchUsersWithAbandonedTasks,
 };

@@ -532,6 +532,17 @@ const getUsersHandler = async (req, res) => {
   }
 };
 
+const getOrphanedTasks = async (req, res) => {
+  try {
+    const data = await tasks.fetchOrphanedTasks();
+
+    return res.status(200).json({ message: "Orphan tasks fetched successfully", data });
+  } catch (error) {
+    logger.error("Error in getting tasks which were abandoned", error);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   addNewTask,
   fetchTasks,
@@ -545,4 +556,5 @@ module.exports = {
   updateStatus,
   getUsersHandler,
   orphanTasks,
+  getOrphanedTasks,
 };

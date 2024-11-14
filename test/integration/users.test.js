@@ -23,9 +23,12 @@ const {
   userStatusDataAfterSignup,
   userStatusDataAfterFillingJoinSection,
 } = require("../fixtures/userStatus/userStatus");
-const { addJoinData, addOrUpdate } = require("../../models/users");
+const { addJoinData, addOrUpdate, fetchUsersWithAbandonedTasks } = require("../../models/users");
 const userStatusModel = require("../../models/userStatus");
 const { MAX_USERNAME_LENGTH } = require("../../constants/users.ts");
+const tasksData = require("../fixtures/tasks/tasks")();
+const tasksModel = firestore.collection("tasks");
+const userDBModel = firestore.collection("users");
 
 const userRoleUpdate = userData[4];
 const userRoleUnArchived = userData[13];
@@ -2644,6 +2647,56 @@ describe("Users", function () {
         .send();
 
       expect(res).to.have.status(401);
+    });
+  });
+
+  describe("fetchUsersWithAbandonedTasks", function () {
+    beforeEach(async function () {
+      // Clean the database
+      await cleanDb();
+
+      // Add test users to the database
+      const userPromises = userData.map((user) => userDBModel.add(user));
+      await Promise.all(userPromises);
+
+      // Add test tasks to the database
+      const taskPromises = tasksData.map((task) => tasksModel.add(task));
+      await Promise.all(taskPromises);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("should fetch users with abandoned tasks", async function () {
+      const usersWithAbandonedTasks = await fetchUsersWithAbandonedTasks();
+
+      expect(usersWithAbandonedTasks).to.be.an("array");
+      expect(usersWithAbandonedTasks).to.have.lengthOf(2); // Two users with abandoned tasks
+    });
+
+    it("should not include user who are present in discord or not archived", async function () {
+      const usersWithAbandonedTasks = await fetchUsersWithAbandonedTasks();
+
+      usersWithAbandonedTasks.forEach((user) => {
+        expect(user.roles.in_discord).to.not.equal(true);
+        expect(user.roles.archived).to.not.equal(false);
+      });
+    });
+
+    it("should return an empty array if there are no users with abandoned tasks", async function () {
+      await cleanDb();
+
+      // Add only active users
+      const activeUser = userData[11]; // Using the active user from our test data
+      await userDBModel.add(activeUser);
+
+      // Add a task assigned to the active user
+      const activeTask = tasksData[11]; // Using the active user's task
+      await tasksModel.add(activeTask);
+      const usersWithAbandonedTasks = await fetchUsersWithAbandonedTasks();
+      expect(usersWithAbandonedTasks).to.be.an("array");
+      expect(usersWithAbandonedTasks).to.have.lengthOf(0);
     });
   });
 });
