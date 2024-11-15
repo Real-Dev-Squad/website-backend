@@ -5,8 +5,8 @@ const firestore = require("../../../utils/firestore");
 const userModel = firestore.collection("users");
 const cleanDb = require("../../utils/cleanDb");
 const userDataArray = require("../../fixtures/user/user")();
-const { generateUniqueUsername } = require("../../../services/users");
-const { addOrUpdate, archiveUsers } = require("../../../models/users");
+const { archiveUsers, generateUniqueUsername } = require("../../../services/users");
+const { addOrUpdate } = require("../../../models/users");
 
 describe("Users services", function () {
   describe("archive inactive discord users in bulk", function () {
