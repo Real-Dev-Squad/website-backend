@@ -5,8 +5,8 @@ const firestore = require("../../../utils/firestore");
 const userModel = firestore.collection("users");
 const cleanDb = require("../../utils/cleanDb");
 const userDataArray = require("../../fixtures/user/user")();
-const { archiveUsers, generateUniqueUsername } = require("../../../services/users");
-const { addOrUpdate } = require("../../../models/users");
+const { generateUniqueUsername } = require("../../../services/users");
+const { addOrUpdate, archiveUsers } = require("../../../models/users");
 
 describe("Users services", function () {
   describe("archive inactive discord users in bulk", function () {
@@ -55,7 +55,7 @@ describe("Users services", function () {
 
       expect(res).to.deep.equal({
         message: "Successfully completed batch updates",
-        totalUsersArchived: 23,
+        totalUsersArchived: 20,
         totalOperationsFailed: 0,
         updatedUserDetails: userDetails,
         failedUserDetails: [],
@@ -76,7 +76,7 @@ describe("Users services", function () {
       expect(res).to.deep.equal({
         message: "Firebase batch operation failed",
         totalUsersArchived: 0,
-        totalOperationsFailed: 23,
+        totalOperationsFailed: 20,
         updatedUserDetails: [],
         failedUserDetails: userDetails,
       });

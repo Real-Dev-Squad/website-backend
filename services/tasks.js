@@ -2,33 +2,8 @@ const firestore = require("../utils/firestore");
 const tasksModel = firestore.collection("tasks");
 const { chunks } = require("../utils/array");
 const { DOCUMENT_WRITE_SIZE: FIRESTORE_BATCH_OPERATIONS_LIMIT } = require("../constants/constants");
-
-const updateTaskStatusToDone = async (tasksData) => {
-  const batch = firestore.batch();
-  const tasksBatch = [];
-  const summary = {
-    totalUpdatedStatus: 0,
-    totalOperationsFailed: 0,
-    updatedTaskDetails: [],
-    failedTaskDetails: [],
-  };
-  tasksData.forEach((task) => {
-    const updateTaskData = { ...task, status: "DONE" };
-    batch.update(tasksModel.doc(task.id), updateTaskData);
-    tasksBatch.push(task.id);
-  });
-  try {
-    await batch.commit();
-    summary.totalUpdatedStatus += tasksData.length;
-    summary.updatedTaskDetails = [...tasksBatch];
-    return { ...summary };
-  } catch (err) {
-    logger.error("Firebase batch Operation Failed!");
-    summary.totalOperationsFailed += tasksData.length;
-    summary.failedTaskDetails = [...tasksBatch];
-    return { ...summary };
-  }
-};
+const { fetchUsersNotInDiscordServer } = require("../models/users");
+const { fetchIncompleteTaskForUser } = require("../models/tasks");
 
 const addTaskCreatedAtAndUpdatedAtFields = async () => {
   const operationStats = {
@@ -83,7 +58,29 @@ const addTaskCreatedAtAndUpdatedAtFields = async () => {
   return operationStats;
 };
 
+const fetchOrphanedTasks = async () => {
+  try {
+    const abandonedTasks = [];
+
+    const userSnapshot = await fetchUsersNotInDiscordServer();
+
+    for (const userDoc of userSnapshot.docs) {
+      const user = userDoc.data();
+      const abandonedTasksQuerySnapshot = await fetchIncompleteTaskForUser(user);
+
+      // Check if the user has any tasks with status not in [Done, Complete]
+      if (!abandonedTasksQuerySnapshot.empty) {
+        abandonedTasks.push(...abandonedTasksQuerySnapshot.docs.map((doc) => doc.data()));
+      }
+    }
+    return abandonedTasks;
+  } catch (error) {
+    logger.error(`Error in getting tasks abandoned by users:  ${error}`);
+    throw error;
+  }
+};
+
 module.exports = {
-  updateTaskStatusToDone,
   addTaskCreatedAtAndUpdatedAtFields,
+  fetchOrphanedTasks,
 };

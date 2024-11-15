@@ -12,7 +12,7 @@ const { getPaginatedLink } = require("../utils/helper");
 const { updateUserStatusOnTaskUpdate, updateStatusOnTaskCompletion } = require("../models/userStatus");
 const dataAccess = require("../services/dataAccessLayer");
 const { parseSearchQuery } = require("../utils/tasks");
-const { addTaskCreatedAtAndUpdatedAtFields } = require("../services/tasks");
+const { addTaskCreatedAtAndUpdatedAtFields, fetchOrphanedTasks } = require("../services/tasks");
 const { RQLQueryParser } = require("../utils/RQLParser");
 const { getMissedProgressUpdatesUsers } = require("../models/discordactions");
 const { logType } = require("../constants/logs");
@@ -534,7 +534,7 @@ const getUsersHandler = async (req, res) => {
 
 const getOrphanedTasks = async (req, res) => {
   try {
-    const data = await tasks.fetchOrphanedTasks();
+    const data = await fetchOrphanedTasks();
 
     return res.status(200).json({ message: "Orphan tasks fetched successfully", data });
   } catch (error) {

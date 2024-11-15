@@ -4,7 +4,6 @@ const userModel = firestore.collection("users");
 const ItemModel = firestore.collection("itemTags");
 const dependencyModel = firestore.collection("taskDependencies");
 const userUtils = require("../utils/users");
-const { updateTaskStatusToDone } = require("../services/tasks");
 const { chunks } = require("../utils/array");
 const { DOCUMENT_WRITE_SIZE } = require("../constants/constants");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
@@ -23,6 +22,33 @@ const {
 } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+
+const updateTaskStatusToDone = async (tasksData) => {
+  const batch = firestore.batch();
+  const tasksBatch = [];
+  const summary = {
+    totalUpdatedStatus: 0,
+    totalOperationsFailed: 0,
+    updatedTaskDetails: [],
+    failedTaskDetails: [],
+  };
+  tasksData.forEach((task) => {
+    const updateTaskData = { ...task, status: "DONE" };
+    batch.update(tasksModel.doc(task.id), updateTaskData);
+    tasksBatch.push(task.id);
+  });
+  try {
+    await batch.commit();
+    summary.totalUpdatedStatus += tasksData.length;
+    summary.updatedTaskDetails = [...tasksBatch];
+    return { ...summary };
+  } catch (err) {
+    logger.error("Firebase batch Operation Failed!");
+    summary.totalOperationsFailed += tasksData.length;
+    summary.failedTaskDetails = [...tasksBatch];
+    return { ...summary };
+  }
+};
 
 /**
  * Adds and Updates tasks
@@ -701,31 +727,16 @@ const markUnDoneTasksOfArchivedUsersBacklog = async (users) => {
   }
 };
 
-const fetchOrphanedTasks = async () => {
+const fetchIncompleteTaskForUser = async (user) => {
+  const COMPLETED_STATUSES = [DONE, COMPLETED];
   try {
-    const COMPLETED_STATUSES = [DONE, COMPLETED];
-    const abandonedTasks = [];
-
-    const userSnapshot = await userModel
-      .where("roles.archived", "==", true)
-      .where("roles.in_discord", "==", false)
+    const incompleteTaskForUser = await tasksModel
+      .where("assigneeId", "==", user.id)
+      .where("status", "not-in", COMPLETED_STATUSES)
       .get();
-
-    for (const userDoc of userSnapshot.docs) {
-      const user = userDoc.data();
-      const abandonedTasksQuerySnapshot = await tasksModel
-        .where("assigneeId", "==", user.id || "")
-        .where("status", "not-in", COMPLETED_STATUSES)
-        .get();
-
-      // Check if the user has any tasks with status not in [Done, Complete]
-      if (!abandonedTasksQuerySnapshot.empty) {
-        abandonedTasks.push(...abandonedTasksQuerySnapshot.docs.map((doc) => doc.data()));
-      }
-    }
-    return abandonedTasks;
+    return incompleteTaskForUser;
   } catch (error) {
-    logger.error(`Error in getting tasks abandoned by users:  ${error}`);
+    logger.error("Error when fetching incomplete tasks:", error);
     throw error;
   }
 };
@@ -749,5 +760,6 @@ module.exports = {
   updateTaskStatus,
   updateOrphanTasksStatus,
   markUnDoneTasksOfArchivedUsersBacklog,
-  fetchOrphanedTasks,
+  fetchIncompleteTaskForUser,
+  updateTaskStatusToDone,
 };

@@ -8,8 +8,12 @@ const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
 const { updateUserStatus } = require("../models/userStatus");
 const { arraysHaveCommonItem, chunks } = require("../utils/array");
-const { archiveUsers } = require("../services/users");
-const { ALLOWED_FILTER_PARAMS, FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
+const {
+  ALLOWED_FILTER_PARAMS,
+  FIRESTORE_IN_CLAUSE_SIZE,
+  USERS_PATCH_HANDLER_SUCCESS_MESSAGES,
+  USERS_PATCH_HANDLER_ERROR_MESSAGES,
+} = require("../constants/users");
 const { DOCUMENT_WRITE_SIZE } = require("../constants/constants");
 const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
@@ -26,6 +30,46 @@ const { AUTHORITIES } = require("../constants/authorities");
 const { formatUsername } = require("../utils/username");
 const { logType } = require("../constants/logs");
 const { addLog } = require("../services/logService");
+
+const archiveUsers = async (usersData) => {
+  const batch = firestore.batch();
+  const usersBatch = [];
+  const summary = {
+    totalUsersArchived: 0,
+    totalOperationsFailed: 0,
+    updatedUserDetails: [],
+    failedUserDetails: [],
+  };
+
+  usersData.forEach((user) => {
+    const { id, first_name: firstName, last_name: lastName } = user;
+    const updatedUserData = {
+      ...user,
+      roles: {
+        ...user.roles,
+        archived: true,
+      },
+      updated_at: Date.now(),
+    };
+    batch.update(userModel.doc(id), updatedUserData);
+    usersBatch.push({ id, firstName, lastName });
+  });
+
+  try {
+    await batch.commit();
+    summary.totalUsersArchived += usersData.length;
+    summary.updatedUserDetails = [...usersBatch];
+    return {
+      message: USERS_PATCH_HANDLER_SUCCESS_MESSAGES.ARCHIVE_USERS.SUCCESSFULLY_COMPLETED_BATCH_UPDATES,
+      ...summary,
+    };
+  } catch (err) {
+    logger.error("Firebase batch Operation Failed!");
+    summary.totalOperationsFailed += usersData.length;
+    summary.failedUserDetails = [...usersBatch];
+    return { message: USERS_PATCH_HANDLER_ERROR_MESSAGES.ARCHIVE_USERS.BATCH_DATA_UPDATED_FAILED, ...summary };
+  }
+};
 
 /**
  * Adds or updates the user data
@@ -1030,7 +1074,21 @@ const updateUsersWithNewUsernames = async () => {
   }
 };
 
+const fetchUsersNotInDiscordServer = async () => {
+  try {
+    const usersNotInDiscordServer = await userModel
+      .where("roles.archived", "==", true)
+      .where("roles.in_discord", "==", false)
+      .get();
+    return usersNotInDiscordServer;
+  } catch (error) {
+    logger.error(`Error in getting users who are not in discord server:  ${error}`);
+    throw error;
+  }
+};
+
 module.exports = {
+  archiveUsers,
   addOrUpdate,
   fetchPaginatedUsers,
   fetchUser,
@@ -1059,4 +1117,5 @@ module.exports = {
   fetchUserForKeyValue,
   getNonNickNameSyncedUsers,
   updateUsersWithNewUsernames,
+  fetchUsersNotInDiscordServer,
 };

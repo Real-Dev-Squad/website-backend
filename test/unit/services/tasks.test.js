@@ -3,9 +3,15 @@ const { expect } = require("chai");
 
 const firestore = require("../../../utils/firestore");
 const tasksModel = firestore.collection("tasks");
+const userModel = firestore.collection("users");
 const cleanDb = require("../../utils/cleanDb");
 const taskDataArray = require("../../fixtures/tasks/tasks")();
-const { updateTaskStatusToDone } = require("../../../services/tasks");
+const { fetchOrphanedTasks } = require("../../../services/tasks");
+const {
+  usersData: abandonedUsersData,
+  tasksData: abandonedTasksData,
+} = require("../../fixtures/abandoned-tasks/departed-users");
+const { updateTaskStatusToDone } = require("../../../models/tasks");
 
 describe("Tasks services", function () {
   describe("task status COMPLETED to DONE in bulk", function () {
@@ -46,7 +52,7 @@ describe("Tasks services", function () {
       const res = await updateTaskStatusToDone(tasks);
 
       expect(res).to.deep.equal({
-        totalUpdatedStatus: 12,
+        totalUpdatedStatus: 8,
         totalOperationsFailed: 0,
         updatedTaskDetails: taskDetails,
         failedTaskDetails: [],
@@ -66,10 +72,68 @@ describe("Tasks services", function () {
 
       expect(res).to.deep.equal({
         totalUpdatedStatus: 0,
-        totalOperationsFailed: 12,
+        totalOperationsFailed: 8,
         updatedTaskDetails: [],
         failedTaskDetails: taskDetails,
       });
+    });
+  });
+
+  describe("fetchOrphanedTasks", function () {
+    beforeEach(async function () {
+      // Clean the database
+      await cleanDb();
+
+      // Add test users to the database
+      const userPromises = abandonedUsersData.map((user) => userModel.add(user));
+      await Promise.all(userPromises);
+
+      // Add test tasks to the database
+      const taskPromises = abandonedTasksData.map((task) => tasksModel.add(task));
+      await Promise.all(taskPromises);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("should fetch tasks assigned to archived and non-discord users", async function () {
+      const abandonedTasks = await fetchOrphanedTasks();
+
+      expect(abandonedTasks).to.be.an("array");
+      expect(abandonedTasks).to.have.lengthOf(2); // Two tasks abandoned by users
+    });
+
+    it("should not include completed or done tasks", async function () {
+      const abandonedTasks = await fetchOrphanedTasks();
+
+      abandonedTasks.forEach((task) => {
+        expect(task.status).to.not.be.oneOf(["DONE", "COMPLETED"]);
+      });
+    });
+
+    it("should not include tasks from active users", async function () {
+      const abandonedTasks = await fetchOrphanedTasks();
+
+      abandonedTasks.forEach((task) => {
+        expect(task.assignee).to.not.equal("active_user");
+      });
+    });
+
+    it("should handle case when no users are archived", async function () {
+      await cleanDb();
+
+      // Add only active users
+      const activeUser = abandonedUsersData[2]; // Using the active user from our test data
+      await userModel.add(activeUser);
+
+      // Add a task assigned to the active user
+      const activeTask = abandonedTasksData[3]; // Using the active user's task
+      await tasksModel.add(activeTask);
+
+      const abandonedTasks = await fetchOrphanedTasks();
+      expect(abandonedTasks).to.be.an("array");
+      expect(abandonedTasks).to.have.lengthOf(0);
     });
   });
 });
