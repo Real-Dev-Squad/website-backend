@@ -164,10 +164,13 @@ const updateGroupRole = async (roleData, docId) => {
 
 const isGroupRoleExists = async (options = {}) => {
   try {
-    const { rolename = null, roleid = null } = options;
+    const { groupId, rolename = null, roleid = null } = options;
 
     let existingRoles;
-    if (rolename && roleid) {
+    if (groupId) {
+      existingRoles = await discordRoleModel.doc(groupId).get();
+      return { roleExists: existingRoles.exists, existingRoles };
+    } else if (rolename && roleid) {
       existingRoles = await discordRoleModel
         .where("rolename", "==", rolename)
         .where("roleid", "==", roleid)
@@ -178,7 +181,7 @@ const isGroupRoleExists = async (options = {}) => {
     } else if (roleid) {
       existingRoles = await discordRoleModel.where("roleid", "==", roleid).limit(1).get();
     } else {
-      throw Error("Either rolename or roleId is required");
+      throw Error("Either rolename, roleId, or groupId is required");
     }
 
     return { roleExists: !existingRoles.empty, existingRoles };

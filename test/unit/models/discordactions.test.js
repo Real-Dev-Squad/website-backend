@@ -173,7 +173,7 @@ describe("discordactions", function () {
     it("should throw an error if rolename and roleid are not passed", async function () {
       return isGroupRoleExists({}).catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
-        expect(err.message).to.equal("Either rolename or roleId is required");
+        expect(err.message).to.equal("Either rolename, roleId, or groupId is required");
       });
     });
 
