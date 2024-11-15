@@ -13,6 +13,7 @@ const ROLES = require("../constants/roles");
 const { Services } = require("../constants/bot");
 const authenticateProfile = require("../middlewares/authenticateProfile");
 
+router.get("/departed-users", users.getUsersWithAbandonedTasks);
 router.post("/", authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]), users.markUnverified);
 router.post("/update-in-discord", authenticate, authorizeRoles([SUPERUSER]), users.setInDiscordScript);
 router.post("/verify", authenticate, users.verifyUser);
@@ -67,6 +68,7 @@ router.patch("/profileURL", authenticate, userValidator.updateProfileURL, users.
 router.patch("/rejectDiff", authenticate, authorizeRoles([SUPERUSER]), users.rejectProfileDiff);
 router.patch("/:userId", authenticate, authorizeRoles([SUPERUSER]), users.updateUser);
 router.get("/suggestedUsers/:skillId", authenticate, authorizeRoles([SUPERUSER]), users.getSuggestedUsers);
+
 module.exports = router;
 router.post("/batch-username-update", authenticate, authorizeRoles([SUPERUSER]), users.updateUsernames);
 module.exports = router;

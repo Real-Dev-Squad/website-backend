@@ -1029,6 +1029,16 @@ const updateUsernames = async (req, res) => {
   }
 };
 
+const getUsersWithAbandonedTasks = async (req, res) => {
+  try {
+    const data = await userQuery.fetchUsersWithAbandonedTasks();
+    return res.status(200).json({ message: "Users with abandoned tasks fetched successfully", data });
+  } catch (error) {
+    logger.error("Error in getting user who abandoned tasks:", error);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -1061,4 +1071,5 @@ module.exports = {
   isDeveloper,
   getIdentityStats,
   updateUsernames,
+  getUsersWithAbandonedTasks,
 };
