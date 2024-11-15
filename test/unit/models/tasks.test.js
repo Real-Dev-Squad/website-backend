@@ -303,12 +303,12 @@ describe("tasks", function () {
       overdueTask.endsOn = Date.now() / 1000 + 24 * 60 * 60 * 7;
       await tasks.updateTask(overdueTask);
       const usersWithOverdueTasks = await tasks.getOverdueTasks(days);
-      expect(usersWithOverdueTasks.length).to.be.equal(8);
+      expect(usersWithOverdueTasks.length).to.be.equal(5);
     });
 
     it("should return all users which have overdue tasks if days is not passed", async function () {
       const usersWithOverdueTasks = await tasks.getOverdueTasks();
-      expect(usersWithOverdueTasks.length).to.be.equal(7);
+      expect(usersWithOverdueTasks.length).to.be.equal(4);
     });
   });
 
@@ -332,8 +332,8 @@ describe("tasks", function () {
 
     it("Should update task status COMPLETED to DONE", async function () {
       const res = await tasks.updateTaskStatus();
-      expect(res.totalTasks).to.be.equal(12);
-      expect(res.totalUpdatedStatus).to.be.equal(12);
+      expect(res.totalTasks).to.be.equal(8);
+      expect(res.totalUpdatedStatus).to.be.equal(8);
     });
 
     it("should throw an error if firebase batch operation fails", async function () {

@@ -701,6 +701,20 @@ const markUnDoneTasksOfArchivedUsersBacklog = async (users) => {
   }
 };
 
+const fetchIncompleteTaskForUser = async (user) => {
+  const COMPLETED_STATUSES = [DONE, COMPLETED];
+  try {
+    const incompleteTaskForUser = await tasksModel
+      .where("assigneeId", "==", user.id)
+      .where("status", "not-in", COMPLETED_STATUSES)
+      .get();
+    return incompleteTaskForUser;
+  } catch (error) {
+    logger.error("Error when fetching incomplete tasks:", error);
+    throw error;
+  }
+};
+
 module.exports = {
   updateTask,
   fetchTasks,
@@ -720,4 +734,5 @@ module.exports = {
   updateTaskStatus,
   updateOrphanTasksStatus,
   markUnDoneTasksOfArchivedUsersBacklog,
+  fetchIncompleteTaskForUser,
 };

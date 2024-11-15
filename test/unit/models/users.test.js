@@ -21,6 +21,7 @@ const photoVerificationModel = firestore.collection("photo-verification");
 const userData = require("../../fixtures/user/user");
 const addUser = require("../../utils/addUser");
 const { userState } = require("../../../constants/userStatus");
+const { usersData: abandonedUsersData } = require("../../fixtures/abandoned-tasks/departed-users");
 /**
  * Test the model functions and validate the data stored
  */
@@ -525,6 +526,26 @@ describe("users", function () {
       expect(userDoc.user.disabled_roles.length).to.be.equal(2);
       expect(userDoc.user.roles.member).to.be.equal(false);
       expect(userDoc.user.roles.super_user).to.be.equal(false);
+    });
+  });
+
+  describe("fetchUsersNotInDiscordServer", function () {
+    beforeEach(async function () {
+      // Clean the database
+      await cleanDb();
+
+      // Add test users to the database
+      const taskPromises = abandonedUsersData.map((task) => userModel.add(task));
+      await Promise.all(taskPromises);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("should fetch users not in discord server", async function () {
+      const usersNotInDiscordServer = await users.fetchUsersNotInDiscordServer();
+      expect(usersNotInDiscordServer.docs.length).to.be.equal(2);
     });
   });
 });
