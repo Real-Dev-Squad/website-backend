@@ -33,6 +33,7 @@ const enableDevModeMiddleware = (req, res, next) => {
   }
 };
 
+router.get("/orphaned-tasks", tasks.getOrphanedTasks);
 router.get("/", getTasksValidator, cacheResponse({ invalidationKey: ALL_TASKS, expiry: 10 }), tasks.fetchTasks);
 router.get("/self", authenticate, tasks.getSelfTasks);
 router.get("/overdue", authenticate, authorizeRoles([SUPERUSER]), tasks.overdueTasks);

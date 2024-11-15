@@ -701,6 +701,35 @@ const markUnDoneTasksOfArchivedUsersBacklog = async (users) => {
   }
 };
 
+const fetchOrphanedTasks = async () => {
+  try {
+    const COMPLETED_STATUSES = [DONE, COMPLETED];
+    const abandonedTasks = [];
+
+    const userSnapshot = await userModel
+      .where("roles.archived", "==", true)
+      .where("roles.in_discord", "==", false)
+      .get();
+
+    for (const userDoc of userSnapshot.docs) {
+      const user = userDoc.data();
+      const abandonedTasksQuerySnapshot = await tasksModel
+        .where("assigneeId", "==", user.id || "")
+        .where("status", "not-in", COMPLETED_STATUSES)
+        .get();
+
+      // Check if the user has any tasks with status not in [Done, Complete]
+      if (!abandonedTasksQuerySnapshot.empty) {
+        abandonedTasks.push(...abandonedTasksQuerySnapshot.docs.map((doc) => doc.data()));
+      }
+    }
+    return abandonedTasks;
+  } catch (error) {
+    logger.error(`Error in getting tasks abandoned by users:  ${error}`);
+    throw error;
+  }
+};
+
 module.exports = {
   updateTask,
   fetchTasks,
@@ -720,4 +749,5 @@ module.exports = {
   updateTaskStatus,
   updateOrphanTasksStatus,
   markUnDoneTasksOfArchivedUsersBacklog,
+  fetchOrphanedTasks,
 };
