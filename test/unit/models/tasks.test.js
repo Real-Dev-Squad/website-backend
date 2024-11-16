@@ -371,14 +371,12 @@ describe("tasks", function () {
     });
 
     it("should fetch tasks which are incomplete for the given user", async function () {
-      // using inactive user id from test data
       const inactiveUser = abandonedUsersData[0];
       const incompleteTasks = await tasks.fetchIncompleteTaskForUser(inactiveUser.id);
       expect(incompleteTasks.docs.length).to.be.equal(1);
     });
 
     it("should return an empty array if there are no tasks incomplete for the user", async function () {
-      // Using the active user from our test data
       const activeUser = abandonedUsersData[2];
       const incompleteTasks = await tasks.fetchIncompleteTaskForUser(activeUser.id);
       expect(incompleteTasks.docs.length).to.be.equal(0);

@@ -125,7 +125,7 @@ describe("Users services", function () {
       const usersWithAbandonedTasks = await getUsersWithIncompleteTasks();
 
       expect(usersWithAbandonedTasks).to.be.an("array");
-      expect(usersWithAbandonedTasks).to.have.lengthOf(2); // Two users with abandoned tasks
+      expect(usersWithAbandonedTasks).to.have.lengthOf(2);
     });
 
     it("should not include user who are present in discord or not archived", async function () {
