@@ -81,14 +81,11 @@ describe("Tasks services", function () {
 
   describe("fetchOrphanedTasks", function () {
     beforeEach(async function () {
-      // Clean the database
       await cleanDb();
 
-      // Add test users to the database
       const userPromises = abandonedUsersData.map((user) => userModel.add(user));
       await Promise.all(userPromises);
 
-      // Add test tasks to the database
       const taskPromises = abandonedTasksData.map((task) => tasksModel.add(task));
       await Promise.all(taskPromises);
     });
@@ -101,7 +98,7 @@ describe("Tasks services", function () {
       const abandonedTasks = await fetchOrphanedTasks();
 
       expect(abandonedTasks).to.be.an("array");
-      expect(abandonedTasks).to.have.lengthOf(2); // Two tasks abandoned by users
+      expect(abandonedTasks).to.have.lengthOf(2);
     });
 
     it("should not include completed or done tasks", async function () {
@@ -123,12 +120,10 @@ describe("Tasks services", function () {
     it("should handle case when no users are archived", async function () {
       await cleanDb();
 
-      // Add only active users
-      const activeUser = abandonedUsersData[2]; // Using the active user from our test data
+      const activeUser = abandonedUsersData[2];
       await userModel.add(activeUser);
 
-      // Add a task assigned to the active user
-      const activeTask = abandonedTasksData[3]; // Using the active user's task
+      const activeTask = abandonedTasksData[3];
       await tasksModel.add(activeTask);
 
       const abandonedTasks = await fetchOrphanedTasks();

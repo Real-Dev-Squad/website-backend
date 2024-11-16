@@ -23,6 +23,15 @@ const {
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
+/**
+ * Update multiple tasks' status to DONE in one batch operation.
+ * @param {Object[]} tasksData - Tasks data to update, must contain 'id' and 'status' fields.
+ * @returns {Object} - Summary of the batch operation.
+ * @property {number} totalUpdatedStatus - Number of tasks that has their status updated to DONE.
+ * @property {number} totalOperationsFailed - Number of tasks that failed to update.
+ * @property {string[]} updatedTaskDetails - IDs of tasks that has their status updated to DONE.
+ * @property {string[]} failedTaskDetails - IDs of tasks that failed to update.
+ */
 const updateTaskStatusToDone = async (tasksData) => {
   const batch = firestore.batch();
   const tasksBatch = [];
@@ -727,11 +736,17 @@ const markUnDoneTasksOfArchivedUsersBacklog = async (users) => {
   }
 };
 
-const fetchIncompleteTaskForUser = async (user) => {
+/**
+ * Fetch incomplete tasks assigned to a specific user
+ * @param {string} userId - The unique identifier for the user.
+ * @returns {Promise<Array>} - A promise that resolves to an array of incomplete tasks for the given user.
+ * @throws {Error} - Throws an error if the database query fails.
+ */
+const fetchIncompleteTaskForUser = async (userId) => {
   const COMPLETED_STATUSES = [DONE, COMPLETED];
   try {
     const incompleteTaskForUser = await tasksModel
-      .where("assigneeId", "==", user.id)
+      .where("assigneeId", "==", userId)
       .where("status", "not-in", COMPLETED_STATUSES)
       .get();
     return incompleteTaskForUser;
