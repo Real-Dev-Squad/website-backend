@@ -245,13 +245,100 @@ describe("Discord actions", function () {
         });
     });
 
-    it("should successfully delete a group role", function (done) {
+    it("should return 404 if group role not found", function (done) {
+      sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
+        roleExists: false,
+        existingRoles: { data: () => ({ ...roleData, roleid: roleData.roleid }) },
+      });
+
+      chai
+        .request(app)
+        .delete(`/discord-actions/groups/${groupId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          expect(res).to.have.status(404);
+          expect(res.body.error).to.equal("Group role not found");
+          done(err);
+        });
+    });
+
+    it("should succesfully delete the group role from discord server", function (done) {
       sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
         roleExists: true,
-        existingRoles: {
-          docs: [{ data: () => ({ ...roleData, roleid: roleData.roleid }) }],
-        },
+        existingRoles: { data: () => ({ ...roleData, roleid: roleData.roleid }) },
       });
+
+      sinon.stub(discordServices, "deleteGroupRoleFromDiscord").resolves({
+        success: true,
+        message: "Role deleted successfully",
+      });
+
+      chai
+        .request(app)
+        .delete(`/discord-actions/groups/${groupId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.equal("Group role deleted succesfully");
+          done(err);
+        });
+    });
+
+    it("should return 500 when discord role deletion fails", function (done) {
+      sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
+        roleExists: true,
+        existingRoles: { data: () => ({ ...roleData, roleid: roleData.roleid }) },
+      });
+
+      sinon.stub(discordServices, "deleteGroupRoleFromDiscord").resolves({
+        success: false,
+        message: "Failed to delete role from Discord",
+      });
+
+      chai
+        .request(app)
+        .delete(`/discord-actions/groups/${groupId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          expect(res).to.have.status(500);
+          expect(res.body.error).to.equal("Failed to delete role from Discord");
+          done(err);
+        });
+    });
+
+    it("should return 500 when discord service throws an error", function (done) {
+      sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
+        roleExists: true,
+        existingRoles: { data: () => ({ ...roleData, roleid: roleData.roleid }) },
+      });
+
+      sinon.stub(discordServices, "deleteGroupRoleFromDiscord").resolves({
+        success: false,
+        message: "Internal server error",
+      });
+
+      chai
+        .request(app)
+        .delete(`/discord-actions/groups/${groupId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          expect(res).to.have.status(500);
+          expect(res.body.error).to.equal("Internal server error");
+          done(err);
+        });
+    });
+
+    it("should successfully delete a group role from database", function (done) {
+      sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
+        roleExists: true,
+        existingRoles: { data: () => ({ ...roleData, roleid: roleData.roleid }) },
+      });
+
+      sinon.stub(discordServices, "deleteGroupRoleFromDiscord").resolves({
+        success: true,
+        message: "Role deleted successfully",
+      });
+
       chai
         .request(app)
         .delete(`/discord-actions/groups/${groupId}?dev=true`)
@@ -265,6 +352,16 @@ describe("Discord actions", function () {
 
     it("should return 400 when deletion fails", function (done) {
       sinon.restore();
+      sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
+        roleExists: true,
+        existingRoles: { data: () => ({ ...roleData, roleid: roleData.roleid }) },
+      });
+
+      sinon.stub(discordServices, "deleteGroupRoleFromDiscord").resolves({
+        success: true,
+        message: "Role deleted successfully",
+      });
+
       sinon.stub(discordRolesModel, "deleteGroupRole").resolves({ isSuccess: false });
       chai
         .request(app)
