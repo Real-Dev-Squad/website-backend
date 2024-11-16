@@ -41,6 +41,12 @@ const { userPhotoVerificationData } = require("../fixtures/user/photo-verificati
 const Sinon = require("sinon");
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../../constants/errorMessages");
 const photoVerificationModel = firestore.collection("photo-verification");
+const userModel = firestore.collection("users");
+const taskModel = firestore.collection("tasks");
+const {
+  usersData: abandonedUsersData,
+  tasksData: abandonedTasksData,
+} = require("../fixtures/abandoned-tasks/departed-users");
 
 chai.use(chaiHttp);
 
@@ -2644,6 +2650,44 @@ describe("Users", function () {
         .send();
 
       expect(res).to.have.status(401);
+    });
+  });
+
+  describe("GET /users/departed-users", function () {
+    beforeEach(async function () {
+      await cleanDb();
+      const userPromises = abandonedUsersData.map((user) => userModel.add(user));
+      await Promise.all(userPromises);
+
+      const taskPromises = abandonedTasksData.map((task) => taskModel.add(task));
+      await Promise.all(taskPromises);
+    });
+
+    afterEach(async function () {
+      Sinon.restore();
+      await cleanDb();
+    });
+
+    it("should return a list of users with abandoned tasks", async function () {
+      const res = await chai.request(app).get("/users/departed-users");
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.have.property("message").that.equals("Users with abandoned tasks fetched successfully");
+      expect(res.body.data).to.be.an("array").with.lengthOf(2);
+    });
+
+    it("should return an empty array when no users have abandoned tasks", async function () {
+      await cleanDb();
+      const user = abandonedUsersData[2];
+      await userModel.add(user);
+
+      const task = abandonedTasksData[3];
+      await taskModel.add(task);
+      const res = await chai.request(app).get("/users/departed-users");
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.have.property("message").that.equals("Users with abandoned tasks fetched successfully");
+      expect(res.body.data).to.be.an("array").with.lengthOf(0);
     });
   });
 });

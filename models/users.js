@@ -1082,7 +1082,7 @@ const updateUsersWithNewUsernames = async () => {
 
 /**
  * Fetches users who are not in the Discord server.
- * @returns {Promise<FirebaseFirestore.QuerySnapshot>} - A promise that resolves to a Firestore QuerySnapshot containing the users matching the criteria.
+ * @returns {Promise<FirebaseFirestore.QuerySnapshot>} - A promise resolving to a Firestore QuerySnapshot of matching users.
  * @throws {Error} - Throws an error if the database query fails.
  */
 const fetchUsersNotInDiscordServer = async () => {

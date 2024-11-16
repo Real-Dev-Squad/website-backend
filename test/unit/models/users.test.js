@@ -533,8 +533,8 @@ describe("users", function () {
     beforeEach(async function () {
       await cleanDb();
 
-      const taskPromises = abandonedUsersData.map((task) => userModel.add(task));
-      await Promise.all(taskPromises);
+      const userPromises = abandonedUsersData.map((user) => userModel.add(user));
+      await Promise.all(userPromises);
     });
 
     afterEach(async function () {
@@ -548,7 +548,7 @@ describe("users", function () {
     });
 
     it("should return an empty array if there are no users in the database", async function () {
-      // Using the active user from our test data
+      await cleanDb();
       const activeUser = abandonedUsersData[2];
       await userModel.add(activeUser);
 
