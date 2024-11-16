@@ -654,7 +654,7 @@ const updateUser = async (req, res) => {
   try {
     const { id: profileDiffId, message } = req.body;
 
-    const profileDiffData = await profileDiffsQuery.fetchProfileDiff(profileDiffId);
+    const profileDiffData = await profileDiffsQuery.fetchProfileDiffUnobfuscated(profileDiffId);
     if (!profileDiffData) return res.boom.notFound("Profile Diff doesn't exist");
 
     const { approval, timestamp, userId, ...profileDiff } = profileDiffData;

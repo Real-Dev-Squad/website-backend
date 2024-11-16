@@ -42,9 +42,17 @@ const addOrUpdate = async (userData, userId = null) => {
       const isNewUser = !user.data();
       // user exists update user
       if (user.data()) {
+        // remove id field if exist in fetched data or profileDiff
+        const currentData = user.data();
+        if ("id" in currentData) {
+          delete currentData.id;
+        }
+        if ("id" in userData) {
+          delete userData.id;
+        }
         await userModel.doc(userId).set(
           {
-            ...user.data(),
+            ...currentData,
             ...userData,
             updated_at: Date.now(),
           },
