@@ -108,14 +108,11 @@ describe("Users services", function () {
 
   describe("fetchUsersWithAbandonedTasks", function () {
     beforeEach(async function () {
-      // Clean the database
       await cleanDb();
 
-      // Add test users to the database
       const userPromises = abandonedUsersData.map((user) => userModel.add(user));
       await Promise.all(userPromises);
 
-      // Add test tasks to the database
       const taskPromises = abandonedTasksData.map((task) => tasksModel.add(task));
       await Promise.all(taskPromises);
     });

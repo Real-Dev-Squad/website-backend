@@ -548,10 +548,8 @@ describe("users", function () {
     });
 
     it("should return an empty array if there are no users in the database", async function () {
-      await cleanDb();
-
-      // Add only active users
-      const activeUser = abandonedUsersData[2]; // Using the active user from our test data
+      // Using the active user from our test data
+      const activeUser = abandonedUsersData[2];
       await userModel.add(activeUser);
 
       const usersNotInDiscordServer = await users.fetchUsersNotInDiscordServer();
