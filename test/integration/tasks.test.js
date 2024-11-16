@@ -37,6 +37,10 @@ const { stubbedModelTaskProgressData } = require("../fixtures/progress/progresse
 const { convertDaysToMilliseconds } = require("../../utils/time");
 const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
 const { generateCronJobToken } = require("../utils/generateBotToken");
+const {
+  usersData: abandonedUsersData,
+  tasksData: abandonedTasksData,
+} = require("../fixtures/abandoned-tasks/departed-users");
 
 const taskData = [
   {
@@ -1631,6 +1635,44 @@ describe("Tasks", function () {
         error: "Unauthorized",
         message: "You are not authorized for this action.",
       });
+    });
+  });
+
+  describe("GET /tasks/orphaned-tasks", function () {
+    beforeEach(async function () {
+      await cleanDb();
+      const userPromises = abandonedUsersData.map((user) => userDBModel.add(user));
+      await Promise.all(userPromises);
+
+      const taskPromises = abandonedTasksData.map((task) => tasksModel.add(task));
+      await Promise.all(taskPromises);
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should fetch tasks assigned to archived and non-discord users", async function () {
+      const res = await chai.request(app).get("/tasks/orphaned-tasks");
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.have.property("message").that.equals("Orphan tasks fetched successfully");
+      expect(res.body.data).to.be.an("array").with.lengthOf(2);
+    });
+
+    it("should return an empty array when no users are archived", async function () {
+      await cleanDb();
+      const user = abandonedUsersData[2];
+      await userDBModel.add(user);
+
+      const task = abandonedTasksData[3];
+      await tasksModel.add(task);
+      const res = await chai.request(app).get("/tasks/orphaned-tasks");
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.have.property("message").that.equals("Orphan tasks fetched successfully");
+      expect(res.body.data).to.be.an("array").with.lengthOf(0);
     });
   });
 });

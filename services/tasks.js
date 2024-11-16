@@ -68,7 +68,6 @@ const fetchOrphanedTasks = async () => {
       const user = userDoc.data();
       const abandonedTasksQuerySnapshot = await fetchIncompleteTaskForUser(user.id);
 
-      // Check if the user has any tasks with status not in [Done, Complete]
       if (!abandonedTasksQuerySnapshot.empty) {
         abandonedTasks.push(...abandonedTasksQuerySnapshot.docs.map((doc) => doc.data()));
       }
