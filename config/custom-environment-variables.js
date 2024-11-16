@@ -10,6 +10,22 @@ module.exports = {
     __name: "PORT",
     __format: "number",
   },
+
+  aws: {
+    region: {
+      __name: "AWS_REGION",
+    },
+    access_key: {
+      __name: "AWS_ACCESS_KEY",
+    },
+    secret_key: {
+      __name: "AWS_SECRET_KEY",
+    },
+    identity_store_id: {
+      __name: "IDENTITY_STORE_ID",
+    },
+  },
+
   enableFileLogs: {
     __name: "ENABLE_FILE_LOGS",
     __format: "boolean",
