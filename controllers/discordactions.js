@@ -90,42 +90,40 @@ const deleteGroupRole = async (req, res) => {
       });
     }
 
-    const roleData = existingRoles.docs[0].data();
+    const roleData = existingRoles.data();
 
-    // To be implemented later after availability of Discord API
+    const discordDeletion = await discordServices.deleteGroupRoleFromDiscord(roleData.roleid);
 
-    // const discordDeletionSuccess = await discordServices.deleteGroupRoleFromDiscord(roleid);
-
-    // if (!discordDeletionSuccess) {
-    //   return res.status(500).json({
-    //     error: "Failed to delete role from Discord server",
-    //   });
-    // }
+    if (!discordDeletion.success) {
+      return res.status(500).json({
+        error: discordDeletion.message,
+      });
+    }
 
     const { isSuccess } = await discordRolesModel.deleteGroupRole(groupId, req.userData.id);
 
-    if (isSuccess) {
-      const groupDeletionLog = {
-        type: "group-role-deletion",
-        meta: {
-          userId: req.userData.id,
-        },
-        body: {
-          groupId: groupId,
-          roleName: roleData.rolename,
-          discordRoleId: roleData.roleid,
-          action: "delete",
-        },
-      };
-      await addLog(groupDeletionLog.type, groupDeletionLog.meta, groupDeletionLog.body);
-      return res.status(200).json({
-        message: "Group role deleted succesfully",
-      });
-    } else {
+    if (!isSuccess) {
       return res.status(400).json({
         error: "Group role deletion failed",
       });
     }
+
+    const groupDeletionLog = {
+      type: "group-role-deletion",
+      meta: {
+        userId: req.userData.id,
+      },
+      body: {
+        groupId: groupId,
+        roleName: roleData.rolename,
+        discordRoleId: roleData.roleid,
+        action: "delete",
+      },
+    };
+    await addLog(groupDeletionLog.type, groupDeletionLog.meta, groupDeletionLog.body);
+    return res.status(200).json({
+      message: "Group role deleted succesfully",
+    });
   } catch (error) {
     logger.error(`Error while deleting group role: ${error}`);
     return res.status(500).json({

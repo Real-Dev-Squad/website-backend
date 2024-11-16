@@ -118,29 +118,30 @@ const setUserDiscordNickname = async (userName, discordId) => {
  * @throws {Error} If the deletion fails or there's a network error
  */
 
-// To be implemented later after availability of Discord API
+const deleteGroupRoleFromDiscord = async (roleId) => {
+  try {
+    const authToken = generateAuthTokenForCloudflare();
+    const response = await fetch(`${DISCORD_BASE_URL}/roles/${roleId}?dev=true`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
 
-// const deleteGroupRoleFromDiscord = async (roleId) => {
-//   try {
-//     const authToken = generateAuthTokenForCloudflare();
-//     const response = await fetch(`URL`, {
-//       method: "DELETE",
-//       headers: {
-//         "Content-Type": "application/json",
-//         Authorization: `Bearer ${authToken}`,
-//       },
-//     });
-
-//     if (!response.ok) {
-//       throw new Error(`Failed to delete role from discord`);
-//     }
-//     const result = await response.json();
-//     return result;
-//   } catch (err) {
-//     logger.error(`Error deleting role from Discord: ${err.message}`);
-//     throw new Error(err);
-//   }
-// };
+    if (!response.ok) {
+      return { success: false, message: "Failed to delete role from discord" };
+    }
+    if (response.status === 204) {
+      return { success: true, message: "Role deleted successfully" };
+    }
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    logger.error("Error deleting role from Discord", err);
+    return { success: false, message: "Internal server error" };
+  }
+};
 
 module.exports = {
   getDiscordMembers,
@@ -149,5 +150,5 @@ module.exports = {
   addRoleToUser,
   removeRoleFromUser,
   setUserDiscordNickname,
-  // deleteGroupRoleFromDiscord,
+  deleteGroupRoleFromDiscord,
 };

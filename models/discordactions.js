@@ -164,7 +164,7 @@ const updateGroupRole = async (roleData, docId) => {
 
 const isGroupRoleExists = async (options = {}) => {
   try {
-    const { groupId, rolename = null, roleid = null } = options;
+    const { groupId = null, rolename = null, roleid = null } = options;
 
     let existingRoles;
     if (groupId) {
@@ -183,7 +183,6 @@ const isGroupRoleExists = async (options = {}) => {
     } else {
       throw Error("Either rolename, roleId, or groupId is required");
     }
-
     return { roleExists: !existingRoles.empty, existingRoles };
   } catch (err) {
     logger.error("Error in getting all group-roles", err);
