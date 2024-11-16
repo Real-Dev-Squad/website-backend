@@ -531,21 +531,42 @@ describe("users", function () {
 
   describe("fetchUsersNotInDiscordServer", function () {
     beforeEach(async function () {
-      // Clean the database
       await cleanDb();
 
-      // Add test users to the database
       const taskPromises = abandonedUsersData.map((task) => userModel.add(task));
       await Promise.all(taskPromises);
     });
 
     afterEach(async function () {
       await cleanDb();
+      sinon.restore();
     });
 
     it("should fetch users not in discord server", async function () {
       const usersNotInDiscordServer = await users.fetchUsersNotInDiscordServer();
       expect(usersNotInDiscordServer.docs.length).to.be.equal(2);
+    });
+
+    it("should return an empty array if there are no users in the database", async function () {
+      await cleanDb();
+
+      // Add only active users
+      const activeUser = abandonedUsersData[2]; // Using the active user from our test data
+      await userModel.add(activeUser);
+
+      const usersNotInDiscordServer = await users.fetchUsersNotInDiscordServer();
+      expect(usersNotInDiscordServer.docs.length).to.be.equal(0);
+    });
+
+    it("should handle errors gracefully if the database query fails", async function () {
+      sinon.stub(users, "fetchUsersNotInDiscordServer").throws(new Error("Database query failed"));
+
+      try {
+        await users.fetchUsersNotInDiscordServer();
+        expect.fail("Expected function to throw an error");
+      } catch (error) {
+        expect(error.message).to.equal("Database query failed");
+      }
     });
   });
 });

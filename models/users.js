@@ -31,6 +31,12 @@ const { formatUsername } = require("../utils/username");
 const { logType } = require("../constants/logs");
 const { addLog } = require("../services/logService");
 
+/**
+ * Archive users by setting the roles.archived field to true.
+ * This function commits the write in batches to avoid reaching the maximum number of writes per batch.
+ * @param {Array} usersData - An array of user objects with the following properties: id, first_name, last_name
+ * @returns {Promise} - A promise that resolves with a summary object containing the number of users updated and failed, and an array of updated and failed user details.
+ */
 const archiveUsers = async (usersData) => {
   const batch = firestore.batch();
   const usersBatch = [];
@@ -1074,6 +1080,11 @@ const updateUsersWithNewUsernames = async () => {
   }
 };
 
+/**
+ * Fetches users who are not in the Discord server.
+ * @returns {Promise<FirebaseFirestore.QuerySnapshot>} - A promise that resolves to a Firestore QuerySnapshot containing the users matching the criteria.
+ * @throws {Error} - Throws an error if the database query fails.
+ */
 const fetchUsersNotInDiscordServer = async () => {
   try {
     const usersNotInDiscordServer = await userModel

@@ -143,12 +143,10 @@ describe("Users services", function () {
     it("should return an empty array if there are no users with abandoned tasks", async function () {
       await cleanDb();
 
-      // Add only active users
-      const activeUser = abandonedUsersData[2]; // Using the active user from our test data
+      const activeUser = abandonedUsersData[2];
       await userModel.add(activeUser);
 
-      // Add a task assigned to the active user
-      const activeTask = abandonedTasksData[3]; // Using the active user's task
+      const activeTask = abandonedTasksData[3];
       await tasksModel.add(activeTask);
       const usersWithAbandonedTasks = await getUsersWithIncompleteTasks();
       expect(usersWithAbandonedTasks).to.be.an("array");

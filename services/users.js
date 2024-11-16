@@ -14,7 +14,7 @@ const getUsersWithIncompleteTasks = async () => {
       const user = userDoc.data();
 
       // Check if the user has any tasks with status not in [Done, Complete]
-      const abandonedTasksQuerySnapshot = await fetchIncompleteTaskForUser(user);
+      const abandonedTasksQuerySnapshot = await fetchIncompleteTaskForUser(user.id);
 
       if (!abandonedTasksQuerySnapshot.empty) {
         eligibleUsersWithTasks.push(user);

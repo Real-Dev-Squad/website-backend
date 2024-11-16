@@ -68,7 +68,6 @@ router.patch("/profileURL", authenticate, userValidator.updateProfileURL, users.
 router.patch("/rejectDiff", authenticate, authorizeRoles([SUPERUSER]), users.rejectProfileDiff);
 router.patch("/:userId", authenticate, authorizeRoles([SUPERUSER]), users.updateUser);
 router.get("/suggestedUsers/:skillId", authenticate, authorizeRoles([SUPERUSER]), users.getSuggestedUsers);
-
 module.exports = router;
 router.post("/batch-username-update", authenticate, authorizeRoles([SUPERUSER]), users.updateUsernames);
 module.exports = router;

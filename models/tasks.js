@@ -701,11 +701,17 @@ const markUnDoneTasksOfArchivedUsersBacklog = async (users) => {
   }
 };
 
-const fetchIncompleteTaskForUser = async (user) => {
+/**
+ * Fetch incomplete tasks assigned to a specific user
+ * @param {string} userId - The unique identifier for the user.
+ * @returns {Promise<Array>} - A promise that resolves to an array of incomplete tasks for the given user.
+ * @throws {Error} - Throws an error if the database query fails.
+ */
+const fetchIncompleteTaskForUser = async (userId) => {
   const COMPLETED_STATUSES = [DONE, COMPLETED];
   try {
     const incompleteTaskForUser = await tasksModel
-      .where("assigneeId", "==", user.id)
+      .where("assigneeId", "==", userId)
       .where("status", "not-in", COMPLETED_STATUSES)
       .get();
     return incompleteTaskForUser;
