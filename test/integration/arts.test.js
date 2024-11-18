@@ -108,6 +108,10 @@ describe("Arts", function () {
           expect(res.body.arts).to.be.a("array");
           expect(res.body.arts[0]).to.be.a("object");
           expect(res.body.arts[0].title).to.equal(artData[0].title);
+          expect(res).to.have.header(
+            "X-Deprecation-Warning",
+            "WARNING: This endpoint is deprecated and will be removed in the future. Please use /arts/:userId to get the art details."
+          );
 
           return done();
         });
