@@ -68,6 +68,11 @@ const getUserArts = async (req, res) => {
   try {
     const userId = req.params.userId;
     const arts = await artsQuery.fetchUserArts(userId);
+
+    if (!arts || arts.length === 0) {
+      return res.status(204).send();
+    }
+
     return res.json({
       message: `User Arts of userId ${userId} returned successfully`,
       arts,

@@ -1,6 +1,8 @@
 const chai = require("chai");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
+const sinon = require("sinon");
+const artsQuery = require("../../models/arts");
 
 const app = require("../../server");
 const authService = require("../../services/authService");
@@ -182,6 +184,51 @@ describe("Arts", function () {
             statusCode: 401,
             error: "Unauthorized",
             message: "Unauthenticated User",
+          });
+
+          return done();
+        });
+    });
+
+    it("Should return 204 No Content if no arts are found", function (done) {
+      sinon.stub(artsQuery, "fetchUserArts").resolves([]);
+
+      chai
+        .request(app)
+        .get(`/arts/${userId}?dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          artsQuery.fetchUserArts.restore();
+
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(204);
+          expect(res.body).to.deep.equal({});
+          return done();
+        });
+    });
+
+    it("Should return 500 Internal Server Error if there is an exception", function (done) {
+      sinon.stub(artsQuery, "fetchUserArts").throws(new Error("Database error"));
+
+      chai
+        .request(app)
+        .get(`/arts/${userId}?dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          artsQuery.fetchUserArts.restore();
+
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(500);
+          expect(res.body).to.deep.equal({
+            statusCode: 500,
+            error: "Internal Server Error",
+            message: "An internal server error occurred",
           });
 
           return done();
