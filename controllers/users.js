@@ -1,6 +1,7 @@
 const chaincodeQuery = require("../models/chaincodes");
 const userQuery = require("../models/users");
 const profileDiffsQuery = require("../models/profileDiffs");
+const admin = require("firebase-admin");
 const logsQuery = require("../models/logs");
 const imageService = require("../services/imageService");
 const { profileDiffStatus } = require("../constants/profileDiff");
@@ -30,6 +31,8 @@ const { addLog } = require("../models/logs");
 const { getUserStatus } = require("../models/userStatus");
 const config = require("config");
 const { generateUniqueUsername } = require("../services/users");
+const { addGroupRoleToMember } = require("../models/discordactions");
+
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 
 const verifyUser = async (req, res) => {
@@ -595,7 +598,6 @@ const markUnverified = async (req, res) => {
     const unverifiedRoleId = config.get("discordUnverifiedRoleId");
     const usersToApplyUnverifiedRole = [];
     const addRolePromises = [];
-    const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 
     allRdsLoggedInUsers.forEach((user) => {
       rdsUserMap[user.discordId] = true;
@@ -612,7 +614,19 @@ const markUnverified = async (req, res) => {
     });
 
     usersToApplyUnverifiedRole.forEach((id) => {
-      addRolePromises.push(addRoleToUser(id, unverifiedRoleId));
+      addRolePromises.push(
+        addRoleToUser(id, unverifiedRoleId),
+        addGroupRoleToMember({
+          roleid: unverifiedRoleId,
+          userid: id,
+          date: admin.firestore.Timestamp.fromDate(new Date()),
+        }),
+        addLog(
+          logType.ADD_UNVERIFIED_ROLE,
+          { roleid: unverifiedRoleId, userid: id },
+          { message: "Unverified role added successfully" }
+        )
+      );
     });
 
     await Promise.all(addRolePromises);
