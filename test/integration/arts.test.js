@@ -13,14 +13,17 @@ const artData = require("../fixtures/arts/arts")();
 
 const config = require("config");
 const cookieName = config.get("userToken.cookieName");
+const { addJoinData } = require("../../models/users");
+const joinData = require("../fixtures/user/join");
 
 chai.use(chaiHttp);
 
 describe("Arts", function () {
   let jwt;
+  let userId = "";
 
   beforeEach(async function () {
-    const userId = await addUser();
+    userId = await addUser();
     jwt = authService.generateAuthToken({ userId });
     await arts.addArt(artData[0], userId);
   });
@@ -121,6 +124,53 @@ describe("Arts", function () {
       chai
         .request(app)
         .get("/arts/user/self")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          expect(res.body).to.deep.equal({
+            statusCode: 401,
+            error: "Unauthorized",
+            message: "Unauthenticated User",
+          });
+
+          return done();
+        });
+    });
+  });
+
+  describe("GET /arts/:userId", function () {
+    beforeEach(async function () {
+      await addJoinData(joinData(userId)[0]);
+    });
+
+    it("Should get all the arts of the user", function (done) {
+      chai
+        .request(app)
+        .get(`/arts/${userId}?dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal(`User Arts of userId ${userId} returned successfully`);
+          expect(res.body.arts).to.be.a("array");
+          expect(res.body.arts[0]).to.be.a("object");
+          expect(res.body.arts[0].title).to.equal(artData[0].title);
+
+          return done();
+        });
+    });
+
+    it("Should return 401, for Unauthenticated User", function (done) {
+      chai
+        .request(app)
+        .get(`/arts/${userId}?dev=true`)
         .end((err, res) => {
           if (err) {
             return done(err);
