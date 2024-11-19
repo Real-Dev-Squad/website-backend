@@ -12,7 +12,8 @@ const { getPaginatedLink } = require("../utils/helper");
 const { updateUserStatusOnTaskUpdate, updateStatusOnTaskCompletion } = require("../models/userStatus");
 const dataAccess = require("../services/dataAccessLayer");
 const { parseSearchQuery } = require("../utils/tasks");
-const { addTaskCreatedAtAndUpdatedAtFields, fetchOrphanedTasks } = require("../services/tasks");
+const { addTaskCreatedAtAndUpdatedAtFields } = require("../services/tasks");
+const tasksService = require("../services/tasks");
 const { RQLQueryParser } = require("../utils/RQLParser");
 const { getMissedProgressUpdatesUsers } = require("../models/discordactions");
 const { logType } = require("../constants/logs");
@@ -534,8 +535,8 @@ const getUsersHandler = async (req, res) => {
 
 const getOrphanedTasks = async (req, res) => {
   try {
-    const data = await fetchOrphanedTasks();
-
+    const data = await tasksService.fetchOrphanedTasks();
+    if (data.length === 0) return res.status(204).send();
     return res.status(200).json({ message: "Orphan tasks fetched successfully", data });
   } catch (error) {
     logger.error("Error in getting tasks which were abandoned", error);

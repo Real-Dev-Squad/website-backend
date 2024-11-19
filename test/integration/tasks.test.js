@@ -25,7 +25,8 @@ const userDBModel = firestore.collection("users");
 const discordService = require("../../services/discordService");
 const { CRON_JOB_HANDLER } = require("../../constants/bot");
 const { logType } = require("../../constants/logs");
-
+const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
+const tasksService = require("../../services/tasks");
 chai.use(chaiHttp);
 
 const appOwner = userData[3];
@@ -1654,7 +1655,7 @@ describe("Tasks", function () {
     });
 
     it("should fetch tasks assigned to archived and non-discord users", async function () {
-      const res = await chai.request(app).get("/tasks/orphaned-tasks");
+      const res = await chai.request(app).get("/tasks/orphaned-tasks?dev=true");
 
       expect(res).to.have.status(200);
       expect(res.body).to.have.property("message").that.equals("Orphan tasks fetched successfully");
@@ -1668,11 +1669,24 @@ describe("Tasks", function () {
 
       const task = abandonedTasksData[3];
       await tasksModel.add(task);
-      const res = await chai.request(app).get("/tasks/orphaned-tasks");
+      const res = await chai.request(app).get("/tasks/orphaned-tasks?dev=true");
 
-      expect(res).to.have.status(200);
-      expect(res.body).to.have.property("message").that.equals("Orphan tasks fetched successfully");
-      expect(res.body.data).to.be.an("array").with.lengthOf(0);
+      expect(res).to.have.status(204);
+    });
+
+    it("should fail if dev flag is not passed", async function () {
+      const res = await chai.request(app).get("/tasks/orphaned-tasks");
+      expect(res).to.have.status(404);
+      expect(res.body.message).to.be.equal("Route not found");
+    });
+
+    it("should handle errors gracefully if the database query fails", async function () {
+      sinon.stub(tasksService, "fetchOrphanedTasks").rejects(new Error(INTERNAL_SERVER_ERROR));
+
+      const res = await chai.request(app).get("/tasks/orphaned-tasks?dev=true");
+
+      expect(res).to.have.status(500);
+      expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
     });
   });
 });
