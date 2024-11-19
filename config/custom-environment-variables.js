@@ -11,7 +11,6 @@ module.exports = {
     __format: "number",
   },
 
-
   aws: {
     region: "AWS_REGION",
     access_key: "AWS_ACCESS_KEY",
