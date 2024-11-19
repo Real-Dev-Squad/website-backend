@@ -29,7 +29,8 @@ const {
 const { addLog } = require("../models/logs");
 const { getUserStatus } = require("../models/userStatus");
 const config = require("config");
-const { generateUniqueUsername, getUsersWithIncompleteTasks } = require("../services/users");
+const { generateUniqueUsername } = require("../services/users");
+const userService = require("../services/users");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 
 const verifyUser = async (req, res) => {
@@ -1031,7 +1032,8 @@ const updateUsernames = async (req, res) => {
 
 const getUsersWithAbandonedTasks = async (req, res) => {
   try {
-    const data = await getUsersWithIncompleteTasks();
+    const data = await userService.getUsersWithIncompleteTasks();
+    if (data.length === 0) res.status(204).send();
     return res.status(200).json({ message: "Users with abandoned tasks fetched successfully", data });
   } catch (error) {
     logger.error("Error in getting user who abandoned tasks:", error);

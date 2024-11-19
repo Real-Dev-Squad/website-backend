@@ -12,8 +12,9 @@ const { authorizeAndAuthenticate } = require("../middlewares/authorizeUsersAndSe
 const ROLES = require("../constants/roles");
 const { Services } = require("../constants/bot");
 const authenticateProfile = require("../middlewares/authenticateProfile");
+const { devFlagMiddleware } = require("../middlewares/devFlag");
 
-router.get("/departed-users", users.getUsersWithAbandonedTasks);
+router.get("/departed-users", devFlagMiddleware, users.getUsersWithAbandonedTasks);
 router.post("/", authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]), users.markUnverified);
 router.post("/update-in-discord", authenticate, authorizeRoles([SUPERUSER]), users.setInDiscordScript);
 router.post("/verify", authenticate, users.verifyUser);

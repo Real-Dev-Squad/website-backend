@@ -47,7 +47,7 @@ const {
   usersData: abandonedUsersData,
   tasksData: abandonedTasksData,
 } = require("../fixtures/abandoned-tasks/departed-users");
-
+const userService = require("../../services/users");
 chai.use(chaiHttp);
 
 describe("Users", function () {
@@ -2669,7 +2669,7 @@ describe("Users", function () {
     });
 
     it("should return a list of users with abandoned tasks", async function () {
-      const res = await chai.request(app).get("/users/departed-users");
+      const res = await chai.request(app).get("/users/departed-users?dev=true");
 
       expect(res).to.have.status(200);
       expect(res.body).to.have.property("message").that.equals("Users with abandoned tasks fetched successfully");
@@ -2683,11 +2683,24 @@ describe("Users", function () {
 
       const task = abandonedTasksData[3];
       await taskModel.add(task);
-      const res = await chai.request(app).get("/users/departed-users");
+      const res = await chai.request(app).get("/users/departed-users?dev=true");
 
-      expect(res).to.have.status(200);
-      expect(res.body).to.have.property("message").that.equals("Users with abandoned tasks fetched successfully");
-      expect(res.body.data).to.be.an("array").with.lengthOf(0);
+      expect(res).to.have.status(204);
+    });
+
+    it("should fail if dev flag is not passed", async function () {
+      const res = await chai.request(app).get("/users/departed-users");
+      expect(res).to.have.status(404);
+      expect(res.body.message).to.be.equal("Route not found");
+    });
+
+    it("should handle errors gracefully if the database query fails", async function () {
+      Sinon.stub(userService, "getUsersWithIncompleteTasks").rejects(new Error(INTERNAL_SERVER_ERROR));
+
+      const res = await chai.request(app).get("/users/departed-users?dev=true");
+
+      expect(res).to.have.status(500);
+      expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
     });
   });
 });
