@@ -11,19 +11,12 @@ module.exports = {
     __format: "number",
   },
 
+
   aws: {
-    region: {
-      __name: "AWS_REGION",
-    },
-    access_key: {
-      __name: "AWS_ACCESS_KEY",
-    },
-    secret_key: {
-      __name: "AWS_SECRET_KEY",
-    },
-    identity_store_id: {
-      __name: "IDENTITY_STORE_ID",
-    },
+    region: "AWS_REGION",
+    access_key: "AWS_ACCESS_KEY",
+    secret_key: "AWS_SECRET_KEY",
+    identity_store_id: "IDENTITY_STORE_ID",
   },
 
   enableFileLogs: {
