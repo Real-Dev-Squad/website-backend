@@ -72,22 +72,13 @@ const createGroupRole = async (req, res) => {
  * @returns {Promise<void>}
  */
 const deleteGroupRole = async (req, res) => {
-  const isDevMode = req.query.dev === "true";
+  const { groupId } = req.params;
 
-  if (!isDevMode) {
-    return res.status(403).json({
-      error: "Feature not available in production mode.",
-    });
-  }
   try {
-    const { groupId } = req.params;
-
     const { roleExists, existingRoles } = await discordRolesModel.isGroupRoleExists({ groupId });
 
     if (!roleExists) {
-      return res.status(404).json({
-        error: "Group role not found",
-      });
+      return res.boom.notFound("Group role not found");
     }
 
     const roleData = existingRoles.data();
@@ -95,17 +86,14 @@ const deleteGroupRole = async (req, res) => {
     const discordDeletion = await discordServices.deleteGroupRoleFromDiscord(roleData.roleid);
 
     if (!discordDeletion.success) {
-      return res.status(500).json({
-        error: discordDeletion.message,
-      });
+      return res.boom.badImplementation(discordDeletion.message);
     }
 
     const { isSuccess } = await discordRolesModel.deleteGroupRole(groupId, req.userData.id);
 
     if (!isSuccess) {
-      return res.status(400).json({
-        error: "Group role deletion failed",
-      });
+      logger.error(`Role deleted from Discord but failed to delete from database for groupId: ${groupId}`);
+      return res.boom.badRequest("Group role deletion failed");
     }
 
     const groupDeletionLog = {
@@ -122,13 +110,11 @@ const deleteGroupRole = async (req, res) => {
     };
     await addLog(groupDeletionLog.type, groupDeletionLog.meta, groupDeletionLog.body);
     return res.status(200).json({
-      message: "Group role deleted succesfully",
+      message: "Group role deleted successfully",
     });
   } catch (error) {
     logger.error(`Error while deleting group role: ${error}`);
-    return res.status(500).json({
-      error: "Internal server error",
-    });
+    return res.boom.badImplementation("Internal server error");
   }
 };
 

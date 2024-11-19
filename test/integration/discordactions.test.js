@@ -233,14 +233,14 @@ describe("Discord actions", function () {
       await cleanDb();
     });
 
-    it("should return 403 when not in dev mode", function (done) {
+    it("should return 404 when not in dev mode", function (done) {
       chai
         .request(app)
         .delete(`/discord-actions/groups/${groupId}`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
-          expect(res).to.have.status(403);
-          expect(res.body.error).to.equal("Feature not available in production mode.");
+          expect(res).to.have.status(404);
+          expect(res.body.error).to.equal("Not Found");
           done(err);
         });
     });
@@ -257,12 +257,12 @@ describe("Discord actions", function () {
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           expect(res).to.have.status(404);
-          expect(res.body.error).to.equal("Group role not found");
+          expect(res.body.error).to.equal("Not Found");
           done(err);
         });
     });
 
-    it("should succesfully delete the group role from discord server", function (done) {
+    it("should successfully delete the group role from discord server", function (done) {
       sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
         roleExists: true,
         existingRoles: { data: () => ({ ...roleData, roleid: roleData.roleid }) },
@@ -279,7 +279,7 @@ describe("Discord actions", function () {
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           expect(res).to.have.status(200);
-          expect(res.body.message).to.equal("Group role deleted succesfully");
+          expect(res.body.message).to.equal("Group role deleted successfully");
           done(err);
         });
     });
@@ -301,7 +301,7 @@ describe("Discord actions", function () {
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           expect(res).to.have.status(500);
-          expect(res.body.error).to.equal("Failed to delete role from Discord");
+          expect(res.body.error).to.equal("Internal Server Error");
           done(err);
         });
     });
@@ -323,7 +323,7 @@ describe("Discord actions", function () {
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           expect(res).to.have.status(500);
-          expect(res.body.error).to.equal("Internal server error");
+          expect(res.body.error).to.equal("Internal Server Error");
           done(err);
         });
     });
@@ -345,7 +345,7 @@ describe("Discord actions", function () {
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           expect(res).to.have.status(200);
-          expect(res.body.message).to.equal("Group role deleted succesfully");
+          expect(res.body.message).to.equal("Group role deleted successfully");
           done(err);
         });
     });
@@ -369,7 +369,7 @@ describe("Discord actions", function () {
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           expect(res).to.have.status(400);
-          expect(res.body.error).to.equal("Group role deletion failed");
+          expect(res.body.error).to.equal("Bad Request");
           done(err);
         });
     });
@@ -383,7 +383,7 @@ describe("Discord actions", function () {
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           expect(res).to.have.status(500);
-          expect(res.body.error).to.equal("Internal server error");
+          expect(res.body.error).to.equal("Internal Server Error");
           done(err);
         });
     });

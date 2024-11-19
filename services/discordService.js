@@ -129,14 +129,11 @@ const deleteGroupRoleFromDiscord = async (roleId) => {
       },
     });
 
-    if (!response.ok) {
-      return { success: false, message: "Failed to delete role from discord" };
-    }
     if (response.status === 204) {
       return { success: true, message: "Role deleted successfully" };
     }
-    const data = await response.json();
-    return data;
+
+    return { success: false, message: "Failed to delete role from discord" };
   } catch (err) {
     logger.error("Error deleting role from Discord", err);
     return { success: false, message: "Internal server error" };
