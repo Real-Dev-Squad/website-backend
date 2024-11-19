@@ -7,7 +7,7 @@ const ACCESS_LEVEL = {
 
 const ROLE_LEVEL = {
   private: ["super_user"],
-  internal: ["super_user"],
+  internal: ["super_user", "cloudfare_worker"],
   confidential: ["super_user"],
 };
 
