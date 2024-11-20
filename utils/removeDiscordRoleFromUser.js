@@ -14,25 +14,23 @@ const { addLog } = require("../models/logs");
  */
 export const removeDiscordRoleFromUser = async (userData, discordId, roleId) => {
   try {
-    const { roleExists, existingRoles } = await discordRolesModel.isGroupRoleExists({ roleid: roleId });
+    const { roleExists } = await discordRolesModel.isGroupRoleExists({ roleid: roleId });
 
     if (!roleExists) {
       throw new Error("Role doesn't exist");
     }
 
-    const { roleid } = existingRoles.docs[0].data();
+    await discordServices.removeRoleFromUser(roleId, discordId, userData);
 
-    await discordServices.removeRoleFromUser(roleid, discordId, userData);
-
-    const { wasSuccess } = await discordRolesModel.removeMemberGroup(roleid, discordId);
+    const { wasSuccess } = await discordRolesModel.removeMemberGroup(roleId, discordId);
     if (!wasSuccess) {
       throw new Error("Role deletion failed");
     }
 
     await addLog(
-      logType.REMOVE_UNVERIFIED_ROLE,
-      { roleid, userid: discordId },
-      { message: "Unverified role removed successfully" }
+      logType.REMOVE_ROLE_FROM_USER,
+      { roleId, userid: discordId },
+      { message: "Role removed successfully from user" }
     );
 
     return { success: true, message: "Role deleted successfully" };
