@@ -93,7 +93,7 @@ const deleteGroupRole = async (req, res) => {
 
     if (!isSuccess) {
       logger.error(`Role deleted from Discord but failed to delete from database for groupId: ${groupId}`);
-      return res.boom.badRequest("Group role deletion failed");
+      return res.boom.badImplementation("Group role deletion failed");
     }
 
     const groupDeletionLog = {

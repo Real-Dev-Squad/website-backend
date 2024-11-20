@@ -350,7 +350,7 @@ describe("Discord actions", function () {
         });
     });
 
-    it("should return 400 when deletion fails", function (done) {
+    it("should return 500 when deletion fails", function (done) {
       sinon.restore();
       sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
         roleExists: true,
@@ -368,8 +368,8 @@ describe("Discord actions", function () {
         .delete(`/discord-actions/groups/${groupId}?dev=true`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
-          expect(res).to.have.status(400);
-          expect(res.body.error).to.equal("Bad Request");
+          expect(res).to.have.status(500);
+          expect(res.body.error).to.equal("Internal Server Error");
           done(err);
         });
     });
