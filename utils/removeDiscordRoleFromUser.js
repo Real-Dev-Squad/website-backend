@@ -8,23 +8,23 @@ const { addLog } = require("../models/logs");
  *
  * @param {Object} userData - User data.
  * @param {string} discordId - User's Discord ID.
- * @param {string} roleid - Discord Role ID.
+ * @param {string} roleId - Discord Role ID.
  *
  * @returns {Promise<Object>} - Result with success status and message.
  */
-export const removeDiscordRoleFromUser = async (userData, discordId, roleid) => {
+export const removeDiscordRoleFromUser = async (userData, discordId, roleId) => {
   try {
-    const role = await discordRolesModel.isGroupRoleExists({ roleid });
+    const { roleExists, existingRoles } = await discordRolesModel.isGroupRoleExists({ roleid: roleId });
 
-    if (!role.roleExists) {
+    if (!roleExists) {
       throw new Error("Role doesn't exist");
     }
 
-    const roleData = role.existingRoles.docs[0].data();
+    const { roleid } = existingRoles.docs[0].data();
 
-    await discordServices.removeRoleFromUser(roleData.roleid, discordId, userData);
+    await discordServices.removeRoleFromUser(roleid, discordId, userData);
 
-    const { wasSuccess } = await discordRolesModel.removeMemberGroup(roleData.roleid, discordId);
+    const { wasSuccess } = await discordRolesModel.removeMemberGroup(roleid, discordId);
     if (!wasSuccess) {
       throw new Error("Role deletion failed");
     }
@@ -37,7 +37,7 @@ export const removeDiscordRoleFromUser = async (userData, discordId, roleid) => 
 
     return { success: true, message: "Role deleted successfully" };
   } catch (error) {
-    logger.error(`Error removing role ${roleid} for user ${discordId}: ${error.message}`);
+    logger.error(`Error removing role ${roleId} for user ${discordId}: ${error.message}`);
 
     return { success: false, message: error.message };
   }
