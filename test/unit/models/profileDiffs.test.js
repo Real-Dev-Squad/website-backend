@@ -1,9 +1,3 @@
-/**
- * This eslint rule is disabled because of https://github.com/nodesecurity/eslint-plugin-security/issues/21
- * It gives linting errors in testing the DB data with keys from fixtures
- */
-/* eslint-disable security/detect-object-injection */
-
 const chai = require("chai");
 const { expect } = chai;
 const cleanDb = require("../../utils/cleanDb");
@@ -36,8 +30,8 @@ describe("profileDiffs", function () {
       const profileDiffs = getProfileDiffs();
       const profileDiffId = await profileDiffsQuery.add(profileDiffs[0]);
       const diff = await profileDiffsQuery.fetchProfileDiffUnobfuscated(profileDiffId);
-      expect(diff.phone).to.match(/^(\+\d{1,3}[- ]?)?\d{7,10}$/);
-      expect(diff.email).to.match(/^([A-Z0-9+-]{1,20}(.[A-Z0-9+-]{1,20})*)@[A-Z0-9][A-Z0-9-](.[A-Z]{2,})+$/i);
+      expect(diff.phone).to.equal(profileDiffs[0].phone);
+      expect(diff.email).to.equal(profileDiffs[0].email);
     });
   });
 });
