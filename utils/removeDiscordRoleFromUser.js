@@ -17,20 +17,30 @@ export const removeDiscordRoleFromUser = async (userData, discordId, roleId) => 
     const { roleExists } = await discordRolesModel.isGroupRoleExists({ roleid: roleId });
 
     if (!roleExists) {
-      throw new Error("Role doesn't exist");
+      const message = "Role doesn't exist";
+      await addLog(logType.REMOVE_ROLE_FROM_USER_FAILED, { roleId }, { message, userid: discordId, userData });
+      throw new Error(message);
     }
 
-    await discordServices.removeRoleFromUser(roleId, discordId, userData);
+    try {
+      await discordServices.removeRoleFromUser(roleId, discordId, userData);
+    } catch (error) {
+      const message = "Role deletion from discord failed";
+      await addLog(logType.REMOVE_ROLE_FROM_USER_FAILED, { roleId, userid: discordId, userData }, { message });
+      throw new Error(message);
+    }
 
     const { wasSuccess } = await discordRolesModel.removeMemberGroup(roleId, discordId);
     if (!wasSuccess) {
-      throw new Error("Role deletion failed");
+      const message = "Role deletion from database failed";
+      await addLog(logType.REMOVE_ROLE_FROM_USER_FAILED, { roleId, userid: discordId }, { message, userData });
+      throw new Error(message);
     }
 
     await addLog(
-      logType.REMOVE_ROLE_FROM_USER,
+      logType.REMOVE_ROLE_FROM_USER_SUCCESS,
       { roleId, userid: discordId },
-      { message: "Role removed successfully from user" }
+      { message: "Role removed successfully from user", userData }
     );
 
     return { success: true, message: "Role deleted successfully" };

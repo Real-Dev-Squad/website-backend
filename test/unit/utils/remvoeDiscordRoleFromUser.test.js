@@ -60,13 +60,23 @@ describe("removeDiscordRoleFromUser", function () {
     }
   });
 
-  it("should throw an error if role deletion failed", async function () {
-    fetchStub.rejects(new Error("Role deletion failed"));
+  it("should throw an error if role deletion from discord failed", async function () {
+    fetchStub.rejects(new Error("Role deletion from discord failed"));
 
     try {
       await removeDiscordRoleFromUser(userData[0], discordId, roleid);
     } catch (error) {
-      expect(error.message).to.equal("Role deletion failed");
+      expect(error.message).to.equal("Role deletion from discord failed");
+    }
+  });
+
+  it("should throw an error if role deletion from database failed", async function () {
+    fetchStub.rejects(new Error("Role deletion from database failed"));
+
+    try {
+      await removeDiscordRoleFromUser(userData[0], discordId, roleid);
+    } catch (error) {
+      expect(error.message).to.equal("Role deletion from database failed");
     }
   });
 });
