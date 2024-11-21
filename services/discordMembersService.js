@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-
+const config = require("config");
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 
 /**
