@@ -108,7 +108,7 @@ describe("/logs", function () {
           }
           expect(res).to.have.status(200);
           expect(res.body.message).to.equal("All Logs fetched successfully");
-          expect(res.body.data).to.lengthOf(7);
+          expect(res.body.data).to.lengthOf(9);
           return done();
         });
     });
@@ -200,6 +200,37 @@ describe("/logs", function () {
           expect(res.body.next).to.contain("/logs?size=3&next=");
           return done();
         });
+    });
+  });
+
+  describe("Add logs when user doc is update", function () {
+    let jwt;
+    let userId;
+
+    beforeEach(async function () {
+      userId = await addUser();
+      jwt = authService.generateAuthToken({ userId });
+    });
+
+    it("Should update the users and capture the logs", async function () {
+      const res = await chai.request(app).patch("/users/self").set("cookie", `${cookieName}=${jwt}`).send({
+        first_name: "Test first_name",
+      });
+
+      expect(res).to.have.status(204);
+
+      const logRes = await chai
+        .request(app)
+        .get("/logs/USER_DETAILS_UPDATED")
+        .set("cookie", `${cookieName}=${superUserToken}`);
+
+      expect(logRes).to.have.status(200);
+      expect(logRes.body.message).to.equal("Logs fetched successfully");
+
+      const log = logRes.body.logs[0];
+      expect(log).to.have.property("meta");
+      expect(log).to.have.property("body");
+      expect(log.type).to.equal("USER_DETAILS_UPDATED");
     });
   });
 });
