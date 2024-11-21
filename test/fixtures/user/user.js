@@ -94,7 +94,7 @@ module.exports = () => {
       github_id: "sagarbajpai",
       github_display_name: "Sagar Bajpai",
       phone: "1234567890",
-      email: "abc@gmail.com",
+      email: "abc1@gmail.com",
       status: "active",
       tokens: {
         githubAccessToken: "githubAccessToken",
@@ -146,7 +146,7 @@ module.exports = () => {
       github_display_name: "Ankita Bannore",
       isMember: true,
       phone: "1234567890",
-      email: "abc@gmail.com",
+      email: "abc12@gmail.com",
       tokens: {
         githubAccessToken: "githubAccessToken",
       },
@@ -195,7 +195,7 @@ module.exports = () => {
       github_id: "ankur1234",
       github_display_name: "ankur-xyz",
       phone: "1234567890",
-      email: "abc@gmail.com",
+      email: "abc123@gmail.com",
     },
     {
       username: "ritvik",
@@ -426,7 +426,7 @@ module.exports = () => {
       github_display_name: "vinayak-trivedi",
       discordJoinedAt: "2023-04-06T01:47:34.488000+00:00",
       phone: "1234567890",
-      email: "abc@gmail.com",
+      email: "abcd123@gmail.com",
       status: "active",
       tokens: {
         githubAccessToken: "githubAccessToken",
