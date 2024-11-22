@@ -152,7 +152,7 @@ const fetchProfileDiffUnobfuscated = async (profileDiffId) => {
       ...profileDiffData,
     };
   } catch (err) {
-    logger.error("Error retrieving profile Diff", err);
+    logger.error("Error retrieving Unobfuscated profile Diff", err);
     throw err;
   }
 };
