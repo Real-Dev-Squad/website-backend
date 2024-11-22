@@ -13,6 +13,7 @@ export const logType = {
   EXTENSION_REQUESTS: "extensionRequests",
   TASK: "task",
   TASK_REQUESTS: "taskRequests",
+  USER_DETAILS_UPDATED: "USER_DETAILS_UPDATED", 
   ...REQUEST_LOG_TYPE,
 };
 

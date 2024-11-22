@@ -24,6 +24,7 @@ const {
   isGroupRoleExists,
   addGroupRoleToMember,
   deleteRoleFromDatabase,
+  deleteGroupRole,
   updateDiscordImageForVerification,
   enrichGroupDataWithMembershipInfo,
   fetchGroupToUserMapping,
@@ -173,7 +174,7 @@ describe("discordactions", function () {
     it("should throw an error if rolename and roleid are not passed", async function () {
       return isGroupRoleExists({}).catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
-        expect(err.message).to.equal("Either rolename or roleId is required");
+        expect(err.message).to.equal("Either rolename, roleId, or groupId is required");
       });
     });
 
@@ -240,6 +241,65 @@ describe("discordactions", function () {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal("Database error");
       });
+    });
+  });
+
+  describe("deleteGroupRole", function () {
+    const groupId = "1234";
+    const deletedBy = "4321";
+    let firestoreOriginal;
+
+    beforeEach(async function () {
+      firestoreOriginal = admin.firestore;
+
+      const roleRef = admin.firestore().collection("discord-roles").doc(groupId);
+      await roleRef.set({
+        isDeleted: false,
+      });
+    });
+
+    it("should mark the group role as deleted", async function () {
+      const result = await deleteGroupRole(groupId, deletedBy);
+
+      const updatedDoc = await admin.firestore().collection("discord-roles").doc(groupId).get();
+
+      const data = updatedDoc.data();
+      expect(data.isDeleted).to.equal(true);
+      expect(data.deletedBy).to.equal(deletedBy);
+      expect(data.deletedAt).to.be.an.instanceof(admin.firestore.Timestamp);
+      expect(result.isSuccess).to.equal(true);
+    });
+
+    it("should return isSuccess as false if Firestore update fails", async function () {
+      delete require.cache[require.resolve("firebase-admin")];
+
+      const mockFirestore = {
+        collection: () => ({
+          doc: () => ({
+            update: async () => {
+              throw new Error("Database error");
+            },
+          }),
+        }),
+      };
+
+      Object.defineProperty(admin, "firestore", {
+        configurable: true,
+        get: () => () => mockFirestore,
+      });
+
+      const result = await deleteGroupRole(groupId, deletedBy);
+      expect(result.isSuccess).to.equal(false);
+    });
+
+    afterEach(async function () {
+      Object.defineProperty(admin, "firestore", {
+        configurable: true,
+        value: firestoreOriginal,
+      });
+
+      const roleRef = admin.firestore().collection("discord-roles").doc(groupId);
+      await roleRef.delete();
     });
   });
 
