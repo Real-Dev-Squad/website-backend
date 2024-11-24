@@ -72,6 +72,7 @@ describe("Data Access Layer", function () {
           expect(user).to.not.have.property(key);
         });
       });
+      fetchUserStub.restore();
     });
 
     it("should return /users/self data and remove sensitive info", async function () {
@@ -81,6 +82,83 @@ describe("Data Access Layer", function () {
       KEYS_NOT_ALLOWED[ACCESS_LEVEL.PUBLIC].forEach((key) => {
         expect(userdata).to.not.have.property(key);
       });
+    });
+  });
+
+  describe("retrieveUsers - Departed Users", function () {
+    let fetchPaginatedUsersStub;
+
+    beforeEach(function () {
+      fetchPaginatedUsersStub = sinon.stub(userQuery, "fetchPaginatedUsers");
+    });
+
+    afterEach(function () {
+      sinon.restore();
+    });
+
+    it("should fetch departed users when departed flag is true", async function () {
+      const departedUser = {
+        ...userData[12],
+        roles: { archived: true, in_discord: false },
+      };
+      fetchPaginatedUsersStub.returns(
+        Promise.resolve({
+          allUsers: [departedUser],
+          nextId: 3,
+          prevId: 1,
+        })
+      );
+
+      const result = await retrieveUsers({ query: { departed: "true" } });
+
+      expect(result.users.length).to.be.equal(1);
+      expect(result.users[0].roles.archived).to.equal(true);
+      expect(result.users[0].roles.in_discord).to.equal(false);
+      KEYS_NOT_ALLOWED[ACCESS_LEVEL.PUBLIC].forEach((key) => {
+        expect(result.users[0]).to.not.have.property(key);
+      });
+    });
+
+    it("should ignore departed parameter when departed flag is not passed or passed as false", async function () {
+      fetchPaginatedUsersStub.returns(
+        Promise.resolve({
+          allUsers: [],
+          nextId: "",
+          prevId: "",
+        })
+      );
+
+      const result = await retrieveUsers({ query: { departed: "false" } });
+
+      expect(result.users.length).to.be.equal(0);
+      expect(result.nextId).to.equal("");
+      expect(result.prevId).to.equal("");
+    });
+
+    it("should handle empty result for departed users query", async function () {
+      fetchPaginatedUsersStub.returns(
+        Promise.resolve({
+          allUsers: [],
+          nextId: "",
+          prevId: "",
+        })
+      );
+      const result = await retrieveUsers({ query: { departed: "true" } });
+      expect(result.users.length).to.be.equal(0);
+      expect(result.nextId).to.equal("");
+      expect(result.prevId).to.equal("");
+    });
+
+    it("should handle database errors properly", async function () {
+      fetchPaginatedUsersStub.rejects(new Error("Database connection failed"));
+
+      try {
+        await retrieveUsers({ query: { departed: true } });
+        expect.fail("Expected function to throw an error");
+      } catch (error) {
+        expect(error).to.be.an("error");
+        expect(error.message).to.equal("Database connection failed");
+      }
     });
   });
 

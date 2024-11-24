@@ -192,6 +192,32 @@ const getUsers = async (req, res) => {
       }
     }
 
+    const isDeparted = req.query.departed === "true";
+
+    if (isDeparted) {
+      let result;
+      if (dev) {
+        try {
+          result = await dataAccess.retrieveUsers({ query: req.query });
+          const departedUsers = await userService.getUsersWithIncompleteTasks(result.users);
+          if (departedUsers.length === 0) res.status(204).send();
+          return res.json({
+            message: "Users with abandoned tasks fetched successfully",
+            users: departedUsers,
+            links: {
+              next: result.nextId ? getPaginationLink(req.query, "next", result.nextId) : "",
+              prev: result.prevId ? getPaginationLink(req.query, "prev", result.prevId) : "",
+            },
+          });
+        } catch (error) {
+          logger.error("Error when fetching users who abandoned tasks:", error);
+          return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+        }
+      } else {
+        return res.boom.notFound("Route not found");
+      }
+    }
+
     if (transformedQuery?.filterBy === OVERDUE_TASKS) {
       try {
         const tasksData = await getOverdueTasks(days);
@@ -1030,17 +1056,6 @@ const updateUsernames = async (req, res) => {
   }
 };
 
-const getUsersWithAbandonedTasks = async (req, res) => {
-  try {
-    const data = await userService.getUsersWithIncompleteTasks();
-    if (data.length === 0) res.status(204).send();
-    return res.status(200).json({ message: "Users with abandoned tasks fetched successfully", data });
-  } catch (error) {
-    logger.error("Error in getting user who abandoned tasks:", error);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
-  }
-};
-
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -1073,5 +1088,4 @@ module.exports = {
   isDeveloper,
   getIdentityStats,
   updateUsernames,
-  getUsersWithAbandonedTasks,
 };

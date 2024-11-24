@@ -1447,6 +1447,56 @@ describe("Users", function () {
     });
   });
 
+  describe("GET /users?departed", function () {
+    beforeEach(async function () {
+      await cleanDb();
+      const userPromises = abandonedUsersData.map((user) => userModel.doc(user.id).set(user));
+      await Promise.all(userPromises);
+
+      const taskPromises = abandonedTasksData.map((task) => taskModel.add(task));
+      await Promise.all(taskPromises);
+    });
+
+    afterEach(async function () {
+      Sinon.restore();
+      await cleanDb();
+    });
+
+    it("should return a list of users with abandoned tasks", async function () {
+      const res = await chai.request(app).get("/users?dev=true&departed=true");
+      expect(res).to.have.status(200);
+      expect(res.body).to.have.property("message").that.equals("Users with abandoned tasks fetched successfully");
+      expect(res.body).to.have.property("users").to.be.an("array").with.lengthOf(2);
+    });
+
+    it("should return an empty array when no users have abandoned tasks", async function () {
+      await cleanDb();
+      const user = abandonedUsersData[2];
+      await userModel.add(user);
+
+      const task = abandonedTasksData[3];
+      await taskModel.add(task);
+      const res = await chai.request(app).get("/users?dev=true&departed=true");
+
+      expect(res).to.have.status(204);
+    });
+
+    it("should fail if dev flag is not passed", async function () {
+      const res = await chai.request(app).get("/users?departed=true");
+      expect(res).to.have.status(404);
+      expect(res.body.message).to.be.equal("Route not found");
+    });
+
+    it("should handle errors gracefully if getUsersWithIncompleteTasks fails", async function () {
+      Sinon.stub(userService, "getUsersWithIncompleteTasks").rejects(new Error(INTERNAL_SERVER_ERROR));
+
+      const res = await chai.request(app).get("/users?departed=true&dev=true");
+
+      expect(res).to.have.status(500);
+      expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
+    });
+  });
+
   describe("PUT /users/self/intro", function () {
     let userStatusData;
 
@@ -2650,57 +2700,6 @@ describe("Users", function () {
         .send();
 
       expect(res).to.have.status(401);
-    });
-  });
-
-  describe("GET /users/departed-users", function () {
-    beforeEach(async function () {
-      await cleanDb();
-      const userPromises = abandonedUsersData.map((user) => userModel.add(user));
-      await Promise.all(userPromises);
-
-      const taskPromises = abandonedTasksData.map((task) => taskModel.add(task));
-      await Promise.all(taskPromises);
-    });
-
-    afterEach(async function () {
-      Sinon.restore();
-      await cleanDb();
-    });
-
-    it("should return a list of users with abandoned tasks", async function () {
-      const res = await chai.request(app).get("/users/departed-users?dev=true");
-
-      expect(res).to.have.status(200);
-      expect(res.body).to.have.property("message").that.equals("Users with abandoned tasks fetched successfully");
-      expect(res.body.data).to.be.an("array").with.lengthOf(2);
-    });
-
-    it("should return an empty array when no users have abandoned tasks", async function () {
-      await cleanDb();
-      const user = abandonedUsersData[2];
-      await userModel.add(user);
-
-      const task = abandonedTasksData[3];
-      await taskModel.add(task);
-      const res = await chai.request(app).get("/users/departed-users?dev=true");
-
-      expect(res).to.have.status(204);
-    });
-
-    it("should fail if dev flag is not passed", async function () {
-      const res = await chai.request(app).get("/users/departed-users");
-      expect(res).to.have.status(404);
-      expect(res.body.message).to.be.equal("Route not found");
-    });
-
-    it("should handle errors gracefully if the database query fails", async function () {
-      Sinon.stub(userService, "getUsersWithIncompleteTasks").rejects(new Error(INTERNAL_SERVER_ERROR));
-
-      const res = await chai.request(app).get("/users/departed-users?dev=true");
-
-      expect(res).to.have.status(500);
-      expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
     });
   });
 });

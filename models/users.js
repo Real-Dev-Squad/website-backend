@@ -232,11 +232,11 @@ const getSuggestedUsers = async (skill) => {
  */
 const fetchPaginatedUsers = async (query) => {
   const isDevMode = query.dev === "true";
-
   try {
     const size = parseInt(query.size) || 100;
     const doc = (query.next || query.prev) && (await userModel.doc(query.next || query.prev).get());
 
+    const isArchived = query.departed === "true";
     let dbQuery;
     /**
      * !!NOTE : At the time of writing we only support member in the role query
@@ -245,9 +245,9 @@ const fetchPaginatedUsers = async (query) => {
      * if you're making changes to this code remove the archived check in the role query, example: role=archived,member
      */
     if (query.roles === "member") {
-      dbQuery = userModel.where("roles.archived", "==", false).where("roles.member", "==", true);
+      dbQuery = userModel.where("roles.archived", "==", isArchived).where("roles.member", "==", true);
     } else {
-      dbQuery = userModel.where("roles.archived", "==", false).orderBy("username");
+      dbQuery = userModel.where("roles.archived", "==", isArchived).orderBy("username");
     }
 
     let compositeQuery = [dbQuery];
@@ -267,6 +267,10 @@ const fetchPaginatedUsers = async (query) => {
     }
 
     if (Object.keys(query).length) {
+      if (query.departed) {
+        compositeQuery = compositeQuery.map((query) => query.where("roles.in_discord", "==", false));
+        dbQuery = dbQuery.where("roles.in_discord", "==", false);
+      }
       if (query.search) {
         const searchValue = query.search.toLowerCase().trim();
         dbQuery = dbQuery.startAt(searchValue).endAt(searchValue + "\uf8ff");
@@ -1080,24 +1084,6 @@ const updateUsersWithNewUsernames = async () => {
   }
 };
 
-/**
- * Fetches users who are not in the Discord server.
- * @returns {Promise<FirebaseFirestore.QuerySnapshot>} - A promise resolving to a Firestore QuerySnapshot of matching users.
- * @throws {Error} - Throws an error if the database query fails.
- */
-const fetchUsersNotInDiscordServer = async () => {
-  try {
-    const usersNotInDiscordServer = await userModel
-      .where("roles.archived", "==", true)
-      .where("roles.in_discord", "==", false)
-      .get();
-    return usersNotInDiscordServer;
-  } catch (error) {
-    logger.error(`Error in getting users who are not in discord server:  ${error}`);
-    throw error;
-  }
-};
-
 module.exports = {
   archiveUsers,
   addOrUpdate,
@@ -1128,5 +1114,4 @@ module.exports = {
   fetchUserForKeyValue,
   getNonNickNameSyncedUsers,
   updateUsersWithNewUsernames,
-  fetchUsersNotInDiscordServer,
 };

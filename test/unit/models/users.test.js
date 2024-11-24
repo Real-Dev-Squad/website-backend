@@ -529,7 +529,7 @@ describe("users", function () {
     });
   });
 
-  describe("fetchUsersNotInDiscordServer", function () {
+  describe("fetchPaginatedUsers - Departed Users", function () {
     beforeEach(async function () {
       await cleanDb();
 
@@ -543,24 +543,29 @@ describe("users", function () {
     });
 
     it("should fetch users not in discord server", async function () {
-      const usersNotInDiscordServer = await users.fetchUsersNotInDiscordServer();
-      expect(usersNotInDiscordServer.docs.length).to.be.equal(2);
+      const result = await users.fetchPaginatedUsers({ departed: "true" });
+      expect(result.allUsers.length).to.be.equal(2);
     });
 
-    it("should return an empty array if there are no users in the database", async function () {
+    it("should return no users if departed flag is false", async function () {
+      const result = await users.fetchPaginatedUsers({ departed: "false" });
+      expect(result.allUsers.length).to.be.equal(0);
+    });
+
+    it("should return an empty array if there are no departed users in the database", async function () {
       await cleanDb();
       const activeUser = abandonedUsersData[2];
       await userModel.add(activeUser);
 
-      const usersNotInDiscordServer = await users.fetchUsersNotInDiscordServer();
-      expect(usersNotInDiscordServer.docs.length).to.be.equal(0);
+      const result = await users.fetchPaginatedUsers({ departed: "true" });
+      expect(result.allUsers.length).to.be.equal(0);
     });
 
     it("should handle errors gracefully if the database query fails", async function () {
-      sinon.stub(users, "fetchUsersNotInDiscordServer").throws(new Error("Database query failed"));
+      sinon.stub(users, "fetchPaginatedUsers").throws(new Error("Database query failed"));
 
       try {
-        await users.fetchUsersNotInDiscordServer();
+        await users.fetchPaginatedUsers();
         expect.fail("Expected function to throw an error");
       } catch (error) {
         expect(error.message).to.equal("Database query failed");

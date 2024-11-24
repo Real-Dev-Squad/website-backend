@@ -1,20 +1,14 @@
 const firestore = require("../utils/firestore");
 const { formatUsername } = require("../utils/username");
 const userModel = firestore.collection("users");
-const { fetchUsersNotInDiscordServer } = require("../models/users");
-const { fetchIncompleteTaskForUser } = require("../models/tasks");
+const tasksQuery = require("../models/tasks");
 
-const getUsersWithIncompleteTasks = async () => {
+const getUsersWithIncompleteTasks = async (users) => {
+  if (users.length === 0) return [];
   try {
     const eligibleUsersWithTasks = [];
-
-    const userSnapshot = await fetchUsersNotInDiscordServer();
-
-    for (const userDoc of userSnapshot.docs) {
-      const user = userDoc.data();
-
-      const abandonedTasksQuerySnapshot = await fetchIncompleteTaskForUser(user.id);
-
+    for (const user of users) {
+      const abandonedTasksQuerySnapshot = await tasksQuery.fetchIncompleteTaskForUser(user.id);
       if (!abandonedTasksQuerySnapshot.empty) {
         eligibleUsersWithTasks.push(user);
       }
