@@ -17,7 +17,6 @@ const { cacheResponse, invalidateCache } = require("../utils/cache");
 const { ALL_TASKS } = require("../constants/cacheKeys");
 const { verifyCronJob } = require("../middlewares/authorizeBot");
 const { CLOUDFLARE_WORKER, CRON_JOB_HANDLER } = require("../constants/bot");
-const { devFlagMiddleware } = require("../middlewares/devFlag");
 
 const oldAuthorizationMiddleware = authorizeRoles([APPOWNER, SUPERUSER]);
 const newAuthorizationMiddleware = authorizeAndAuthenticate(
@@ -34,7 +33,6 @@ const enableDevModeMiddleware = (req, res, next) => {
   }
 };
 
-router.get("/orphaned-tasks", devFlagMiddleware, tasks.getOrphanedTasks);
 router.get("/", getTasksValidator, cacheResponse({ invalidationKey: ALL_TASKS, expiry: 10 }), tasks.fetchTasks);
 router.get("/self", authenticate, tasks.getSelfTasks);
 router.get("/overdue", authenticate, authorizeRoles([SUPERUSER]), tasks.overdueTasks);

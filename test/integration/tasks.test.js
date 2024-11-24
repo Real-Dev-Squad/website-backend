@@ -1639,10 +1639,10 @@ describe("Tasks", function () {
     });
   });
 
-  describe("GET /tasks/orphaned-tasks", function () {
+  describe("GET /tasks?orphaned", function () {
     beforeEach(async function () {
       await cleanDb();
-      const userPromises = abandonedUsersData.map((user) => userDBModel.add(user));
+      const userPromises = abandonedUsersData.map((user) => userDBModel.doc(user.id).set(user));
       await Promise.all(userPromises);
 
       const taskPromises = abandonedTasksData.map((task) => tasksModel.add(task));
@@ -1654,28 +1654,30 @@ describe("Tasks", function () {
       await cleanDb();
     });
 
+    it("should return 204 status when no users are archived", async function () {
+      await cleanDb();
+
+      const user = abandonedUsersData[2];
+      await userDBModel.add(user);
+
+      const task = abandonedTasksData[3];
+      await tasksModel.add(task);
+
+      const res = await chai.request(app).get("/tasks?dev=true&orphaned=true").set("Accept", "application/json");
+
+      expect(res).to.have.status(204);
+    });
+
     it("should fetch tasks assigned to archived and non-discord users", async function () {
-      const res = await chai.request(app).get("/tasks/orphaned-tasks?dev=true");
+      const res = await chai.request(app).get("/tasks?dev=true&orphaned=true");
 
       expect(res).to.have.status(200);
       expect(res.body).to.have.property("message").that.equals("Orphan tasks fetched successfully");
       expect(res.body.data).to.be.an("array").with.lengthOf(2);
     });
 
-    it("should return an empty array when no users are archived", async function () {
-      await cleanDb();
-      const user = abandonedUsersData[2];
-      await userDBModel.add(user);
-
-      const task = abandonedTasksData[3];
-      await tasksModel.add(task);
-      const res = await chai.request(app).get("/tasks/orphaned-tasks?dev=true");
-
-      expect(res).to.have.status(204);
-    });
-
     it("should fail if dev flag is not passed", async function () {
-      const res = await chai.request(app).get("/tasks/orphaned-tasks");
+      const res = await chai.request(app).get("/tasks?orphaned=true");
       expect(res).to.have.status(404);
       expect(res.body.message).to.be.equal("Route not found");
     });
@@ -1683,7 +1685,7 @@ describe("Tasks", function () {
     it("should handle errors gracefully if the database query fails", async function () {
       sinon.stub(tasksService, "fetchOrphanedTasks").rejects(new Error(INTERNAL_SERVER_ERROR));
 
-      const res = await chai.request(app).get("/tasks/orphaned-tasks?dev=true");
+      const res = await chai.request(app).get("/tasks?orphaned=true&dev=true");
 
       expect(res).to.have.status(500);
       expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);

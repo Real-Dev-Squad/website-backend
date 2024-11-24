@@ -2,8 +2,8 @@ const firestore = require("../utils/firestore");
 const tasksModel = firestore.collection("tasks");
 const { chunks } = require("../utils/array");
 const { DOCUMENT_WRITE_SIZE: FIRESTORE_BATCH_OPERATIONS_LIMIT } = require("../constants/constants");
-const { fetchUsersNotInDiscordServer } = require("../models/users");
-const { fetchIncompleteTaskForUser } = require("../models/tasks");
+const usersQuery = require("../models/users");
+const tasksQuery = require("../models/tasks");
 
 const addTaskCreatedAtAndUpdatedAtFields = async () => {
   const operationStats = {
@@ -60,13 +60,16 @@ const addTaskCreatedAtAndUpdatedAtFields = async () => {
 
 const fetchOrphanedTasks = async () => {
   try {
+    const userSnapshot = await usersQuery.fetchUsersNotInDiscordServer();
+    if (userSnapshot.empty) {
+      return [];
+    }
+    const userIds = userSnapshot.docs.map((doc) => doc.id);
+
     const abandonedTasks = [];
 
-    const userSnapshot = await fetchUsersNotInDiscordServer();
-
-    for (const userDoc of userSnapshot.docs) {
-      const user = userDoc.data();
-      const abandonedTasksQuerySnapshot = await fetchIncompleteTaskForUser(user.id);
+    for (const userId of userIds) {
+      const abandonedTasksQuerySnapshot = await tasksQuery.fetchIncompleteTaskForUser(userId);
 
       if (!abandonedTasksQuerySnapshot.empty) {
         abandonedTasks.push(...abandonedTasksQuerySnapshot.docs.map((doc) => doc.data()));

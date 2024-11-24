@@ -12,6 +12,7 @@ const {
   tasksData: abandonedTasksData,
 } = require("../../fixtures/abandoned-tasks/departed-users");
 const { updateTaskStatusToDone } = require("../../../models/tasks");
+const tasksQuery = require("../../../models/tasks");
 
 describe("Tasks services", function () {
   describe("task status COMPLETED to DONE in bulk", function () {
@@ -83,7 +84,7 @@ describe("Tasks services", function () {
     beforeEach(async function () {
       await cleanDb();
 
-      const userPromises = abandonedUsersData.map((user) => userModel.add(user));
+      const userPromises = abandonedUsersData.map((user) => userModel.doc(user.id).set(user));
       await Promise.all(userPromises);
 
       const taskPromises = abandonedTasksData.map((task) => tasksModel.add(task));
@@ -95,24 +96,23 @@ describe("Tasks services", function () {
     });
 
     it("should fetch tasks assigned to archived and non-discord users", async function () {
-      const abandonedTasks = await fetchOrphanedTasks();
-
-      expect(abandonedTasks).to.be.an("array");
-      expect(abandonedTasks).to.have.lengthOf(2);
+      const orphanedTasks = await fetchOrphanedTasks();
+      expect(orphanedTasks).to.be.an("array");
+      expect(orphanedTasks).to.have.lengthOf(2);
     });
 
     it("should not include completed or done tasks", async function () {
-      const abandonedTasks = await fetchOrphanedTasks();
+      const orphanedTasks = await fetchOrphanedTasks();
 
-      abandonedTasks.forEach((task) => {
+      orphanedTasks.forEach((task) => {
         expect(task.status).to.not.be.oneOf(["DONE", "COMPLETED"]);
       });
     });
 
     it("should not include tasks from active users", async function () {
-      const abandonedTasks = await fetchOrphanedTasks();
+      const orphanedTasks = await fetchOrphanedTasks();
 
-      abandonedTasks.forEach((task) => {
+      orphanedTasks.forEach((task) => {
         expect(task.assignee).to.not.equal("active_user");
       });
     });
@@ -126,9 +126,21 @@ describe("Tasks services", function () {
       const activeTask = abandonedTasksData[3];
       await tasksModel.add(activeTask);
 
-      const abandonedTasks = await fetchOrphanedTasks();
-      expect(abandonedTasks).to.be.an("array");
-      expect(abandonedTasks).to.have.lengthOf(0);
+      const orphanedTasks = await fetchOrphanedTasks();
+      expect(orphanedTasks).to.be.an("array");
+      expect(orphanedTasks).to.have.lengthOf(0);
+    });
+
+    it("should handle errors gracefully if getUsersWithIncompleteTasks fails", async function () {
+      Sinon.stub(tasksQuery, "fetchIncompleteTaskForUser").throws(new Error("Database query failed"));
+
+      try {
+        await fetchOrphanedTasks();
+        expect.fail("Expected function to throw an error");
+      } catch (error) {
+        expect(error.message).to.equal("Database query failed");
+      }
+      Sinon.restore();
     });
   });
 });
