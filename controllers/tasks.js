@@ -175,24 +175,22 @@ const fetchTasks = async (req, res) => {
     const isOrphaned = orphaned === "true";
     const isDev = dev === "true";
     if (isOrphaned) {
-      if (isDev) {
-        try {
-          const orphanedTasks = await tasksService.fetchOrphanedTasks();
-
-          if (!orphanedTasks || orphanedTasks.length === 0) {
-            return res.sendStatus(204);
-          }
-          const tasksWithRdsAssigneeInfo = await fetchTasksWithRdsAssigneeInfo(orphanedTasks);
-          return res.status(200).json({
-            message: "Orphan tasks fetched successfully",
-            data: tasksWithRdsAssigneeInfo,
-          });
-        } catch (error) {
-          logger.error("Error in getting tasks which were abandoned", error);
-          return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
-        }
-      } else {
+      if (!isDev) {
         return res.boom.notFound("Route not found");
+      }
+      try {
+        const orphanedTasks = await tasksService.fetchOrphanedTasks();
+        if (!orphanedTasks || orphanedTasks.length === 0) {
+          return res.sendStatus(204);
+        }
+        const tasksWithRdsAssigneeInfo = await fetchTasksWithRdsAssigneeInfo(orphanedTasks);
+        return res.status(200).json({
+          message: "Orphan tasks fetched successfully",
+          data: tasksWithRdsAssigneeInfo,
+        });
+      } catch (error) {
+        logger.error("Error in getting tasks which were abandoned", error);
+        return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
       }
     }
 
