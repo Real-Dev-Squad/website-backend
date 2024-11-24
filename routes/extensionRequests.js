@@ -16,6 +16,7 @@ router.post("/", authenticate, createExtensionRequest, extensionRequests.createT
 router.get("/", authenticate, getExtensionRequestsValidator, extensionRequests.fetchExtensionRequests);
 router.get("/self", authenticate, extensionRequests.getSelfExtensionRequests);
 router.get("/:id", authenticate, authorizeRoles([SUPERUSER, APPOWNER]), extensionRequests.getExtensionRequest);
+//  remove the skipAuthorizeRolesUnderFF & authorizeRoles middleware when removing the feature flag
 router.patch(
   "/:id",
   authenticate,
