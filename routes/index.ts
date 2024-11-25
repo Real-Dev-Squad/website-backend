@@ -41,4 +41,6 @@ app.use("/goals", require("./goals"));
 app.use("/invites", require("./invites"));
 app.use("/requests", require("./requests"));
 app.use("/subscription", devFlagMiddleware, require("./subscription"));
+app.use("/feature-flag", require("./featureFlag"));
+
 module.exports = app;

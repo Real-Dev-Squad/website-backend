@@ -63,6 +63,9 @@ module.exports = {
     discordBot: {
       baseUrl: "<DISCORD_BOT_BASE_URL>",
     },
+    featureFlag: {
+      baseUrl: "<FEATURE_FLAG_SERVICE_BASE_URL>",
+    },
   },
 
   cors: {
