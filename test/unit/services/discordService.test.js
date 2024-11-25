@@ -6,12 +6,14 @@ const {
   getDiscordMembers,
   removeRoleFromUser,
   setUserDiscordNickname,
+  deleteGroupRoleFromDiscord,
 } = require("../../../services/discordService");
 const { fetchAllUsers } = require("../../../models/users");
 const Sinon = require("sinon");
 const userModel = firestore.collection("users");
 const userDataArray = require("../../fixtures/user/user")();
 const discordMembersArray = require("../../fixtures/discordResponse/discord-response");
+// const { func } = require("joi");
 let fetchStub;
 describe("Discord services", function () {
   describe("setInDiscordFalseScript", function () {
@@ -155,6 +157,57 @@ describe("Discord services", function () {
       setUserDiscordNickname("Kotesh", "aMYlI7sxQ4JMPwiqLQlp").catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal("Error in updating discord Nickname");
+      });
+    });
+  });
+
+  describe("delete group role from Discord", function () {
+    beforeEach(function () {
+      fetchStub = Sinon.stub(global, "fetch");
+    });
+
+    afterEach(function () {
+      fetchStub.restore();
+    });
+
+    it("should successfully delete role from discord and return success for 204 response", async function () {
+      fetchStub.returns(
+        Promise.resolve({
+          ok: true,
+          status: 204,
+        })
+      );
+
+      const response = await deleteGroupRoleFromDiscord("123456789");
+      expect(response).to.deep.equal({
+        success: true,
+        message: "Role deleted successfully",
+      });
+      expect(fetchStub.calledOnce).to.be.equal(true);
+    });
+
+    it("should return failure for non-ok response", async function () {
+      fetchStub.returns(
+        Promise.resolve({
+          ok: false,
+          status: 400,
+        })
+      );
+
+      const response = await deleteGroupRoleFromDiscord("123456789");
+      expect(response).to.deep.equal({
+        success: false,
+        message: "Failed to delete role from discord",
+      });
+    });
+
+    it("should handle unexpected errors", async function () {
+      fetchStub.rejects(new Error("Network error"));
+
+      const response = await deleteGroupRoleFromDiscord("123456789");
+      expect(response).to.deep.equal({
+        success: false,
+        message: "Internal server error",
       });
     });
   });
