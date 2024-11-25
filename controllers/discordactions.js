@@ -505,14 +505,14 @@ const generateInviteForUser = async (req, res) => {
         inviteLink,
         purpose,
       });
-    } else {
-      await discordRolesModel.addInviteToInviteModel({ userId: userIdForInvite, inviteLink });
-
-      return res.status(201).json({
-        message: "invite generated successfully",
-        inviteLink,
-      });
     }
+
+    await discordRolesModel.addInviteToInviteModel({ userId: userIdForInvite, inviteLink });
+
+    return res.status(201).json({
+      message: "invite generated successfully",
+      inviteLink,
+    });
   } catch (err) {
     logger.error(`Error in generating invite for user: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
