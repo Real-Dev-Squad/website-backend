@@ -1,5 +1,5 @@
 import config from "config";
-import { FeatureFlag, FeatureFlagResponse, FeatureFlagService } from "../types/featureFlags";
+import { FeatureFlag, FeatureFlagResponse, FeatureFlagService, UpdateFeatureFlagRequestBody } from "../types/featureFlags";
 
 const FEATURE_FLAG_BASE_URL = config.get<string>("services.featureFlag.baseUrl");
 const FEATURE_FLAG_API_KEY = config.get<string>("services.featureFlag.apiKey");
@@ -17,11 +17,17 @@ const getAllFeatureFlags = async (): Promise<FeatureFlagResponse> => {
       method: "GET",
       headers: generateHeaders(),
     });
+
+    if (!response.ok) {
+      logger.error(`Failed to fetch feature flags. Status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
     const data = await response.json();
     return data;
   } catch (err) {
     logger.error("Error in fetching feature flags", err);
-      return { status: 500, error: { message: "Internal error while connecting to the feature flag service" } };
+    return { status: 500, error: { message: "Internal error while connecting to the feature flag service" } };
   }
 };
 
@@ -51,22 +57,59 @@ const createFeatureFlag = async (flagData: any): Promise<{ status: number; data?
     }
 };
 
-
 const updateFeatureFlag = async (
-  flagId: string, 
-  updateData: Partial<FeatureFlag>
+    flagId: string,
+    updateData: UpdateFeatureFlagRequestBody
 ): Promise<FeatureFlagResponse> => {
+    try {
+        const response = await fetch(`http://127.0.0.1:3000/feature-flags/${flagId}`, {
+            method: "PATCH",
+            headers: generateHeaders(),
+            body: JSON.stringify(updateData),
+        });
+        console.log("Mehulllll", response)
+        if (!response.ok) {
+            const error = await response.json();
+            return {
+                status: response.status,
+                error: error || { message: `HTTP error! status: ${response.status}` }
+            };
+        }
+
+        const data = await response.json();
+        return { status: response.status, data };
+    } catch (err) {
+        logger.error("Error in updating feature flag", err);
+        return {
+            status: 500,
+            error: { message: "Internal error while connecting to the feature flag service" }
+        };
+    }
+};
+
+const getFeatureFlagById = async (flagId: string): Promise<FeatureFlagResponse> => {
   try {
     const response = await fetch(`${FEATURE_FLAG_BASE_URL}/feature-flags/${flagId}`, {
-      method: "PUT",
+      method: "GET",
       headers: generateHeaders(),
-      body: JSON.stringify(updateData),
     });
+
+    if (!response.ok) {
+      logger.error(`Failed to fetch feature flag. Status: ${response.status}`);
+      return {
+        status: response.status,
+        error: { message: `HTTP error! status: ${response.status}` }
+      };
+    }
+
     const data = await response.json();
-    return data;
+    return { status: response.status, data };
   } catch (err) {
-    logger.error("Error in updating feature flag", err);
-    throw err;
+    logger.error("Error in fetching feature flag by ID", err);
+    return {
+      status: 500,
+      error: { message: "Internal error while connecting to the feature flag service" }
+    };
   }
 };
 
@@ -74,6 +117,7 @@ const featureFlagService: FeatureFlagService = {
   getAllFeatureFlags,
   createFeatureFlag,
   updateFeatureFlag,
+  getFeatureFlagById,
 };
 
 export default featureFlagService; 

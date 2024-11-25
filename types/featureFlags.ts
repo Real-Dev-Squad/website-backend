@@ -20,5 +20,11 @@ export interface FeatureFlagResponse {
 export interface FeatureFlagService {
   getAllFeatureFlags(): Promise<FeatureFlagResponse>;
   createFeatureFlag(flagData: Partial<FeatureFlag>): Promise<FeatureFlagResponse>;
-  updateFeatureFlag(flagId: string, updateData: Partial<FeatureFlag>): Promise<FeatureFlagResponse>;
+  updateFeatureFlag(flagId: string, updateData: UpdateFeatureFlagRequestBody): Promise<FeatureFlagResponse>;
+	getFeatureFlagById: (flagId: string) => Promise<FeatureFlagResponse>;
 } 
+
+export interface UpdateFeatureFlagRequestBody {
+	Status: string;
+	UserId: string;
+}
