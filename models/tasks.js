@@ -4,7 +4,6 @@ const userModel = firestore.collection("users");
 const ItemModel = firestore.collection("itemTags");
 const dependencyModel = firestore.collection("taskDependencies");
 const userUtils = require("../utils/users");
-const { updateTaskStatusToDone } = require("../services/tasks");
 const { chunks } = require("../utils/array");
 const { DOCUMENT_WRITE_SIZE } = require("../constants/constants");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
@@ -23,6 +22,42 @@ const {
 } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+
+/**
+ * Update multiple tasks' status to DONE in one batch operation.
+ * @param {Object[]} tasksData - Tasks data to update, must contain 'id' and 'status' fields.
+ * @returns {Object} - Summary of the batch operation.
+ * @property {number} totalUpdatedStatus - Number of tasks that has their status updated to DONE.
+ * @property {number} totalOperationsFailed - Number of tasks that failed to update.
+ * @property {string[]} updatedTaskDetails - IDs of tasks that has their status updated to DONE.
+ * @property {string[]} failedTaskDetails - IDs of tasks that failed to update.
+ */
+const updateTaskStatusToDone = async (tasksData) => {
+  const batch = firestore.batch();
+  const tasksBatch = [];
+  const summary = {
+    totalUpdatedStatus: 0,
+    totalOperationsFailed: 0,
+    updatedTaskDetails: [],
+    failedTaskDetails: [],
+  };
+  tasksData.forEach((task) => {
+    const updateTaskData = { ...task, status: "DONE" };
+    batch.update(tasksModel.doc(task.id), updateTaskData);
+    tasksBatch.push(task.id);
+  });
+  try {
+    await batch.commit();
+    summary.totalUpdatedStatus += tasksData.length;
+    summary.updatedTaskDetails = [...tasksBatch];
+    return { ...summary };
+  } catch (err) {
+    logger.error("Firebase batch Operation Failed!");
+    summary.totalOperationsFailed += tasksData.length;
+    summary.failedTaskDetails = [...tasksBatch];
+    return { ...summary };
+  }
+};
 
 /**
  * Adds and Updates tasks
@@ -701,6 +736,26 @@ const markUnDoneTasksOfArchivedUsersBacklog = async (users) => {
   }
 };
 
+/**
+ * Fetch incomplete tasks assigned to a specific user
+ * @param {string} userId - The unique identifier for the user.
+ * @returns {Promise<Array>} - A promise that resolves to an array of incomplete tasks for the given user.
+ * @throws {Error} - Throws an error if the database query fails.
+ */
+const fetchIncompleteTaskForUser = async (userId) => {
+  const COMPLETED_STATUSES = [DONE, COMPLETED];
+  try {
+    const incompleteTaskForUser = await tasksModel
+      .where("assigneeId", "==", userId)
+      .where("status", "not-in", COMPLETED_STATUSES)
+      .get();
+    return incompleteTaskForUser;
+  } catch (error) {
+    logger.error("Error when fetching incomplete tasks:", error);
+    throw error;
+  }
+};
+
 module.exports = {
   updateTask,
   fetchTasks,
@@ -720,4 +775,6 @@ module.exports = {
   updateTaskStatus,
   updateOrphanTasksStatus,
   markUnDoneTasksOfArchivedUsersBacklog,
+  fetchIncompleteTaskForUser,
+  updateTaskStatusToDone,
 };

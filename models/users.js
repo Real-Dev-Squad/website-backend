@@ -1030,6 +1030,24 @@ const updateUsersWithNewUsernames = async () => {
   }
 };
 
+/**
+ * Fetches users who are not in the Discord server.
+ * @returns {Promise<FirebaseFirestore.QuerySnapshot>} - A promise that resolves to a Firestore QuerySnapshot containing the users matching the criteria.
+ * @throws {Error} - Throws an error if the database query fails.
+ */
+const fetchUsersNotInDiscordServer = async () => {
+  try {
+    const usersNotInDiscordServer = await userModel
+      .where("roles.archived", "==", true)
+      .where("roles.in_discord", "==", false)
+      .get();
+    return usersNotInDiscordServer;
+  } catch (error) {
+    logger.error(`Error in getting users who are not in discord server:  ${error}`);
+    throw error;
+  }
+};
+
 module.exports = {
   addOrUpdate,
   fetchPaginatedUsers,
@@ -1059,4 +1077,5 @@ module.exports = {
   fetchUserForKeyValue,
   getNonNickNameSyncedUsers,
   updateUsersWithNewUsernames,
+  fetchUsersNotInDiscordServer,
 };
