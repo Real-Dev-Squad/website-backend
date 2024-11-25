@@ -72,7 +72,6 @@ export const createFeatureFlag = async (req: CustomRequest, res: CustomResponse)
 export const updateFeatureFlag = async (req: CustomRequest, res: CustomResponse) => {
   try {
     const { flagId } = req.params;
-    console.log("Mehulllll", flagId)
     const updateData: UpdateFeatureFlagRequestBody = {
       Status: req.body.Status,
       UserId: req.body.UserId,

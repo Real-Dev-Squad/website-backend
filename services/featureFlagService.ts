@@ -62,12 +62,12 @@ const updateFeatureFlag = async (
     updateData: UpdateFeatureFlagRequestBody
 ): Promise<FeatureFlagResponse> => {
     try {
-        const response = await fetch(`http://127.0.0.1:3000/feature-flags/${flagId}`, {
+        const response = await fetch(`${FEATURE_FLAG_BASE_URL}/feature-flags/${flagId}`, {
             method: "PATCH",
             headers: generateHeaders(),
             body: JSON.stringify(updateData),
         });
-        console.log("Mehulllll", response)
+
         if (!response.ok) {
             const error = await response.json();
             return {
