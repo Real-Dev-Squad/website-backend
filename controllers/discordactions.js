@@ -535,17 +535,16 @@ const getUserDiscordInvite = async (req, res) => {
     }
 
     if (dev) {
-      return res.json({
+      return res.status(200).json({
         message: "Invite returned successfully",
         inviteLink: invite?.inviteLink,
         purpose: invite?.purpose,
       });
-    } else {
-      return res.json({
-        message: "Invite returned successfully",
-        inviteLink: invite?.inviteLink,
-      });
     }
+    return res.status(200).json({
+      message: "Invite returned successfully",
+      inviteLink: invite?.inviteLink,
+    });
   } catch (err) {
     logger.error(`Error in fetching user invite: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
