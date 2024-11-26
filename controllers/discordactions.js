@@ -467,8 +467,9 @@ const generateInviteForUser = async (req, res) => {
     const { userId, dev } = req.query;
     const userIdForInvite = userId || req.userData.id;
     let inviteLink = "";
+    const isDev = dev === "true";
 
-    if (!dev) {
+    if (!isDev) {
       const modelResponse = await discordRolesModel.getUserDiscordInvite(userIdForInvite);
       if (!modelResponse.notFound) {
         return res.status(409).json({
@@ -496,7 +497,7 @@ const generateInviteForUser = async (req, res) => {
     const inviteCode = discordInviteResponse.data.code;
     inviteLink = `discord.gg/${inviteCode}`;
 
-    if (dev) {
+    if (isDev) {
       const purpose = req.body.purpose;
       await discordRolesModel.addInviteToInviteModel({ userId: userIdForInvite, inviteLink, purpose });
 
@@ -523,6 +524,7 @@ const getUserDiscordInvite = async (req, res) => {
   try {
     const { userId, dev } = req.query;
     const isSuperUser = req.userData.roles.super_user;
+    const isDev = dev === "true";
 
     if (userId && !isSuperUser) return res.boom.forbidden("User should be super user to get link for other users");
 
@@ -534,7 +536,7 @@ const getUserDiscordInvite = async (req, res) => {
       return res.boom.notFound("User invite doesn't exist");
     }
 
-    if (dev) {
+    if (isDev) {
       return res.status(200).json({
         message: "Invite returned successfully",
         inviteLink: invite?.inviteLink,
