@@ -6,6 +6,7 @@ const discordRolesModel = require("../models/discordactions");
 const discordServices = require("../services/discordService");
 const { fetchAllUsers, fetchUser } = require("../models/users");
 const { generateCloudFlareHeaders } = require("../utils/discord-actions");
+const { addLog } = require("../models/logs");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 const discordMavenRoleId = config.get("discordMavenRoleId");
 
@@ -60,6 +61,60 @@ const createGroupRole = async (req, res) => {
   } catch (err) {
     logger.error(`Error while creating new Role: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+/**
+ * Controller function to handle the soft deletion of a group role.
+ *
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Promise<void>}
+ */
+const deleteGroupRole = async (req, res) => {
+  const { groupId } = req.params;
+
+  try {
+    const { roleExists, existingRoles } = await discordRolesModel.isGroupRoleExists({ groupId });
+
+    if (!roleExists) {
+      return res.boom.notFound("Group role not found");
+    }
+
+    const roleData = existingRoles.data();
+
+    const discordDeletion = await discordServices.deleteGroupRoleFromDiscord(roleData.roleid);
+
+    if (!discordDeletion.success) {
+      return res.boom.badImplementation(discordDeletion.message);
+    }
+
+    const { isSuccess } = await discordRolesModel.deleteGroupRole(groupId, req.userData.id);
+
+    if (!isSuccess) {
+      logger.error(`Role deleted from Discord but failed to delete from database for groupId: ${groupId}`);
+      return res.boom.badImplementation("Group role deletion failed");
+    }
+
+    const groupDeletionLog = {
+      type: "group-role-deletion",
+      meta: {
+        userId: req.userData.id,
+      },
+      body: {
+        groupId: groupId,
+        roleName: roleData.rolename,
+        discordRoleId: roleData.roleid,
+        action: "delete",
+      },
+    };
+    await addLog(groupDeletionLog.type, groupDeletionLog.meta, groupDeletionLog.body);
+    return res.status(200).json({
+      message: "Group role deleted successfully",
+    });
+  } catch (error) {
+    logger.error(`Error while deleting group role: ${error}`);
+    return res.boom.badImplementation("Internal server error");
   }
 };
 
@@ -491,4 +546,5 @@ module.exports = {
   setRoleToUsersWith31DaysPlusOnboarding,
   getUserDiscordInvite,
   generateInviteForUser,
+  deleteGroupRole,
 };
