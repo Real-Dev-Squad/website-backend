@@ -61,9 +61,9 @@ const addTaskCreatedAtAndUpdatedAtFields = async () => {
 const fetchOrphanedTasks = async () => {
   try {
     const userSnapshot = await usersQuery.fetchUsersNotInDiscordServer();
-    if (userSnapshot.empty) {
-      return [];
-    }
+
+    if (userSnapshot.empty) return [];
+
     const userIds = userSnapshot.docs.map((doc) => doc.id);
 
     const abandonedTasks = [];
