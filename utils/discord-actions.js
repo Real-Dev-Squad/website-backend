@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const config = require("config");
 const { getDiscordMemberDetails } = require("../services/discordMembersService");
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 const RDS_SERVERLESS_PRIVATE_KEY = config.get("rdsServerlessBot.rdsServerLessPrivateKey");
