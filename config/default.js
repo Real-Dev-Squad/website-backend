@@ -72,6 +72,7 @@ module.exports = {
     },
     featureFlag: {
       baseUrl: "<FEATURE_FLAG_SERVICE_BASE_URL>",
+      apiKey: "<FEATURE_FLAG_SERVICE_API_KEY>",
     },
   },
 

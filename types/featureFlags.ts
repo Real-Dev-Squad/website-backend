@@ -20,7 +20,6 @@ export interface FeatureFlagResponse {
 export interface FeatureFlagService {
   getAllFeatureFlags(): Promise<FeatureFlagResponse>;
   createFeatureFlag(flagData: Partial<FeatureFlag>): Promise<FeatureFlagResponse>;
-  updateFeatureFlag(flagId: string, updateData: UpdateFeatureFlagRequestBody): Promise<FeatureFlagResponse>;
 	getFeatureFlagById: (flagId: string) => Promise<FeatureFlagResponse>;
 } 
 
