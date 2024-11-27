@@ -1,5 +1,5 @@
 import config from "config";
-import { FeatureFlag, FeatureFlagResponse, FeatureFlagService } from "../types/featureFlags";
+import { FeatureFlagResponse, FeatureFlagService } from "../types/featureFlags";
 
 const FEATURE_FLAG_BASE_URL = config.get<string>("services.featureFlag.baseUrl");
 const FEATURE_FLAG_API_KEY = config.get<string>("services.featureFlag.apiKey");

@@ -111,7 +111,7 @@ describe("Feature Flag API", function () {
 
   describe("GET /feature-flag/getFeatureFlag/:flagId", function () {
     it("should return specific feature flag successfully", function (done) {
-      const mockFlag = mockFlags[0]
+      const mockFlag = mockFlags[0];
 
       const serviceResponse = {
         status: 200,
