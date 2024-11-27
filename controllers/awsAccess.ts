@@ -7,7 +7,6 @@ export const addUserToAWSGroup = async (req, res) => {
     const { groupId, userId } = req.body;
 
     try {
-      console.log("discord id ", userId);
       const userInfoData = await dataAccess.retrieveUsers({ discordId: userId, level: userDataLevels.ACCESS_LEVEL.INTERNAL, role: 'cloudfare_worker'});
       if (!userInfoData.userExists) {
         return res.status(400).json({ error: "User not found" });

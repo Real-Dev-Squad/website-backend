@@ -93,7 +93,6 @@ export const addUserToGroup = async (groupId: string, awsUserId: string): Promis
       const command = new CreateGroupMembershipCommand(params);
       return (await client.send(command));
     } catch (error) {
-      console.error("Error adding user to group:", error);
       if (error.__type === 'ConflictException'){
         return { conflict: true };
       }
