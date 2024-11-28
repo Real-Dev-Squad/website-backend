@@ -1,21 +1,27 @@
 const firestore = require("../utils/firestore");
 const { formatUsername } = require("../utils/username");
 const userModel = firestore.collection("users");
-const tasksQuery = require("../models/tasks");
+const tasksModel = require("../models/tasks");
 
 const getUsersWithIncompleteTasks = async (users) => {
   if (users.length === 0) return [];
+
   try {
-    const eligibleUsersWithTasks = [];
-    for (const user of users) {
-      const abandonedTasksQuerySnapshot = await tasksQuery.fetchIncompleteTaskForUser(user.id);
-      if (!abandonedTasksQuerySnapshot.empty) {
-        eligibleUsersWithTasks.push(user);
-      }
+    const userIds = users.map((user) => user.id);
+
+    const abandonedTasksQuerySnapshot = await tasksModel.fetchIncompleteTasksByUserIds(userIds);
+
+    if (abandonedTasksQuerySnapshot.empty) {
+      return [];
     }
+
+    const userIdsWithIncompleteTasks = new Set(abandonedTasksQuerySnapshot.map((doc) => doc.data().assigneeId));
+
+    const eligibleUsersWithTasks = users.filter((user) => userIdsWithIncompleteTasks.has(user.id));
+
     return eligibleUsersWithTasks;
   } catch (error) {
-    logger.error(`Error in getting users who abandoned tasks:  ${error}`);
+    logger.error(`Error in getting users who abandoned tasks: ${error}`);
     throw error;
   }
 };

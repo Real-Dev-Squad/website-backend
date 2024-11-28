@@ -371,23 +371,23 @@ describe("tasks", function () {
     });
 
     it("should fetch tasks which are incomplete for the given user", async function () {
-      const inactiveUser = abandonedUsersData[0];
-      const incompleteTasks = await tasks.fetchIncompleteTaskForUser(inactiveUser.id);
-      expect(incompleteTasks.docs.length).to.be.equal(1);
+      const userIds = abandonedUsersData.map((user) => user.id);
+      const incompleteTasks = await tasks.fetchIncompleteTasksByUserIds(userIds);
+      expect(incompleteTasks.length).to.be.equal(3);
     });
 
     it("should return an empty array if there are no tasks incomplete for the user", async function () {
       await cleanDb();
       const activeUser = abandonedUsersData[2];
-      const incompleteTasks = await tasks.fetchIncompleteTaskForUser(activeUser.id);
-      expect(incompleteTasks.docs.length).to.be.equal(0);
+      const incompleteTasks = await tasks.fetchIncompleteTasksByUserIds([activeUser.id]);
+      expect(incompleteTasks.length).to.be.equal(0);
     });
 
     it("should handle errors gracefully if the database query fails", async function () {
-      sinon.stub(tasks, "fetchIncompleteTaskForUser").throws(new Error("Database query failed"));
+      sinon.stub(tasks, "fetchIncompleteTasksByUserIds").throws(new Error("Database query failed"));
 
       try {
-        await tasks.fetchIncompleteTaskForUser();
+        await tasks.fetchIncompleteTasksByUserIds();
         expect.fail("Expected function to throw an error");
       } catch (error) {
         expect(error.message).to.equal("Database query failed");

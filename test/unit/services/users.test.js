@@ -150,7 +150,7 @@ describe("Users services", function () {
 
     it("should throw an error if fetchIncompleteTaskForUser fails", async function () {
       const users = abandonedUsersData.slice(0, 2);
-      Sinon.stub(tasks, "fetchIncompleteTaskForUser").throws(new Error("Database query failed"));
+      Sinon.stub(tasks, "fetchIncompleteTasksByUserIds").throws(new Error("Database query failed"));
 
       try {
         await getUsersWithIncompleteTasks([users]);
