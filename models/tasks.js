@@ -737,21 +737,28 @@ const markUnDoneTasksOfArchivedUsersBacklog = async (users) => {
 };
 
 /**
- * Fetch incomplete tasks assigned to a specific user
- * @param {string} userId - The unique identifier for the user.
- * @returns {Promise<Array>} - A promise that resolves to an array of incomplete tasks for the given user.
+ * Fetches all incomplete tasks for given user IDs.
+ *
+ * @param {string[]} userIds - The IDs of the users to fetch incomplete tasks for.
+ * @returns {Promise<firebase.firestore.QuerySnapshot>} - The query snapshot object.
  * @throws {Error} - Throws an error if the database query fails.
  */
-const fetchIncompleteTaskForUser = async (userId) => {
+const fetchIncompleteTasksByUserIds = async (userIds) => {
   const COMPLETED_STATUSES = [DONE, COMPLETED];
+
+  if (!userIds || userIds.length === 0) {
+    return [];
+  }
   try {
-    const incompleteTaskForUser = await tasksModel
-      .where("assigneeId", "==", userId)
-      .where("status", "not-in", COMPLETED_STATUSES)
-      .get();
-    return incompleteTaskForUser;
+    const incompleteTasksQuery = await tasksModel.where("assigneeId", "in", userIds).get();
+
+    const incompleteTaskForUsers = incompleteTasksQuery.docs.filter((task) => {
+      return !COMPLETED_STATUSES.includes(task.data().status);
+    });
+
+    return incompleteTaskForUsers;
   } catch (error) {
-    logger.error("Error when fetching incomplete tasks:", error);
+    logger.error("Error when fetching incomplete tasks for users:", error);
     throw error;
   }
 };
@@ -775,6 +782,6 @@ module.exports = {
   updateTaskStatus,
   updateOrphanTasksStatus,
   markUnDoneTasksOfArchivedUsersBacklog,
-  fetchIncompleteTaskForUser,
   updateTaskStatusToDone,
+  fetchIncompleteTasksByUserIds,
 };

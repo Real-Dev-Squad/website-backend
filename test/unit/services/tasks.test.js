@@ -132,7 +132,7 @@ describe("Tasks services", function () {
     });
 
     it("should handle errors gracefully if getUsersWithIncompleteTasks fails", async function () {
-      Sinon.stub(tasksQuery, "fetchIncompleteTaskForUser").throws(new Error("Database query failed"));
+      Sinon.stub(tasksQuery, "fetchIncompleteTasksByUserIds").throws(new Error("Database query failed"));
 
       try {
         await fetchOrphanedTasks();
