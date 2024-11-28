@@ -189,7 +189,7 @@ const fetchTasks = async (req, res) => {
           data: tasksWithRdsAssigneeInfo,
         });
       } catch (error) {
-        logger.error("Error in getting tasks which were abandoned", error);
+        logger.error("Error in getting tasks which were orphaned", error);
         return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
       }
     }

@@ -66,15 +66,15 @@ const fetchOrphanedTasks = async () => {
 
     const userIds = userSnapshot.docs.map((doc) => doc.id);
 
-    const abandonedTasksQuerySnapshot = await tasksQuery.fetchIncompleteTasksByUserIds(userIds);
+    const orphanedTasksQuerySnapshot = await tasksQuery.fetchIncompleteTasksByUserIds(userIds);
 
-    if (abandonedTasksQuerySnapshot.empty) {
+    if (orphanedTasksQuerySnapshot.empty) {
       return [];
     }
 
-    const abandonedTasks = abandonedTasksQuerySnapshot.map((doc) => doc.data());
+    const orphanedTasks = orphanedTasksQuerySnapshot.map((doc) => doc.data());
 
-    return abandonedTasks;
+    return orphanedTasks;
   } catch (error) {
     logger.error(`Error in getting tasks abandoned by users:  ${error}`);
     throw error;
