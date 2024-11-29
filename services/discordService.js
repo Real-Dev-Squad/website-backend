@@ -103,7 +103,40 @@ const setUserDiscordNickname = async (userName, discordId) => {
     };
   } catch (err) {
     logger.error("Error in updating discord Nickname", err);
-    throw err;
+    throw new Error(err);
+  }
+};
+
+/**
+ * Deletes a group role from the Discord server.
+ * This function sends a DELETE request to the Discord API to remove the role.
+ * It's part of the soft delete process, where we remove the role from Discord
+ * but keep a record of it in our database.
+ *
+ * @param {string} roleId - The Discord ID of the role to be deleted
+ * @returns {Promise<Object>} The response from the Discord API
+ * @throws {Error} If the deletion fails or there's a network error
+ */
+
+const deleteGroupRoleFromDiscord = async (roleId) => {
+  try {
+    const authToken = generateAuthTokenForCloudflare();
+    const response = await fetch(`${DISCORD_BASE_URL}/roles/${roleId}?dev=true`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
+
+    if (response.status === 204) {
+      return { success: true, message: "Role deleted successfully" };
+    }
+
+    return { success: false, message: "Failed to delete role from discord" };
+  } catch (err) {
+    logger.error("Error deleting role from Discord", err);
+    return { success: false, message: "Internal server error" };
   }
 };
 
@@ -114,4 +147,5 @@ module.exports = {
   addRoleToUser,
   removeRoleFromUser,
   setUserDiscordNickname,
+  deleteGroupRoleFromDiscord,
 };
