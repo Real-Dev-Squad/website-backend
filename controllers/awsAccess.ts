@@ -21,6 +21,12 @@ export const addUserToAWSGroup = async (req, res) => {
       if (awsUserId === null){
         // We need to create the user in AWS before and then fetch its Id
         userCreationResponse = await createUser(userInfoData.user.username, userInfoData.user.email);
+        
+        if (userCreationResponse.conflict){
+          return res.status(400).json({
+            error: `Username or Email is already being used, please use another email / username for creating account in AWS`
+          })
+        }
         awsUserId = userCreationResponse.UserId;
       }
 
