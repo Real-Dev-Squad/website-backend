@@ -205,11 +205,7 @@ describe("/logs", function () {
 
   describe("Update logs", function () {
     it("should run the migration and update logs successfully", async function () {
-      const res = await chai
-        .request(app)
-        .post("/logs/migration")
-        .set("cookie", `${cookieName}=${superUserToken}`)
-        .send();
+      const res = await chai.request(app).post("/logs/migrate").set("cookie", `${cookieName}=${superUserToken}`).send();
 
       expect(res).to.have.status(200);
       expect(res.body).to.be.an("object");
@@ -230,7 +226,7 @@ describe("/logs", function () {
     });
 
     it("should return error if unauthorized user tries to run migration", async function () {
-      const res = await chai.request(app).post("/logs/migration").set("cookie", `${cookieName}=invalidToken`).send();
+      const res = await chai.request(app).post("/logs/migrate").set("cookie", `${cookieName}=invalidToken`).send();
 
       expect(res).to.have.status(401);
       expect(res.body).to.have.property("error").that.is.a("string");
