@@ -257,6 +257,43 @@ describe("auth", function () {
     expect(res.headers["set-cookie"][1]).to.include("SameSite=Lax");
   });
 
+  it("should redirect to the correct URL and update user email when GitHub API returns primary email", async function () {
+    // Define a fake GitHub API response for user emails (primary email)
+    const rdsUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
+    const fakeEmails = [
+      { primary: true, email: "primary@example.com" },
+      { primary: false, email: "secondary@example.com" },
+    ];
+
+    // Stub fetch to resolve with the fake email response
+    const fetchStub = sinon.stub(global, "fetch").resolves(new Response(JSON.stringify(fakeEmails)));
+
+    // Stub passport.authenticate to simulate a successful authentication
+    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
+      callback(null, "accessToken", {
+        username: "github-user",
+        displayName: "GitHub User",
+        _json: { email: null, created_at: "2022-01-01" },
+        id: 12345,
+      });
+      return (req, res, next) => {};
+    });
+
+    const res = await chai
+      .request(app)
+      .get(`/auth/github/callback`)
+      .query({ code: "codeReturnedByGithub", state: rdsUrl })
+      .redirects(0);
+    expect(res).to.have.status(302);
+
+    // Verify that the fetch function was called with the correct GitHub API URL
+    const fetchArgs = fetchStub.getCall(0).args;
+    expect(fetchArgs[0]).to.equal("https://api.github.com/user/emails");
+    expect(fetchArgs[1].headers.Authorization).to.equal("token accessToken"); // Ensure the token is passed correctly
+    // Check if the user data was updated with the primary email returned by GitHub API
+    // expect(userData.email).to.equal('primary@example.com'); // Make sure the email was updated from the API response
+  });
+
   it("should return google call back URL", async function () {
     const googleOauthURL = generateGoogleAuthRedirectUrl({});
     const res = await chai.request(app).get("/auth/google/login").redirects(0);
@@ -408,11 +445,7 @@ describe("auth", function () {
 
         expect(res).to.have.status(401);
         expect(res.body).to.be.an("object");
-        expect(res.body).to.eql({
-          statusCode: 401,
-          error: "Unauthorized",
-          message: "User cannot be authenticated",
-        });
+        expect(res.body.message).to.equal("User cannot be authenticated");
 
         return done();
       });

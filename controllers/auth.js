@@ -56,7 +56,7 @@ const googleAuthCallback = (req, res, next) => {
 
       if (userDataFromDB.userExists) {
         if (userDataFromDB.user.roles.developer === true) {
-          // console.log("hi");
+          // Waiting for sameer-supe to update what he requires on frontend.
           return res.boom.unauthorized("User is not allowed to login via Google");
         }
       }
@@ -164,6 +164,7 @@ const githubAuthCallback = (req, res, next) => {
       // console.log(userData);
 
       if (userData.email === null) {
+        // console.log("old", userData);
         const res = await fetch("https://api.github.com/user/emails", {
           headers: {
             Authorization: `token ${accessToken}`,
@@ -177,10 +178,9 @@ const githubAuthCallback = (req, res, next) => {
         // Get the first primary email, if it exists
         if (primaryEmails.length > 0) {
           userData.email = primaryEmails[0].email;
-        } else {
-          userData.email = null;
-          // console.log("userData.email", userData.email);
+          // console.log("userData.email setting up", userData.email);
         }
+        // console.log(userData);
       }
 
       const { userId, incompleteUserDetails, role } = await users.addOrUpdate(userData);
@@ -213,6 +213,7 @@ const githubAuthCallback = (req, res, next) => {
         newUrl.searchParams.set("token", token);
         authRedirectionUrl = newUrl.toString();
       }
+      // console.log(userData);
       return res.redirect(authRedirectionUrl);
     })(req, res, next);
   } catch (err) {
