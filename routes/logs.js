@@ -7,6 +7,6 @@ const { SUPERUSER } = require("../constants/roles");
 
 router.get("/:type", authenticate, authorizeRoles([SUPERUSER]), logs.fetchLogs);
 router.get("/", authenticate, authorizeRoles([SUPERUSER]), logs.fetchAllLogs);
-router.post("/migration", authenticate, authorizeRoles([SUPERUSER]), logs.updateLogs);
+router.post("/migrate", authenticate, authorizeRoles([SUPERUSER]), logs.updateLogs);
 
 module.exports = router;
