@@ -50,6 +50,10 @@ const getSelfArts = async (req, res) => {
   try {
     const { id } = req.userData;
     const arts = await artsQuery.fetchUserArts(id);
+    res.set(
+      "X-Deprecation-Warning",
+      "WARNING: This endpoint is deprecated and will be removed in the future. Please use /arts/:userId to get the art details."
+    );
     return res.json({
       message: "User arts returned successfully!",
       arts,
@@ -64,6 +68,11 @@ const getUserArts = async (req, res) => {
   try {
     const userId = req.params.userId;
     const arts = await artsQuery.fetchUserArts(userId);
+
+    if (!arts || arts.length === 0) {
+      return res.status(204).send();
+    }
+
     return res.json({
       message: `User Arts of userId ${userId} returned successfully`,
       arts,
