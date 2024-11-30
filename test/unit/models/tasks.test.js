@@ -357,7 +357,7 @@ describe("tasks", function () {
     });
   });
 
-  describe("fetchIncompleteTaskForUser", function () {
+  describe("fetchIncompleteTasksByUserIds", function () {
     beforeEach(async function () {
       await cleanDb();
 
