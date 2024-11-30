@@ -30,6 +30,7 @@ const { addLog } = require("../models/logs");
 const { getUserStatus } = require("../models/userStatus");
 const config = require("config");
 const { generateUniqueUsername } = require("../services/users");
+const userService = require("../services/users");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 
 const verifyUser = async (req, res) => {
@@ -188,6 +189,30 @@ const getUsers = async (req, res) => {
         });
       } else {
         return res.boom.notFound("Route not found");
+      }
+    }
+
+    const isDeparted = req.query.departed === "true";
+
+    if (isDeparted) {
+      if (!dev) {
+        return res.boom.notFound("Route not found");
+      }
+      try {
+        const result = await dataAccess.retrieveUsers({ query: req.query });
+        const departedUsers = await userService.getUsersWithIncompleteTasks(result.users);
+        if (departedUsers.length === 0) return res.status(204).send();
+        return res.json({
+          message: "Users with abandoned tasks fetched successfully",
+          users: departedUsers,
+          links: {
+            next: result.nextId ? getPaginationLink(req.query, "next", result.nextId) : "",
+            prev: result.prevId ? getPaginationLink(req.query, "prev", result.prevId) : "",
+          },
+        });
+      } catch (error) {
+        logger.error("Error when fetching users who abandoned tasks:", error);
+        return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
       }
     }
 

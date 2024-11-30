@@ -200,6 +200,7 @@ async function getUsers(req, res, next) {
       filterBy: joi.string().optional(),
       days: joi.string().optional(),
       dev: joi.string().optional(),
+      departed: joi.string().optional(),
       roles: joi.optional().custom((value, helpers) => {
         if (value !== "member") {
           return helpers.message("only member role is supported");
