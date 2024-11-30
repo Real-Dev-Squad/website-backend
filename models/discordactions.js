@@ -46,6 +46,31 @@ const createNewRole = async (roleData) => {
   }
 };
 
+/**
+ * Soft deletes a group role by marking it as deleted in the database.
+ * This function updates the role document in Firestore, setting isDeleted to true
+ * and recording who deleted it and when.
+ *
+ * @param {string} groupId - The ID of the group role to be deleted
+ * @param {string} deletedBy - The ID of the user performing the deletion for logging purpose
+ * @returns {Promise<Object>} An object indicating whether the operation was successful
+ */
+const deleteGroupRole = async (groupId, deletedBy) => {
+  try {
+    const roleRef = admin.firestore().collection("discord-roles").doc(groupId);
+    await roleRef.update({
+      isDeleted: true,
+      deletedAt: admin.firestore.Timestamp.fromDate(new Date()),
+      deletedBy: deletedBy,
+    });
+
+    return { isSuccess: true };
+  } catch (error) {
+    logger.error(`Error in deleteGroupRole: ${error}`);
+    return { isSuccess: false };
+  }
+};
+
 const removeMemberGroup = async (roleId, discordId) => {
   try {
     const backendResponse = await deleteRoleFromDatabase(roleId, discordId);
@@ -139,10 +164,13 @@ const updateGroupRole = async (roleData, docId) => {
 
 const isGroupRoleExists = async (options = {}) => {
   try {
-    const { rolename = null, roleid = null } = options;
+    const { groupId = null, rolename = null, roleid = null } = options;
 
     let existingRoles;
-    if (rolename && roleid) {
+    if (groupId) {
+      existingRoles = await discordRoleModel.doc(groupId).get();
+      return { roleExists: existingRoles.exists, existingRoles };
+    } else if (rolename && roleid) {
       existingRoles = await discordRoleModel
         .where("rolename", "==", rolename)
         .where("roleid", "==", roleid)
@@ -153,9 +181,8 @@ const isGroupRoleExists = async (options = {}) => {
     } else if (roleid) {
       existingRoles = await discordRoleModel.where("roleid", "==", roleid).limit(1).get();
     } else {
-      throw Error("Either rolename or roleId is required");
+      throw Error("Either rolename, roleId, or groupId is required");
     }
-
     return { roleExists: !existingRoles.empty, existingRoles };
   } catch (err) {
     logger.error("Error in getting all group-roles", err);
@@ -1075,4 +1102,5 @@ module.exports = {
   getUserDiscordInvite,
   addInviteToInviteModel,
   groupUpdateLastJoinDate,
+  deleteGroupRole,
 };

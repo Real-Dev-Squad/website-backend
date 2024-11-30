@@ -8,8 +8,12 @@ const firestore = require("../utils/firestore");
 const { fetchWallet, createWallet } = require("../models/wallets");
 const { updateUserStatus } = require("../models/userStatus");
 const { arraysHaveCommonItem, chunks } = require("../utils/array");
-const { archiveUsers } = require("../services/users");
-const { ALLOWED_FILTER_PARAMS, FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
+const {
+  ALLOWED_FILTER_PARAMS,
+  FIRESTORE_IN_CLAUSE_SIZE,
+  USERS_PATCH_HANDLER_SUCCESS_MESSAGES,
+  USERS_PATCH_HANDLER_ERROR_MESSAGES,
+} = require("../constants/users");
 const { DOCUMENT_WRITE_SIZE } = require("../constants/constants");
 const { userState } = require("../constants/userStatus");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
@@ -24,6 +28,54 @@ const admin = require("firebase-admin");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { AUTHORITIES } = require("../constants/authorities");
 const { formatUsername } = require("../utils/username");
+const { logType } = require("../constants/logs");
+const { addLog } = require("../services/logService");
+
+/**
+ * Archive users by setting the roles.archived field to true.
+ * This function commits the write in batches to avoid reaching the maximum number of writes per batch.
+ * @param {Array} usersData - An array of user objects with the following properties: id, first_name, last_name
+ * @returns {Promise} - A promise that resolves with a summary object containing the number of users updated and failed, and an array of updated and failed user details.
+ */
+const archiveUsers = async (usersData) => {
+  const batch = firestore.batch();
+  const usersBatch = [];
+  const summary = {
+    totalUsersArchived: 0,
+    totalOperationsFailed: 0,
+    updatedUserDetails: [],
+    failedUserDetails: [],
+  };
+
+  usersData.forEach((user) => {
+    const { id, first_name: firstName, last_name: lastName } = user;
+    const updatedUserData = {
+      ...user,
+      roles: {
+        ...user.roles,
+        archived: true,
+      },
+      updated_at: Date.now(),
+    };
+    batch.update(userModel.doc(id), updatedUserData);
+    usersBatch.push({ id, firstName, lastName });
+  });
+
+  try {
+    await batch.commit();
+    summary.totalUsersArchived += usersData.length;
+    summary.updatedUserDetails = [...usersBatch];
+    return {
+      message: USERS_PATCH_HANDLER_SUCCESS_MESSAGES.ARCHIVE_USERS.SUCCESSFULLY_COMPLETED_BATCH_UPDATES,
+      ...summary,
+    };
+  } catch (err) {
+    logger.error("Firebase batch Operation Failed!");
+    summary.totalOperationsFailed += usersData.length;
+    summary.failedUserDetails = [...usersBatch];
+    return { message: USERS_PATCH_HANDLER_ERROR_MESSAGES.ARCHIVE_USERS.BATCH_DATA_UPDATED_FAILED, ...summary };
+  }
+};
 
 /**
  * Adds or updates the user data
@@ -48,6 +100,13 @@ const addOrUpdate = async (userData, userId = null) => {
           },
           { merge: true }
         );
+
+        const logData = {
+          type: logType.USER_DETAILS_UPDATED,
+          meta: { userId: userId },
+          body: userData,
+        };
+        await addLog(logData.type, logData.meta, logData.body);
       }
 
       return { isNewUser, userId };
@@ -63,6 +122,14 @@ const addOrUpdate = async (userData, userId = null) => {
     }
     if (user && !user.empty && user.docs !== null) {
       await userModel.doc(user.docs[0].id).set({ ...userData, updated_at: Date.now() }, { merge: true });
+
+      const logData = {
+        type: logType.USER_DETAILS_UPDATED,
+        meta: { userId: user.docs[0].id },
+        body: userData,
+      };
+      await addLog(logData.type, logData.meta, logData.body);
+
       const data = user.docs[0].data();
       return {
         isNewUser: false,
@@ -165,11 +232,11 @@ const getSuggestedUsers = async (skill) => {
  */
 const fetchPaginatedUsers = async (query) => {
   const isDevMode = query.dev === "true";
-
   try {
     const size = parseInt(query.size) || 100;
     const doc = (query.next || query.prev) && (await userModel.doc(query.next || query.prev).get());
 
+    const isArchived = query.departed === "true";
     let dbQuery;
     /**
      * !!NOTE : At the time of writing we only support member in the role query
@@ -178,9 +245,9 @@ const fetchPaginatedUsers = async (query) => {
      * if you're making changes to this code remove the archived check in the role query, example: role=archived,member
      */
     if (query.roles === "member") {
-      dbQuery = userModel.where("roles.archived", "==", false).where("roles.member", "==", true);
+      dbQuery = userModel.where("roles.archived", "==", isArchived).where("roles.member", "==", true);
     } else {
-      dbQuery = userModel.where("roles.archived", "==", false).orderBy("username");
+      dbQuery = userModel.where("roles.archived", "==", isArchived).orderBy("username");
     }
 
     let compositeQuery = [dbQuery];
@@ -200,6 +267,10 @@ const fetchPaginatedUsers = async (query) => {
     }
 
     if (Object.keys(query).length) {
+      if (query.departed) {
+        compositeQuery = compositeQuery.map((query) => query.where("roles.in_discord", "==", false));
+        dbQuery = dbQuery.where("roles.in_discord", "==", false);
+      }
       if (query.search) {
         const searchValue = query.search.toLowerCase().trim();
         dbQuery = dbQuery.startAt(searchValue).endAt(searchValue + "\uf8ff");
@@ -1013,7 +1084,26 @@ const updateUsersWithNewUsernames = async () => {
   }
 };
 
+/**
+ * Fetches users who are not in the Discord server.
+ * @returns {Promise<FirebaseFirestore.QuerySnapshot>} - A promise that resolves to a Firestore QuerySnapshot containing the users matching the criteria.
+ * @throws {Error} - Throws an error if the database query fails.
+ */
+const fetchUsersNotInDiscordServer = async () => {
+  try {
+    const usersNotInDiscordServer = await userModel
+      .where("roles.archived", "==", true)
+      .where("roles.in_discord", "==", false)
+      .get();
+    return usersNotInDiscordServer;
+  } catch (error) {
+    logger.error(`Error in getting users who are not in discord server:  ${error}`);
+    throw error;
+  }
+};
+
 module.exports = {
+  archiveUsers,
   addOrUpdate,
   fetchPaginatedUsers,
   fetchUser,
@@ -1042,4 +1132,5 @@ module.exports = {
   fetchUserForKeyValue,
   getNonNickNameSyncedUsers,
   updateUsersWithNewUsernames,
+  fetchUsersNotInDiscordServer,
 };
