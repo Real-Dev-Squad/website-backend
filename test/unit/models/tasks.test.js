@@ -17,6 +17,10 @@ const dependencyModel = firestore.collection("TaskDependencies");
 const tasksModel = firestore.collection("tasks");
 const userData = require("../../fixtures/user/user");
 const addUser = require("../../utils/addUser");
+const {
+  usersData: abandonedUsersData,
+  tasksData: abandonedTasksData,
+} = require("../../fixtures/abandoned-tasks/departed-users");
 
 describe("tasks", function () {
   afterEach(async function () {
@@ -349,6 +353,45 @@ describe("tasks", function () {
       } catch (error) {
         expect(error).to.be.an.instanceOf(Error);
         expect(error.message).to.equal("An internal server error occurred");
+      }
+    });
+  });
+
+  describe("fetchIncompleteTasksByUserIds", function () {
+    beforeEach(async function () {
+      await cleanDb();
+
+      const taskPromises = abandonedTasksData.map((task) => tasksModel.add(task));
+      await Promise.all(taskPromises);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+      sinon.restore();
+    });
+
+    it("should fetch tasks which are incomplete for the given user", async function () {
+      const userIds = abandonedUsersData.map((user) => user.id);
+      const incompleteTasks = await tasks.fetchIncompleteTasksByUserIds(userIds);
+      expect(incompleteTasks.length).to.be.equal(3);
+    });
+
+    it("should return an empty array if there are no tasks incomplete for the user", async function () {
+      await cleanDb();
+
+      const activeUser = abandonedUsersData[2];
+      const incompleteTasks = await tasks.fetchIncompleteTasksByUserIds([activeUser.id]);
+      expect(incompleteTasks.length).to.be.equal(0);
+    });
+
+    it("should handle errors gracefully if the database query fails", async function () {
+      sinon.stub(tasks, "fetchIncompleteTasksByUserIds").throws(new Error("Database query failed"));
+
+      try {
+        await tasks.fetchIncompleteTasksByUserIds();
+        expect.fail("Expected function to throw an error");
+      } catch (error) {
+        expect(error.message).to.equal("Database query failed");
       }
     });
   });
