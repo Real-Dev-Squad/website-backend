@@ -378,7 +378,6 @@ describe("tasks", function () {
 
     it("should return an empty array if there are no tasks incomplete for the user", async function () {
       await cleanDb();
-
       const activeUser = abandonedUsersData[2];
       const incompleteTasks = await tasks.fetchIncompleteTasksByUserIds([activeUser.id]);
       expect(incompleteTasks.length).to.be.equal(0);

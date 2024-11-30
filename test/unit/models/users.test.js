@@ -529,6 +529,50 @@ describe("users", function () {
     });
   });
 
+  describe("fetchPaginatedUsers - Departed Users", function () {
+    beforeEach(async function () {
+      await cleanDb();
+
+      const userPromises = abandonedUsersData.map((user) => userModel.add(user));
+      await Promise.all(userPromises);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+      sinon.restore();
+    });
+
+    it("should fetch users not in discord server", async function () {
+      const result = await users.fetchPaginatedUsers({ departed: "true" });
+      expect(result.allUsers.length).to.be.equal(2);
+    });
+
+    it("should return no users if departed flag is false", async function () {
+      const result = await users.fetchPaginatedUsers({ departed: "false" });
+      expect(result.allUsers.length).to.be.equal(0);
+    });
+
+    it("should return an empty array if there are no departed users in the database", async function () {
+      await cleanDb();
+      const activeUser = abandonedUsersData[2];
+      await userModel.add(activeUser);
+
+      const result = await users.fetchPaginatedUsers({ departed: "true" });
+      expect(result.allUsers.length).to.be.equal(0);
+    });
+
+    it("should handle errors gracefully if the database query fails", async function () {
+      sinon.stub(users, "fetchPaginatedUsers").throws(new Error("Database query failed"));
+
+      try {
+        await users.fetchPaginatedUsers();
+        expect.fail("Expected function to throw an error");
+      } catch (error) {
+        expect(error.message).to.equal("Database query failed");
+      }
+    });
+  });
+
   describe("fetchUsersNotInDiscordServer", function () {
     beforeEach(async function () {
       await cleanDb();

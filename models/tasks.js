@@ -752,9 +752,9 @@ const fetchIncompleteTasksByUserIds = async (userIds) => {
   try {
     const incompleteTasksQuery = await tasksModel.where("assigneeId", "in", userIds).get();
 
-    const incompleteTaskForUsers = incompleteTasksQuery.docs.filter((task) => {
-      return !COMPLETED_STATUSES.includes(task.data().status);
-    });
+    const incompleteTaskForUsers = incompleteTasksQuery.docs.filter(
+      (task) => !COMPLETED_STATUSES.includes(task.data().status)
+    );
 
     return incompleteTaskForUsers;
   } catch (error) {
