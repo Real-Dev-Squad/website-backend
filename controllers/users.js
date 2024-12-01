@@ -678,8 +678,14 @@ const getUserImageForVerification = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { id: profileDiffId, message } = req.body;
-
-    const profileDiffData = await profileDiffsQuery.fetchProfileDiff(profileDiffId);
+    const devFeatureFlag = req.query.dev;
+    let profileDiffData;
+    if (devFeatureFlag === "true") {
+      profileDiffData = await profileDiffsQuery.fetchProfileDiffUnobfuscated(profileDiffId);
+    } else {
+      profileDiffData = await profileDiffsQuery.fetchProfileDiff(profileDiffId);
+    }
+    Object.freeze(profileDiffData);
     if (!profileDiffData) return res.boom.notFound("Profile Diff doesn't exist");
 
     const { approval, timestamp, userId, ...profileDiff } = profileDiffData;
