@@ -10,11 +10,15 @@ const {
 } = require("../constants/errorMessages");
 
 const googleAuthLogin = (req, res, next) => {
-  const { redirectURL } = req.query;
-  return passport.authenticate("google", {
-    scope: ["email"],
-    state: redirectURL,
-  })(req, res, next);
+  const { redirectURL, dev } = req.query;
+  if (dev === "true") {
+    return passport.authenticate("google", {
+      scope: ["email"],
+      state: redirectURL,
+    })(req, res, next);
+  } else {
+    return res.boom.unauthorized("User cannot be authenticated");
+  }
 };
 
 const googleAuthCallback = (req, res, next) => {
@@ -28,8 +32,6 @@ const googleAuthCallback = (req, res, next) => {
       if (`.${redirectUrl.hostname}`.endsWith(`.${rdsUiUrl.hostname}`)) {
         // Matching *.realdevsquad.com
         authRedirectionUrl = redirectUrl;
-        // console.log("redirect url is", authRedirectionUrl);
-        // devMode = Boolean(redirectUrl.searchParams.get("dev"));
       } else {
         logger.error(`Malicious redirect URL provided URL: ${redirectUrl}, Will redirect to RDS`);
       }
@@ -43,26 +45,22 @@ const googleAuthCallback = (req, res, next) => {
         logger.error(err);
         return res.boom.unauthorized("User cannot be authenticated");
       }
-      // console.log("user", user);
       const userData = {
         email: user.emails[0].value,
         created_at: Date.now(),
         updated_at: null,
       };
-      // console.log("userData", userData);
 
       const userDataFromDB = await users.fetchUser({ email: userData.email });
-      // console.log("userDataFromDB", userDataFromDB);
 
       if (userDataFromDB.userExists) {
         if (userDataFromDB.user.roles.developer === true) {
-          // Waiting for sameer-supe to update what he requires on frontend.
-          return res.boom.unauthorized("User is not allowed to login via Google");
+          const errorMessage = encodeURIComponent("Google login is restricted for developer role.");
+          return res.redirect(`${authRedirectionUrl}?error=${errorMessage}`);
         }
       }
 
       const { userId, incompleteUserDetails } = await users.addOrUpdate(userData);
-      // console.log(role);
 
       const token = authService.generateAuthToken({ userId });
 
@@ -150,8 +148,6 @@ const githubAuthCallback = (req, res, next) => {
         logger.error(err);
         return res.boom.unauthorized("User cannot be authenticated");
       }
-      // console.log(accessToken);
-      // console.log("user", user);
       userData = {
         github_id: user.username,
         github_display_name: user.displayName,
@@ -161,26 +157,19 @@ const githubAuthCallback = (req, res, next) => {
         created_at: Date.now(),
         updated_at: null,
       };
-      // console.log(userData);
 
       if (userData.email === null) {
-        // console.log("old", userData);
         const res = await fetch("https://api.github.com/user/emails", {
           headers: {
             Authorization: `token ${accessToken}`,
           },
         });
         const emails = await res.json();
-        // console.log("emails", emails);
         const primaryEmails = emails.filter((item) => item.primary);
-        // console.log("primaryEmails", primaryEmails);
 
-        // Get the first primary email, if it exists
         if (primaryEmails.length > 0) {
           userData.email = primaryEmails[0].email;
-          // console.log("userData.email setting up", userData.email);
         }
-        // console.log(userData);
       }
 
       const { userId, incompleteUserDetails, role } = await users.addOrUpdate(userData);
@@ -213,7 +202,6 @@ const githubAuthCallback = (req, res, next) => {
         newUrl.searchParams.set("token", token);
         authRedirectionUrl = newUrl.toString();
       }
-      // console.log(userData);
       return res.redirect(authRedirectionUrl);
     })(req, res, next);
   } catch (err) {

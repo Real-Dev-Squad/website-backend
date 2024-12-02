@@ -258,17 +258,13 @@ describe("auth", function () {
   });
 
   it("should redirect to the correct URL and update user email when GitHub API returns primary email", async function () {
-    // Define a fake GitHub API response for user emails (primary email)
     const rdsUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
     const fakeEmails = [
       { primary: true, email: "primary@example.com" },
       { primary: false, email: "secondary@example.com" },
     ];
-
-    // Stub fetch to resolve with the fake email response
     const fetchStub = sinon.stub(global, "fetch").resolves(new Response(JSON.stringify(fakeEmails)));
 
-    // Stub passport.authenticate to simulate a successful authentication
     sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
       callback(null, "accessToken", {
         username: "github-user",
@@ -286,17 +282,14 @@ describe("auth", function () {
       .redirects(0);
     expect(res).to.have.status(302);
 
-    // Verify that the fetch function was called with the correct GitHub API URL
     const fetchArgs = fetchStub.getCall(0).args;
     expect(fetchArgs[0]).to.equal("https://api.github.com/user/emails");
-    expect(fetchArgs[1].headers.Authorization).to.equal("token accessToken"); // Ensure the token is passed correctly
-    // Check if the user data was updated with the primary email returned by GitHub API
-    // expect(userData.email).to.equal('primary@example.com'); // Make sure the email was updated from the API response
+    expect(fetchArgs[1].headers.Authorization).to.equal("token accessToken");
   });
 
   it("should return google call back URL", async function () {
     const googleOauthURL = generateGoogleAuthRedirectUrl({});
-    const res = await chai.request(app).get("/auth/google/login").redirects(0);
+    const res = await chai.request(app).get("/auth/google/login?dev=true").redirects(0);
     expect(res).to.have.status(302);
     expect(res.headers.location).to.equal(googleOauthURL);
   });
@@ -306,14 +299,14 @@ describe("auth", function () {
     const googleOauthURL = generateGoogleAuthRedirectUrl({ state: RDS_MEMBERS_SITE_URL });
     const res = await chai
       .request(app)
-      .get("/auth/google/login")
+      .get("/auth/google/login?dev=true")
       .query({ redirectURL: RDS_MEMBERS_SITE_URL })
       .redirects(0);
     expect(res).to.have.status(302);
     expect(res.headers.location).to.equal(googleOauthURL);
   });
 
-  it("should redirect the googleuser to new sign up flow if they are have incomplete user details true", async function () {
+  it("should redirect the google user to new sign up flow if they are have incomplete user details true", async function () {
     const redirectURL = "https://my.realdevsquad.com/new-signup";
 
     sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
@@ -330,7 +323,7 @@ describe("auth", function () {
     expect(res.headers.location).to.equal(redirectURL);
   });
 
-  it("should redirect the request to the goto page on successful google login, if user has incomplete user details false", async function () {
+  it("should redirect the google user to the goto page on successful login, if user has incomplete user details false", async function () {
     await addUserToDBForTest(googleUserInfo[1]);
     const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
     sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
@@ -347,7 +340,7 @@ describe("auth", function () {
     expect(res.headers.location).to.equal(rdsUiUrl);
   });
 
-  it("should redirect the request to the redirect URL provided on successful google login, if user has incomplete user details false", async function () {
+  it("should redirect the google user to the redirect URL provided on successful login, if user has incomplete user details false", async function () {
     await addUserToDBForTest(googleUserInfo[1]);
     const rdsUrl = new URL("https://dashboard.realdevsquad.com").href;
     sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
@@ -433,7 +426,7 @@ describe("auth", function () {
       });
   });
 
-  it("should return 401 if google call fails", function (done) {
+  it("should return 401 if google auth call fails", function (done) {
     chai
       .request(app)
       .get("/auth/google/callback")

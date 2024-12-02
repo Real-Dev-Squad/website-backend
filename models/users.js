@@ -87,8 +87,6 @@ const archiveUsers = async (usersData) => {
 const addOrUpdate = async (userData, userId = null) => {
   try {
     // userId exists Update user
-    // console.log("userData entry", userData, userId);
-    // console.log("0");
     if (userId !== null) {
       const user = await userModel.doc(userId).get();
       const isNewUser = !user.data();
@@ -123,38 +121,19 @@ const addOrUpdate = async (userData, userId = null) => {
 
     if (userData.github_user_id) {
       user = await userModel.where("github_user_id", "==", userData.github_user_id).limit(1).get();
-      // console.log("github_user_id query result:", user.size); // Log the result size
     }
 
     if (userData.github_id && (!user || (user && user.empty))) {
       user = await userModel.where("github_id", "==", userData.github_id).limit(1).get();
-      // console.log("github_id query result:", user.size); // Log the result size
     }
 
-    if ((!user || (user && user.empty)) && userData.email) {
-      // console.log("Checking email of the users, please check email for the user");
+    if (userData.email && (!user || (user && user.empty))) {
       user = await userModel.where("email", "==", userData.email).limit(1).get();
-      // console.log("email query result:", user.size, user.empty); // Log the result size
     }
 
-    // if (userData.github_user_id) {
-    //   user = await userModel.where("github_user_id", "==", userData.github_user_id).limit(1).get();
-    // }
-    // if (!user && userData.github_id) {
-    //   user = await userModel.where("github_id", "==", userData.github_id).limit(1).get();
-    // }
-
-    // if (!user && userData.email) {
-    //   console.log("checkingemail of the users please check email for the user");
-    //   user = await userModel.where("email", "==", userData.email).limit(1).get();
-    // }
-
-    // if (user && user.empty) {
-    //   user = null;
-    // }
-    // console.log("2");
     if (user && !user.empty && user.docs !== null) {
-      await userModel.doc(user.docs[0].id).set({ ...userData, updated_at: Date.now() }, { merge: true });
+      const { created_at: createdAt, ...updatedUserData } = userData;
+      await userModel.doc(user.docs[0].id).set({ ...updatedUserData, updated_at: Date.now() }, { merge: true });
 
       const logData = {
         type: logType.USER_DETAILS_UPDATED,
@@ -170,10 +149,8 @@ const addOrUpdate = async (userData, userId = null) => {
         incompleteUserDetails: user.docs[0].data().incompleteUserDetails,
         updated_at: Date.now(),
         role: Object.values(AUTHORITIES).find((role) => data.roles[role]) || AUTHORITIES.USER,
-        roles: data.roles,
       };
     }
-    // console.log("3");
     // Add new user
     /*
        Adding default archived role enables us to query for only
@@ -182,9 +159,7 @@ const addOrUpdate = async (userData, userId = null) => {
      */
     userData.roles = { archived: false, in_discord: false };
     userData.incompleteUserDetails = true;
-    // console.log("userData last mein", userData);
     const userInfo = await userModel.add(userData);
-    // console.log("4");
     return {
       isNewUser: true,
       role: AUTHORITIES.USER,
@@ -426,7 +401,6 @@ const fetchUser = async ({ userId = null, username = null, githubUsername = null
       });
     } else if (email) {
       const user = await userModel.where("email", "==", email).limit(1).get();
-      // console.log("hihiijfoiafoieuiofeuofueoiurioeajoeifeoiuroie");
       user.forEach((doc) => {
         id = doc.id;
         userData = doc.data();
