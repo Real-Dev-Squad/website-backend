@@ -133,6 +133,30 @@ const fetchProfileDiff = async (profileDiffId) => {
   }
 };
 
+/**
+ * Fetches the unobfuscated profileDiff data of the provided profileDiff Id
+ * @param profileDiffId profileDiffId of the diffs need to be fetched
+ * @returns unobfuscated profileDiff Data
+ */
+const fetchProfileDiffUnobfuscated = async (profileDiffId) => {
+  try {
+    const profileDiff = await profileDiffsModel.doc(profileDiffId).get();
+
+    if (!profileDiff.exists) {
+      return { profileDiffExists: false };
+    }
+    const profileDiffData = profileDiff.data();
+    return {
+      id: profileDiff.id,
+      profileDiffExists: true,
+      ...profileDiffData,
+    };
+  } catch (err) {
+    logger.error("Error retrieving Unobfuscated profile Diff", err);
+    throw err;
+  }
+};
+
 /** Add profileDiff
  *
  * @param profileDiffData { Object }: Data to be added
@@ -181,4 +205,5 @@ module.exports = {
   add,
   updateProfileDiff,
   fetchProfileDiffsWithPagination,
+  fetchProfileDiffUnobfuscated,
 };
