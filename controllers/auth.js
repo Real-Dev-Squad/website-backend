@@ -21,6 +21,52 @@ const googleAuthLogin = (req, res, next) => {
   }
 };
 
+async function handleGoogleLogin(req, res, user, authRedirectionUrl) {
+  const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
+  try {
+    if (!user.emails || user.emails.length === 0) {
+      throw new Error("Email not found in user data");
+    }
+    const userData = {
+      email: user.emails[0].value,
+      created_at: Date.now(),
+      updated_at: null,
+    };
+
+    const userDataFromDB = await users.fetchUser({ email: userData.email });
+
+    if (userDataFromDB.userExists) {
+      if (userDataFromDB.user.roles?.developer) {
+        const errorMessage = encodeURIComponent("Google login is restricted for developer role.");
+        return res.redirect(`${authRedirectionUrl}?error=${errorMessage}`);
+      }
+    }
+
+    const { userId, incompleteUserDetails } = await users.addOrUpdate(userData);
+
+    const token = authService.generateAuthToken({ userId });
+
+    const cookieOptions = {
+      domain: rdsUiUrl.hostname,
+      expires: new Date(Date.now() + config.get("userToken.ttl") * 1000),
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+    };
+
+    res.cookie(config.get("userToken.cookieName"), token, cookieOptions);
+
+    if (incompleteUserDetails) {
+      authRedirectionUrl = "https://my.realdevsquad.com/new-signup";
+    }
+
+    return res.redirect(authRedirectionUrl);
+  } catch (err) {
+    logger.error(err);
+    return res.boom.unauthorized("User cannot be authenticated");
+  }
+}
+
 const googleAuthCallback = (req, res, next) => {
   const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
   let authRedirectionUrl = rdsUiUrl;
@@ -39,49 +85,13 @@ const googleAuthCallback = (req, res, next) => {
       logger.error("Invalid redirect URL provided", error);
     }
   }
-  try {
-    return passport.authenticate("google", { session: false }, async (err, accessToken, user) => {
-      if (err) {
-        logger.error(err);
-        return res.boom.unauthorized("User cannot be authenticated");
-      }
-      const userData = {
-        email: user.emails[0].value,
-        created_at: Date.now(),
-        updated_at: null,
-      };
-
-      const userDataFromDB = await users.fetchUser({ email: userData.email });
-
-      if (userDataFromDB.userExists) {
-        if (userDataFromDB.user.roles.developer === true) {
-          const errorMessage = encodeURIComponent("Google login is restricted for developer role.");
-          return res.redirect(`${authRedirectionUrl}?error=${errorMessage}`);
-        }
-      }
-
-      const { userId, incompleteUserDetails } = await users.addOrUpdate(userData);
-
-      const token = authService.generateAuthToken({ userId });
-
-      const cookieOptions = {
-        domain: rdsUiUrl.hostname,
-        expires: new Date(Date.now() + config.get("userToken.ttl") * 1000),
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-      };
-
-      res.cookie(config.get("userToken.cookieName"), token, cookieOptions);
-
-      if (incompleteUserDetails) authRedirectionUrl = "https://my.realdevsquad.com/new-signup";
-
-      return res.redirect(authRedirectionUrl);
-    })(req, res, next);
-  } catch (err) {
-    logger.error(err);
-    return res.boom.unauthorized("User cannot be authenticated");
-  }
+  return passport.authenticate("google", { session: false }, async (err, accessToken, user) => {
+    if (err) {
+      logger.error(err);
+      return res.boom.unauthorized("User cannot be authenticated");
+    }
+    return await handleGoogleLogin(req, res, user, authRedirectionUrl);
+  })(req, res, next);
 };
 
 /**
@@ -158,8 +168,9 @@ const githubAuthCallback = (req, res, next) => {
         updated_at: null,
       };
 
-      if (userData.email === null) {
-        const res = await fetch("https://api.github.com/user/emails", {
+      if (!userData.email) {
+        const githubBaseUrl = config.get("githubApi.baseUrl");
+        const res = await fetch(`${githubBaseUrl}/user/emails`, {
           headers: {
             Authorization: `token ${accessToken}`,
           },

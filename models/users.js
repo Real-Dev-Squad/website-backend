@@ -123,11 +123,11 @@ const addOrUpdate = async (userData, userId = null) => {
       user = await userModel.where("github_user_id", "==", userData.github_user_id).limit(1).get();
     }
 
-    if (userData.github_id && (!user || (user && user.empty))) {
+    if (userData.github_id && (!user || user.empty)) {
       user = await userModel.where("github_id", "==", userData.github_id).limit(1).get();
     }
 
-    if (userData.email && (!user || (user && user.empty))) {
+    if (userData.email && (!user || user.empty)) {
       user = await userModel.where("email", "==", userData.email).limit(1).get();
     }
 
