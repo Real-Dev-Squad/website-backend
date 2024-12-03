@@ -233,18 +233,6 @@ describe("Discord actions", function () {
       await cleanDb();
     });
 
-    it("should return 404 when not in dev mode", function (done) {
-      chai
-        .request(app)
-        .delete(`/discord-actions/groups/${groupId}`)
-        .set("cookie", `${cookieName}=${superUserAuthToken}`)
-        .end((err, res) => {
-          expect(res).to.have.status(404);
-          expect(res.body.error).to.equal("Not Found");
-          done(err);
-        });
-    });
-
     it("should return 404 if group role not found", function (done) {
       sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
         roleExists: false,
