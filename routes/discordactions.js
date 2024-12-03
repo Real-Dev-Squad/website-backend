@@ -30,19 +30,11 @@ const ROLES = require("../constants/roles");
 const { Services } = require("../constants/bot");
 const { verifyCronJob } = require("../middlewares/authorizeBot");
 const { authorizeAndAuthenticate } = require("../middlewares/authorizeUsersAndService");
-const { devFlagMiddleware } = require("../middlewares/devFlag");
 const router = express.Router();
 
 router.post("/groups", authenticate, checkIsVerifiedDiscord, validateGroupRoleBody, createGroupRole);
 router.get("/groups", authenticate, checkIsVerifiedDiscord, getAllGroupRoles);
-router.delete(
-  "/groups/:groupId",
-  authenticate,
-  checkIsVerifiedDiscord,
-  authorizeRoles([SUPERUSER]),
-  devFlagMiddleware,
-  deleteGroupRole
-);
+router.delete("/groups/:groupId", authenticate, checkIsVerifiedDiscord, authorizeRoles([SUPERUSER]), deleteGroupRole);
 router.post("/roles", authenticate, checkIsVerifiedDiscord, validateMemberRoleBody, addGroupRoleToMember);
 router.get("/invite", authenticate, getUserDiscordInvite);
 router.post("/invite", authenticate, checkCanGenerateDiscordLink, generateInviteForUser);
