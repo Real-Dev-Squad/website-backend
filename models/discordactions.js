@@ -158,7 +158,7 @@ const updateGroupRole = async (roleData, docId) => {
  *
  * @param options { Object }: Data of the new role
  * @param options.rolename String : name of the role
- * @param options.roleId String : id of the role
+ * @param options.roleid String : id of the role
  * @returns {Promise<discordRoleModel|Object>}
  */
 
