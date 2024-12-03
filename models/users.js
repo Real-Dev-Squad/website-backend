@@ -98,7 +98,6 @@ const addOrUpdate = async (userData, userId = null) => {
         }
         await userModel.doc(userId).set(
           {
-            ...user.data(),
             ...userData,
             updated_at: Date.now(),
           },
