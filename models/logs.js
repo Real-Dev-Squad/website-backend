@@ -164,14 +164,16 @@ const fetchLastAddedCacheLog = async (id) => {
 };
 
 const fetchAllLogs = async (query) => {
-  let { type, prev, next, page, size = SIZE, format, userId, username, startDate, endDate } = query;
+  let { type, prev, next, page, size = SIZE, format, userId, username, startDate, endDate, dev } = query;
+
   size = parseInt(size);
   page = parseInt(page);
 
   try {
     let requestQuery = logsModel;
+    const isDev = dev === "true";
 
-    if (username) {
+    if (isDev && username) {
       userId = await getUserId(username);
       requestQuery = requestQuery.where("meta.userId", "==", userId);
     }
@@ -181,13 +183,25 @@ const fetchAllLogs = async (query) => {
       if (logType.length >= 1) requestQuery = requestQuery.where("type", "in", logType);
     }
 
-    if (startDate) {
-      const startTimestamp = { _seconds: parseInt(startDate / 1000), _nanoseconds: 0 };
-      requestQuery = requestQuery.where("timestamp", ">=", startTimestamp);
-    }
-    if (endDate) {
-      const endTimestamp = { _seconds: parseInt(endDate / 1000), _nanoseconds: 0 };
-      requestQuery = requestQuery.where("timestamp", "<=", endTimestamp);
+    if (isDev && (startDate || endDate)) {
+      startDate = startDate ? parseInt(startDate) : null;
+      endDate = endDate ? parseInt(endDate) : null;
+
+      if (startDate && endDate && startDate > endDate) {
+        throw new Error("Start date cannot be greater than end date.");
+      }
+
+      const buildTimestamp = (date) => ({
+        _seconds: Math.floor(date / 1000),
+        _nanoseconds: 0,
+      });
+
+      if (startDate) {
+        requestQuery = requestQuery.where("timestamp", ">=", buildTimestamp(startDate));
+      }
+      if (endDate) {
+        requestQuery = requestQuery.where("timestamp", "<=", buildTimestamp(endDate));
+      }
     }
 
     requestQuery = requestQuery.orderBy("timestamp", "desc");
@@ -219,12 +233,14 @@ const fetchAllLogs = async (query) => {
       const last = snapshot.docs[snapshot.docs.length - 1];
       nextDoc = await requestQuery.startAfter(last).limit(1).get();
     }
+
     const allLogs = [];
     if (!snapshot.empty) {
       snapshot.forEach((doc) => {
         allLogs.push({ ...doc.data() });
       });
     }
+
     if (allLogs.length === 0) {
       return {
         allLogs: [],
@@ -233,17 +249,23 @@ const fetchAllLogs = async (query) => {
         page: page ? page + 1 : null,
       };
     }
+
     if (format === "feed") {
-      let logsData = [];
       const userList = await getUsersListFromLogs(allLogs);
       const taskIdList = await getTasksFromLogs(allLogs);
       const usersMap = mapify(userList, "id");
       const tasksMap = mapify(taskIdList, "id");
-      logsData = allLogs.map((data) => {
+
+      const logsData = allLogs.map((data) => {
         const formattedLogs = formatLogsForFeed(data, usersMap, tasksMap);
         if (!Object.keys(formattedLogs).length) return null;
-        return { ...formattedLogs, type: data.type, timestamp: convertTimestamp(data.timestamp) };
+        return {
+          ...formattedLogs,
+          type: data.type,
+          timestamp: convertTimestamp(data.timestamp),
+        };
       });
+
       return {
         allLogs: logsData.filter((log) => log),
         prev: prevDoc.empty ? null : prevDoc.docs[0].id,
