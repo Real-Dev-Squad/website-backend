@@ -13,6 +13,7 @@ const { updateUserStatusOnTaskUpdate, updateStatusOnTaskCompletion } = require("
 const dataAccess = require("../services/dataAccessLayer");
 const { parseSearchQuery } = require("../utils/tasks");
 const { addTaskCreatedAtAndUpdatedAtFields } = require("../services/tasks");
+const tasksService = require("../services/tasks");
 const { RQLQueryParser } = require("../utils/RQLParser");
 const { getMissedProgressUpdatesUsers } = require("../models/discordactions");
 const { logType } = require("../constants/logs");
@@ -134,7 +135,19 @@ const fetchPaginatedTasks = async (query) => {
 
 const fetchTasks = async (req, res) => {
   try {
-    const { status, page, size, prev, next, q: queryString, assignee, title, userFeatureFlag } = req.query;
+    const {
+      status,
+      page,
+      size,
+      prev,
+      next,
+      q: queryString,
+      assignee,
+      title,
+      userFeatureFlag,
+      orphaned,
+      dev,
+    } = req.query;
     const transformedQuery = transformQuery(status, size, page, assignee, title);
 
     if (queryString !== undefined) {
@@ -157,6 +170,28 @@ const fetchTasks = async (req, res) => {
         message: "Filter tasks returned successfully!",
         tasks: tasksWithRdsAssigneeInfo,
       });
+    }
+
+    const isOrphaned = orphaned === "true";
+    const isDev = dev === "true";
+    if (isOrphaned) {
+      if (!isDev) {
+        return res.boom.notFound("Route not found");
+      }
+      try {
+        const orphanedTasks = await tasksService.fetchOrphanedTasks();
+        if (!orphanedTasks || orphanedTasks.length === 0) {
+          return res.sendStatus(204);
+        }
+        const tasksWithRdsAssigneeInfo = await fetchTasksWithRdsAssigneeInfo(orphanedTasks);
+        return res.status(200).json({
+          message: "Orphan tasks fetched successfully",
+          data: tasksWithRdsAssigneeInfo,
+        });
+      } catch (error) {
+        logger.error("Error in getting tasks which were orphaned", error);
+        return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+      }
     }
 
     const paginatedTasks = await fetchPaginatedTasks({ ...transformedQuery, prev, next, userFeatureFlag });
