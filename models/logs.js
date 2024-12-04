@@ -188,7 +188,9 @@ const fetchAllLogs = async (query) => {
       endDate = endDate ? parseInt(endDate) : null;
 
       if (startDate && endDate && startDate > endDate) {
-        throw new Error("Start date cannot be greater than end date.");
+        const error = new Error("Start date cannot be greater than end date.");
+        error.statusCode = 400;
+        throw error;
       }
 
       const buildTimestamp = (date) => ({

@@ -241,7 +241,7 @@ describe("/logs", function () {
         .get(`/logs?username=${username}&startDate=${startDate}&endDate=${endDate}&dev=true`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .end(function (_err, res) {
-          expect(res).to.have.status(500);
+          expect(res).to.have.status(400);
           expect(res.body.error).to.equal("Start date cannot be greater than end date.");
           return done();
         });
