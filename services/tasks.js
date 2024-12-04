@@ -66,13 +66,13 @@ const fetchOrphanedTasks = async () => {
 
     const userIds = userSnapshot.docs.map((doc) => doc.id);
 
-    const orphanedTasksQuerySnapshot = await tasksQuery.fetchIncompleteTasksByUserIds(userIds);
+    const orphanedTasksData = await tasksQuery.fetchIncompleteTasksByUserIds(userIds);
 
-    if (orphanedTasksQuerySnapshot.empty) {
+    if (orphanedTasksData.empty) {
       return [];
     }
 
-    const orphanedTasks = orphanedTasksQuerySnapshot.map((doc) => doc.data());
+    const orphanedTasks = orphanedTasksData;
 
     return orphanedTasks;
   } catch (error) {
