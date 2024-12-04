@@ -15,7 +15,7 @@ const getUsersWithIncompleteTasks = async (users) => {
       return [];
     }
 
-    const userIdsWithIncompleteTasks = new Set(abandonedTasksQuerySnapshot.map((doc) => doc.data().assigneeId));
+    const userIdsWithIncompleteTasks = new Set(abandonedTasksQuerySnapshot.map((doc) => doc.assignee));
 
     const eligibleUsersWithTasks = users.filter((user) => userIdsWithIncompleteTasks.has(user.id));
 
