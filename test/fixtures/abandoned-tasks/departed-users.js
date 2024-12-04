@@ -76,8 +76,7 @@ const tasksData = [
     updatedAt: 1727027999,
     startedOn: 1727027777,
     endsOn: 1731542400,
-    assignee: "archived_user1",
-    assigneeId: "user1_id",
+    assignee: "user1_id",
     github: {
       issue: {
         html_url: "https://github.com/org/repo/issues/1",
@@ -97,8 +96,7 @@ const tasksData = [
     updatedAt: 1727027999,
     startedOn: 1727027777,
     endsOn: 1731542400,
-    assignee: "archived_user2",
-    assigneeId: "user2_id",
+    assignee: "user2_id",
     github: {
       issue: {
         html_url: "https://github.com/org/repo/issues/2",
@@ -118,8 +116,7 @@ const tasksData = [
     updatedAt: 1727027999,
     startedOn: 1727027777,
     endsOn: 1731542400,
-    assignee: "archived_user1",
-    assigneeId: "user1_id",
+    assignee: "user1_id",
     github: {
       issue: {
         html_url: "https://github.com/org/repo/issues/3",
@@ -139,8 +136,7 @@ const tasksData = [
     updatedAt: 1727027999,
     startedOn: 1727027777,
     endsOn: 1731542400,
-    assignee: "active_user",
-    assigneeId: "user3_id",
+    assignee: "user3_id",
     github: {
       issue: {
         html_url: "https://github.com/org/repo/issues/4",
