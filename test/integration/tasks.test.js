@@ -571,6 +571,102 @@ describe("Tasks", function () {
     });
   });
 
+  describe("GET /tasks/:userId", function () {
+    it("Should return all the completed tasks of the user when query 'completed' is true and dev is true", async function () {
+      const { userId: assignedUser } = await userModel.addOrUpdate({
+        github_id: "prakashchoudhary07",
+        username: "user1",
+      });
+
+      const assignedTask = [
+        {
+          title: "Test task",
+          type: "feature",
+          endsOn: 1234,
+          startedOn: 4567,
+          status: "COMPLETED",
+          percentCompleted: 10,
+          participants: [],
+          assignee: "user1",
+          completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+          lossRate: { [DINERO]: 1 },
+          isNoteworthy: true,
+        },
+        {
+          title: "Test task",
+          type: "feature",
+          endsOn: 1234,
+          startedOn: 4567,
+          status: "COMPLETED",
+          percentCompleted: 10,
+          participants: [],
+          assignee: "user1",
+          completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+          lossRate: { [DINERO]: 1 },
+          isNoteworthy: true,
+        },
+      ];
+      await tasks.updateTask(assignedTask[0]);
+      await tasks.updateTask(assignedTask[1]);
+
+      const res = await chai
+        .request(app)
+        .get(`/tasks/${assignedUser}/?dev=true&completed=true`)
+        .set("cookie", `${cookieName}=${authService.generateAuthToken({ userId: assignedUser })}`);
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("array");
+      expect(res.body).to.satisfy((tasks) => tasks.every((task) => task.status === "COMPLETED"));
+    });
+
+    it("Should return all the tasks of the user when dev is true", async function () {
+      const { userId: assignedUser } = await userModel.addOrUpdate({
+        github_id: "prakashchoudhary07",
+        username: "user1",
+      });
+
+      const assignedTask = [
+        {
+          title: "Test task",
+          type: "feature",
+          endsOn: 1234,
+          startedOn: 4567,
+          status: "IN_PROGRESS",
+          percentCompleted: 10,
+          participants: [],
+          assignee: "user1",
+          completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+          lossRate: { [DINERO]: 1 },
+          isNoteworthy: true,
+        },
+        {
+          title: "Test task",
+          type: "feature",
+          endsOn: 1234,
+          startedOn: 4567,
+          status: "BLOCKED",
+          percentCompleted: 10,
+          participants: [],
+          assignee: "user1",
+          completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+          lossRate: { [DINERO]: 1 },
+          isNoteworthy: true,
+        },
+      ];
+      const { taskId: taskId1 } = await tasks.updateTask(assignedTask[0]);
+      const { taskId: taskId2 } = await tasks.updateTask(assignedTask[1]);
+
+      const res = await chai
+        .request(app)
+        .get(`/tasks/${assignedUser}/?dev=true`)
+        .set("cookie", `${cookieName}=${authService.generateAuthToken({ userId: assignedUser })}`);
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.a("array");
+      expect([taskId1, taskId2]).to.include(taskId1);
+    });
+  });
+
   describe("GET /tasks/self", function () {
     it("Should return all the completed tasks of the user when query 'completed' is true", function (done) {
       const { COMPLETED } = TASK_STATUS;

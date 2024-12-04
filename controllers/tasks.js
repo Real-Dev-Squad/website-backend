@@ -206,6 +206,36 @@ const fetchTasks = async (req, res) => {
 };
 
 /**
+ * Fetches all the tasks of the logged in user
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const getTasksByUser = async (req, res) => {
+  try {
+    const { username, id: authenticatedUserId } = req.userData;
+    const requestedUserId = req.params.userId;
+    const dev = req.query.dev;
+
+    if (requestedUserId === authenticatedUserId && dev) {
+      if (req.query.completed) {
+        const allCompletedTasks = await tasks.fetchUserCompletedTasks(username);
+        return res.json(allCompletedTasks);
+      } else {
+        const allTasks = await tasks.fetchUserTasks(username, []);
+        return res.json(allTasks);
+      }
+    } else {
+      return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    }
+  } catch (err) {
+    logger.error(`Error while fetching tasks: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+/**
  * Fetches all the tasks of the requested user
  *
  * @param req {Object} - Express request object
@@ -573,6 +603,7 @@ module.exports = {
   updateTask,
   getSelfTasks,
   getUserTasks,
+  getTasksByUser,
   getTask,
   updateTaskStatus,
   overdueTasks,
