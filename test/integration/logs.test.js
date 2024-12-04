@@ -201,6 +201,67 @@ describe("/logs", function () {
           return done();
         });
     });
+
+    it("should return logs filtered by username, startDate, and endDate when dev flag is enabled", function (done) {
+      const username = "joygupta";
+      const startDate = 1729841400000;
+      const endDate = 1729841500000;
+      chai
+        .request(app)
+        .get(`/logs?username=${username}&startDate=${startDate}&endDate=${endDate}&dev=true`)
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.equal("All Logs fetched successfully");
+
+          expect(res.body.data).to.be.an("array");
+          res.body.data.forEach((log) => {
+            expect(log).to.have.property("meta");
+            expect(log).to.have.property("body");
+            expect(log.meta).to.have.property("userId");
+            const timestamp = log.timestamp._seconds * 1000;
+            expect(timestamp).to.be.at.least(startDate);
+            expect(timestamp).to.be.at.most(endDate);
+          });
+
+          return done();
+        });
+    });
+
+    it("should return an error if startDate is greater than endDate", function (done) {
+      const username = "joygupta";
+      const startDate = 1729841500000;
+      const endDate = 1729841400000;
+
+      chai
+        .request(app)
+        .get(`/logs?username=${username}&startDate=${startDate}&endDate=${endDate}&dev=true`)
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .end(function (_err, res) {
+          expect(res).to.have.status(500);
+          expect(res.body.error).to.equal("Start date cannot be greater than end date.");
+          return done();
+        });
+    });
+
+    it("should return an empty array if no logs match username and date range", function (done) {
+      const username = "nonexistentUser";
+      const startDate = 1729841400000;
+      const endDate = 1729841500000;
+
+      chai
+        .request(app)
+        .get(`/logs?username=${username}&startDate=${startDate}&endDate=${endDate}&dev=true`)
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .end(function (_err, res) {
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.equal("All Logs fetched successfully");
+          return done();
+        });
+    });
   });
 
   describe("Add logs when user doc is update", function () {
