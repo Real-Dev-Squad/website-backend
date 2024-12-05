@@ -39,7 +39,7 @@ const verifyUser = async (req, res) => {
     if (!req.userData?.profileURL) {
       return res.boom.serverUnavailable("ProfileURL is Missing");
     }
-    await userQuery.addOrUpdate({ profileStatus: "PENDING" }, userId);
+    await userQuery.addOrUpdate({ profileStatus: "PENDING" }, userId, req.query.dev);
   } catch (error) {
     logger.error(`Error while verifying user: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
@@ -496,7 +496,7 @@ const updateSelf = async (req, res) => {
         const { roles } = discordMember;
         if (roles && roles.includes(discordDeveloperRoleId)) {
           if (req.body.disabledRoles && devFeatureFlag) {
-            const updatedUser = await userQuery.addOrUpdate({ disabled_roles: rolesToDisable }, userId);
+            const updatedUser = await userQuery.addOrUpdate({ disabled_roles: rolesToDisable }, userId, req.query.dev);
             if (updatedUser) {
               return res
                 .status(200)
@@ -510,7 +510,7 @@ const updateSelf = async (req, res) => {
       }
     }
 
-    const updatedUser = await userQuery.addOrUpdate(req.body, userId);
+    const updatedUser = await userQuery.addOrUpdate(req.body, userId, req.query.dev);
 
     if (!updatedUser.isNewUser) {
       // Success criteria, user finished the sign-up process.
@@ -695,7 +695,7 @@ const updateUser = async (req, res) => {
 
     await profileDiffsQuery.updateProfileDiff({ approval: profileDiffStatus.APPROVED }, profileDiffId);
 
-    await userQuery.addOrUpdate(profileDiff, userId);
+    await userQuery.addOrUpdate(profileDiff, userId, req.query.dev);
 
     const meta = {
       approvedBy: req.userData.id,
@@ -718,7 +718,7 @@ const generateChaincode = async (req, res) => {
     const { id } = req.userData;
 
     const chaincode = await chaincodeQuery.storeChaincode(id);
-    await userQuery.addOrUpdate({ chaincode }, id);
+    await userQuery.addOrUpdate({ chaincode }, id, req.query.dev);
     return res.json({
       chaincode,
       message: "Chaincode returned successfully",
@@ -733,7 +733,7 @@ const profileURL = async (req, res) => {
   try {
     const userId = req.userData.id;
     const { profileURL } = req.body;
-    await userQuery.addOrUpdate({ profileURL }, userId);
+    await userQuery.addOrUpdate({ profileURL }, userId, req.query.dev);
     return res.json({
       message: "updated profile URL!!",
     });
@@ -933,7 +933,7 @@ const updateRoles = async (req, res) => {
 
       const response = await getRoleToUpdate(result.user, dataToUpdate);
       if (response.updateRole) {
-        await userQuery.addOrUpdate(response.newUserRoles, result.user.id);
+        await userQuery.addOrUpdate(response.newUserRoles, result.user.id, req.query.dev);
         if (dataToUpdate?.archived) {
           const body = {
             reason: reason || "",
