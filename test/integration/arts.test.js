@@ -152,7 +152,7 @@ describe("Arts", function () {
     it("Should get all the arts of the user", function (done) {
       chai
         .request(app)
-        .get(`/arts/${userId}?dev=true`)
+        .get(`/arts/${userId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -172,7 +172,7 @@ describe("Arts", function () {
     it("Should return 401, for Unauthenticated User", function (done) {
       chai
         .request(app)
-        .get(`/arts/${userId}?dev=true`)
+        .get(`/arts/${userId}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -195,7 +195,7 @@ describe("Arts", function () {
 
       chai
         .request(app)
-        .get(`/arts/${userId}?dev=true`)
+        .get(`/arts/${userId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           artsQuery.fetchUserArts.restore();
@@ -215,7 +215,7 @@ describe("Arts", function () {
 
       chai
         .request(app)
-        .get(`/arts/${userId}?dev=true`)
+        .get(`/arts/${userId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           artsQuery.fetchUserArts.restore();
