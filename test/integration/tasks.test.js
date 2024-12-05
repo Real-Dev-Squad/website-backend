@@ -1786,5 +1786,22 @@ describe("Tasks", function () {
       expect(res.body).to.be.a("array");
       expect([taskId1, taskId2]).to.include(taskId1);
     });
+
+    it("Should return 401 if not logged in", async function () {
+      const { userId: assignedUser } = await userModel.addOrUpdate({
+        github_id: "prakashchoudhary07",
+        username: "user1",
+      });
+
+      const res = await chai.request(app).get(`/tasks/v1/${assignedUser}/?dev=true`);
+
+      expect(res).to.have.status(401);
+      expect(res.body).to.be.an("object");
+      expect(res.body).to.eql({
+        statusCode: 401,
+        error: "Unauthorized",
+        message: "Unauthenticated User",
+      });
+    });
   });
 });
