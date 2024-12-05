@@ -23,6 +23,7 @@ const { userState } = require("../constants/userStatus");
 const discordRoleModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
 const usersCollection = firestore.collection("users");
+const config = require("config");
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 const { generateAuthTokenForCloudflare } = require("../utils/discord-actions");
 
