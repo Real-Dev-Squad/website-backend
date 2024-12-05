@@ -75,7 +75,19 @@ const fetchAllLogs = async (req, res) => {
   }
 };
 
+const updateLogs = async (req, res) => {
+  try {
+    const response = await logsQuery.updateLogs();
+    return res.json({
+      response,
+    });
+  } catch (error) {
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+  }
+};
+
 module.exports = {
   fetchLogs,
   fetchAllLogs,
+  updateLogs,
 };

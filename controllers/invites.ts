@@ -32,7 +32,7 @@ export const createInviteLink = async (req: InviteBodyRequest, res: CustomRespon
       type: logType.DISCORD_INVITES,
       meta: {
         action: "create",
-        createdBy: logType.EXTERNAL_SERVICE,
+        userId: logType.EXTERNAL_SERVICE,
         createdAt: Date.now(),
       },
       body: {
