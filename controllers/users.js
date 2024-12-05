@@ -1,6 +1,10 @@
 const chaincodeQuery = require("../models/chaincodes");
 const userQuery = require("../models/users");
 const profileDiffsQuery = require("../models/profileDiffs");
+const firestore = require("../utils/firestore");
+const memberRoleModel = firestore.collection("member-group-roles");
+const logsModel = firestore.collection("logs");
+const admin = require("firebase-admin");
 const logsQuery = require("../models/logs");
 const imageService = require("../services/imageService");
 const { profileDiffStatus } = require("../constants/profileDiff");
@@ -620,7 +624,7 @@ const markUnverified = async (req, res) => {
     const unverifiedRoleId = config.get("discordUnverifiedRoleId");
     const usersToApplyUnverifiedRole = [];
     const addRolePromises = [];
-    const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
+    const batchPromises = [];
 
     allRdsLoggedInUsers.forEach((user) => {
       rdsUserMap[user.discordId] = true;
@@ -636,11 +640,40 @@ const markUnverified = async (req, res) => {
       }
     });
 
+    const batchSize = 500;
+    const batches = Array.from({ length: Math.ceil(usersToApplyUnverifiedRole.length / batchSize) }, (_, index) =>
+      usersToApplyUnverifiedRole.slice(index * batchSize, index * batchSize + batchSize)
+    );
+
+    batches.forEach((batch) => {
+      const firestoreBatch = firestore.batch();
+
+      batch.forEach((id) => {
+        const memberRoleRef = memberRoleModel.doc(id);
+        const logRef = logsModel.doc();
+
+        firestoreBatch.set(memberRoleRef, {
+          roleid: unverifiedRoleId,
+          userid: id,
+          date: admin.firestore.Timestamp.fromDate(new Date()),
+        });
+
+        firestoreBatch.set(logRef, {
+          type: logType.ADD_UNVERIFIED_ROLE,
+          meta: { roleid: unverifiedRoleId, userid: id },
+          body: { message: "Unverified role added successfully" },
+          timestamp: admin.firestore.Timestamp.fromDate(new Date()),
+        });
+      });
+
+      batchPromises.push(firestoreBatch.commit());
+    });
+
     usersToApplyUnverifiedRole.forEach((id) => {
       addRolePromises.push(addRoleToUser(id, unverifiedRoleId));
     });
 
-    await Promise.all(addRolePromises);
+    await Promise.all([...addRolePromises, ...batchPromises]);
     return res.json({ message: "ROLES APPLIED SUCCESSFULLY" });
   } catch (err) {
     logger.error(err);
