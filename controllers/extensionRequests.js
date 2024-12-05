@@ -74,7 +74,7 @@ const createTaskExtensionRequest = async (req, res) => {
       type: "extensionRequests",
       meta: {
         taskId: extensionBody.taskId,
-        createdBy: req.userData.id,
+        userId: req.userData.id,
       },
       body: {
         extensionRequestId: extensionRequest.id,
