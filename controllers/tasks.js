@@ -285,7 +285,7 @@ const getUserTasks = async (req, res) => {
 /**
  * @deprecated
  * WARNING: This API endpoint is being deprecated and will be removed in future versions.
- * Please use the updated API endpoint: `/tasks/:userId?dev=true` for retrieving user profile details.
+ * Please use the updated API endpoint: `/tasks/:userId?dev=true` for retrieving user's task details.
  *
  * This API is kept temporarily for backward compatibility.
  */
