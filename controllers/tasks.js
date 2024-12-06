@@ -5,7 +5,7 @@ const { USER_STATUS } = require("../constants/users");
 const { addOrUpdate, getRdsUserInfoByGitHubUsername } = require("../models/users");
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
-const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG, FORBIDDEN_ACCESS } = require("../constants/errorMessages");
 const dependencyModel = require("../models/tasks");
 const { transformQuery, transformTasksUsersQuery } = require("../utils/tasks");
 const { getPaginatedLink } = require("../utils/helper");
@@ -227,7 +227,7 @@ const getTasksByUser = async (req, res) => {
         return res.json(allTasks);
       }
     } else {
-      return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+      return res.boom.forbidden(FORBIDDEN_ACCESS);
     }
   } catch (err) {
     logger.error(`Error while fetching tasks: ${err}`);
