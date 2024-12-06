@@ -1812,7 +1812,7 @@ describe("Tasks", function () {
       });
     });
 
-    it("Should return 500 if the requested user is not the authenticated user or dev is false", async function () {
+    it("Should return 403 if the requested user is not the authenticated user or dev is false", async function () {
       const { userId: authenticatedUserId } = await userModel.addOrUpdate({
         github_id: "authenticated_user",
         username: "auth_user",
@@ -1830,12 +1830,11 @@ describe("Tasks", function () {
         .get(`/tasks/v1/${requestedUserId}`)
         .set("cookie", `${cookieName}=${authToken}`);
 
-      expect(res).to.have.status(500);
-      expect(res.body).to.be.an("object");
+      expect(res).to.have.status(403);
       expect(res.body).to.eql({
-        statusCode: 500,
-        error: "Internal Server Error",
-        message: "An internal server error occurred",
+        statusCode: 403,
+        error: "Forbidden",
+        message: "Access denied: You cannot view",
       });
     });
   });
