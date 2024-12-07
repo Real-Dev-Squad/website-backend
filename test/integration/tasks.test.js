@@ -1837,7 +1837,7 @@ describe("Tasks", function () {
         message: "Access denied: You cannot view",
       });
     });
-    
+
     it("Should return 500 if an unexpected error occurs", async function () {
       const { userId: authenticatedUserId } = await userModel.addOrUpdate({
         github_id: "authenticated_user",
