@@ -5,7 +5,7 @@ const { USER_STATUS } = require("../constants/users");
 const { addOrUpdate, getRdsUserInfoByGitHubUsername } = require("../models/users");
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
 const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
-const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG, FORBIDDEN_ACCESS } = require("../constants/errorMessages");
 const dependencyModel = require("../models/tasks");
 const { transformQuery, transformTasksUsersQuery } = require("../utils/tasks");
 const { getPaginatedLink } = require("../utils/helper");
@@ -206,6 +206,36 @@ const fetchTasks = async (req, res) => {
 };
 
 /**
+ * Fetches all the tasks of the logged in user
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+
+const getTasksByUser = async (req, res) => {
+  try {
+    const { username, id: authenticatedUserId } = req.userData;
+    const requestedUserId = req.params.userId;
+    const dev = req.query.dev;
+
+    if (requestedUserId === authenticatedUserId && dev) {
+      if (req.query.completed) {
+        const allCompletedTasks = await tasks.fetchUserCompletedTasks(username);
+        return res.json(allCompletedTasks);
+      } else {
+        const allTasks = await tasks.fetchUserTasks(username, []);
+        return res.json(allTasks);
+      }
+    } else {
+      return res.boom.forbidden(FORBIDDEN_ACCESS);
+    }
+  } catch (err) {
+    logger.error(`Error while fetching tasks: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+/**
  * Fetches all the tasks of the requested user
  *
  * @param req {Object} - Express request object
@@ -251,6 +281,15 @@ const getUserTasks = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
+
+/**
+ * @deprecated
+ * WARNING: This API endpoint is being deprecated and will be removed in future versions.
+ * Please use the updated API endpoint: `/tasks/:userId?dev=true` for retrieving user's task details.
+ *
+ * This API is kept temporarily for backward compatibility.
+ */
+
 const getSelfTasks = async (req, res) => {
   try {
     const { username } = req.userData;
@@ -258,9 +297,17 @@ const getSelfTasks = async (req, res) => {
     if (username) {
       if (req.query.completed) {
         const allCompletedTasks = await tasks.fetchUserCompletedTasks(username);
+        res.set(
+          "X-Deprecation-Warning",
+          "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:userId?dev=true&completed=true to get the updated profile details."
+        );
         return res.json(allCompletedTasks);
       } else {
         const allTasks = await tasks.fetchSelfTasks(username);
+        res.set(
+          "X-Deprecation-Warning",
+          "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:userId?dev=true to get the updated profile details."
+        );
         return res.json(allTasks);
       }
     }
@@ -573,6 +620,7 @@ module.exports = {
   updateTask,
   getSelfTasks,
   getUserTasks,
+  getTasksByUser,
   getTask,
   updateTaskStatus,
   overdueTasks,
