@@ -1837,5 +1837,30 @@ describe("Tasks", function () {
         message: "Access denied: You cannot view",
       });
     });
+    
+    it("Should return 500 if an unexpected error occurs", async function () {
+      const { userId: authenticatedUserId } = await userModel.addOrUpdate({
+        github_id: "authenticated_user",
+        username: "auth_user",
+      });
+
+      const authToken = authService.generateAuthToken({ userId: authenticatedUserId });
+
+      const fetchUserTasksStub = sinon.stub(tasks, "fetchUserTasks").throws(new Error("Test Error"));
+
+      const res = await chai
+        .request(app)
+        .get(`/tasks/v1/${authenticatedUserId}?dev=true`)
+        .set("cookie", `${cookieName}=${authToken}`);
+
+      expect(res).to.have.status(500);
+      expect(res.body).to.eql({
+        statusCode: 500,
+        error: "Internal Server Error",
+        message: "An internal server error occurred",
+      });
+
+      fetchUserTasksStub.restore();
+    });
   });
 });
