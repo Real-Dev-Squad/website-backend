@@ -67,12 +67,27 @@ const fetchAllLogs = async (req, res) => {
       prev: prevUrl,
     });
   } catch (err) {
+    if (err.statusCode) {
+      return res.status(err.statusCode).json({ error: err.message });
+    }
     logger.error(ERROR_WHILE_FETCHING_LOGS, err);
     return res.boom.badImplementation(ERROR_WHILE_FETCHING_LOGS);
+  }
+};
+
+const updateLogs = async (req, res) => {
+  try {
+    const response = await logsQuery.updateLogs();
+    return res.json({
+      response,
+    });
+  } catch (error) {
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
 
 module.exports = {
   fetchLogs,
   fetchAllLogs,
+  updateLogs,
 };
