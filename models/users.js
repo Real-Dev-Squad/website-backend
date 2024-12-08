@@ -96,7 +96,7 @@ const addOrUpdate = async (userData, userId = null, devFeatureFlag) => {
         if ("id" in userData) {
           delete userData.id;
         }
-        if (devFeatureFlag === "true") {
+        if (devFeatureFlag) {
           await userModel.doc(userId).set(
             {
               ...userData,

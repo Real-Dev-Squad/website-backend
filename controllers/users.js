@@ -39,7 +39,7 @@ const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
-  const devFeatureFlag = req.query.dev;
+  const devFeatureFlag = req.query.dev === "true";
   try {
     if (!req.userData?.profileURL) {
       return res.boom.serverUnavailable("ProfileURL is Missing");
@@ -458,7 +458,6 @@ const updateSelf = async (req, res) => {
   try {
     const { id: userId, roles: userRoles, discordId } = req.userData;
     const devFeatureFlag = req.query.dev === "true";
-    const devFlag = req.query.dev;
     const { user } = await dataAccess.retrieveUsers({ id: userId });
     let rolesToDisable = [];
 
@@ -502,7 +501,7 @@ const updateSelf = async (req, res) => {
         const { roles } = discordMember;
         if (roles && roles.includes(discordDeveloperRoleId)) {
           if (req.body.disabledRoles && devFeatureFlag) {
-            const updatedUser = await userQuery.addOrUpdate({ disabled_roles: rolesToDisable }, userId, devFlag);
+            const updatedUser = await userQuery.addOrUpdate({ disabled_roles: rolesToDisable }, userId, devFeatureFlag);
             if (updatedUser) {
               return res
                 .status(200)
@@ -516,7 +515,7 @@ const updateSelf = async (req, res) => {
       }
     }
 
-    const updatedUser = await userQuery.addOrUpdate(req.body, userId, devFlag);
+    const updatedUser = await userQuery.addOrUpdate(req.body, userId, devFeatureFlag);
 
     if (!updatedUser.isNewUser) {
       // Success criteria, user finished the sign-up process.
@@ -713,9 +712,9 @@ const getUserImageForVerification = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { id: profileDiffId, message } = req.body;
-    const devFeatureFlag = req.query.dev;
+    const devFeatureFlag = req.query.dev === "true";
     let profileDiffData;
-    if (devFeatureFlag === "true") {
+    if (devFeatureFlag) {
       profileDiffData = await profileDiffsQuery.fetchProfileDiffUnobfuscated(profileDiffId);
     } else {
       profileDiffData = await profileDiffsQuery.fetchProfileDiff(profileDiffId);
@@ -751,7 +750,7 @@ const updateUser = async (req, res) => {
 const generateChaincode = async (req, res) => {
   try {
     const { id } = req.userData;
-    const devFeatureFlag = req.query.dev;
+    const devFeatureFlag = req.query.dev === "true";
     const chaincode = await chaincodeQuery.storeChaincode(id);
     await userQuery.addOrUpdate({ chaincode }, id, devFeatureFlag);
     return res.json({
@@ -768,7 +767,7 @@ const profileURL = async (req, res) => {
   try {
     const userId = req.userData.id;
     const { profileURL } = req.body;
-    const devFeatureFlag = req.query.dev;
+    const devFeatureFlag = req.query.dev === "true";
     await userQuery.addOrUpdate({ profileURL }, userId, devFeatureFlag);
     return res.json({
       message: "updated profile URL!!",
@@ -961,7 +960,7 @@ const setInDiscordScript = async (req, res) => {
 const updateRoles = async (req, res) => {
   try {
     const result = await dataAccess.retrieveUsers({ id: req.params.id });
-    const devFeatureFlag = req.query.dev;
+    const devFeatureFlag = req.query.dev === "true";
     if (result?.userExists) {
       const dataToUpdate = req.body;
       const roles = req?.userData?.roles;
