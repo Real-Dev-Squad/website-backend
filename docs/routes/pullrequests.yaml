@@ -1,0 +1,118 @@
+paths:
+  /pullrequests/open:
+    get:
+      summary: Latest 10 Pull Requests in Real Dev Squad
+      tags:
+        - Pull Requests
+      parameters:
+        - in: query
+          name: size
+          schema:
+            type: integer
+          description: Number of pull requests to be returned
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Page number for pagination
+      responses:
+        200:
+          description: Pull Requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A message indicating the success of the operation
+                    example: Open PRs
+                  pullRequests:
+                    type: array
+                    items:
+                      $ref: "../components.yaml#/components/schemas/PullRequests"
+        500:
+          description: badImplementation
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/schemas/errors/badImplementation"
+
+  /pullrequests/stale:
+    get:
+      summary: All open Pull Requests in Real Dev Squad
+      tags:
+        - Pull Requests
+      parameters:
+        - in: query
+          name: size
+          schema:
+            type: integer
+          description: Number of pull requests to be returned
+        - in: query
+          name: page
+          schema:
+            type: integer
+          description: Page number for pagination
+      responses:
+        200:
+          description: Pull Requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A message indicating the success of the operation
+                    example: Stale PRs
+                  pullRequests:
+                    type: array
+                    items:
+                      $ref: "../components.yaml#/components/schemas/PullRequests"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
+
+  /pullrequests/user/{username}:
+    get:
+      summary: Pull Requests by a user in Real Dev Squad
+      tags:
+        - Pull Requests
+      responses:
+        200:
+          description: Pull Requests
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A message indicating the success of the operation
+                    example: Pull requests returned successfully!
+                  pullRequests:
+                    type: array
+                    items:
+                      $ref: "../components.yaml#/components/schemas/PullRequests"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
