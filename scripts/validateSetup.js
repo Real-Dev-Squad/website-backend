@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-const Firestore = require("../utils/firestore.js");
+const Firestore = require("../utils/firestore");
 const config = require("config");
 
 // check whether github credentials are not falsy
