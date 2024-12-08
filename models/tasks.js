@@ -22,6 +22,7 @@ const {
 } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 
 /**
  * Update multiple tasks' status to DONE in one batch operation.
@@ -750,11 +751,22 @@ const fetchIncompleteTasksByUserIds = async (userIds) => {
     return [];
   }
   try {
-    const incompleteTasksQuery = await tasksModel.where("assigneeId", "in", userIds).get();
+    const userIdChunks = [];
 
-    const incompleteTaskForUsers = incompleteTasksQuery.docs.filter(
-      (task) => !COMPLETED_STATUSES.includes(task.data().status)
-    );
+    for (let i = 0; i < userIds.length; i += BATCH_SIZE_IN_CLAUSE) {
+      userIdChunks.push(userIds.slice(i, i + BATCH_SIZE_IN_CLAUSE));
+    }
+
+    const promises = userIdChunks.map(async (userIdChunk) => {
+      const querySnapshot = await tasksModel.where("assignee", "in", userIdChunk).get();
+      return querySnapshot.docs.map((doc) => doc.data());
+    });
+
+    const snapshots = await Promise.all(promises);
+
+    const incompleteTasks = snapshots.flat();
+
+    const incompleteTaskForUsers = incompleteTasks.filter((task) => !COMPLETED_STATUSES.includes(task.status));
 
     return incompleteTaskForUsers;
   } catch (error) {
