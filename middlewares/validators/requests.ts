@@ -16,10 +16,6 @@ export const createRequestsMiddleware = async (
   next: NextFunction
 ) => {
   const type = req.body.type;
-  // TODO: Remove this check once feature is tested and ready to be used
-  if ( req.query.dev !== "true") {
-    return res.boom.badRequest("Please use feature flag to make this requests");
-  }
 
   try {
     switch (type) {
@@ -49,10 +45,6 @@ export const updateRequestsMiddleware = async (
   res: CustomResponse,
   next: NextFunction
 ) => {
-  // TODO: Remove this check once feature is tested and ready to be used
-  if ( req.query.dev !== "true") {
-    return res.boom.badRequest("Please use feature flag to make this requests");
-  }
   const schema = joi
   .object()
   .strict()
@@ -83,7 +75,7 @@ export const updateRequestsMiddleware = async (
 
 export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: OooRequestResponse, next: NextFunction) => {
   const schema = joi.object().keys({
-    dev: joi.bool().sensitive(),  // TODO: Remove this validator once feature is tested and ready to be used
+    dev: joi.bool().sensitive().optional(), // TODO: Remove this validator once feature is tested and ready to be used
     id: joi.string().optional(),
     type: joi
       .string()

@@ -10,6 +10,14 @@ module.exports = {
     __name: "PORT",
     __format: "number",
   },
+
+  aws: {
+    region: "AWS_REGION",
+    access_key: "AWS_ACCESS_KEY",
+    secret_key: "AWS_SECRET_KEY",
+    identity_store_id: "IDENTITY_STORE_ID",
+  },
+
   enableFileLogs: {
     __name: "ENABLE_FILE_LOGS",
     __format: "boolean",
@@ -52,6 +60,16 @@ module.exports = {
 
     discordBot: {
       baseUrl: "DISCORD_BASE_URL",
+    },
+  },
+
+  emailServiceConfig: {
+    email: "RDS_EMAIL",
+    password: "RDS_EMAIL_PASSWORD",
+    host: "SMTP_HOST",
+    port: {
+      __name: "SMTP_PORT",
+      __format: "number",
     },
   },
 

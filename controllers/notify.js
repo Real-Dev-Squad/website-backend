@@ -1,4 +1,4 @@
-const admin = require("firebase-admin");
+const { getMessaging } = require("firebase-admin/messaging");
 const { getFcmTokenFromUserId } = require("../services/getFcmTokenFromUserId");
 const { getUserIdsFromRoleId } = require("../services/getUserIdsFromRoleId");
 
@@ -56,6 +56,7 @@ const notifyController = async (req, res) => {
     },
     tokens: Array.from(setOfFcmTokens),
   };
+
   function calculateMessageSize(message) {
     const byteArray = new TextEncoder().encode(message);
 
@@ -68,9 +69,9 @@ const notifyController = async (req, res) => {
   if (calculateMessageSize(message) >= 2) {
     res.error(401).send("Message length exceeds");
   }
-  admin
-    .messaging()
-    .sendMulticast(message)
+
+  getMessaging()
+    .sendEachForMulticast(message)
     .then(() => res.status(200).json({ status: 200, message: "User notified successfully" }))
     .catch((error) => {
       logger.error("Error sending message:", error);

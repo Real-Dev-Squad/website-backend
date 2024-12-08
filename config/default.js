@@ -20,9 +20,23 @@ module.exports = {
     org: "Real-Dev-Squad",
   },
 
+  aws: {
+    region: "<aws-region>",
+    access_key: "<aws-access-key>",
+    secret_key: "<aws-secret-key>",
+    identity_store_id: "<identity-store-id>",
+  },
+
   githubOauth: {
     clientId: "<clientId>",
     clientSecret: "<clientSecret>",
+  },
+
+  emailServiceConfig: {
+    email: "<RDS_EMAIL>",
+    password: "<EMAIL PASSWORD GENERATED AFTER 2FA>",
+    host: "<smtp host>",
+    port: "<number>",
   },
 
   firestore: `{

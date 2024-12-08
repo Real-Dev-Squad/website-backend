@@ -46,6 +46,31 @@ const createNewRole = async (roleData) => {
   }
 };
 
+/**
+ * Soft deletes a group role by marking it as deleted in the database.
+ * This function updates the role document in Firestore, setting isDeleted to true
+ * and recording who deleted it and when.
+ *
+ * @param {string} groupId - The ID of the group role to be deleted
+ * @param {string} deletedBy - The ID of the user performing the deletion for logging purpose
+ * @returns {Promise<Object>} An object indicating whether the operation was successful
+ */
+const deleteGroupRole = async (groupId, deletedBy) => {
+  try {
+    const roleRef = admin.firestore().collection("discord-roles").doc(groupId);
+    await roleRef.update({
+      isDeleted: true,
+      deletedAt: admin.firestore.Timestamp.fromDate(new Date()),
+      deletedBy: deletedBy,
+    });
+
+    return { isSuccess: true };
+  } catch (error) {
+    logger.error(`Error in deleteGroupRole: ${error}`);
+    return { isSuccess: false };
+  }
+};
+
 const removeMemberGroup = async (roleId, discordId) => {
   try {
     const backendResponse = await deleteRoleFromDatabase(roleId, discordId);
@@ -156,16 +181,19 @@ const updateGroupRole = async (roleData, docId) => {
  *
  * @param options { Object }: Data of the new role
  * @param options.rolename String : name of the role
- * @param options.roleId String : id of the role
+ * @param options.roleid String : id of the role
  * @returns {Promise<discordRoleModel|Object>}
  */
 
 const isGroupRoleExists = async (options = {}) => {
   try {
-    const { rolename = null, roleid = null } = options;
+    const { groupId = null, rolename = null, roleid = null } = options;
 
     let existingRoles;
-    if (rolename && roleid) {
+    if (groupId) {
+      existingRoles = await discordRoleModel.doc(groupId).get();
+      return { roleExists: existingRoles.exists, existingRoles };
+    } else if (rolename && roleid) {
       existingRoles = await discordRoleModel
         .where("rolename", "==", rolename)
         .where("roleid", "==", roleid)
@@ -176,9 +204,8 @@ const isGroupRoleExists = async (options = {}) => {
     } else if (roleid) {
       existingRoles = await discordRoleModel.where("roleid", "==", roleid).limit(1).get();
     } else {
-      throw Error("Either rolename or roleId is required");
+      throw Error("Either rolename, roleId, or groupId is required");
     }
-
     return { roleExists: !existingRoles.empty, existingRoles };
   } catch (err) {
     logger.error("Error in getting all group-roles", err);
@@ -336,7 +363,7 @@ const fetchGroupToUserMapping = async (roleIds) => {
   }
 };
 
-const updateIdleUsersOnDiscord = async () => {
+const updateIdleUsersOnDiscord = async (dev) => {
   let totalIdleUsers = 0;
   const totalGroupIdleRolesApplied = { count: 0, response: [] };
   const totalGroupIdleRolesNotApplied = { count: 0, errors: [] };
@@ -361,7 +388,7 @@ const updateIdleUsersOnDiscord = async () => {
       const haveIdleRole = discordUser.roles.includes(groupIdleRole.role.roleid);
       const isMaven = discordUser.roles.includes(discordMavenRoleId);
 
-      if (isMaven) {
+      if (dev === "true" && isMaven) {
         allMavens.push(discordUser.user.id);
       }
 
@@ -378,7 +405,7 @@ const updateIdleUsersOnDiscord = async () => {
             if (userData.exists) {
               if (isUserArchived) {
                 totalArchivedUsers++;
-              } else if (!allMavens.includes(userData.data().discordId)) {
+              } else if (dev === "true" && !allMavens.includes(userData.data().discordId)) {
                 userStatus.userid = userData.data().discordId;
                 allIdleUsers.push(userStatus);
               }
@@ -566,7 +593,7 @@ const updateUsersNicknameStatus = async (lastNicknameUpdate) => {
   }
 };
 
-const updateIdle7dUsersOnDiscord = async () => {
+const updateIdle7dUsersOnDiscord = async (dev) => {
   let totalIdle7dUsers = 0;
   const totalGroupIdle7dRolesApplied = { count: 0, response: [] };
   const totalGroupIdle7dRolesNotApplied = { count: 0, errors: [] };
@@ -593,7 +620,7 @@ const updateIdle7dUsersOnDiscord = async () => {
       const haveIdle7dRole = discordUser.roles.includes(groupIdle7dRoleId);
       const isMaven = discordUser.roles.includes(discordMavenRoleId);
 
-      if (isMaven) {
+      if (dev === "true" && isMaven) {
         allMavens.push(discordUser.user.id);
       }
 
@@ -617,7 +644,7 @@ const updateIdle7dUsersOnDiscord = async () => {
               if (userData.exists) {
                 if (isUserArchived) {
                   totalArchivedUsers++;
-                } else if (!allMavens.includes(userData.data().discordId)) {
+                } else if (dev === "true" && !allMavens.includes(userData.data().discordId)) {
                   userStatus.userid = userData.data().discordId;
                   allIdle7dUsers.push(userStatus);
                 }
@@ -1099,4 +1126,5 @@ module.exports = {
   getUserDiscordInvite,
   addInviteToInviteModel,
   groupUpdateLastJoinDate,
+  deleteGroupRole,
 };

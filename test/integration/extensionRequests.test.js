@@ -30,6 +30,9 @@ describe("Extension Requests", function () {
     taskId2,
     taskId3,
     taskId4,
+    taskId5,
+    taskId6,
+    taskId7,
     extensionRequestId1,
     extensionRequestId2,
     extensionRequestId3,
@@ -115,6 +118,46 @@ describe("Extension Requests", function () {
         completionAward: { [DINERO]: 3, [NEELAM]: 300 },
         lossRate: { [DINERO]: 1 },
       },
+      {
+        title: "Task with multiple requests",
+        type: "feature",
+        endsOn: 1234,
+        startedOn: 4567,
+        status: "active",
+        percentCompleted: 10,
+        assignee: appOwner.username,
+        isNoteworthy: true,
+        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+        lossRate: { [DINERO]: 1 },
+      },
+      {
+        title: "Task with pending request",
+        type: "feature",
+        endsOn: 1234,
+        startedOn: 4567,
+        status: "active",
+        percentCompleted: 10,
+        assignee: appOwner.username,
+        isNoteworthy: true,
+        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+        lossRate: { [DINERO]: 1 },
+      },
+      {
+        title: "Test task 5",
+        purpose: "To Test mocha",
+        featureUrl: "<testUrl>",
+        type: "group",
+        links: ["test1"],
+        endsOn: 1234,
+        startedOn: 54321,
+        status: "active",
+        percentCompleted: 10,
+        dependsOn: ["d12", "d23"],
+        isNoteworthy: false,
+        assignee: appOwner.username,
+        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+        lossRate: { [DINERO]: 1 },
+      },
     ];
 
     // Add the active task
@@ -127,6 +170,9 @@ describe("Extension Requests", function () {
     // Add the completed task
     taskId3 = (await tasks.updateTask(taskData[3])).taskId;
     taskId4 = (await tasks.updateTask(taskData[4])).taskId;
+    taskId5 = (await tasks.updateTask(taskData[5])).taskId;
+    taskId6 = (await tasks.updateTask(taskData[6])).taskId;
+    taskId7 = (await tasks.updateTask(taskData[7])).taskId;
 
     const extensionRequest = {
       taskId: taskId3,
@@ -176,11 +222,32 @@ describe("Extension Requests", function () {
       reason: "family event",
       status: "PENDING",
     };
+    const extensionRequest5 = {
+      taskId: taskId7,
+      title: "change ETA",
+      assignee: user.id,
+      oldEndsOn: 1234,
+      newEndsOn: 1235,
+      reason: "family event",
+      status: "APPROVED",
+    };
+
+    const extensionRequest6 = {
+      taskId: taskId6,
+      title: "change ETA",
+      assignee: user.id,
+      oldEndsOn: 1234,
+      newEndsOn: 1235,
+      reason: "family event",
+      status: "PENDING",
+    };
     extensionRequestId1 = (await extensionRequests.createExtensionRequest(extensionRequest)).id;
     extensionRequestId2 = (await extensionRequests.createExtensionRequest(extensionRequest1)).id;
     extensionRequestId3 = (await extensionRequests.createExtensionRequest(extensionRequest2)).id;
     extensionRequestId4 = (await extensionRequests.createExtensionRequest(extensionRequest3)).id;
     extensionRequestId5 = (await extensionRequests.createExtensionRequest(extensionRequest4)).id;
+    await extensionRequests.createExtensionRequest(extensionRequest5);
+    await extensionRequests.createExtensionRequest(extensionRequest6);
   });
 
   after(async function () {
@@ -231,6 +298,44 @@ describe("Extension Requests", function () {
           expect(res.body.allExtensionRequests).to.be.a("array");
           expect(res.body.allExtensionRequests[0].assignee).to.equal(appOwner.username);
           expect(res.body.allExtensionRequests[0].id).to.equal(extensionRequestId2);
+          return done();
+        });
+    });
+
+    it("should return success response and an empty array of extensionRequest if assignee is not same as latest one", function (done) {
+      chai
+        .request(app)
+        .get(`/extension-requests/self`)
+        .query({ taskId: taskId7 })
+        .set("cookie", `${cookieName}=${appOwnerjwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal("Extension Requests returned successfully!");
+          expect(res.body.allExtensionRequests).to.be.a("array").with.lengthOf(0);
+          return done();
+        });
+    });
+
+    it("should return success response and a single latestExtensionRequest if assignee same as latest one", function (done) {
+      chai
+        .request(app)
+        .get(`/extension-requests/self`)
+        .query({ taskId: taskId2 })
+        .set("cookie", `${cookieName}=${appOwnerjwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal("Extension Requests returned successfully!");
+          expect(res.body.allExtensionRequests).to.be.a("array").with.lengthOf(1);
           return done();
         });
     });
@@ -333,7 +438,7 @@ describe("Extension Requests", function () {
             return done(err);
           }
           expect(res).to.have.status(400);
-          expect(res.body.message).to.equal("User with this id or username doesn't exist.");
+          expect(res.body.message).to.equal("User Not Found");
           return done();
         });
     });
@@ -387,7 +492,7 @@ describe("Extension Requests", function () {
 
           expect(res).to.have.status(400);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("Task with this id or taskid doesn't exist.");
+          expect(res.body.message).to.equal("Task Not Found");
           return done();
         });
     });
@@ -413,7 +518,7 @@ describe("Extension Requests", function () {
 
           expect(res).to.have.status(400);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("This task is assigned to some different user");
+          expect(res.body.message).to.equal("This task is assigned to some different user.");
           return done();
         });
     });
@@ -438,34 +543,54 @@ describe("Extension Requests", function () {
           }
           expect(res).to.have.status(400);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("The value for newEndsOn should be greater than the previous ETA");
+          expect(res.body.message).to.equal("New ETA must be greater than Old ETA");
           return done();
         });
     });
 
-    it("Should return fail response if extension request for a task already exists", function (done) {
-      chai
+    it("should create a new extension request when no previous extension request exists and make the requestNumber to 1", async function () {
+      const requestData = {
+        taskId: taskId5,
+        title: "change ETA",
+        assignee: appOwner.id,
+        oldEndsOn: 1234,
+        newEndsOn: 1235,
+        reason: "family event",
+        status: "PENDING",
+      };
+
+      const res = await chai
         .request(app)
         .post("/extension-requests")
         .set("cookie", `${cookieName}=${appOwnerjwt}`)
-        .send({
-          taskId: taskId3,
-          title: "change ETA",
-          assignee: appOwner.id,
-          oldEndsOn: 1234,
-          newEndsOn: 1235,
-          reason: "family event",
-          status: "PENDING",
-        })
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(403);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal("An extension request for this task already exists.");
-          return done();
-        });
+        .send(requestData);
+
+      expect(res).to.have.status(200);
+      expect(res.body.message).to.equal("Extension Request created successfully!");
+
+      expect(res.body.extensionRequest.requestNumber).to.be.equal(1);
+      expect(res.body.extensionRequest).to.be.an("object");
+    });
+
+    it("should handle the case when a previous extension request is pending so api should not allow and throw a proper message", async function () {
+      const requestData = {
+        taskId: taskId6,
+        title: "change ETA",
+        assignee: appOwner.id,
+        oldEndsOn: 1235,
+        newEndsOn: 1236,
+        reason: "family event",
+        status: "PENDING",
+      };
+
+      const res = await chai
+        .request(app)
+        .post("/extension-requests")
+        .set("cookie", `${cookieName}=${appOwnerjwt}`)
+        .send(requestData);
+
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.equal("An extension request for this task already exists.");
     });
 
     it("Should return success response after adding the extension request and also there should be a log for the same", function (done) {
@@ -791,6 +916,57 @@ describe("Extension Requests", function () {
             return done(err);
           }
 
+          expect(res).to.have.status(204);
+          return done();
+        });
+    });
+
+    it("User should be able to update the extensionRequest for the given extensionRequestId", function (done) {
+      chai
+        .request(app)
+        .patch(`/extension-requests/${extensionRequestId4}?dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          title: "new-title",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(204);
+          return done();
+        });
+    });
+
+    it("User should not be able to update the extensionRequest if already approved", function (done) {
+      chai
+        .request(app)
+        .patch(`/extension-requests/${extensionRequestId1}?dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          title: "new-title",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          return done();
+        });
+    });
+
+    it("Super user should be able to update the extensionRequest if already approved", function (done) {
+      chai
+        .request(app)
+        .patch(`/extension-requests/${extensionRequestId1}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          title: "new-title",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
           expect(res).to.have.status(204);
           return done();
         });

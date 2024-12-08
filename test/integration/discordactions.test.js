@@ -213,6 +213,170 @@ describe("Discord actions", function () {
     });
   });
 
+  describe("DELETE /discord-actions/groups/:groupId", function () {
+    let groupId;
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    const roleData = groupData[0];
+
+    beforeEach(async function () {
+      const docRef = await discordRoleModel.add(roleData);
+      groupId = docRef.id;
+
+      superUserId = await addUser(superUser);
+      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+
+      sinon.stub(discordRolesModel, "deleteGroupRole").resolves({ isSuccess: true });
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should return 404 if group role not found", function (done) {
+      sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
+        roleExists: false,
+        existingRoles: { data: () => ({ ...roleData, roleid: roleData.roleid }) },
+      });
+
+      chai
+        .request(app)
+        .delete(`/discord-actions/groups/${groupId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          expect(res).to.have.status(404);
+          expect(res.body.error).to.equal("Not Found");
+          done(err);
+        });
+    });
+
+    it("should successfully delete the group role from discord server", function (done) {
+      sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
+        roleExists: true,
+        existingRoles: { data: () => ({ ...roleData, roleid: roleData.roleid }) },
+      });
+
+      sinon.stub(discordServices, "deleteGroupRoleFromDiscord").resolves({
+        success: true,
+        message: "Role deleted successfully",
+      });
+
+      chai
+        .request(app)
+        .delete(`/discord-actions/groups/${groupId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.equal("Group role deleted successfully");
+          done(err);
+        });
+    });
+
+    it("should return 500 when discord role deletion fails", function (done) {
+      sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
+        roleExists: true,
+        existingRoles: { data: () => ({ ...roleData, roleid: roleData.roleid }) },
+      });
+
+      sinon.stub(discordServices, "deleteGroupRoleFromDiscord").resolves({
+        success: false,
+        message: "Failed to delete role from Discord",
+      });
+
+      chai
+        .request(app)
+        .delete(`/discord-actions/groups/${groupId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          expect(res).to.have.status(500);
+          expect(res.body.error).to.equal("Internal Server Error");
+          done(err);
+        });
+    });
+
+    it("should return 500 when discord service throws an error", function (done) {
+      sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
+        roleExists: true,
+        existingRoles: { data: () => ({ ...roleData, roleid: roleData.roleid }) },
+      });
+
+      sinon.stub(discordServices, "deleteGroupRoleFromDiscord").resolves({
+        success: false,
+        message: "Internal server error",
+      });
+
+      chai
+        .request(app)
+        .delete(`/discord-actions/groups/${groupId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          expect(res).to.have.status(500);
+          expect(res.body.error).to.equal("Internal Server Error");
+          done(err);
+        });
+    });
+
+    it("should successfully delete a group role from database", function (done) {
+      sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
+        roleExists: true,
+        existingRoles: { data: () => ({ ...roleData, roleid: roleData.roleid }) },
+      });
+
+      sinon.stub(discordServices, "deleteGroupRoleFromDiscord").resolves({
+        success: true,
+        message: "Role deleted successfully",
+      });
+
+      chai
+        .request(app)
+        .delete(`/discord-actions/groups/${groupId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.equal("Group role deleted successfully");
+          done(err);
+        });
+    });
+
+    it("should return 500 when deletion fails", function (done) {
+      sinon.restore();
+      sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
+        roleExists: true,
+        existingRoles: { data: () => ({ ...roleData, roleid: roleData.roleid }) },
+      });
+
+      sinon.stub(discordServices, "deleteGroupRoleFromDiscord").resolves({
+        success: true,
+        message: "Role deleted successfully",
+      });
+
+      sinon.stub(discordRolesModel, "deleteGroupRole").resolves({ isSuccess: false });
+      chai
+        .request(app)
+        .delete(`/discord-actions/groups/${groupId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          expect(res).to.have.status(500);
+          expect(res.body.error).to.equal("Internal Server Error");
+          done(err);
+        });
+    });
+
+    it("should return 500 when an internal error occurs", function (done) {
+      sinon.restore();
+      sinon.stub(discordRolesModel, "isGroupRoleExists").throws(new Error("Database error"));
+      chai
+        .request(app)
+        .delete(`/discord-actions/groups/${groupId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          expect(res).to.have.status(500);
+          expect(res.body.error).to.equal("Internal Server Error");
+          done(err);
+        });
+    });
+  });
+
   describe("POST /discord-actions/roles", function () {
     let roleid;
 
@@ -470,7 +634,7 @@ describe("Discord actions", function () {
       );
       chai
         .request(app)
-        .post(`/discord-actions/nicknames/sync?dev=true`)
+        .post(`/discord-actions/nicknames/sync`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
@@ -672,7 +836,7 @@ describe("Discord actions", function () {
     it("should update Idle 7d+ Users successfully and return a 201 status code", function (done) {
       chai
         .request(app)
-        .put(`/discord-actions/group-idle-7d`)
+        .put(`/discord-actions/group-idle-7d?dev=true`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
@@ -1036,10 +1200,10 @@ describe("Discord actions", function () {
       await cleanDb();
     });
 
-    it("should update Idle Users successfully and return a 201 status code", function (done) {
+    it("should update Idle Users successfully and return a 201 status code!", function (done) {
       chai
         .request(app)
-        .put(`/discord-actions/group-idle`)
+        .put(`/discord-actions/group-idle?dev=true`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
