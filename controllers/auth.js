@@ -9,6 +9,91 @@ const {
   USER_DOES_NOT_EXIST_ERROR,
 } = require("../constants/errorMessages");
 
+const googleAuthLogin = (req, res, next) => {
+  const { redirectURL, dev } = req.query;
+  if (dev === "true") {
+    return passport.authenticate("google", {
+      scope: ["email"],
+      state: redirectURL,
+    })(req, res, next);
+  } else {
+    return res.boom.unauthorized("User cannot be authenticated");
+  }
+};
+
+async function handleGoogleLogin(req, res, user, authRedirectionUrl) {
+  const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
+  try {
+    if (!user.emails || user.emails.length === 0) {
+      throw new Error("Email not found in user data");
+    }
+    const userData = {
+      email: user.emails[0].value,
+      created_at: Date.now(),
+      updated_at: null,
+    };
+
+    const userDataFromDB = await users.fetchUser({ email: userData.email });
+
+    if (userDataFromDB.userExists) {
+      if (userDataFromDB.user.roles?.developer) {
+        const errorMessage = encodeURIComponent("Google login is restricted for developer role.");
+        return res.redirect(`${authRedirectionUrl}?error=${errorMessage}`);
+      }
+    }
+
+    const { userId, incompleteUserDetails } = await users.addOrUpdate(userData);
+
+    const token = authService.generateAuthToken({ userId });
+
+    const cookieOptions = {
+      domain: rdsUiUrl.hostname,
+      expires: new Date(Date.now() + config.get("userToken.ttl") * 1000),
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+    };
+
+    res.cookie(config.get("userToken.cookieName"), token, cookieOptions);
+
+    if (incompleteUserDetails) {
+      authRedirectionUrl = "https://my.realdevsquad.com/new-signup";
+    }
+
+    return res.redirect(authRedirectionUrl);
+  } catch (err) {
+    logger.error(err);
+    return res.boom.unauthorized("User cannot be authenticated");
+  }
+}
+
+const googleAuthCallback = (req, res, next) => {
+  const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
+  let authRedirectionUrl = rdsUiUrl;
+
+  if ("state" in req.query) {
+    try {
+      const redirectUrl = new URL(req.query.state);
+
+      if (`.${redirectUrl.hostname}`.endsWith(`.${rdsUiUrl.hostname}`)) {
+        // Matching *.realdevsquad.com
+        authRedirectionUrl = redirectUrl;
+      } else {
+        logger.error(`Malicious redirect URL provided URL: ${redirectUrl}, Will redirect to RDS`);
+      }
+    } catch (error) {
+      logger.error("Invalid redirect URL provided", error);
+    }
+  }
+  return passport.authenticate("google", { session: false }, async (err, accessToken, user) => {
+    if (err) {
+      logger.error(err);
+      return res.boom.unauthorized("User cannot be authenticated");
+    }
+    return await handleGoogleLogin(req, res, user, authRedirectionUrl);
+  })(req, res, next);
+};
+
 /**
  * Makes authentication call to GitHub statergy
  *
@@ -56,7 +141,6 @@ const githubAuthCallback = (req, res, next) => {
       }
 
       if (redirectUrl.searchParams.get("v2") === "true") isV2FlagPresent = true;
-
       if (`.${redirectUrl.hostname}`.endsWith(`.${rdsUiUrl.hostname}`)) {
         // Matching *.realdevsquad.com
         authRedirectionUrl = redirectUrl;
@@ -77,11 +161,27 @@ const githubAuthCallback = (req, res, next) => {
       userData = {
         github_id: user.username,
         github_display_name: user.displayName,
+        email: user._json.email,
         github_created_at: Number(new Date(user._json.created_at).getTime()),
         github_user_id: user.id,
         created_at: Date.now(),
         updated_at: null,
       };
+
+      if (!userData.email) {
+        const githubBaseUrl = config.get("githubApi.baseUrl");
+        const res = await fetch(`${githubBaseUrl}/user/emails`, {
+          headers: {
+            Authorization: `token ${accessToken}`,
+          },
+        });
+        const emails = await res.json();
+        const primaryEmails = emails.filter((item) => item.primary);
+
+        if (primaryEmails.length > 0) {
+          userData.email = primaryEmails[0].email;
+        }
+      }
 
       const { userId, incompleteUserDetails, role } = await users.addOrUpdate(userData);
 
@@ -232,6 +332,8 @@ const fetchDeviceDetails = async (req, res) => {
 module.exports = {
   githubAuthLogin,
   githubAuthCallback,
+  googleAuthLogin,
+  googleAuthCallback,
   signout,
   storeUserDeviceInfo,
   updateAuthStatus,

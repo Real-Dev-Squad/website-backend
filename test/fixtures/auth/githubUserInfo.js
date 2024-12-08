@@ -43,7 +43,7 @@ module.exports = () => {
         company: null,
         blog: "",
         location: null,
-        email: null,
+        email: "abc@gmail.com",
         hireable: null,
         bio: null,
         twitter_username: null,
