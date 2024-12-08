@@ -124,8 +124,20 @@ const deleteGroupRole = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
-const getAllGroupRoles = async (req, res) => {
+const getPaginatedGroupRoles = async (req, res) => {
   try {
+    const isDevMode = req.query?.dev === "true";
+    if (isDevMode) {
+      const latestDoc = req.query?.latestDoc;
+      const { groups, newLatestDoc } = await discordRolesModel.getPaginatedGroupRoles(latestDoc);
+      const discordId = req.userData?.discordId;
+      const groupsWithMembershipInfo = await discordRolesModel.enrichGroupDataWithMembershipInfo(discordId, groups);
+      return res.json({
+        message: "Roles fetched successfully!",
+        newLatestDoc: newLatestDoc,
+        groups: groupsWithMembershipInfo,
+      });
+    }
     const { groups } = await discordRolesModel.getAllGroupRoles();
     const discordId = req.userData?.discordId;
     const groupsWithMembershipInfo = await discordRolesModel.enrichGroupDataWithMembershipInfo(discordId, groups);
@@ -431,7 +443,7 @@ const syncDiscordGroupRolesInFirestore = async (req, res) => {
     });
     await Promise.all(batch);
 
-    const allRolesInFirestore = await discordRolesModel.getAllGroupRoles();
+    const allRolesInFirestore = await discordRolesModel.getPaginatedGroupRoles();
 
     return res.json({
       response: allRolesInFirestore.groups,
@@ -534,7 +546,7 @@ const getUserDiscordInvite = async (req, res) => {
 module.exports = {
   getGroupsRoleId,
   createGroupRole,
-  getAllGroupRoles,
+  getPaginatedGroupRoles,
   addGroupRoleToMember,
   deleteRole,
   updateDiscordImageForVerification,

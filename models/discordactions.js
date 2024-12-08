@@ -107,6 +107,7 @@ const deleteRoleFromDatabase = async (roleId, discordId) => {
  * @param roleData { Object }: Data of the new role
  * @returns {Promise<discordRoleModel|Object>}
  */
+
 const getAllGroupRoles = async () => {
   try {
     const data = await discordRoleModel.get();
@@ -119,6 +120,28 @@ const getAllGroupRoles = async () => {
       groups.push(group);
     });
     return { groups };
+  } catch (err) {
+    logger.error("Error in getting all group-roles", err);
+    throw err;
+  }
+};
+
+const getPaginatedGroupRoles = async (latestDoc) => {
+  try {
+    const data = await discordRoleModel
+      .orderBy("roleid")
+      .startAfter(latestDoc || 0)
+      .limit(18)
+      .get();
+    const groups = [];
+    data.forEach((doc) => {
+      const group = {
+        id: doc.id,
+        ...doc.data(),
+      };
+      groups.push(group);
+    });
+    return { groups, newLatestDoc: data.docs[data.docs.length - 1]?.data().roleid };
   } catch (err) {
     logger.error("Error in getting all group-roles", err);
     throw err;
@@ -1086,6 +1109,7 @@ module.exports = {
   removeMemberGroup,
   getGroupRolesForUser,
   getAllGroupRoles,
+  getPaginatedGroupRoles,
   getGroupRoleByName,
   updateGroupRole,
   addGroupRoleToMember,
