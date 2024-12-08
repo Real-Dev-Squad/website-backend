@@ -464,15 +464,18 @@ const setRoleToUsersWith31DaysPlusOnboarding = async (req, res) => {
 
 const generateInviteForUser = async (req, res) => {
   try {
-    const { userId } = req.query;
+    const { userId, dev } = req.query;
     const userIdForInvite = userId || req.userData.id;
+    let inviteLink = "";
+    const isDev = dev === "true";
 
-    const modelResponse = await discordRolesModel.getUserDiscordInvite(userIdForInvite);
-
-    if (!modelResponse.notFound) {
-      return res.status(409).json({
-        message: "User invite is already present!",
-      });
+    if (!isDev) {
+      const modelResponse = await discordRolesModel.getUserDiscordInvite(userIdForInvite);
+      if (!modelResponse.notFound) {
+        return res.status(409).json({
+          message: "User invite is already present!",
+        });
+      }
     }
 
     const channelId = config.get("discordNewComersChannelId");
@@ -492,7 +495,18 @@ const generateInviteForUser = async (req, res) => {
     const discordInviteResponse = await response.json();
 
     const inviteCode = discordInviteResponse.data.code;
-    const inviteLink = `discord.gg/${inviteCode}`;
+    inviteLink = `discord.gg/${inviteCode}`;
+
+    if (isDev) {
+      const purpose = req.body.purpose;
+      await discordRolesModel.addInviteToInviteModel({ userId: userIdForInvite, inviteLink, purpose });
+
+      return res.status(201).json({
+        message: "invite generated successfully",
+        inviteLink,
+        purpose,
+      });
+    }
 
     await discordRolesModel.addInviteToInviteModel({ userId: userIdForInvite, inviteLink });
 
@@ -508,8 +522,9 @@ const generateInviteForUser = async (req, res) => {
 
 const getUserDiscordInvite = async (req, res) => {
   try {
-    const { userId } = req.query;
+    const { userId, dev } = req.query;
     const isSuperUser = req.userData.roles.super_user;
+    const isDev = dev === "true";
 
     if (userId && !isSuperUser) return res.boom.forbidden("User should be super user to get link for other users");
 
@@ -521,7 +536,14 @@ const getUserDiscordInvite = async (req, res) => {
       return res.boom.notFound("User invite doesn't exist");
     }
 
-    return res.json({
+    if (isDev) {
+      return res.status(200).json({
+        message: "Invite returned successfully",
+        inviteLink: invite?.inviteLink,
+        purpose: invite?.purpose,
+      });
+    }
+    return res.status(200).json({
       message: "Invite returned successfully",
       inviteLink: invite?.inviteLink,
     });
