@@ -41,7 +41,7 @@ export const createOooRequestController = async (req: OooRequestCreateRequest, r
       meta: {
         requestId: requestResult.id,
         action: LOG_ACTION.CREATE,
-        createdBy: userId,
+        userId: userId,
         createdAt: Date.now(),
       },
       body: requestResult,
@@ -84,7 +84,7 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
       meta: {
         requestId: requestId,
         action: LOG_ACTION.UPDATE,
-        createdBy: userId,
+        userId: userId,
         createdAt: Date.now(),
       },
       body: requestResult,
