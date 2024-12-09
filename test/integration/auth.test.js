@@ -444,6 +444,93 @@ describe("auth", function () {
     expect(res.headers.location).to.equal(expectedUrl);
   });
 
+  it("should recognize existing user by email when logging in via different OAuth provider", async function () {
+    await addUserToDBForTest(userData[0]);
+    const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
+    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
+      const userInfoFromGoogle = {
+        ...googleUserInfo[0],
+        emails: [{ value: "abc@gmail.com", verified: true }],
+      };
+      callback(null, "accessToken", userInfoFromGoogle);
+      return (req, res, next) => {};
+    });
+
+    const res = await chai
+      .request(app)
+      .get("/auth/google/callback")
+      .query({ code: "codeReturnedByGoogle", state: rdsUiUrl })
+      .redirects(0);
+    expect(res).to.have.status(302);
+    expect(res.headers.location).to.equal(rdsUiUrl);
+  });
+
+  it("should get the verified email and redirect the google user to the goto page on successful login", async function () {
+    await addUserToDBForTest(googleUserInfo[1]);
+    const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
+    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
+      const googleUser = {
+        ...googleUserInfo[0],
+        emails: [
+          { value: "test123@example.com", verified: false },
+          { value: "test12@gmail.com", verified: true },
+        ],
+      };
+      callback(null, "accessToken", googleUser);
+      return (req, res, next) => {};
+    });
+
+    const res = await chai
+      .request(app)
+      .get("/auth/google/callback")
+      .query({ code: "codeReturnedByGoogle", state: rdsUiUrl })
+      .redirects(0);
+    expect(res).to.have.status(302);
+    expect(res.headers.location).to.equal(rdsUiUrl);
+  });
+
+  it("should return 401 if google email does not exist", async function () {
+    const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
+    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
+      const userInfoWithoutEmail = {
+        ...googleUserInfo[0],
+        emails: [],
+      };
+      callback(null, "accessToken", userInfoWithoutEmail);
+      return (req, res, next) => {};
+    });
+
+    const res = await chai
+      .request(app)
+      .get("/auth/google/callback")
+      .query({ code: "codeReturnedByGoogle", state: rdsUiUrl })
+      .redirects(0);
+
+    expect(res).to.have.status(401);
+    expect(res.body.message).to.equal("No email found in Google account");
+  });
+
+  it("should return 401 if no verified email exists", async function () {
+    const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
+    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
+      const userInfoWithUnverifiedEmail = {
+        ...googleUserInfo[0],
+        emails: [{ value: "test@example.com", verified: false }],
+      };
+      callback(null, "accessToken", userInfoWithUnverifiedEmail);
+      return (req, res, next) => {};
+    });
+
+    const res = await chai
+      .request(app)
+      .get("/auth/google/callback")
+      .query({ code: "codeReturnedByGoogle", state: rdsUiUrl })
+      .redirects(0);
+
+    expect(res).to.have.status(401);
+    expect(res.body.message).to.equal("No verified email found in Google account");
+  });
+
   it("should return 401 if google auth call fails", function (done) {
     chai
       .request(app)

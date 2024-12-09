@@ -25,11 +25,13 @@ async function handleGoogleLogin(req, res, user, authRedirectionUrl) {
   const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
   try {
     if (!user.emails || user.emails.length === 0) {
-      throw new Error("Email not found in user data");
+      logger.error("Google login failed: No emails found in user data");
+      return res.boom.unauthorized("No email found in Google account");
     }
     const primaryEmail = user.emails.find((email) => email.verified === true);
     if (!primaryEmail) {
-      throw new Error("No verified email found in user data");
+      logger.error("Google login failed: No verified email found");
+      return res.boom.unauthorized("No verified email found in Google account");
     }
 
     const userData = {
@@ -68,7 +70,7 @@ async function handleGoogleLogin(req, res, user, authRedirectionUrl) {
 
     return res.redirect(authRedirectionUrl);
   } catch (err) {
-    logger.error(err);
+    logger.error("Unexpected error during Google login", err);
     return res.boom.unauthorized("User cannot be authenticated");
   }
 }

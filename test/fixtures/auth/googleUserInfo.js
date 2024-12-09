@@ -42,7 +42,7 @@ module.exports = () => {
     {
       id: "1234567890",
       displayName: "Google User",
-      emails: [{ value: "test12@gmail.com", verified: true }],
+      emails: [{ value: "test123@gmail.com", verified: true }],
       photos: [
         {
           value: "https://lh3.googleusercontent.com/a-/test",
@@ -52,18 +52,18 @@ module.exports = () => {
       _raw: `{
           '"sub": "1234567890",\n' +
           '"picture": "https://lh3.googleusercontent.com/a-/test",\n' +
-          '"email": "test12@gmail.com",\n' +
+          '"email": "test123@gmail.com",\n' +
           '"email_verified": true\n' +
         }`,
       _json: {
         sub: "1234567890",
         picture: "https://lh3.googleusercontent.com/a-/test",
-        email: "test12@gmail.com",
+        email: "test123@gmail.com",
         email_verified: true,
       },
     },
     {
-      email: "test12@gmail.com",
+      email: "test123@gmail.com",
       roles: {
         developer: true,
         in_discord: true,
