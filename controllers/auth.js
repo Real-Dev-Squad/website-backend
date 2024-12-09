@@ -27,8 +27,13 @@ async function handleGoogleLogin(req, res, user, authRedirectionUrl) {
     if (!user.emails || user.emails.length === 0) {
       throw new Error("Email not found in user data");
     }
+    const primaryEmail = user.emails.find((email) => email.verified === true);
+    if (!primaryEmail) {
+      throw new Error("No verified email found in user data");
+    }
+
     const userData = {
-      email: user.emails[0].value,
+      email: primaryEmail.value,
       created_at: Date.now(),
       updated_at: null,
     };
@@ -38,7 +43,8 @@ async function handleGoogleLogin(req, res, user, authRedirectionUrl) {
     if (userDataFromDB.userExists) {
       if (userDataFromDB.user.roles?.developer) {
         const errorMessage = encodeURIComponent("Google login is restricted for developer role.");
-        return res.redirect(`${authRedirectionUrl}?error=${errorMessage}`);
+        const separator = authRedirectionUrl.search ? "&" : "?";
+        return res.redirect(`${authRedirectionUrl}${separator}error=${errorMessage}`);
       }
     }
 

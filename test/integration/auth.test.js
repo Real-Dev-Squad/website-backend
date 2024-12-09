@@ -412,7 +412,6 @@ describe("auth", function () {
         }
 
         expect(res).to.have.status(302);
-        // rds-session=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ1c2VySWQiLCJpYXQiOjE1OTkzOTEzODcsImV4cCI6MTYwMTk4MzM4N30.AljtAmXpZUmErubhSBbA0fQtG9DwH4ci6iroa9z5MBjIPFfQ5FSbaOqU0CQlmgOe-U7XDVPuGBp7GzBzA4yCH7_3PSS9JrHwEVZQQBScTUC-WHDradit5nD1ryKPqJE2WlRO6q0uLOKEukMj-7iPXQ-ykdYwtlokhyJbLVS1S3E; Domain=realdevsquad.com; Path=/; Expires=Tue, 06 Oct 2020 11:23:07 GMT; HttpOnly; Secure
         expect(res.headers["set-cookie"]).to.have.length(1);
         expect(res.headers["set-cookie"][0])
           .to.be.a("string")
@@ -424,6 +423,25 @@ describe("auth", function () {
 
         return done();
       });
+  });
+
+  it("should redirect the google user to login page if the user is a developer", async function () {
+    await addUserToDBForTest(googleUserInfo[3]);
+    const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
+    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
+      callback(null, "accessToken", googleUserInfo[2]);
+      return (req, res, next) => {};
+    });
+
+    const res = await chai
+      .request(app)
+      .get("/auth/google/callback")
+      .query({ code: "codeReturnedByGoogle", state: rdsUiUrl })
+      .redirects(0);
+    expect(res).to.have.status(302);
+    const errorMessage = "Google login is restricted for developer role.";
+    const expectedUrl = `https://realdevsquad.com/?error=${encodeURIComponent(errorMessage)}`;
+    expect(res.headers.location).to.equal(expectedUrl);
   });
 
   it("should return 401 if google auth call fails", function (done) {
