@@ -32,6 +32,11 @@ module.exports = {
     clientSecret: "<clientSecret>",
   },
 
+  googleOauth: {
+    clientId: "<clientId>",
+    clientSecret: "<clientSecret>",
+  },
+
   emailServiceConfig: {
     email: "<RDS_EMAIL>",
     password: "<EMAIL PASSWORD GENERATED AFTER 2FA>",

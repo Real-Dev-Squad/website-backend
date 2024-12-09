@@ -9,6 +9,10 @@ router.get("/github/login", auth.githubAuthLogin);
 
 router.get("/github/callback", auth.githubAuthCallback);
 
+router.get("/google/login", auth.googleAuthLogin);
+
+router.get("/google/callback", auth.googleAuthCallback);
+
 router.get("/signout", auth.signout);
 
 router.get("/qr-code-auth", userDeviceInfoValidator.validateFetchingUserDocument, auth.fetchUserDeviceInfo);
