@@ -12,6 +12,7 @@ const { authorizeAndAuthenticate } = require("../middlewares/authorizeUsersAndSe
 const ROLES = require("../constants/roles");
 const { Services } = require("../constants/bot");
 const authenticateProfile = require("../middlewares/authenticateProfile");
+const { devFlagMiddleware } = require("../middlewares/devFlag");
 
 router.post("/", authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]), users.markUnverified);
 router.post("/update-in-discord", authenticate, authorizeRoles([SUPERUSER]), users.setInDiscordScript);
@@ -36,6 +37,7 @@ router.patch(
 router.get("/:username", users.getUser);
 router.get("/:userId/intro", authenticate, authorizeRoles([SUPERUSER]), users.getUserIntro);
 router.put("/self/intro", authenticate, userValidator.validateJoinData, users.addUserIntro);
+router.put("/:userId/intro", devFlagMiddleware, authenticate, userValidator.validateJoinData, users.addUserIntro);
 router.get("/:id/skills", users.getUserSkills);
 router.get("/:id/badges", getUserBadges);
 router.patch(
