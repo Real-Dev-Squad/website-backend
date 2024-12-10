@@ -67,7 +67,10 @@ import {
       const command = new CreateUserCommand(params);
       return (await client.send(command));
     } catch (error) {
-      console.error(`The error from create user ${error}`);
+      if (error.__type === 'ConflictException'){
+        return { conflict: true };
+      }
+
       throw new Error(`Failed to create user: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
@@ -93,7 +96,6 @@ export const addUserToGroup = async (groupId: string, awsUserId: string): Promis
       const command = new CreateGroupMembershipCommand(params);
       return (await client.send(command));
     } catch (error) {
-      console.error("Error adding user to group:", error);
       if (error.__type === 'ConflictException'){
         return { conflict: true };
       }
