@@ -803,7 +803,7 @@ const rejectProfileDiff = async (req, res) => {
 };
 
 const addUserIntro = async (req, res) => {
-  if (req.params.userId !== req.userData.id) {
+  if (req.path !== "/self/intro" && req.params.userId !== req.userData.id) {
     return res.status(403).json({ message: "Unauthorized access" });
   }
 
