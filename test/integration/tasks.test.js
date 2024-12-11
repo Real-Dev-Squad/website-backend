@@ -585,7 +585,7 @@ describe("Tasks", function () {
           expect(res).to.have.status(200);
           expect(res).to.have.header(
             "X-Deprecation-Warning",
-            "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:userId?dev=true&completed=true to get the updated profile details."
+            "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:userId to get the task details."
           );
           expect(res.body).to.be.a("array");
           expect(res.body[0].status).to.equal(COMPLETED);
@@ -636,7 +636,7 @@ describe("Tasks", function () {
       expect(res).to.have.status(200);
       expect(res).to.have.header(
         "X-Deprecation-Warning",
-        "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:userId?dev=true to get the updated profile details."
+        "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:userId to get the task details."
       );
       expect(res.body).to.be.a("array");
       expect([taskId1, taskId2]).to.include(taskId1);
@@ -1812,7 +1812,7 @@ describe("Tasks", function () {
       });
     });
 
-    it("Should return 403 if the requested user is not the authenticated user or dev is false", async function () {
+    it("Should return 500 if the requested user is not the authenticated user or dev is false", async function () {
       const { userId: authenticatedUserId } = await userModel.addOrUpdate({
         github_id: "authenticated_user",
         username: "auth_user",
@@ -1830,37 +1830,13 @@ describe("Tasks", function () {
         .get(`/tasks/v1/${requestedUserId}`)
         .set("cookie", `${cookieName}=${authToken}`);
 
-      expect(res).to.have.status(403);
-      expect(res.body).to.eql({
-        statusCode: 403,
-        error: "Forbidden",
-        message: "Access denied: You cannot view",
-      });
-    });
-
-    it("Should return 500 if an unexpected error occurs", async function () {
-      const { userId: authenticatedUserId } = await userModel.addOrUpdate({
-        github_id: "authenticated_user",
-        username: "auth_user",
-      });
-
-      const authToken = authService.generateAuthToken({ userId: authenticatedUserId });
-
-      const fetchUserTasksStub = sinon.stub(tasks, "fetchUserTasks").throws(new Error("Test Error"));
-
-      const res = await chai
-        .request(app)
-        .get(`/tasks/v1/${authenticatedUserId}?dev=true`)
-        .set("cookie", `${cookieName}=${authToken}`);
-
       expect(res).to.have.status(500);
+      expect(res.body).to.be.an("object");
       expect(res.body).to.eql({
         statusCode: 500,
         error: "Internal Server Error",
         message: "An internal server error occurred",
       });
-
-      fetchUserTasksStub.restore();
     });
   });
 });

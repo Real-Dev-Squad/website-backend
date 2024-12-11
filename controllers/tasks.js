@@ -299,14 +299,14 @@ const getSelfTasks = async (req, res) => {
         const allCompletedTasks = await tasks.fetchUserCompletedTasks(username);
         res.set(
           "X-Deprecation-Warning",
-          "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:userId?dev=true&completed=true to get the updated profile details."
+          "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:userId to get the task details."
         );
         return res.json(allCompletedTasks);
       } else {
         const allTasks = await tasks.fetchSelfTasks(username);
         res.set(
           "X-Deprecation-Warning",
-          "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:userId?dev=true to get the updated profile details."
+          "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:userId to get the task details."
         );
         return res.json(allTasks);
       }
