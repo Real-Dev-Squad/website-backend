@@ -30,7 +30,6 @@ describe("GET /stocks/:userId", function () {
   it("Should return user stocks when stocks are available", function (done) {
     const userStocks = [{id: "5YGjUSW1SinwCNfuLXOO", userId: "DHLG3gYMTtMenj6lciWz", stockId: "s2eYDswDUAoQxwAhh07f", stockName: "EURO", quantity: 1, orderValue: 150, initialStockValue: 150}];
 
-    // Stub fetchUserStocks to return mock stocks
     sinon.stub(stocks, "fetchUserStocks").resolves(userStocks);
 
     chai
@@ -50,9 +49,10 @@ describe("GET /stocks/:userId", function () {
       });
   });
 
-  it("Should return 204 when no stocks are found", function (done) {
-    // Stub fetchUserStocks to return an empty array
-    sinon.stub(stocks, "fetchUserStocks").resolves([]);
+  it("Should return empty object when no stocks are found", function (done) {
+    const userStocks=[];
+
+    sinon.stub(stocks, "fetchUserStocks").resolves(userStocks);
 
     chai
       .request(app)
@@ -61,8 +61,10 @@ describe("GET /stocks/:userId", function () {
       .end((err, res) => {
         if (err) return done(err);
 
-        expect(res).to.have.status(204);
-        expect(res.body).to.be.empty;
+        expect(res).to.have.status(200);
+        expect(res.body).to.be.an("object");
+        expect(res.body.message).to.equal("No stocks found");
+        expect(res.body.userStocks).to.be.an("array");
 
         return done();
       });

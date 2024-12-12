@@ -80,20 +80,15 @@ const getUserStocks = async (req, res) => {
   const { id: authenticatedUserId } = req.userData;
   const userId = req.params.userId;
 
-  try {
-    if (userId !== authenticatedUserId) {
-      return res.status(403).json({ message: "Unauthorized access" });
-    }
+  if (userId !== authenticatedUserId) {
+    return res.boom.forbidden("Unauthorized access");
+  }
 
+  try {
     const userStocks = await stocks.fetchUserStocks(userId);
 
-    if (userStocks.length === 0) {
-      logger.info(`No stocks found for user ${userId}`);
-      return res.status(204).json({ message: "No stocks found", userStocks: [] });
-    }
-
     return res.json({
-      message: "User stocks returned successfully!",
+      message: userStocks.length > 0 ? "User stocks returned successfully!" : "No stocks found",
       userStocks,
     });
   } catch (err) {
