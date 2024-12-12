@@ -1627,7 +1627,7 @@ describe("Users", function () {
         });
     });
 
-    it("Should return 401 for unauthorized request", function (done) {
+    it("Should return 401 for Unauthenticated User Request", function (done) {
       chai
         .request(app)
         .put(`/users/${userId}/intro?dev=true`)
@@ -1639,6 +1639,7 @@ describe("Users", function () {
           }
           expect(res).to.have.status(401);
           expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Unauthenticated User");
           return done();
         });
     });
@@ -1660,19 +1661,21 @@ describe("Users", function () {
         });
     });
 
-    it("Should return 403 for Unauthorized access", function (done) {
+    it("Should return 403 for Forbidden access", function (done) {
+      const userId = "anotherUser123";
+      addJoinData(joinData(userId)[3]);
       chai
         .request(app)
         .put(`/users/${userId}/intro?dev=true`)
-        .set("Cookie", `${cookieName}=${jwt}`)
-        .send(joinData()[1])
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(joinData(userId)[3])
         .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(400);
-          expect(res.body).to.be.a("object");
-          expect(res.body.message).to.be.equal('"firstName" is required');
+          if (err) return done(err);
+
+          expect(res).to.have.status(403);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Forbidden access");
+
           return done();
         });
     });
