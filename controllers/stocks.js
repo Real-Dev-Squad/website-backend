@@ -77,15 +77,8 @@ const getSelfStocks = async (req, res) => {
  * @param res {Object} - Express response object
  */
 const getUserStocks = async (req, res) => {
-  const { id: authenticatedUserId } = req.userData;
-  const userId = req.params.userId;
-
-  if (userId !== authenticatedUserId) {
-    return res.boom.forbidden("Unauthorized access");
-  }
-
   try {
-    const userStocks = await stocks.fetchUserStocks(userId);
+    const userStocks = await stocks.fetchUserStocks(req.params.userId);
 
     return res.json({
       message: userStocks.length > 0 ? "User stocks returned successfully!" : "No stocks found",
