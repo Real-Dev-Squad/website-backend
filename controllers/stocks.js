@@ -46,7 +46,7 @@ const fetchStocks = async (req, res) => {
  */
 /**
  * @deprecated
- * WARNING: This API endpoint is being deprecated and will be removed in future versions.
+ * WARNING: This API endpoint is being deprecated and will be removed in future.
  * Please use the updated API endpoint: `/stocks/:userId` for retrieving user stocks details.
  *
  * This API is kept temporarily for backward compatibility.
@@ -58,7 +58,7 @@ const getSelfStocks = async (req, res) => {
 
     res.set(
       "X-Deprecation-Warning",
-      "WARNING: This endpoint is deprecated and will be removed in the future. Please use `/stocks/:userId` route to get the user stocks details."
+      "WARNING: This endpoint is being deprecated and will be removed in the future. Please use `/stocks/:userId` route to get the user stocks details."
     );
     return res.json({
       message: userStocks.length > 0 ? "User stocks returned successfully!" : "No stocks found",
