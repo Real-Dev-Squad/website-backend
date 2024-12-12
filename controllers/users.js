@@ -803,10 +803,6 @@ const rejectProfileDiff = async (req, res) => {
 };
 
 const addUserIntro = async (req, res) => {
-  if (req.path !== "/self/intro" && req.params.userId !== req.userData.id) {
-    return res.boom.forbidden("Forbidden access");
-  }
-
   try {
     const rawData = req.body;
     const joinData = await userQuery.getJoinData(req.userData.id);

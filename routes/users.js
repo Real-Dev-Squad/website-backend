@@ -13,6 +13,7 @@ const ROLES = require("../constants/roles");
 const { Services } = require("../constants/bot");
 const authenticateProfile = require("../middlewares/authenticateProfile");
 const { devFlagMiddleware } = require("../middlewares/devFlag");
+const { userAuthorization } = require("../middlewares/userAuthorization");
 
 router.post("/", authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]), users.markUnverified);
 router.post("/update-in-discord", authenticate, authorizeRoles([SUPERUSER]), users.setInDiscordScript);
@@ -37,7 +38,14 @@ router.patch(
 router.get("/:username", users.getUser);
 router.get("/:userId/intro", authenticate, authorizeRoles([SUPERUSER]), users.getUserIntro);
 router.put("/self/intro", authenticate, userValidator.validateJoinData, users.addUserIntro); // This route is being deprecated soon, please use alternate available route `/users/:userId/intro`.
-router.put("/:userId/intro", devFlagMiddleware, authenticate, userValidator.validateJoinData, users.addUserIntro);
+router.put(
+  "/:userId/intro",
+  devFlagMiddleware,
+  authenticate,
+  userValidator.validateJoinData,
+  userAuthorization,
+  users.addUserIntro
+);
 router.get("/:id/skills", users.getUserSkills);
 router.get("/:id/badges", getUserBadges);
 router.patch(
