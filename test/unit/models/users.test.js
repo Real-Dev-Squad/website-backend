@@ -122,8 +122,8 @@ describe("users", function () {
       const profileDiff = { id: "random-id", diff: "random-diff" };
       await users.addOrUpdate(profileDiff, userId);
       const data = (await userModel.doc(userId).get()).data();
-      expect(data).to.haveOwnProperty("diff"); // Ensures profile diffs are pushed
-      expect(data.id).not.equal("random-id"); // Ensures id is not added / updated by profile Diffs
+      expect(data).to.haveOwnProperty("diff");
+      expect(data.id).not.equal("random-id");
     });
   });
 
