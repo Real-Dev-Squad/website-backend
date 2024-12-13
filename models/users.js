@@ -84,7 +84,7 @@ const archiveUsers = async (usersData) => {
  * @param userId { String }: User Id String to be used to update the user
  * @return {Promise<{isNewUser: boolean, userId: string}|{isNewUser: boolean, userId: string}>}
  */
-const addOrUpdate = async (userData, userId = null) => {
+const addOrUpdate = async (userData, userId = null, devFeatureFlag) => {
   try {
     // userId exists Update user
     if (userId !== null) {
@@ -96,14 +96,24 @@ const addOrUpdate = async (userData, userId = null) => {
         if ("id" in userData) {
           delete userData.id;
         }
-        await userModel.doc(userId).set(
-          {
-            ...user.data(),
-            ...userData,
-            updated_at: Date.now(),
-          },
-          { merge: true }
-        );
+        if (devFeatureFlag) {
+          await userModel.doc(userId).set(
+            {
+              ...userData,
+              updated_at: Date.now(),
+            },
+            { merge: true }
+          );
+        } else {
+          await userModel.doc(userId).set(
+            {
+              ...user.data(),
+              ...userData,
+              updated_at: Date.now(),
+            },
+            { merge: true }
+          );
+        }
 
         const logData = {
           type: logType.USER_DETAILS_UPDATED,
