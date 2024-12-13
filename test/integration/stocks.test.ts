@@ -1,6 +1,5 @@
 import chai from "chai";
 import chaiHttp from "chai-http";
-
 import app from "../../server";
 import authService from "../../services/authService";
 import addUser from "../utils/addUser";
@@ -16,10 +15,14 @@ const { expect } = chai;
 describe("GET /stocks/:userId", function () {
   let jwt: string;
   let userId: string;
+  let userStock;
+  const stockData = { name: "EURO", quantity: 2, price: 10 };
 
   beforeEach(async function () {
     userId = await addUser();
     jwt = authService.generateAuthToken({ userId });
+    const { id } = await stocks.addStock(stockData);
+    userStock = { stockId: id, stockName: "EURO", quantity: 1, orderValue: 10, initialStockValue: 2 };
   });
 
   afterEach(async function () {
@@ -27,33 +30,19 @@ describe("GET /stocks/:userId", function () {
     sinon.restore();
   });
 
-  it("Should return user stocks when stocks are available", function (done) {
-    const userStocks = [{id: "5YGjUSW1SinwCNfuLXOO", userId: "DHLG3gYMTtMenj6lciWz", stockId: "s2eYDswDUAoQxwAhh07f", stockName: "EURO", quantity: 1, orderValue: 150, initialStockValue: 150}];
+  it("Should return user stocks when stocks are available", async function () {
+    await stocks.updateUserStocks(userId, userStock);
 
-    sinon.stub(stocks, "fetchUserStocks").resolves(userStocks);
+    const res = await chai.request(app).get(`/stocks/${userId}?dev=true`).set("cookie", `${cookieName}=${jwt}`);
 
-    chai
-      .request(app)
-      .get(`/stocks/${userId}?dev=true`)
-      .set("cookie", `${cookieName}=${jwt}`)
-      .end((err, res) => {
-        if (err) return done(err);
-
-        expect(res).to.have.status(200);
-        expect(res.body).to.be.an("object");
-        expect(res.body.message).to.equal("User stocks returned successfully!");
-        expect(res.body.userStocks).to.be.an("array");
-        expect(res.body.userStocks).to.deep.equal(userStocks);
-
-        return done();
-      });
+    expect(res).to.have.status(200);
+    expect(res.body).to.be.an("object");
+    expect(res.body.message).to.equal("User stocks returned successfully!");
+    expect(res.body.userStocks).to.be.an("array");
+    expect(res.body.userStocks.map(({ id, ...rest }) => rest)).to.deep.equal([{ ...userStock, userId }]);
   });
 
   it("Should return empty object when no stocks are found", function (done) {
-    const userStocks=[];
-
-    sinon.stub(stocks, "fetchUserStocks").resolves(userStocks);
-
     chai
       .request(app)
       .get(`/stocks/${userId}?dev=true`)
@@ -89,7 +78,6 @@ describe("GET /stocks/:userId", function () {
   });
 
   it("Should return 500 when an internal server error occurs", function (done) {
-    // Stub fetchUserStocks to throw an error
     sinon.stub(stocks, "fetchUserStocks").throws(new Error("Database error"));
 
     chai
