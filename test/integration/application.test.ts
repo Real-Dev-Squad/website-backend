@@ -202,6 +202,111 @@ describe("Application", function () {
           expect(res.body.next).to.be.equal(
             `/applications?next=${res.body.applications[res.body.applications.length - 1].id}&size=2&status=rejected`
           );
+          expect(res.body).to.not.have.property("totalCount");
+          return done();
+        });
+    });
+
+        it("should return application with status accepted if status accepted is passed in query params", function (done) {
+      chai
+        .request(app)
+        .get("/applications?status=accepted")
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Applications returned successfully");
+          expect(res.body.applications).to.be.a("array");
+          expect(res.body.applications[0].status).to.be.equal("accepted");
+          expect(res.body).to.not.have.property("totalCount");
+          return done();
+        });
+    });
+
+    it("should return application with status pending if status pending is passed in query params ", function (done) {
+      chai
+        .request(app)
+        .get("/applications?status=pending")
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Applications returned successfully");
+          expect(res.body.applications).to.be.a("array");
+          expect(res.body.applications[0].status).to.be.equal("pending");
+          expect(res.body).to.not.have.property("totalCount");
+          return done();
+        });
+    });
+
+
+    it("should return application with status rejected and the total count of the rejected applications if  dev = true ", function (done) {
+      chai
+        .request(app)
+        .get("/applications?status=rejected&size=2&dev=true")
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Applications returned successfully");
+          expect(res.body.applications).to.be.a("array");
+          expect(res.body.applications[0].status).to.be.equal("rejected");
+          expect(res.body.next).to.be.equal(
+            `/applications?next=${res.body.applications[res.body.applications.length - 1].id}&size=2&status=rejected`
+          );
+          expect(res.body.totalCount).to.be.a("number");
+          return done();
+        });
+    });
+
+        it("should return application with status accepted and the total count of the accepted applications if  dev = true ", function (done) {
+      chai
+        .request(app)
+        .get("/applications?status=accepted&dev=true")
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Applications returned successfully");
+          expect(res.body.applications).to.be.a("array");
+          expect(res.body.applications[0].status).to.be.equal("accepted");
+          expect(res.body.totalCount).to.be.a("number");
+          return done();
+        });
+    });
+
+    it("should return application with status pending and the total count of the pending applications if  dev = true ", function (done) {
+      chai
+        .request(app)
+        .get("/applications?status=pending&dev=true")
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Applications returned successfully");
+          expect(res.body.applications).to.be.a("array");
+          expect(res.body.applications[0].status).to.be.equal("pending");
+          expect(res.body.totalCount).to.be.a("number");
           return done();
         });
     });
@@ -396,45 +501,6 @@ describe("Application", function () {
           expect(res).to.have.status(404);
           expect(res.body.error).to.be.equal("Not Found");
           expect(res.body.message).to.be.equal("Application not found");
-          return done();
-        });
-    });
-  });
-
-  describe("PATCH /application/batch/update", function () {
-    it("should return 401 if the user is not super user", function (done) {
-      chai
-        .request(app)
-        .patch(`/applications/batch/update`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(401);
-          expect(res.body.message).to.be.equal("You are not authorized for this action.");
-          return done();
-        });
-    });
-
-    it("should return updated stats after updating all the application", function (done) {
-      chai
-        .request(app)
-        .patch(`/applications/batch/update`)
-        .set("cookie", `${cookieName}=${superUserJwt}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a("object");
-          expect(res.body).to.be.deep.equal({
-            failedApplicationUpdateIds: [],
-            totalFailedApplicationUpdates: 0,
-            totalApplicationUpdates: 6,
-          });
           return done();
         });
     });

@@ -84,7 +84,7 @@ export const createTaskExtensionRequest = async (req: ExtensionRequestRequest, r
         taskId,
         requestId: extensionRequest.id,
         action: LOG_ACTION.CREATE,
-        createdBy: requestedBy,
+        userId: requestedBy,
         createdAt: Date.now(),
       },
       body: extensionBody,

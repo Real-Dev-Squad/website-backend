@@ -6,5 +6,6 @@ const authenticate = require("../middlewares/authenticate");
 const { SUPERUSER } = require("../constants/roles");
 
 router.get("/", authenticate, authorizeRoles([SUPERUSER]), profileDiffs.getProfileDiffs);
+router.get("/:id", authenticate, authorizeRoles([SUPERUSER]), profileDiffs.getProfileDiff);
 
 module.exports = router;

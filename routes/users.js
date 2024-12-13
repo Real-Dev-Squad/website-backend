@@ -11,19 +11,21 @@ const checkIsVerifiedDiscord = require("../middlewares/verifydiscord");
 const { authorizeAndAuthenticate } = require("../middlewares/authorizeUsersAndService");
 const ROLES = require("../constants/roles");
 const { Services } = require("../constants/bot");
+const authenticateProfile = require("../middlewares/authenticateProfile");
 
 router.post("/", authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]), users.markUnverified);
 router.post("/update-in-discord", authenticate, authorizeRoles([SUPERUSER]), users.setInDiscordScript);
 router.post("/verify", authenticate, users.verifyUser);
 router.get("/userId/:userId", users.getUserById);
 router.patch("/self", authenticate, userValidator.updateUser, users.updateSelf);
-router.get("/", userValidator.getUsers, users.getUsers);
+router.get("/", authenticateProfile(authenticate), userValidator.getUsers, users.getUsers);
 router.get("/self", authenticate, users.getSelfDetails);
 router.get("/isDeveloper", authenticate, users.isDeveloper);
 router.get("/isUsernameAvailable/:username", authenticate, users.getUsernameAvailabilty);
 router.get("/username", authenticate, userValidator.validateGenerateUsernameQuery, users.generateUsername);
 router.get("/chaincode", authenticate, users.generateChaincode);
 router.get("/search", userValidator.validateUserQueryParams, users.filterUsers);
+router.get("/identity-stats", authenticate, authorizeRoles([SUPERUSER]), users.getIdentityStats);
 router.patch(
   "/:userId/update-nickname",
   authenticate,
@@ -65,4 +67,6 @@ router.patch("/profileURL", authenticate, userValidator.updateProfileURL, users.
 router.patch("/rejectDiff", authenticate, authorizeRoles([SUPERUSER]), users.rejectProfileDiff);
 router.patch("/:userId", authenticate, authorizeRoles([SUPERUSER]), users.updateUser);
 router.get("/suggestedUsers/:skillId", authenticate, authorizeRoles([SUPERUSER]), users.getSuggestedUsers);
+module.exports = router;
+router.post("/batch-username-update", authenticate, authorizeRoles([SUPERUSER]), users.updateUsernames);
 module.exports = router;

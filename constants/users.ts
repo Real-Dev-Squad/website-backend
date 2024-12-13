@@ -48,6 +48,8 @@ const discordNicknameLength = 32;
 
 const SIMULTANEOUS_WORKER_CALLS = 4;
 
+const MAX_USERNAME_LENGTH = 32;
+
 module.exports = {
   profileStatus,
   USER_STATUS,
@@ -61,4 +63,5 @@ module.exports = {
   months,
   discordNicknameLength,
   SIMULTANEOUS_WORKER_CALLS,
+  MAX_USERNAME_LENGTH,
 };

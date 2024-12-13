@@ -48,7 +48,7 @@ describe("applications", function () {
   });
 
   describe("getUserApplications", function () {
-    it("should return all the user applications", async function () {
+    it("should return users most recent application", async function () {
       const applications = await ApplicationModel.getUserApplications("kfasdjfkdlfjkasdjflsdjfk");
       expect(applications).to.be.a("array");
       expect(applications.length).to.be.equal(1);
@@ -66,8 +66,11 @@ describe("applications", function () {
   });
 
   describe("getApplicationsBasedOnStatus", function () {
-    it("should return applications with the status provided in the param and the lastDocId", async function () {
-      const { applications, lastDocId } = await ApplicationModel.getApplicationsBasedOnStatus("rejected", 5);
+    it("should return applications with the status provided in the param ,the lastDocId and total count", async function () {
+      const { applications, lastDocId, totalCount } = await ApplicationModel.getApplicationsBasedOnStatus(
+        "rejected",
+        5
+      );
 
       expect(applications).to.be.a("array");
       expect(applications.length).to.be.equal(4);
@@ -75,6 +78,7 @@ describe("applications", function () {
         expect(application.status).to.be.equal("rejected");
       });
       expect(lastDocId).to.exist;
+      expect(totalCount).to.be.a("number");
     });
 
     it("should return application with a particular status for a particular user if userId is provided in the argument", async function () {
@@ -112,13 +116,6 @@ describe("applications", function () {
       const application = await ApplicationModel.getApplicationById(applicationId1);
 
       expect(application.status).to.be.equal("accepted");
-    });
-  });
-
-  describe("batchUpdateApplications", function () {
-    it("should add createdAt null to all existing application docs", async function () {
-      const operationStats = await ApplicationModel.batchUpdateApplications();
-      expect(operationStats.totalApplicationUpdates).to.be.equal(6);
     });
   });
 });

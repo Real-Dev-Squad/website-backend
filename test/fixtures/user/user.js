@@ -34,6 +34,7 @@ module.exports = () => {
       },
       status: "active",
       profileURL: "https://abcde.com",
+      profileStatus: "BLOCKED",
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
         url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
@@ -53,12 +54,12 @@ module.exports = () => {
       twitter_id: "whatifi",
       discordJoinedAt: "2023-04-06T01:47:34.488000+00:00",
       phone: "1234567891",
-      email: "abc1@gmail.com",
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
         url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
       },
       nickname_synced: false,
+      profileStatus: "BLOCKED",
     },
     {
       username: "pranavg",
@@ -81,6 +82,7 @@ module.exports = () => {
         url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
       },
       nickname_synced: false,
+      profileStatus: "VERIFIED",
     },
     {
       username: "sagar",
@@ -359,7 +361,7 @@ module.exports = () => {
       },
     },
     {
-      username: "shubham-sigdar",
+      username: "shubham-sigdar-1",
       first_name: "shubham",
       last_name: "sigdar",
       github_id: githubUserInfo[1].login,

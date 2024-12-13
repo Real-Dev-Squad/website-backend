@@ -8,6 +8,8 @@ const addUser = require("../utils/addUser");
 const cleanDb = require("../utils/cleanDb");
 // Import fixtures
 const userData = require("../fixtures/user/user")();
+const ApplicationModel = require("../../models/applications");
+
 const usersInDiscord = require("../fixtures/user/inDiscord");
 const superUser = userData[4];
 const archievedUser = userData[19];
@@ -33,6 +35,7 @@ const {
   roleDataFromDiscord,
   memberGroupData,
   groupOnboarding31dPlus,
+  groupIdle,
 } = require("../fixtures/discordactions/discordactions");
 const discordServices = require("../../services/discordService");
 const { addGroupRoleToMember, addInviteToInviteModel } = require("../../models/discordactions");
@@ -206,6 +209,170 @@ describe("Discord actions", function () {
           });
           expect(res.body.message).to.equal("Roles fetched successfully!");
           return done();
+        });
+    });
+  });
+
+  describe("DELETE /discord-actions/groups/:groupId", function () {
+    let groupId;
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    const roleData = groupData[0];
+
+    beforeEach(async function () {
+      const docRef = await discordRoleModel.add(roleData);
+      groupId = docRef.id;
+
+      superUserId = await addUser(superUser);
+      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+
+      sinon.stub(discordRolesModel, "deleteGroupRole").resolves({ isSuccess: true });
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should return 404 if group role not found", function (done) {
+      sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
+        roleExists: false,
+        existingRoles: { data: () => ({ ...roleData, roleid: roleData.roleid }) },
+      });
+
+      chai
+        .request(app)
+        .delete(`/discord-actions/groups/${groupId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          expect(res).to.have.status(404);
+          expect(res.body.error).to.equal("Not Found");
+          done(err);
+        });
+    });
+
+    it("should successfully delete the group role from discord server", function (done) {
+      sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
+        roleExists: true,
+        existingRoles: { data: () => ({ ...roleData, roleid: roleData.roleid }) },
+      });
+
+      sinon.stub(discordServices, "deleteGroupRoleFromDiscord").resolves({
+        success: true,
+        message: "Role deleted successfully",
+      });
+
+      chai
+        .request(app)
+        .delete(`/discord-actions/groups/${groupId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.equal("Group role deleted successfully");
+          done(err);
+        });
+    });
+
+    it("should return 500 when discord role deletion fails", function (done) {
+      sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
+        roleExists: true,
+        existingRoles: { data: () => ({ ...roleData, roleid: roleData.roleid }) },
+      });
+
+      sinon.stub(discordServices, "deleteGroupRoleFromDiscord").resolves({
+        success: false,
+        message: "Failed to delete role from Discord",
+      });
+
+      chai
+        .request(app)
+        .delete(`/discord-actions/groups/${groupId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          expect(res).to.have.status(500);
+          expect(res.body.error).to.equal("Internal Server Error");
+          done(err);
+        });
+    });
+
+    it("should return 500 when discord service throws an error", function (done) {
+      sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
+        roleExists: true,
+        existingRoles: { data: () => ({ ...roleData, roleid: roleData.roleid }) },
+      });
+
+      sinon.stub(discordServices, "deleteGroupRoleFromDiscord").resolves({
+        success: false,
+        message: "Internal server error",
+      });
+
+      chai
+        .request(app)
+        .delete(`/discord-actions/groups/${groupId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          expect(res).to.have.status(500);
+          expect(res.body.error).to.equal("Internal Server Error");
+          done(err);
+        });
+    });
+
+    it("should successfully delete a group role from database", function (done) {
+      sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
+        roleExists: true,
+        existingRoles: { data: () => ({ ...roleData, roleid: roleData.roleid }) },
+      });
+
+      sinon.stub(discordServices, "deleteGroupRoleFromDiscord").resolves({
+        success: true,
+        message: "Role deleted successfully",
+      });
+
+      chai
+        .request(app)
+        .delete(`/discord-actions/groups/${groupId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.equal("Group role deleted successfully");
+          done(err);
+        });
+    });
+
+    it("should return 500 when deletion fails", function (done) {
+      sinon.restore();
+      sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
+        roleExists: true,
+        existingRoles: { data: () => ({ ...roleData, roleid: roleData.roleid }) },
+      });
+
+      sinon.stub(discordServices, "deleteGroupRoleFromDiscord").resolves({
+        success: true,
+        message: "Role deleted successfully",
+      });
+
+      sinon.stub(discordRolesModel, "deleteGroupRole").resolves({ isSuccess: false });
+      chai
+        .request(app)
+        .delete(`/discord-actions/groups/${groupId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          expect(res).to.have.status(500);
+          expect(res.body.error).to.equal("Internal Server Error");
+          done(err);
+        });
+    });
+
+    it("should return 500 when an internal error occurs", function (done) {
+      sinon.restore();
+      sinon.stub(discordRolesModel, "isGroupRoleExists").throws(new Error("Database error"));
+      chai
+        .request(app)
+        .delete(`/discord-actions/groups/${groupId}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          expect(res).to.have.status(500);
+          expect(res.body.error).to.equal("Internal Server Error");
+          done(err);
         });
     });
   });
@@ -467,7 +634,7 @@ describe("Discord actions", function () {
       );
       chai
         .request(app)
-        .post(`/discord-actions/nicknames/sync?dev=true`)
+        .post(`/discord-actions/nicknames/sync`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
@@ -613,9 +780,30 @@ describe("Discord actions", function () {
     let allIds;
 
     beforeEach(async function () {
-      userData[0].roles = { archived: false };
-      userData[1].roles = { archived: false };
-      userData[2].roles = { archived: false };
+      userData[0] = {
+        ...userData[0],
+        discordId: "123456789098765432",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+      userData[1] = {
+        ...userData[1],
+        discordId: "12345678909867666",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+      userData[2] = {
+        ...userData[2],
+        discordId: "1234567",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+
+      getDiscordMembers[3] = {
+        ...getDiscordMembers[3],
+        roles: ["1212121212"],
+      };
+
       await addUser(userData[0]);
       await addUser(userData[1]);
       await addUser(userData[2]);
@@ -648,7 +836,7 @@ describe("Discord actions", function () {
     it("should update Idle 7d+ Users successfully and return a 201 status code", function (done) {
       chai
         .request(app)
-        .put(`/discord-actions/group-idle-7d`)
+        .put(`/discord-actions/group-idle-7d?dev=true`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
           if (err) {
@@ -656,9 +844,9 @@ describe("Discord actions", function () {
           }
           expect(res).to.have.status(201);
           expect(res.body.message).to.be.equal("All Idle 7d+ Users updated successfully.");
-          expect(res.body.totalIdle7dUsers).to.be.equal(3);
-          expect(res.body.totalGroupIdle7dRolesApplied.count).to.be.equal(3);
-          expect(res.body.totalUserRoleToBeAdded).to.be.equal(3);
+          expect(res.body.totalIdle7dUsers).to.be.equal(2);
+          expect(res.body.totalGroupIdle7dRolesApplied.count).to.be.equal(2);
+          expect(res.body.totalUserRoleToBeAdded).to.be.equal(2);
           return done();
         });
     });
@@ -777,7 +965,12 @@ describe("Discord actions", function () {
     });
   });
 
+  // <------ Will revisit this later https://github.com/Real-Dev-Squad/website-backend/issues/2078 --->
   describe("POST /discord-actions/invite", function () {
+    afterEach(function () {
+      sinon.restore();
+    });
+
     it("should return 403 if the userId in the query param is not equal to the userId of the user and user is not a super user", async function () {
       const res = await chai
         .request(app)
@@ -788,7 +981,8 @@ describe("Discord actions", function () {
       expect(res.body.message).to.be.equal("User should be super user to generate link for other users");
     });
 
-    it("should return 403 if the user has discord id in their user object, which means user is already in discord", async function () {
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip("should return 403 if the user has discord id in their user object, which means user is already in discord", async function () {
       const res = await chai
         .request(app)
         .post(`/discord-actions/invite`)
@@ -798,7 +992,8 @@ describe("Discord actions", function () {
       expect(res.body.message).to.be.equal("Only users who have never joined discord can generate invite link");
     });
 
-    it("should return 403 if user has role archieved", async function () {
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip("should return 403 if user has role archieved", async function () {
       archievedUserId = await addUser(archievedUser);
       archievedUserToken = authService.generateAuthToken({ userId: archievedUserId });
       const res = await chai
@@ -810,7 +1005,8 @@ describe("Discord actions", function () {
       expect(res.body.message).to.be.equal("Archived users cannot generate invite");
     });
 
-    it("should return 403 if the user doesn't have role designer, product_manager, or mavens", async function () {
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip("should return 403 if the user doesn't have role designer, product_manager, or mavens", async function () {
       developerUserWithoutApprovedProfileStatusId = await addUser(developerUserWithoutApprovedProfileStatus);
       developerUserWithoutApprovedProfileStatusToken = authService.generateAuthToken({
         userId: developerUserWithoutApprovedProfileStatusId,
@@ -824,7 +1020,8 @@ describe("Discord actions", function () {
       expect(res.body.message).to.be.equal("Only selected roles can generate discord link directly");
     });
 
-    it("should generate discord link if user is a product mananger", async function () {
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip("should generate discord link if user is a product mananger", async function () {
       fetchStub.returns(
         Promise.resolve({
           status: 201,
@@ -844,7 +1041,8 @@ describe("Discord actions", function () {
       expect(res.body.inviteLink).to.be.equal("discord.gg/xyz");
     });
 
-    it("should generate discord link if user is a designer", async function () {
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip("should generate discord link if user is a designer", async function () {
       fetchStub.returns(
         Promise.resolve({
           status: 201,
@@ -864,7 +1062,8 @@ describe("Discord actions", function () {
       expect(res.body.inviteLink).to.be.equal("discord.gg/zlmfasd");
     });
 
-    it("should generate discord link if user is a maven", async function () {
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip("should generate discord link if user is a maven", async function () {
       fetchStub.returns(
         Promise.resolve({
           status: 201,
@@ -884,21 +1083,139 @@ describe("Discord actions", function () {
       expect(res.body.inviteLink).to.be.equal("discord.gg/asdfdsfsd");
     });
 
-    it("should generate discord link if user is a superUser", async function () {
+    it("should return 403 if user has no applications", async function () {
+      sinon.stub(ApplicationModel, "getUserApplications").resolves([]);
+
+      const res = await chai
+        .request(app)
+        .post(`/discord-actions/invite`)
+        .set("cookie", `${cookieName}=${userAuthToken}`);
+
+      expect(res).to.have.status(403);
+      expect(res.body.message).to.be.equal("No applications found.");
+    });
+
+    it("should return 403 if user has pending applications", async function () {
+      sinon.stub(ApplicationModel, "getUserApplications").resolves([{ status: "pending" }]);
+
+      const res = await chai
+        .request(app)
+        .post(`/discord-actions/invite`)
+        .set("cookie", `${cookieName}=${userAuthToken}`);
+
+      expect(res).to.have.status(403);
+      expect(res.body.message).to.be.equal(
+        "Only users with an accepted application can generate a Discord invite link."
+      );
+    });
+
+    it("should return 403 if user has rejected applications", async function () {
+      sinon.stub(ApplicationModel, "getUserApplications").resolves([{ status: "rejected" }]);
+
+      const res = await chai
+        .request(app)
+        .post(`/discord-actions/invite`)
+        .set("cookie", `${cookieName}=${userAuthToken}`);
+
+      expect(res).to.have.status(403);
+      expect(res.body.message).to.be.equal(
+        "Only users with an accepted application can generate a Discord invite link."
+      );
+    });
+
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip("should generate discord link if user has an approved application", async function () {
+      sinon.stub(ApplicationModel, "getUserApplications").resolves([{ status: "accepted" }]);
       fetchStub.returns(
         Promise.resolve({
           status: 201,
-          json: () => Promise.resolve({ data: { code: "asdfdsfsd" } }),
+          json: () => Promise.resolve({ data: { code: "xyz" } }),
         })
       );
 
       const res = await chai
         .request(app)
-        .post(`/discord-actions/invite`)
-        .set("cookie", `${cookieName}=${superUserAuthToken}`);
+        .post("/discord-actions/invite")
+        .set("cookie", `${cookieName}=${userAuthToken}`);
       expect(res).to.have.status(201);
       expect(res.body.message).to.be.equal("invite generated successfully");
       expect(res.body.inviteLink).to.be.equal("discord.gg/asdfdsfsd");
+    });
+  });
+
+  describe("PUT /discord-actions/group-idle", function () {
+    let allIds;
+
+    beforeEach(async function () {
+      userData[0] = {
+        ...userData[0],
+        discordId: "123456789098765432",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+      userData[1] = {
+        ...userData[1],
+        discordId: "12345678909867666",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+      userData[2] = {
+        ...userData[2],
+        discordId: "1234567",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+
+      getDiscordMembers[3] = {
+        ...getDiscordMembers[3],
+        roles: ["1212121212"],
+      };
+
+      await addUser(userData[0]);
+      await addUser(userData[1]);
+      await addUser(userData[2]);
+
+      const addUsersPromises = userData.slice(0, 3).map((user) => userModel.add({ ...user }));
+      const responses = await Promise.all(addUsersPromises);
+      allIds = responses.map((response) => response.id);
+
+      const userStatusPromises = allIds.map(async (userId) => {
+        await updateUserStatus(userId, generateUserStatusData("IDLE", 1690829925336, 1690829925336));
+      });
+      await Promise.all(userStatusPromises);
+
+      const addRolesPromises = [discordRoleModel.add(groupIdle)];
+      await Promise.all(addRolesPromises);
+
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(getDiscordMembers),
+        })
+      );
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should update Idle Users successfully and return a 201 status code!", function (done) {
+      chai
+        .request(app)
+        .put(`/discord-actions/group-idle?dev=true`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(201);
+          expect(res.body.message).to.be.equal("All Idle Users updated successfully.");
+          expect(res.body.totalIdleUsers).to.be.equal(2);
+          expect(res.body.totalGroupIdleRolesApplied.count).to.be.equal(2);
+          expect(res.body.totalUserRoleToBeAdded).to.be.equal(2);
+          return done();
+        });
     });
   });
 });

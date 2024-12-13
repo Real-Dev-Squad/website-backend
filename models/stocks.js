@@ -6,7 +6,7 @@ const userStocksModel = firestore.collection("user-stocks");
  * Adds Stocks
  *
  * @param stockData { Object }: stock data object to be stored in DB
- * @return {Promise<{stockId: string}>}
+ * @return {Promise<{id: string, stockData: Object}>}
  */
 const addStock = async (stockData) => {
   try {

@@ -21,9 +21,9 @@ const updateUser = async (req, res, next) => {
         .string()
         .optional()
         .min(4)
-        .max(20)
+        .max(32)
         .regex(/^[a-zA-Z0-9-]+$/)
-        .message("Username must be between 4 and 20 characters long and contain only letters or numbers."),
+        .message("Username must be between 4 and 32 characters long and contain only letters or numbers."),
       first_name: joi.string().optional(),
       last_name: joi.string().optional(),
       yoe: joi.number().min(0).optional(),
@@ -51,6 +51,7 @@ const updateUser = async (req, res, next) => {
         .valid(...Object.values(USER_STATUS))
         .optional(),
       discordId: joi.string().optional(),
+      disabledRoles: joi.array().items(joi.string().valid("super_user", "member")).optional(),
       roles: joi.object().keys({
         designer: joi.boolean().optional(),
         maven: joi.boolean().optional(),
@@ -60,6 +61,14 @@ const updateUser = async (req, res, next) => {
 
   try {
     await schema.validateAsync(req.body);
+
+    if (req.body.first_name) {
+      req.body.first_name = req.body.first_name.toLowerCase();
+    }
+    if (req.body.last_name) {
+      req.body.last_name = req.body.last_name.toLowerCase();
+    }
+
     next();
   } catch (error) {
     logger.error(`Error validating updateUser payload : ${error}`);
@@ -187,9 +196,18 @@ async function getUsers(req, res, next) {
         }),
       query: joi.string().optional(),
       q: joi.string().optional(),
+      profile: joi.string().valid("true").optional(),
       filterBy: joi.string().optional(),
       days: joi.string().optional(),
       dev: joi.string().optional(),
+      departed: joi.string().optional(),
+      roles: joi.optional().custom((value, helpers) => {
+        if (value !== "member") {
+          return helpers.message("only member role is supported");
+        }
+
+        return value;
+      }),
     });
   try {
     await schema.validateAsync(req.query);
@@ -308,8 +326,18 @@ const validateGenerateUsernameQuery = async (req, res, next) => {
     .object()
     .strict()
     .keys({
-      firstname: joi.string().min(1).required(),
-      lastname: joi.string().min(1).required(),
+      firstname: joi
+        .string()
+        .trim()
+        .pattern(/^[a-zA-Z]+$/)
+        .min(1)
+        .required(),
+      lastname: joi
+        .string()
+        .trim()
+        .pattern(/^[a-zA-Z]+$/)
+        .min(1)
+        .required(),
       dev: joi.string().valid("true").optional(),
     });
 
@@ -321,6 +349,7 @@ const validateGenerateUsernameQuery = async (req, res, next) => {
     res.boom.badRequest("Invalid Query Parameters Passed");
   }
 };
+
 const migrationsValidator = async (req, res, next) => {
   const { action, page, size } = req.query;
   const schema = joi

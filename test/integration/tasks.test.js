@@ -25,7 +25,8 @@ const userDBModel = firestore.collection("users");
 const discordService = require("../../services/discordService");
 const { CRON_JOB_HANDLER } = require("../../constants/bot");
 const { logType } = require("../../constants/logs");
-
+const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
+const tasksService = require("../../services/tasks");
 chai.use(chaiHttp);
 
 const appOwner = userData[3];
@@ -37,6 +38,10 @@ const { stubbedModelTaskProgressData } = require("../fixtures/progress/progresse
 const { convertDaysToMilliseconds } = require("../../utils/time");
 const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
 const { generateCronJobToken } = require("../utils/generateBotToken");
+const {
+  usersData: abandonedUsersData,
+  tasksData: abandonedTasksData,
+} = require("../fixtures/abandoned-tasks/departed-users");
 
 const taskData = [
   {
@@ -239,17 +244,20 @@ describe("Tasks", function () {
         });
     });
 
-    it("Should call paginated tasks when dev flag passed to GET /tasks is true", function (done) {
-      const fetchPaginatedUserStub = sinon.stub(tasks, "fetchPaginatedTasks");
+    it("Should return paginated tasks", function (done) {
       chai
         .request(app)
-        .get("/tasks?dev=true")
+        .get("/tasks")
         .end((err, res) => {
           if (err) {
             return done(err);
           }
-          expect(fetchPaginatedUserStub.calledOnce).to.be.equal(true);
-
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Tasks returned successfully!");
+          expect(res.body.tasks).to.be.a("array");
+          expect(res.body).to.have.property("next");
+          expect(res.body).to.have.property("prev");
           return done();
         });
     });
@@ -257,7 +265,7 @@ describe("Tasks", function () {
     it("Should get all tasks filtered with status when passed to GET /tasks", function (done) {
       chai
         .request(app)
-        .get(`/tasks?dev=true&status=${TASK_STATUS.IN_PROGRESS}`)
+        .get(`/tasks?status=${TASK_STATUS.IN_PROGRESS}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -281,7 +289,7 @@ describe("Tasks", function () {
     it("Should get all tasks filtered with status ,assignee, title when passed to GET /tasks", function (done) {
       chai
         .request(app)
-        .get(`/tasks?status=${TASK_STATUS.IN_PROGRESS}&userFeatureFlag=true&dev=true&assignee=sagar&title=Test`)
+        .get(`/tasks?status=${TASK_STATUS.IN_PROGRESS}&userFeatureFlag=true&assignee=sagar&title=Test`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -307,7 +315,7 @@ describe("Tasks", function () {
     it("Should get all tasks filtered with status, multiple assignees, title when passed to GET /tasks", function (done) {
       chai
         .request(app)
-        .get(`/tasks?status=${TASK_STATUS.IN_PROGRESS}&dev=true&assignee=sagar,ankur&title=Test`)
+        .get(`/tasks?status=${TASK_STATUS.IN_PROGRESS}&assignee=sagar,ankur&title=Test`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -333,7 +341,7 @@ describe("Tasks", function () {
     it("Should get all overdue tasks GET /tasks", function (done) {
       chai
         .request(app)
-        .get(`/tasks?dev=true&status=overdue`)
+        .get(`/tasks?status=overdue`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -348,7 +356,7 @@ describe("Tasks", function () {
     it("Should get all overdue tasks filtered with assignee when passed to GET /tasks", function (done) {
       chai
         .request(app)
-        .get(`/tasks?dev=true&status=overdue&assignee=${appOwner.username}`)
+        .get(`/tasks?status=overdue&assignee=${appOwner.username}`)
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -373,7 +381,7 @@ describe("Tasks", function () {
     it("Should get tasks when correct query parameters are passed", function (done) {
       chai
         .request(app)
-        .get("/tasks?dev=true&size=1&page=0")
+        .get("/tasks?size=1&page=0")
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -391,7 +399,7 @@ describe("Tasks", function () {
     });
 
     it("Should get next and previous page results based returned by the links in the response", async function () {
-      const initialReq = `/tasks?size=1&dev=true`;
+      const initialReq = `/tasks?size=1`;
       const response = await chai.request(app).get(initialReq);
       expect(response).to.have.status(200);
       expect(response.body).to.be.a("object");
@@ -484,7 +492,7 @@ describe("Tasks", function () {
     it("Should get paginated tasks ordered by updatedAt in desc order ", function (done) {
       chai
         .request(app)
-        .get("/tasks?dev=true&size=5&page=0")
+        .get("/tasks?size=5&page=0")
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -509,7 +517,7 @@ describe("Tasks", function () {
         },
         taskId2
       );
-      const res = await chai.request(app).get(`/tasks?dev=true&status=DONE&userFeatureFlag=true`);
+      const res = await chai.request(app).get(`/tasks?status=DONE&userFeatureFlag=true`);
 
       expect(res).to.have.status(200);
       expect(res.body).to.be.a("object");
@@ -1628,6 +1636,59 @@ describe("Tasks", function () {
         error: "Unauthorized",
         message: "You are not authorized for this action.",
       });
+    });
+  });
+
+  describe("GET /tasks?orphaned", function () {
+    beforeEach(async function () {
+      await cleanDb();
+      const userPromises = abandonedUsersData.map((user) => userDBModel.doc(user.id).set(user));
+      await Promise.all(userPromises);
+
+      const taskPromises = abandonedTasksData.map((task) => tasksModel.add(task));
+      await Promise.all(taskPromises);
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should return 204 status when no users are archived", async function () {
+      await cleanDb();
+
+      const user = abandonedUsersData[2];
+      await userDBModel.add(user);
+
+      const task = abandonedTasksData[3];
+      await tasksModel.add(task);
+
+      const res = await chai.request(app).get("/tasks?dev=true&orphaned=true").set("Accept", "application/json");
+
+      expect(res).to.have.status(204);
+    });
+
+    it("should fetch tasks assigned to archived and non-discord users", async function () {
+      const res = await chai.request(app).get("/tasks?dev=true&orphaned=true");
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.have.property("message").that.equals("Orphan tasks fetched successfully");
+      expect(res.body.data).to.be.an("array").with.lengthOf(2);
+    });
+
+    it("should fail if dev flag is not passed", async function () {
+      const res = await chai.request(app).get("/tasks?orphaned=true");
+      expect(res).to.have.status(404);
+      expect(res.body.message).to.be.equal("Route not found");
+    });
+
+    it("should handle errors gracefully if the database query fails", async function () {
+      sinon.stub(tasksService, "fetchOrphanedTasks").rejects(new Error(INTERNAL_SERVER_ERROR));
+
+      const res = await chai.request(app).get("/tasks?orphaned=true&dev=true");
+
+      expect(res).to.have.status(500);
+      expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
     });
   });
 });

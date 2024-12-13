@@ -7,21 +7,12 @@ const { API_RESPONSE_MESSAGES } = require("../constants/application");
 const { getUserApplicationObject } = require("../utils/application");
 const admin = require("firebase-admin");
 
-const batchUpdateApplications = async (req: CustomRequest, res: CustomResponse): Promise<any> => {
-  try {
-    const updateStats = await ApplicationModel.batchUpdateApplications();
-    return res.json(updateStats);
-  } catch (err) {
-    logger.error(`Error in batch updating application: ${err}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
-  }
-};
-
 const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse): Promise<any> => {
   try {
-    const { userId, status, next, size } = req.query;
+    const { userId, status, next, size, dev } = req.query;
     const limit = Number(size) || 25;
     let nextPageUrl = null;
+    const isDevMode = dev === "true";
 
     if (userId) {
       const applications = await ApplicationModel.getUserApplications(userId);
@@ -33,17 +24,26 @@ const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse):
     }
 
     if (status) {
-      const { applications, lastDocId } = await ApplicationModel.getApplicationsBasedOnStatus(status, limit, next);
+      const { applications, lastDocId, totalCount } = await ApplicationModel.getApplicationsBasedOnStatus(
+        status,
+        limit,
+        next
+      );
 
       if (applications.length === limit) {
         nextPageUrl = `/applications?next=${lastDocId}&size=${limit}&status=${status}`;
       }
 
-      return res.json({
+      const response = {
         message: API_RESPONSE_MESSAGES.APPLICATION_RETURN_SUCCESS,
         applications,
         next: nextPageUrl,
-      });
+      };
+      if (isDevMode) {
+        response["totalCount"] = totalCount;
+      }
+
+      return res.json(response);
     }
 
     const { applications, lastDocId } = await ApplicationModel.getAllApplications(limit, next);
@@ -154,5 +154,4 @@ module.exports = {
   addApplication,
   updateApplication,
   getApplicationById,
-  batchUpdateApplications,
 };

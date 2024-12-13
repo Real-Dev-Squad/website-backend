@@ -72,7 +72,7 @@ describe("/logs", function () {
     it("should return 401 if user is not logged in", function (done) {
       chai
         .request(app)
-        .get("/logs?dev=true")
+        .get("/logs")
         .end(function (err, res) {
           if (err) {
             return done(err);
@@ -97,7 +97,7 @@ describe("/logs", function () {
         });
     });
 
-    it("should return 400, if user has access and dev flag is not", function (done) {
+    it("should return all Logs", function (done) {
       chai
         .request(app)
         .get("/logs")
@@ -106,25 +106,9 @@ describe("/logs", function () {
           if (err) {
             return done(err);
           }
-          expect(res).to.have.status(400);
-          expect(res.body.error).to.equal("Bad Request");
-          expect(res.body.message).to.equal(`Please use feature flag to make this request!`);
-          return done();
-        });
-    });
-
-    it("should return all Logs", function (done) {
-      chai
-        .request(app)
-        .get("/logs?dev=true")
-        .set("cookie", `${cookieName}=${superUserToken}`)
-        .end(function (err, res) {
-          if (err) {
-            return done(err);
-          }
           expect(res).to.have.status(200);
           expect(res.body.message).to.equal("All Logs fetched successfully");
-          expect(res.body.data).to.lengthOf(7);
+          expect(res.body.data).to.lengthOf(9);
           return done();
         });
     });
@@ -132,7 +116,7 @@ describe("/logs", function () {
     it("should return all formatted Logs", function (done) {
       chai
         .request(app)
-        .get("/logs?dev=true&format=feed")
+        .get("/logs?format=feed")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .end(function (err, res) {
           if (err) {
@@ -159,7 +143,7 @@ describe("/logs", function () {
     it("should return logs of type = extensionRequests", function (done) {
       chai
         .request(app)
-        .get("/logs?type=extensionRequests&dev=true")
+        .get("/logs?type=extensionRequests")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .end((err, res) => {
           if (err) {
@@ -174,7 +158,7 @@ describe("/logs", function () {
     it("if no logs are present, should return valid response", function (done) {
       chai
         .request(app)
-        .get("/logs?type=REQUEST_CREATED1&dev=true")
+        .get("/logs?type=REQUEST_CREATED1")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .end((err, res) => {
           if (err) {
@@ -189,7 +173,7 @@ describe("/logs", function () {
     it("should return data if page param is passed in the quey", function (done) {
       chai
         .request(app)
-        .get("/logs?page=1&dev=true&size=3")
+        .get("/logs?page=1&size=3")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .end(function (err, res) {
           if (err) {
@@ -197,7 +181,7 @@ describe("/logs", function () {
           }
           expect(res.body.message).to.equal("All Logs fetched successfully");
           expect(res.body.data).to.lengthOf(3);
-          expect(res.body.page).to.equal("/logs?page=2&dev=true");
+          expect(res.body.page).to.equal("/logs?page=2");
           return done();
         });
     });
@@ -205,7 +189,7 @@ describe("/logs", function () {
     it("should return valid paginated link", function (done) {
       chai
         .request(app)
-        .get("/logs?dev=true&size=3")
+        .get("/logs?size=3")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .end(function (err, res) {
           if (err) {
@@ -213,9 +197,131 @@ describe("/logs", function () {
           }
           expect(res.body.message).to.equal("All Logs fetched successfully");
           expect(res.body.data).to.lengthOf(3);
-          expect(res.body.next).to.contain("/logs?dev=true&size=3&next=");
+          expect(res.body.next).to.contain("/logs?size=3&next=");
           return done();
         });
+    });
+
+    it("should return logs filtered by username, startDate, and endDate when dev flag is enabled", function (done) {
+      const username = "joygupta";
+      const startDate = 1729841400000;
+      const endDate = 1729841500000;
+      chai
+        .request(app)
+        .get(`/logs?username=${username}&startDate=${startDate}&endDate=${endDate}&dev=true`)
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.equal("All Logs fetched successfully");
+
+          expect(res.body.data).to.be.an("array");
+          res.body.data.forEach((log) => {
+            expect(log).to.have.property("meta");
+            expect(log).to.have.property("body");
+            expect(log.meta).to.have.property("userId");
+            const timestamp = log.timestamp._seconds * 1000;
+            expect(timestamp).to.be.at.least(startDate);
+            expect(timestamp).to.be.at.most(endDate);
+          });
+
+          return done();
+        });
+    });
+
+    it("should return an error if startDate is greater than endDate", function (done) {
+      const username = "joygupta";
+      const startDate = 1729841500000;
+      const endDate = 1729841400000;
+
+      chai
+        .request(app)
+        .get(`/logs?username=${username}&startDate=${startDate}&endDate=${endDate}&dev=true`)
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .end(function (_err, res) {
+          expect(res).to.have.status(400);
+          expect(res.body.error).to.equal("Start date cannot be greater than end date.");
+          return done();
+        });
+    });
+
+    it("should return an empty array if no logs match username and date range", function (done) {
+      const username = "nonexistentUser";
+      const startDate = 1729841400000;
+      const endDate = 1729841500000;
+
+      chai
+        .request(app)
+        .get(`/logs?username=${username}&startDate=${startDate}&endDate=${endDate}&dev=true`)
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .end(function (_err, res) {
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.equal("All Logs fetched successfully");
+          return done();
+        });
+    });
+  });
+
+  describe("Update logs", function () {
+    it("should run the migration and update logs successfully", async function () {
+      const res = await chai.request(app).post("/logs/migrate").set("cookie", `${cookieName}=${superUserToken}`).send();
+
+      expect(res).to.have.status(200);
+      expect(res.body).to.be.an("object");
+      expect(res.body.response).to.have.property("totalLogsProcessed").that.is.a("number");
+      expect(res.body.response).to.have.property("totalLogsUpdated").that.is.a("number");
+      expect(res.body.response).to.have.property("totalOperationsFailed").that.is.a("number");
+      expect(res.body.response).to.have.property("failedLogDetails").that.is.an("array");
+
+      expect(res.body.response.totalLogsProcessed).to.be.at.least(0);
+      expect(res.body.response.totalLogsUpdated).to.be.lessThanOrEqual(res.body.response.totalLogsProcessed);
+
+      expect(res.body.response).to.have.all.keys(
+        "totalLogsProcessed",
+        "totalLogsUpdated",
+        "totalOperationsFailed",
+        "failedLogDetails"
+      );
+    });
+
+    it("should return error if unauthorized user tries to run migration", async function () {
+      const res = await chai.request(app).post("/logs/migrate").set("cookie", `${cookieName}=invalidToken`).send();
+
+      expect(res).to.have.status(401);
+      expect(res.body).to.have.property("error").that.is.a("string");
+    });
+  });
+
+  describe("Add logs when user doc is update", function () {
+    let jwt;
+    let userId;
+
+    beforeEach(async function () {
+      userId = await addUser();
+      jwt = authService.generateAuthToken({ userId });
+    });
+
+    it("Should update the users and capture the logs", async function () {
+      const res = await chai.request(app).patch("/users/self").set("cookie", `${cookieName}=${jwt}`).send({
+        first_name: "Test first_name",
+      });
+
+      expect(res).to.have.status(204);
+
+      const logRes = await chai
+        .request(app)
+        .get("/logs/USER_DETAILS_UPDATED")
+        .set("cookie", `${cookieName}=${superUserToken}`);
+
+      expect(logRes).to.have.status(200);
+      expect(logRes.body.message).to.equal("Logs fetched successfully");
+
+      const log = logRes.body.logs[0];
+      expect(log).to.have.property("meta");
+      expect(log).to.have.property("body");
+      expect(log.type).to.equal("USER_DETAILS_UPDATED");
     });
   });
 });
