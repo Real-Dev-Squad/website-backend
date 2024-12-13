@@ -44,6 +44,13 @@ const fetchStocks = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
+/**
+ * @deprecated
+ * WARNING: This API endpoint is being deprecated and will be removed in future.
+ * Please use the updated API endpoint: `/stocks/:userId` for retrieving user stocks details.
+ *
+ * This API is kept temporarily for backward compatibility.
+ */
 const getSelfStocks = async (req, res) => {
   try {
     const { id: userId } = req.userData;
@@ -87,4 +94,5 @@ module.exports = {
   addNewStock,
   fetchStocks,
   getSelfStocks,
+  getUserStocks,
 };
