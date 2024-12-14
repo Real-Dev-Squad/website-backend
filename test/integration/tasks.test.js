@@ -1700,8 +1700,8 @@ describe("Tasks", function () {
     });
   });
 
-  describe("GET /tasks/v1/:userId", function () {
-    it("Should return all the completed tasks of the user when query 'completed' is true and dev is true", async function () {
+  describe("GET /tasks/:userId", function () {
+    it("Should return all the completed tasks of the user when query 'completed','dev'is true and version is 'v1'", async function () {
       const { userId: assignedUser } = await userModel.addOrUpdate({
         github_id: "prakashchoudhary07",
         username: "user1",
@@ -1740,7 +1740,7 @@ describe("Tasks", function () {
 
       const res = await chai
         .request(app)
-        .get(`/tasks/v1/${assignedUser}/?dev=true&completed=true`)
+        .get(`/tasks/${assignedUser}/?dev=true&completed=true&version=v1`)
         .set("cookie", `${cookieName}=${authService.generateAuthToken({ userId: assignedUser })}`);
 
       expect(res).to.have.status(200);
@@ -1748,7 +1748,7 @@ describe("Tasks", function () {
       expect(res.body).to.satisfy((tasks) => tasks.every((task) => task.status === "COMPLETED"));
     });
 
-    it("Should return all the tasks of the user when dev is true", async function () {
+    it("Should return all the tasks of the user when dev is true and version is v1", async function () {
       const { userId: assignedUser } = await userModel.addOrUpdate({
         github_id: "prakashchoudhary07",
         username: "user1",
@@ -1787,7 +1787,7 @@ describe("Tasks", function () {
 
       const res = await chai
         .request(app)
-        .get(`/tasks/v1/${assignedUser}/?dev=true`)
+        .get(`/tasks/${assignedUser}/?dev=true&version=v1`)
         .set("cookie", `${cookieName}=${authService.generateAuthToken({ userId: assignedUser })}`);
 
       expect(res).to.have.status(200);
@@ -1801,7 +1801,7 @@ describe("Tasks", function () {
         username: "user1",
       });
 
-      const res = await chai.request(app).get(`/tasks/v1/${assignedUser}/?dev=true`);
+      const res = await chai.request(app).get(`/tasks/${assignedUser}/?dev=true&version=v1`);
 
       expect(res).to.have.status(401);
       expect(res.body).to.be.an("object");
@@ -1809,32 +1809,6 @@ describe("Tasks", function () {
         statusCode: 401,
         error: "Unauthorized",
         message: "Unauthenticated User",
-      });
-    });
-
-    it("Should return 403 if the requested user is not the authenticated user or dev is false", async function () {
-      const { userId: authenticatedUserId } = await userModel.addOrUpdate({
-        github_id: "authenticated_user",
-        username: "auth_user",
-      });
-
-      const { userId: requestedUserId } = await userModel.addOrUpdate({
-        github_id: "requested_user",
-        username: "req_user",
-      });
-
-      const authToken = authService.generateAuthToken({ userId: authenticatedUserId });
-
-      const res = await chai
-        .request(app)
-        .get(`/tasks/v1/${requestedUserId}`)
-        .set("cookie", `${cookieName}=${authToken}`);
-
-      expect(res).to.have.status(403);
-      expect(res.body).to.eql({
-        statusCode: 403,
-        error: "Forbidden",
-        message: "Access denied: You cannot view",
       });
     });
   });

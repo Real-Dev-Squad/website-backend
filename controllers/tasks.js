@@ -206,36 +206,6 @@ const fetchTasks = async (req, res) => {
 };
 
 /**
- * Fetches all the tasks of the logged in user
- *
- * @param req {Object} - Express request object
- * @param res {Object} - Express response object
- */
-
-const getTasksByUser = async (req, res) => {
-  try {
-    const { username, id: authenticatedUserId } = req.userData;
-    const requestedUserId = req.params.userId;
-    const dev = req.query.dev;
-
-    if (requestedUserId === authenticatedUserId && dev) {
-      if (req.query.completed) {
-        const allCompletedTasks = await tasks.fetchUserCompletedTasks(username);
-        return res.json(allCompletedTasks);
-      } else {
-        const allTasks = await tasks.fetchUserTasks(username, []);
-        return res.json(allTasks);
-      }
-    } else {
-      return res.boom.forbidden(FORBIDDEN_ACCESS);
-    }
-  } catch (err) {
-    logger.error(`Error while fetching tasks: ${err}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
-  }
-};
-
-/**
  * Fetches all the tasks of the requested user
  *
  * @param req {Object} - Express request object
@@ -294,24 +264,19 @@ const getSelfTasks = async (req, res) => {
   try {
     const { username } = req.userData;
 
-    if (username) {
-      if (req.query.completed) {
-        const allCompletedTasks = await tasks.fetchUserCompletedTasks(username);
-        res.set(
-          "X-Deprecation-Warning",
-          "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:userId to get the task details."
-        );
-        return res.json(allCompletedTasks);
-      } else {
-        const allTasks = await tasks.fetchSelfTasks(username);
-        res.set(
-          "X-Deprecation-Warning",
-          "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:userId to get the task details."
-        );
-        return res.json(allTasks);
-      }
+    if (!username) {
+      return res.boom.notFound("User doesn't exist");
     }
-    return res.boom.notFound("User doesn't exist");
+
+    const tasksData = req.query.completed
+      ? await tasks.fetchUserCompletedTasks(username)
+      : await tasks.fetchSelfTasks(username);
+
+    res.set(
+      "X-Deprecation-Warning",
+      "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:userId to get the task details."
+    );
+    return res.json(tasksData);
   } catch (err) {
     logger.error(`Error while fetching tasks: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
@@ -610,6 +575,38 @@ const getUsersHandler = async (req, res) => {
     };
     await addLog(taskRequestLog.type, taskRequestLog.meta, taskRequestLog.body);
     logger.error("Error in fetching users details of tasks", error);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+/**
+ * Fetches all the tasks of the logged in user
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const getTasksByUser = async (req, res) => {
+  try {
+    const { username, id: authenticatedUserId } = req.userData;
+    const requestedUserId = req.params.userId;
+    const dev = req.query.dev;
+
+    if (req.query.version === "v1") {
+      if (requestedUserId === authenticatedUserId && dev) {
+        if (req.query.completed) {
+          const allCompletedTasks = await tasks.fetchUserCompletedTasks(username);
+          return res.json(allCompletedTasks);
+        } else {
+          const allTasks = await tasks.fetchUserTasks(username, []);
+          return res.json(allTasks);
+        }
+      } else {
+        return res.boom.forbidden(FORBIDDEN_ACCESS);
+      }
+    }
+    return res.boom.badRequest("Invalid version or missing query parameters");
+  } catch (err) {
+    logger.error(`Error while fetching tasks: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
