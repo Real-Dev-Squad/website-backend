@@ -850,7 +850,7 @@ const addUserIntro = async (req, res) => {
   }
 };
 
-const getUserIntro = async (req, res) => {
+/* const getUserIntro = async (req, res) => {
   try {
     const data = await userQuery.getJoinData(req.params.userId);
     if (data.length) {
@@ -858,6 +858,33 @@ const getUserIntro = async (req, res) => {
         message: "User data returned",
         data: data,
       });
+    } else {
+      return res.status(404).json({
+        message: "Data Not Found",
+      });
+    }
+  } catch (err) {
+    logger.error("Could Not Get User Data", err);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+}; */
+const getUserIntro = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const loggedInUserId = req.userData.id;
+    const data = await userQuery.getJoinData(userId);
+
+    if (data.length) {
+      if (userId === loggedInUserId || req.userData.roles.super_user) {
+        return res.json({
+          message: "User data returned",
+          data: data,
+        });
+      } else {
+        return res.status(403).json({
+          message: "You're not authorized to view this page",
+        });
+      }
     } else {
       return res.status(404).json({
         message: "Data Not Found",
