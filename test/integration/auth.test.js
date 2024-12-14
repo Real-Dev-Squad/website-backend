@@ -6,7 +6,7 @@ const passport = require("passport");
 const app = require("../../server");
 const cleanDb = require("../utils/cleanDb");
 const { generateGithubAuthRedirectUrl } = require("..//utils/github");
-const { generateGoogleAuthRedirectUrl } = require("..//utils/googleauth");
+const { generateGoogleAuthRedirectUrl, stubPassportAuthenticate } = require("..//utils/googleauth");
 const { addUserToDBForTest } = require("../../utils/users");
 const userData = require("../fixtures/user/user")();
 
@@ -308,11 +308,7 @@ describe("auth", function () {
 
   it("should redirect the google user to new sign up flow if they are have incomplete user details true", async function () {
     const redirectURL = "https://my.realdevsquad.com/new-signup";
-
-    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
-      callback(null, "accessToken", googleUserInfo[0]);
-      return (req, res, next) => {};
-    });
+    stubPassportAuthenticate(googleUserInfo[0]);
 
     const res = await chai
       .request(app)
@@ -326,10 +322,7 @@ describe("auth", function () {
   it("should redirect the google user to the goto page on successful login, if user has incomplete user details false", async function () {
     await addUserToDBForTest(googleUserInfo[1]);
     const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
-    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
-      callback(null, "accessToken", googleUserInfo[0]);
-      return (req, res, next) => {};
-    });
+    stubPassportAuthenticate(googleUserInfo[0]);
 
     const res = await chai
       .request(app)
@@ -343,11 +336,7 @@ describe("auth", function () {
   it("should redirect the google user to the redirect URL provided on successful login, if user has incomplete user details false", async function () {
     await addUserToDBForTest(googleUserInfo[1]);
     const rdsUrl = new URL("https://dashboard.realdevsquad.com").href;
-    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
-      callback(null, "accessToken", googleUserInfo[0]);
-      return (req, res, next) => {};
-    });
-
+    stubPassportAuthenticate(googleUserInfo[0]);
     const res = await chai
       .request(app)
       .get(`/auth/google/callback`)
@@ -361,10 +350,7 @@ describe("auth", function () {
     await addUserToDBForTest(googleUserInfo[1]);
     const invalidRedirectUrl = new URL("https://google.com").href;
     const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
-    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
-      callback(null, "accessToken", googleUserInfo[0]);
-      return (req, res, next) => {};
-    });
+    stubPassportAuthenticate(googleUserInfo[0]);
 
     const res = await chai
       .request(app)
@@ -379,11 +365,7 @@ describe("auth", function () {
     await addUserToDBForTest(googleUserInfo[1]);
     const invalidRedirectUrl = "invalidURL";
     const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
-    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
-      callback(null, "accessToken", googleUserInfo[0]);
-      return (req, res, next) => {};
-    });
-
+    stubPassportAuthenticate(googleUserInfo[0]);
     const res = await chai
       .request(app)
       .get(`/auth/google/callback`)
@@ -393,13 +375,10 @@ describe("auth", function () {
     expect(res.headers.location).to.equal(rdsUiUrl);
   });
 
-  it("should send a cookie with JWT in the response for google user", function (done) {
+  it("should issue JWT cookie on using google login", function (done) {
     const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
 
-    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
-      callback(null, "accessToken", googleUserInfo[0]);
-      return (req, res, next) => {};
-    });
+    stubPassportAuthenticate(googleUserInfo[0]);
 
     chai
       .request(app)
@@ -428,10 +407,7 @@ describe("auth", function () {
   it("should redirect the google user to login page if the user is a developer", async function () {
     await addUserToDBForTest(googleUserInfo[3]);
     const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
-    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
-      callback(null, "accessToken", googleUserInfo[2]);
-      return (req, res, next) => {};
-    });
+    stubPassportAuthenticate(googleUserInfo[2]);
 
     const res = await chai
       .request(app)
@@ -444,17 +420,35 @@ describe("auth", function () {
     expect(res.headers.location).to.equal(expectedUrl);
   });
 
-  it("should recognize existing user by email when logging in via different OAuth provider", async function () {
+  it("should log in existing google user with same email via github OAuth", async function () {
+    await addUserToDBForTest(googleUserInfo[1]);
+    const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
+    const userInfoFromGitHub = {
+      ...githubUserInfo[0],
+      _json: {
+        ...githubUserInfo[0]._json,
+        email: "test12@gmail.com",
+      },
+    };
+    stubPassportAuthenticate(userInfoFromGitHub);
+
+    const res = await chai
+      .request(app)
+      .get("/auth/github/callback")
+      .query({ code: "codeReturnedByGithub", state: rdsUiUrl })
+      .redirects(0);
+    expect(res).to.have.status(302);
+    expect(res.headers.location).to.equal(rdsUiUrl);
+  });
+
+  it("should log in existing github user with same email via google OAuth", async function () {
     await addUserToDBForTest(userData[0]);
     const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
-    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
-      const userInfoFromGoogle = {
-        ...googleUserInfo[0],
-        emails: [{ value: "abc@gmail.com", verified: true }],
-      };
-      callback(null, "accessToken", userInfoFromGoogle);
-      return (req, res, next) => {};
-    });
+    const userInfoFromGoogle = {
+      ...googleUserInfo[0],
+      emails: [{ value: "abc@gmail.com", verified: true }],
+    };
+    stubPassportAuthenticate(userInfoFromGoogle);
 
     const res = await chai
       .request(app)
@@ -468,17 +462,14 @@ describe("auth", function () {
   it("should get the verified email and redirect the google user to the goto page on successful login", async function () {
     await addUserToDBForTest(googleUserInfo[1]);
     const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
-    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
-      const googleUser = {
-        ...googleUserInfo[0],
-        emails: [
-          { value: "test123@example.com", verified: false },
-          { value: "test12@gmail.com", verified: true },
-        ],
-      };
-      callback(null, "accessToken", googleUser);
-      return (req, res, next) => {};
-    });
+    const googleUser = {
+      ...googleUserInfo[0],
+      emails: [
+        { value: "test123@example.com", verified: false },
+        { value: "test12@gmail.com", verified: true },
+      ],
+    };
+    stubPassportAuthenticate(googleUser);
 
     const res = await chai
       .request(app)
@@ -489,16 +480,21 @@ describe("auth", function () {
     expect(res.headers.location).to.equal(rdsUiUrl);
   });
 
+  it("should return 404 if dev feature flag is not enabled", async function () {
+    const res = await chai.request(app).get("/auth/google/login");
+
+    expect(res).to.have.status(404);
+    expect(res.body.message).to.equal("Route not found");
+  });
+
   it("should return 401 if google email does not exist", async function () {
     const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
-    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
-      const userInfoWithoutEmail = {
-        ...googleUserInfo[0],
-        emails: [],
-      };
-      callback(null, "accessToken", userInfoWithoutEmail);
-      return (req, res, next) => {};
-    });
+    const userInfoWithoutEmail = {
+      ...googleUserInfo[0],
+      emails: [],
+    };
+
+    stubPassportAuthenticate(userInfoWithoutEmail);
 
     const res = await chai
       .request(app)
@@ -512,15 +508,11 @@ describe("auth", function () {
 
   it("should return 401 if no verified email exists", async function () {
     const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
-    sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
-      const userInfoWithUnverifiedEmail = {
-        ...googleUserInfo[0],
-        emails: [{ value: "test@example.com", verified: false }],
-      };
-      callback(null, "accessToken", userInfoWithUnverifiedEmail);
-      return (req, res, next) => {};
-    });
-
+    const userInfoWithUnverifiedEmail = {
+      ...googleUserInfo[0],
+      emails: [{ value: "test@example.com", verified: false }],
+    };
+    stubPassportAuthenticate(userInfoWithUnverifiedEmail);
     const res = await chai
       .request(app)
       .get("/auth/google/callback")

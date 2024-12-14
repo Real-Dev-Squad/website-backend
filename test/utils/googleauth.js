@@ -1,5 +1,7 @@
 const defaultClientId = config.get("googleOauth.clientId");
 const baseURL = config.get("services.rdsApi.baseUrl");
+const sinon = require("sinon");
+const passport = require("passport");
 
 const generateGoogleAuthRedirectUrl = function ({
   baseUrl = "https://accounts.google.com/o/oauth2/v2/auth",
@@ -19,4 +21,11 @@ const generateGoogleAuthRedirectUrl = function ({
   return `${encodedUrl}&client_id=${clientId}`;
 };
 
-module.exports = { generateGoogleAuthRedirectUrl };
+const stubPassportAuthenticate = function (userData, token = "accessToken") {
+  return sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
+    callback(null, token, userData);
+    return (req, res, next) => {};
+  });
+};
+
+module.exports = { generateGoogleAuthRedirectUrl, stubPassportAuthenticate };
