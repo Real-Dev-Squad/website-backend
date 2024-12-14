@@ -171,10 +171,16 @@ const fetchTaskRequestById = async (taskRequestId) => {
     const taskRequestSnapshot = await taskRequestsCollection.doc(taskRequestId).get();
     const taskRequestData = taskRequestSnapshot.data();
 
-    if (taskRequestData) {
-      taskRequestData.id = taskRequestSnapshot.id;
-      taskRequestData.url = new URL(`/taskRequests/${taskRequestData.id}`, config.get("services.rdsUi.baseUrl"));
+    if (!taskRequestData){
+      return {
+        taskRequestData,
+        taskRequestExists: false,
+      };
     }
+    
+    taskRequestData.id = taskRequestSnapshot.id;
+    taskRequestData.url = new URL(`/taskRequests/${taskRequestData.id}`, config.get("services.rdsUi.baseUrl"));
+
     return {
       taskRequestData,
       taskRequestExists: true,
