@@ -44,10 +44,42 @@ const fetchStocks = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
+/**
+ * @deprecated
+ * WARNING: This API endpoint is being deprecated and will be removed in future.
+ * Please use the updated API endpoint: `/stocks/:userId` for retrieving user stocks details.
+ *
+ * This API is kept temporarily for backward compatibility.
+ */
 const getSelfStocks = async (req, res) => {
   try {
     const { id: userId } = req.userData;
     const userStocks = await stocks.fetchUserStocks(userId);
+
+    res.set(
+      "X-Deprecation-Warning",
+      "WARNING: This endpoint is being deprecated and will be removed in the future. Please use `/stocks/:userId` route to get the user stocks details."
+    );
+    return res.json({
+      message: userStocks.length > 0 ? "User stocks returned successfully!" : "No stocks found",
+      userStocks,
+    });
+  } catch (err) {
+    logger.error(`Error while getting user stocks ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
+/**
+ * Fetches all the stocks of the authenticated user
+ *
+ * @param req {Object} - Express request object
+ * @param res {Object} - Express response object
+ */
+const getUserStocks = async (req, res) => {
+  try {
+    const userStocks = await stocks.fetchUserStocks(req.params.userId);
+
     return res.json({
       message: userStocks.length > 0 ? "User stocks returned successfully!" : "No stocks found",
       userStocks,
@@ -62,4 +94,5 @@ module.exports = {
   addNewStock,
   fetchStocks,
   getSelfStocks,
+  getUserStocks,
 };

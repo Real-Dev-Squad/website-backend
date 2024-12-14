@@ -92,7 +92,7 @@ export const createTaskRequestController = async (req: TaskRequestRequest, res: 
         meta: {
           taskRequestId: updatedRequest.id,
           action: "update",
-          createdBy: req.userData.id,
+          userId: req.userData.id,
           createdAt: Date.now(),
           lastModifiedBy: req.userData.id,
           lastModifiedAt: Date.now(),
@@ -150,7 +150,7 @@ export const createTaskRequestController = async (req: TaskRequestRequest, res: 
       meta: {
         taskRequestId: newTaskRequest.id,
         action: "create",
-        createdBy: req.userData.id,
+        userId: req.userData.id,
         createdAt: Date.now(),
         lastModifiedBy: req.userData.id,
         lastModifiedAt: Date.now(),

@@ -1,6 +1,10 @@
 const chaincodeQuery = require("../models/chaincodes");
 const userQuery = require("../models/users");
 const profileDiffsQuery = require("../models/profileDiffs");
+const firestore = require("../utils/firestore");
+const memberRoleModel = firestore.collection("member-group-roles");
+const logsModel = firestore.collection("logs");
+const admin = require("firebase-admin");
 const logsQuery = require("../models/logs");
 const imageService = require("../services/imageService");
 const { profileDiffStatus } = require("../constants/profileDiff");
@@ -30,15 +34,17 @@ const { addLog } = require("../models/logs");
 const { getUserStatus } = require("../models/userStatus");
 const config = require("config");
 const { generateUniqueUsername } = require("../services/users");
+const userService = require("../services/users");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
+  const devFeatureFlag = req.query.dev === "true";
   try {
     if (!req.userData?.profileURL) {
       return res.boom.serverUnavailable("ProfileURL is Missing");
     }
-    await userQuery.addOrUpdate({ profileStatus: "PENDING" }, userId);
+    await userQuery.addOrUpdate({ profileStatus: "PENDING" }, userId, devFeatureFlag);
   } catch (error) {
     logger.error(`Error while verifying user: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
@@ -113,6 +119,22 @@ const getUsers = async (req, res) => {
       });
     }
 
+    const profile = req.query.profile === "true";
+
+    if (profile) {
+      if (!req.userData.id) {
+        return res.boom.badRequest("User ID not provided.");
+      }
+
+      try {
+        const result = await dataAccess.retrieveUsers({ id: req.userData.id });
+        return res.send(result.user);
+      } catch (error) {
+        logger.error(`Error while fetching user: ${error}`);
+        return res.boom.serverUnavailable(INTERNAL_SERVER_ERROR);
+      }
+    }
+
     if (!transformedQuery?.days && transformedQuery?.filterBy === "unmerged_prs") {
       return res.boom.badRequest(`Days is required for filterBy ${transformedQuery?.filterBy}`);
     }
@@ -172,6 +194,30 @@ const getUsers = async (req, res) => {
         });
       } else {
         return res.boom.notFound("Route not found");
+      }
+    }
+
+    const isDeparted = req.query.departed === "true";
+
+    if (isDeparted) {
+      if (!dev) {
+        return res.boom.notFound("Route not found");
+      }
+      try {
+        const result = await dataAccess.retrieveUsers({ query: req.query });
+        const departedUsers = await userService.getUsersWithIncompleteTasks(result.users);
+        if (departedUsers.length === 0) return res.status(204).send();
+        return res.json({
+          message: "Users with abandoned tasks fetched successfully",
+          users: departedUsers,
+          links: {
+            next: result.nextId ? getPaginationLink(req.query, "next", result.nextId) : "",
+            prev: result.prevId ? getPaginationLink(req.query, "prev", result.prevId) : "",
+          },
+        });
+      } catch (error) {
+        logger.error("Error when fetching users who abandoned tasks:", error);
+        return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
       }
     }
 
@@ -370,13 +416,27 @@ const generateUsername = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-
+/**
+ * @deprecated
+ * WARNING: This API endpoint is being deprecated and will be removed in future versions.
+ * Please use the updated API endpoint: `/users?profile=true` for retrieving user profile details.
+ *
+ * For more information, refer to this PR:
+ * https://github.com/Real-Dev-Squad/website-backend/pull/2201
+ *
+ * This API is kept temporarily for backward compatibility.
+ */
 const getSelfDetails = async (req, res) => {
   try {
     if (req.userData) {
       const user = await dataAccess.retrieveUsers({
         userdata: req.userData,
       });
+
+      res.set(
+        "X-Deprecation-Warning",
+        "WARNING: This endpoint is deprecated and will be removed in the future. Please use /users?profile=true to get the updated profile details."
+      );
       return res.send(user);
     }
     return res.boom.notFound("User doesn't exist");
@@ -393,6 +453,7 @@ const getSelfDetails = async (req, res) => {
  * @param req.body {Object} - User object
  * @param res {Object} - Express response object
  */
+
 const updateSelf = async (req, res) => {
   try {
     const { id: userId, roles: userRoles, discordId } = req.userData;
@@ -440,7 +501,7 @@ const updateSelf = async (req, res) => {
         const { roles } = discordMember;
         if (roles && roles.includes(discordDeveloperRoleId)) {
           if (req.body.disabledRoles && devFeatureFlag) {
-            const updatedUser = await userQuery.addOrUpdate({ disabled_roles: rolesToDisable }, userId);
+            const updatedUser = await userQuery.addOrUpdate({ disabled_roles: rolesToDisable }, userId, devFeatureFlag);
             if (updatedUser) {
               return res
                 .status(200)
@@ -454,7 +515,7 @@ const updateSelf = async (req, res) => {
       }
     }
 
-    const updatedUser = await userQuery.addOrUpdate(req.body, userId);
+    const updatedUser = await userQuery.addOrUpdate(req.body, userId, devFeatureFlag);
 
     if (!updatedUser.isNewUser) {
       // Success criteria, user finished the sign-up process.
@@ -564,7 +625,7 @@ const markUnverified = async (req, res) => {
     const unverifiedRoleId = config.get("discordUnverifiedRoleId");
     const usersToApplyUnverifiedRole = [];
     const addRolePromises = [];
-    const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
+    const batchPromises = [];
 
     allRdsLoggedInUsers.forEach((user) => {
       rdsUserMap[user.discordId] = true;
@@ -580,11 +641,40 @@ const markUnverified = async (req, res) => {
       }
     });
 
+    const batchSize = 500;
+    const batches = Array.from({ length: Math.ceil(usersToApplyUnverifiedRole.length / batchSize) }, (_, index) =>
+      usersToApplyUnverifiedRole.slice(index * batchSize, index * batchSize + batchSize)
+    );
+
+    batches.forEach((batch) => {
+      const firestoreBatch = firestore.batch();
+
+      batch.forEach((id) => {
+        const memberRoleRef = memberRoleModel.doc(id);
+        const logRef = logsModel.doc();
+
+        firestoreBatch.set(memberRoleRef, {
+          roleid: unverifiedRoleId,
+          userid: id,
+          date: admin.firestore.Timestamp.fromDate(new Date()),
+        });
+
+        firestoreBatch.set(logRef, {
+          type: logType.ADD_UNVERIFIED_ROLE,
+          meta: { roleid: unverifiedRoleId, userid: id },
+          body: { message: "Unverified role added successfully" },
+          timestamp: admin.firestore.Timestamp.fromDate(new Date()),
+        });
+      });
+
+      batchPromises.push(firestoreBatch.commit());
+    });
+
     usersToApplyUnverifiedRole.forEach((id) => {
       addRolePromises.push(addRoleToUser(id, unverifiedRoleId));
     });
 
-    await Promise.all(addRolePromises);
+    await Promise.all([...addRolePromises, ...batchPromises]);
     return res.json({ message: "ROLES APPLIED SUCCESSFULLY" });
   } catch (err) {
     logger.error(err);
@@ -622,8 +712,14 @@ const getUserImageForVerification = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { id: profileDiffId, message } = req.body;
-
-    const profileDiffData = await profileDiffsQuery.fetchProfileDiff(profileDiffId);
+    const devFeatureFlag = req.query.dev === "true";
+    let profileDiffData;
+    if (devFeatureFlag) {
+      profileDiffData = await profileDiffsQuery.fetchProfileDiffUnobfuscated(profileDiffId);
+    } else {
+      profileDiffData = await profileDiffsQuery.fetchProfileDiff(profileDiffId);
+    }
+    Object.freeze(profileDiffData);
     if (!profileDiffData) return res.boom.notFound("Profile Diff doesn't exist");
 
     const { approval, timestamp, userId, ...profileDiff } = profileDiffData;
@@ -633,7 +729,7 @@ const updateUser = async (req, res) => {
 
     await profileDiffsQuery.updateProfileDiff({ approval: profileDiffStatus.APPROVED }, profileDiffId);
 
-    await userQuery.addOrUpdate(profileDiff, userId);
+    await userQuery.addOrUpdate(profileDiff, userId, devFeatureFlag);
 
     const meta = {
       approvedBy: req.userData.id,
@@ -654,9 +750,9 @@ const updateUser = async (req, res) => {
 const generateChaincode = async (req, res) => {
   try {
     const { id } = req.userData;
-
+    const devFeatureFlag = req.query.dev === "true";
     const chaincode = await chaincodeQuery.storeChaincode(id);
-    await userQuery.addOrUpdate({ chaincode }, id);
+    await userQuery.addOrUpdate({ chaincode }, id, devFeatureFlag);
     return res.json({
       chaincode,
       message: "Chaincode returned successfully",
@@ -671,7 +767,8 @@ const profileURL = async (req, res) => {
   try {
     const userId = req.userData.id;
     const { profileURL } = req.body;
-    await userQuery.addOrUpdate({ profileURL }, userId);
+    const devFeatureFlag = req.query.dev === "true";
+    await userQuery.addOrUpdate({ profileURL }, userId, devFeatureFlag);
     return res.json({
       message: "updated profile URL!!",
     });
@@ -863,6 +960,7 @@ const setInDiscordScript = async (req, res) => {
 const updateRoles = async (req, res) => {
   try {
     const result = await dataAccess.retrieveUsers({ id: req.params.id });
+    const devFeatureFlag = req.query.dev === "true";
     if (result?.userExists) {
       const dataToUpdate = req.body;
       const roles = req?.userData?.roles;
@@ -871,7 +969,7 @@ const updateRoles = async (req, res) => {
 
       const response = await getRoleToUpdate(result.user, dataToUpdate);
       if (response.updateRole) {
-        await userQuery.addOrUpdate(response.newUserRoles, result.user.id);
+        await userQuery.addOrUpdate(response.newUserRoles, result.user.id, devFeatureFlag);
         if (dataToUpdate?.archived) {
           const body = {
             reason: reason || "",

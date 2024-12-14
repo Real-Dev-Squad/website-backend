@@ -4,7 +4,7 @@ const logsModel = firestore.collection("logs");
 const admin = require("firebase-admin");
 const { logType, ERROR_WHILE_FETCHING_LOGS } = require("../constants/logs");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const { getFullName } = require("../utils/users");
+const { getFullName, getUserId } = require("../utils/users");
 const {
   getUsersListFromLogs,
   formatLogsForFeed,
@@ -164,16 +164,46 @@ const fetchLastAddedCacheLog = async (id) => {
 };
 
 const fetchAllLogs = async (query) => {
-  let { type, prev, next, page, size = SIZE, format } = query;
+  let { type, prev, next, page, size = SIZE, format, userId, username, startDate, endDate, dev } = query;
+
   size = parseInt(size);
   page = parseInt(page);
 
   try {
     let requestQuery = logsModel;
+    const isDev = dev === "true";
+
+    if (isDev && username) {
+      userId = await getUserId(username);
+      requestQuery = requestQuery.where("meta.userId", "==", userId);
+    }
 
     if (type) {
       const logType = type.split(",");
       if (logType.length >= 1) requestQuery = requestQuery.where("type", "in", logType);
+    }
+
+    if (isDev && (startDate || endDate)) {
+      startDate = startDate ? parseInt(startDate) : null;
+      endDate = endDate ? parseInt(endDate) : null;
+
+      if (startDate && endDate && startDate > endDate) {
+        const error = new Error("Start date cannot be greater than end date.");
+        error.statusCode = 400;
+        throw error;
+      }
+
+      const buildTimestamp = (date) => ({
+        _seconds: Math.floor(date / 1000),
+        _nanoseconds: 0,
+      });
+
+      if (startDate) {
+        requestQuery = requestQuery.where("timestamp", ">=", buildTimestamp(startDate));
+      }
+      if (endDate) {
+        requestQuery = requestQuery.where("timestamp", "<=", buildTimestamp(endDate));
+      }
     }
 
     requestQuery = requestQuery.orderBy("timestamp", "desc");
@@ -205,12 +235,14 @@ const fetchAllLogs = async (query) => {
       const last = snapshot.docs[snapshot.docs.length - 1];
       nextDoc = await requestQuery.startAfter(last).limit(1).get();
     }
+
     const allLogs = [];
     if (!snapshot.empty) {
       snapshot.forEach((doc) => {
         allLogs.push({ ...doc.data() });
       });
     }
+
     if (allLogs.length === 0) {
       return {
         allLogs: [],
@@ -219,17 +251,23 @@ const fetchAllLogs = async (query) => {
         page: page ? page + 1 : null,
       };
     }
+
     if (format === "feed") {
-      let logsData = [];
       const userList = await getUsersListFromLogs(allLogs);
       const taskIdList = await getTasksFromLogs(allLogs);
       const usersMap = mapify(userList, "id");
       const tasksMap = mapify(taskIdList, "id");
-      logsData = allLogs.map((data) => {
+
+      const logsData = allLogs.map((data) => {
         const formattedLogs = formatLogsForFeed(data, usersMap, tasksMap);
         if (!Object.keys(formattedLogs).length) return null;
-        return { ...formattedLogs, type: data.type, timestamp: convertTimestamp(data.timestamp) };
+        return {
+          ...formattedLogs,
+          type: data.type,
+          timestamp: convertTimestamp(data.timestamp),
+        };
       });
+
       return {
         allLogs: logsData.filter((log) => log),
         prev: prevDoc.empty ? null : prevDoc.docs[0].id,
@@ -250,10 +288,72 @@ const fetchAllLogs = async (query) => {
   }
 };
 
+const updateLogs = async () => {
+  const batchSize = 500;
+  let lastDoc = null;
+  let isCompleted = false;
+
+  const summary = {
+    totalLogsProcessed: 0,
+    totalLogsUpdated: 0,
+    totalOperationsFailed: 0,
+    failedLogDetails: [],
+  };
+
+  try {
+    while (!isCompleted) {
+      let query = logsModel.orderBy("timestamp").limit(batchSize);
+      if (lastDoc) {
+        query = query.startAfter(lastDoc);
+      }
+      const snapshot = await query.get();
+
+      if (snapshot.empty) {
+        isCompleted = true;
+        continue;
+      }
+
+      const batch = firestore.batch();
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.meta && data.meta.createdBy) {
+          const updatedMeta = {
+            ...data.meta,
+            userId: data.meta.createdBy,
+          };
+          delete updatedMeta.createdBy;
+
+          batch.update(doc.ref, { meta: updatedMeta });
+          summary.totalLogsUpdated++;
+        }
+        summary.totalLogsProcessed++;
+      });
+
+      try {
+        await batch.commit();
+      } catch (err) {
+        logger.error("Batch update failed for logs collection:", err);
+        summary.totalOperationsFailed += snapshot.docs.length;
+        summary.failedLogDetails.push(...snapshot.docs.map((doc) => doc.id));
+      }
+
+      lastDoc = snapshot.docs[snapshot.docs.length - 1];
+      isCompleted = snapshot.docs.length < batchSize;
+    }
+
+    logger.info("Migration completed:", summary);
+    return summary;
+  } catch (error) {
+    logger.error("Error during logs migration:", error);
+    throw error;
+  }
+};
+
 module.exports = {
   addLog,
   fetchLogs,
   fetchCacheLogs,
   fetchLastAddedCacheLog,
   fetchAllLogs,
+  updateLogs,
 };
