@@ -35,7 +35,6 @@ const enableDevModeMiddleware = (req, res, next) => {
 
 router.get("/", getTasksValidator, cacheResponse({ invalidationKey: ALL_TASKS, expiry: 10 }), tasks.fetchTasks);
 router.get("/self", authenticate, tasks.getSelfTasks);
-router.get("/:userId", authenticate, tasks.getTasksByUser);
 
 router.get("/overdue", authenticate, authorizeRoles([SUPERUSER]), tasks.overdueTasks);
 router.post(
@@ -55,6 +54,8 @@ router.patch(
   tasks.updateTask
 );
 router.get("/:id/details", tasks.getTask);
+router.get("/:userId", authenticate, tasks.getTasksByUser);
+
 router.get("/:username", tasks.getUserTasks);
 
 router.patch(
