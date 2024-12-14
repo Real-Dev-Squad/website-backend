@@ -1664,6 +1664,7 @@ describe("Users", function () {
     it("Should return 403 for Forbidden access", function (done) {
       const userId = "anotherUser123";
       addJoinData(joinData(userId)[3]);
+
       chai
         .request(app)
         .put(`/users/${userId}/intro?dev=true`)
@@ -1674,8 +1675,7 @@ describe("Users", function () {
 
           expect(res).to.have.status(403);
           expect(res.body).to.be.an("object");
-          expect(res.body.message).to.equal("Forbidden access");
-
+          expect(res.body.message).to.equal("Unauthorized access");
           return done();
         });
     });
