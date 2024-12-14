@@ -10,16 +10,49 @@ const {
 } = require("../constants/errorMessages");
 
 const googleAuthLogin = (req, res, next) => {
-  const { redirectURL, dev } = req.query;
-  if (dev === "true") {
-    return passport.authenticate("google", {
-      scope: ["email"],
-      state: redirectURL,
-    })(req, res, next);
-  } else {
-    return res.boom.unauthorized("User cannot be authenticated");
-  }
+  const { redirectURL } = req.query;
+  return passport.authenticate("google", {
+    scope: ["email"],
+    state: redirectURL,
+  })(req, res, next);
 };
+
+function handleRedirectUrl(req) {
+  const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
+  let authRedirectionUrl = rdsUiUrl;
+  let isMobileApp = false;
+  let isV2FlagPresent = false;
+  let devMode = false;
+
+  if ("state" in req.query) {
+    try {
+      const redirectUrl = new URL(req.query.state);
+      if (redirectUrl.searchParams.get("isMobileApp") === "true") {
+        isMobileApp = true;
+        redirectUrl.searchParams.delete("isMobileApp");
+      }
+
+      if (`.${redirectUrl.hostname}`.endsWith(`.${rdsUiUrl.hostname}`)) {
+        // Matching *.realdevsquad.com
+        authRedirectionUrl = redirectUrl;
+        devMode = Boolean(redirectUrl.searchParams.get("dev"));
+      } else {
+        logger.error(`Malicious redirect URL provided URL: ${redirectUrl}, Will redirect to RDS`);
+      }
+      if (redirectUrl.searchParams.get("v2") === "true") {
+        isV2FlagPresent = true;
+      }
+    } catch (error) {
+      logger.error("Invalid redirect URL provided", error);
+    }
+  }
+  return {
+    authRedirectionUrl,
+    isMobileApp,
+    isV2FlagPresent,
+    devMode,
+  };
+}
 
 async function handleGoogleLogin(req, res, user, authRedirectionUrl) {
   const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
@@ -76,23 +109,7 @@ async function handleGoogleLogin(req, res, user, authRedirectionUrl) {
 }
 
 const googleAuthCallback = (req, res, next) => {
-  const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
-  let authRedirectionUrl = rdsUiUrl;
-
-  if ("state" in req.query) {
-    try {
-      const redirectUrl = new URL(req.query.state);
-
-      if (`.${redirectUrl.hostname}`.endsWith(`.${rdsUiUrl.hostname}`)) {
-        // Matching *.realdevsquad.com
-        authRedirectionUrl = redirectUrl;
-      } else {
-        logger.error(`Malicious redirect URL provided URL: ${redirectUrl}, Will redirect to RDS`);
-      }
-    } catch (error) {
-      logger.error("Invalid redirect URL provided", error);
-    }
-  }
+  const { authRedirectionUrl } = handleRedirectUrl(req);
   return passport.authenticate("google", { session: false }, async (err, accessToken, user) => {
     if (err) {
       logger.error(err);
@@ -134,32 +151,8 @@ const githubAuthLogin = (req, res, next) => {
  */
 const githubAuthCallback = (req, res, next) => {
   let userData;
-  let isMobileApp = false;
   const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
-  let authRedirectionUrl = rdsUiUrl;
-  let devMode = false;
-  let isV2FlagPresent = false;
-
-  if ("state" in req.query) {
-    try {
-      const redirectUrl = new URL(req.query.state);
-      if (redirectUrl.searchParams.get("isMobileApp") === "true") {
-        isMobileApp = true;
-        redirectUrl.searchParams.delete("isMobileApp");
-      }
-
-      if (redirectUrl.searchParams.get("v2") === "true") isV2FlagPresent = true;
-      if (`.${redirectUrl.hostname}`.endsWith(`.${rdsUiUrl.hostname}`)) {
-        // Matching *.realdevsquad.com
-        authRedirectionUrl = redirectUrl;
-        devMode = Boolean(redirectUrl.searchParams.get("dev"));
-      } else {
-        logger.error(`Malicious redirect URL provided URL: ${redirectUrl}, Will redirect to RDS`);
-      }
-    } catch (error) {
-      logger.error("Invalid redirect URL provided", error);
-    }
-  }
+  let { authRedirectionUrl, isMobileApp, isV2FlagPresent, devMode } = handleRedirectUrl(req);
   try {
     return passport.authenticate("github", { session: false }, async (err, accessToken, user) => {
       if (err) {
