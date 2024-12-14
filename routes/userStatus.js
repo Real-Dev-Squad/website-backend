@@ -7,6 +7,7 @@ const {
   batchUpdateUsersStatus,
   getUserStatusControllers,
   updateUserStatusController,
+  migrateUserStatusController,
 } = require("../controllers/userStatus");
 const router = express.Router();
 const authenticate = require("../middlewares/authenticate");
@@ -34,5 +35,7 @@ router.patch(
 );
 router.patch("/:userId", authenticate, authorizeRoles([SUPERUSER]), validateUserStatus, updateUserStatus);
 router.delete("/:userId", authenticate, authorizeRoles([SUPERUSER]), deleteUserStatus);
+
+router.post("/migrate", authenticate, authorizeRoles([SUPERUSER]), migrateUserStatusController);
 
 module.exports = router;
