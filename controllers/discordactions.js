@@ -253,13 +253,6 @@ const setRoleIdle7DToIdleUsers = async (req, res) => {
 
 const updateDiscordNicknames = async (req, res) => {
   try {
-    const { dev } = req.query;
-    if (dev !== "true") {
-      return res.status(404).json({
-        message: "Users Nicknames not updated",
-      });
-    }
-
     const membersInDiscord = await getDiscordMembers();
     const usersInDB = await fetchAllUsers();
     const usersToBeEffected = [];

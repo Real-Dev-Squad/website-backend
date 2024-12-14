@@ -78,6 +78,7 @@ const validateApplicationQueryParam = async (req: CustomRequest, res: CustomResp
     status: joi.string().optional(),
     size: joi.string().optional(),
     next: joi.string().optional(),
+    dev: joi.string().optional(),
   });
 
   try {
