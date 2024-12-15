@@ -129,7 +129,27 @@ describe("users", function () {
     it("it should update profileDiff even if it is deeply nested", async function () {
       const userData = userDataArray[0];
       const { userId } = await users.addOrUpdate(userData);
-      const profileDiffs = getProfileDiffs()[6];
+      const profileDiffs = {
+        level1: {
+          level2: {
+            level3: {
+              level4: {
+                level5: {
+                  level6: {
+                    level7: {
+                      level8: {
+                        level9: {
+                          level10: "nested-random-diff",
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
       await users.addOrUpdate(profileDiffs, userId);
       const data = (await userModel.doc(userId).get()).data();
       expect(data)

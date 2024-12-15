@@ -4,7 +4,7 @@ const cleanDb = require("../../utils/cleanDb");
 const profileDiffsQuery = require("../../../models/profileDiffs");
 const getProfileDiffs = require("../../fixtures/profileDiffs/profileDiffs");
 
-describe.only("profileDiffs", function () {
+describe("profileDiffs", function () {
   afterEach(async function () {
     await cleanDb();
   });
