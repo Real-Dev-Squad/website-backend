@@ -4,7 +4,7 @@ const cleanDb = require("../../utils/cleanDb");
 const profileDiffsQuery = require("../../../models/profileDiffs");
 const getProfileDiffs = require("../../fixtures/profileDiffs/profileDiffs");
 
-describe("profileDiffs", function () {
+describe.only("profileDiffs", function () {
   afterEach(async function () {
     await cleanDb();
   });
@@ -32,6 +32,83 @@ describe("profileDiffs", function () {
       const diff = await profileDiffsQuery.fetchProfileDiffUnobfuscated(profileDiffId);
       expect(diff.phone).to.equal(profileDiffs[0].phone);
       expect(diff.email).to.equal(profileDiffs[0].email);
+    });
+
+    it("it should throw an error on undefined profileDiff Id", async function () {
+      const profileDiffs = getProfileDiffs();
+      await profileDiffsQuery.add(profileDiffs[0]);
+      let error = "";
+      try {
+        await profileDiffsQuery.fetchProfileDiffUnobfuscated(undefined);
+      } catch (err) {
+        error = err;
+      }
+      Object.freeze(error);
+      expect(error).to.be.an("Error");
+      expect(error.message).to.be.equal(
+        'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.'
+      );
+    });
+
+    it("it should throw an error on null profileDiff Id", async function () {
+      const profileDiffs = getProfileDiffs();
+      await profileDiffsQuery.add(profileDiffs[0]);
+      let error = "";
+      try {
+        await profileDiffsQuery.fetchProfileDiffUnobfuscated(null);
+      } catch (err) {
+        error = err;
+      }
+      Object.freeze(error);
+      expect(error).to.be.an("Error");
+      expect(error.message).to.be.equal(
+        'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.'
+      );
+    });
+
+    it("it should throw an error on passing profileDiff Id as empty string", async function () {
+      const profileDiffs = getProfileDiffs();
+      await profileDiffsQuery.add(profileDiffs[0]);
+      let error = "";
+      try {
+        await profileDiffsQuery.fetchProfileDiffUnobfuscated("");
+      } catch (err) {
+        error = err;
+      }
+      Object.freeze(error);
+      expect(error).to.be.an("Error");
+      expect(error.message).to.be.equal(
+        'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.'
+      );
+    });
+
+    it("it should correctly fetch deeply nested profileDiff", async function () {
+      const profileDiff = {
+        level1: {
+          level2: {
+            level3: {
+              level4: {
+                level5: {
+                  level6: {
+                    level7: {
+                      level8: {
+                        level9: {
+                          level10: "nested-random-diff",
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+      const profileDiffId = await profileDiffsQuery.add(profileDiff);
+      const diff = await profileDiffsQuery.fetchProfileDiffUnobfuscated(profileDiffId);
+      expect(diff)
+        .to.have.nested.property("level1.level2.level3.level4.level5.level6.level7.level8.level9.level10")
+        .that.equals("nested-random-diff");
     });
   });
 });

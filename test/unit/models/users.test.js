@@ -125,6 +125,17 @@ describe("users", function () {
       expect(data).to.haveOwnProperty("diff");
       expect(data.id).not.equal("random-id");
     });
+
+    it("it should update profileDiff even if it is deeply nested", async function () {
+      const userData = userDataArray[0];
+      const { userId } = await users.addOrUpdate(userData);
+      const profileDiffs = getProfileDiffs()[6];
+      await users.addOrUpdate(profileDiffs, userId);
+      const data = (await userModel.doc(userId).get()).data();
+      expect(data)
+        .to.have.nested.property("level1.level2.level3.level4.level5.level6.level7.level8.level9.level10")
+        .that.equals("nested-random-diff");
+    });
   });
 
   describe("fetch user details based on discord id", function () {
