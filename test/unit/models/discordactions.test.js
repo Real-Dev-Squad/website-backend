@@ -120,15 +120,28 @@ describe("discordactions", function () {
     });
 
     it("should return paginated group-roles from the database", async function () {
-      const result = await getPaginatedGroupRoles();
+      const result = await getPaginatedGroupRoles({ cursor: groupData, limit: 2 });
+
       expect(result).to.have.property("groups").that.is.an("array");
-      expect(result).to.have.property("newLatestDoc");
-      expect(result.groups.length).to.be.at.most(18);
+      expect(result.groups).to.have.lengthOf(2); // Verify the limit works
+      expect(result).to.have.property("newLatestDoc").that.is.a("string");
+      expect(result).to.have.property("hasMore").that.is.a("boolean");
+    });
+
+    it("should handle pagination without a cursor", async function () {
+      const result = await getPaginatedGroupRoles({ limit: 2 });
+
+      // eslint-disable-next-line no-undef
+      assert(orderByStub.calledOnce);
+      // eslint-disable-next-line no-undef
+      assert(startAfterStub.notCalled);
+      expect(result.groups).to.have.lengthOf(2);
     });
 
     it("should throw an error if getting group-roles fails", async function () {
       getStub.rejects(new Error("Database error"));
-      return getPaginatedGroupRoles().catch((err) => {
+
+      await getPaginatedGroupRoles({ cursor: groupData, limit: 2 }).catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal("Database error");
       });

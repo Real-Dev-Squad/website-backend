@@ -3,7 +3,7 @@ const authenticate = require("../middlewares/authenticate");
 const {
   createGroupRole,
   getGroupsRoleId,
-  getPaginatedGroupRoles,
+  getPaginatedAllGroupRoles,
   addGroupRoleToMember,
   deleteRole,
   updateDiscordImageForVerification,
@@ -21,6 +21,7 @@ const {
   validateGroupRoleBody,
   validateMemberRoleBody,
   validateUpdateUsersNicknameStatusBody,
+  validateLazyLoadingParams,
 } = require("../middlewares/validators/discordactions");
 const checkIsVerifiedDiscord = require("../middlewares/verifydiscord");
 const checkCanGenerateDiscordLink = require("../middlewares/checkCanGenerateDiscordLink");
@@ -33,7 +34,7 @@ const { authorizeAndAuthenticate } = require("../middlewares/authorizeUsersAndSe
 const router = express.Router();
 
 router.post("/groups", authenticate, checkIsVerifiedDiscord, validateGroupRoleBody, createGroupRole);
-router.get("/groups", authenticate, checkIsVerifiedDiscord, getPaginatedGroupRoles);
+router.get("/groups", authenticate, checkIsVerifiedDiscord, validateLazyLoadingParams, getPaginatedAllGroupRoles);
 router.delete("/groups/:groupId", authenticate, checkIsVerifiedDiscord, authorizeRoles([SUPERUSER]), deleteGroupRole);
 router.post("/roles", authenticate, checkIsVerifiedDiscord, validateMemberRoleBody, addGroupRoleToMember);
 router.get("/invite", authenticate, getUserDiscordInvite);

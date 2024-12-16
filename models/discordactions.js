@@ -126,24 +126,41 @@ const getAllGroupRoles = async () => {
   }
 };
 
-const getPaginatedGroupRoles = async (latestDoc) => {
+/**
+ * Get Paginated Group Roles
+ * Fetches group roles with support for lazy loading.
+ *
+ * @param {Object} options - Pagination options
+ * @param {string} options.cursor - Firestore document ID for cursor
+ * @param {number} options.limit - Maximum number of roles to fetch
+ * @returns {Promise<Object>} - Paginated roles with metadata
+ */
+const getPaginatedGroupRoles = async ({ cursor, limit }) => {
   try {
-    const data = await discordRoleModel
-      .orderBy("roleid")
-      .startAfter(latestDoc || 0)
-      .limit(18)
-      .get();
-    const groups = [];
-    data.forEach((doc) => {
-      const group = {
-        id: doc.id,
-        ...doc.data(),
-      };
-      groups.push(group);
-    });
-    return { groups, newLatestDoc: data.docs[data.docs.length - 1]?.data().roleid };
+    let query = discordRoleModel.orderBy("roleid").limit(limit + 1); // Fetch one extra for `hasMore`
+
+    if (cursor) {
+      const cursorDoc = await discordRoleModel.doc(cursor).get();
+      if (!cursorDoc.exists) {
+        throw new Error("Invalid cursor.");
+      }
+      query = query.startAfter(cursorDoc);
+    }
+
+    const snapshot = await query.get();
+    const roles = snapshot.docs.slice(0, limit).map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    const nextCursor = snapshot.docs.length > limit ? snapshot.docs[limit - 1].id : null;
+
+    return {
+      roles,
+      nextCursor,
+      hasMore: !!nextCursor,
+    };
   } catch (err) {
-    logger.error("Error in getting all group-roles", err);
+    logger.error(`Error in getPaginatedGroupRoles: ${err}`);
     throw err;
   }
 };

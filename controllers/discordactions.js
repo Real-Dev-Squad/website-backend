@@ -119,22 +119,57 @@ const deleteGroupRole = async (req, res) => {
 };
 
 /**
- * Gets all group-roles
+ * Get Paginated All Group Roles with Lazy Loading
+ * Implements cursor-based lazy loading with "dev=true" feature flag.
  *
+ * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-
-const getPaginatedGroupRoles = async (req, res) => {
+const getPaginatedAllGroupRoles = async (req, res) => {
   try {
-    const isDevMode = req.query?.dev === "true";
-    if (isDevMode) {
-      const latestDoc = req.query?.latestDoc;
-      const { groups, newLatestDoc } = await discordRolesModel.getPaginatedGroupRoles(latestDoc);
+    const { page = 0, size = 10, cursor, dev } = req.query;
+
+    const pageNumber = parseInt(page, 10);
+    const limit = parseInt(size, 10) || 10;
+
+    if (limit < 1 || limit > 100) {
+      return res.boom.badRequest("Invalid size. Must be between 1 and 100.");
+    }
+
+    if (dev === "true") {
+      let query = discordRolesModel.orderBy("roleid").limit(limit + 1); // Fetch one extra for `hasMore`
+
+      if (cursor) {
+        const cursorDoc = await discordRolesModel.doc(cursor).get();
+        if (!cursorDoc.exists) {
+          return res.boom.badRequest("Invalid cursor.");
+        }
+        query = query.startAfter(cursorDoc);
+      }
+
+      const snapshot = await query.get();
+      const roles = snapshot.docs.slice(0, limit).map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      const nextCursor = snapshot.docs.length > limit ? snapshot.docs[limit - 1].id : null;
+      const hasMore = !!nextCursor;
+
       const discordId = req.userData?.discordId;
-      const groupsWithMembershipInfo = await discordRolesModel.enrichGroupDataWithMembershipInfo(discordId, groups);
+      const groupsWithMembershipInfo = await discordRolesModel.enrichGroupDataWithMembershipInfo(discordId, roles);
+
+      const next = nextCursor ? `/roles?cursor=${nextCursor}&page=${pageNumber + 1}&size=${limit}` : null;
+      const prev = pageNumber > 0 ? `/roles?cursor=${cursor}&page=${pageNumber - 1}&size=${limit}` : null;
+
       return res.json({
         message: "Roles fetched successfully!",
-        newLatestDoc: newLatestDoc,
+        data: {
+          page: pageNumber,
+          size: limit,
+          next,
+          prev,
+          hasMore,
+        },
         groups: groupsWithMembershipInfo,
       });
     }
@@ -146,7 +181,7 @@ const getPaginatedGroupRoles = async (req, res) => {
       groups: groupsWithMembershipInfo,
     });
   } catch (err) {
-    logger.error(`Error while getting roles: ${err}`);
+    logger.error(`Error while fetching paginated group roles: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
@@ -546,7 +581,7 @@ const getUserDiscordInvite = async (req, res) => {
 module.exports = {
   getGroupsRoleId,
   createGroupRole,
-  getPaginatedGroupRoles,
+  getPaginatedAllGroupRoles,
   addGroupRoleToMember,
   deleteRole,
   updateDiscordImageForVerification,
