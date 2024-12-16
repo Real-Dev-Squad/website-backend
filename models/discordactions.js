@@ -140,9 +140,12 @@ const getPaginatedGroupRoles = async ({ cursor, limit }) => {
     let query = discordRoleModel.orderBy("roleid").limit(limit + 1); // Fetch one extra for `hasMore`
 
     if (cursor) {
+      if (typeof cursor !== "string" || !cursor.trim()) {
+        throw new Error("Invalid cursor: Cursor must be a non-empty string");
+      }
       const cursorDoc = await discordRoleModel.doc(cursor).get();
       if (!cursorDoc.exists) {
-        throw new Error("Invalid cursor.");
+        throw new Error("Invalid cursor: Document does not exist");
       }
       query = query.startAfter(cursorDoc);
     }
@@ -160,8 +163,8 @@ const getPaginatedGroupRoles = async ({ cursor, limit }) => {
       hasMore: !!nextCursor,
     };
   } catch (err) {
-    logger.error(`Error in getPaginatedGroupRoles: ${err}`);
-    throw err;
+    logger.error(`Error in getPaginatedGroupRoles: ${err.message}`);
+    throw new Error("Database error");
   }
 };
 
