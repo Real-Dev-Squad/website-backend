@@ -117,6 +117,31 @@ describe("users", function () {
     });
   });
 
+  describe("addOrUpdate-Dev Feature Flag", function () {
+    it("should update the user collection when userId is passed", async function () {
+      const userData1 = userDataArray[0];
+      const userData2 = userDataArray[1];
+      const updatedUserData = {};
+
+      Object.assign(updatedUserData, userData1, userData2);
+
+      // Add the user the first time
+      const { isNewUser, userId } = await users.addOrUpdate(userData1, null, true);
+
+      // Update the user with same data
+      const { isNewUser: updatedIsNewUserFlag } = await users.addOrUpdate(userData2, userId, true);
+
+      const data = (await userModel.doc(userId).get()).data();
+
+      Object.keys(updatedUserData).forEach((key) => {
+        expect(updatedUserData[key]).to.deep.equal(data[key]);
+      });
+
+      expect(isNewUser).to.equal(true);
+      expect(updatedIsNewUserFlag).to.equal(false);
+    });
+  });
+
   describe("fetch user details based on discord id", function () {
     let [userId0] = [];
 
