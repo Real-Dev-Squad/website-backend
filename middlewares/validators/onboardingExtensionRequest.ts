@@ -13,22 +13,28 @@ export const createOnboardingExtensionRequestValidator = async (
     .object()
     .strict()
     .keys({
-      numberOfDays: joi.number().required().min(1).messages({
+      numberOfDays: joi.number().required().positive().integer().min(1).messages({
         "number.base": "numberOfDays must be a number",
         "any.required": "numberOfDays is required",
+        "number.positive": "numberOfDays must be positive",
+        "number.min": "numberOfDays must be greater than zero",
+        "number.integer": "numberOfDays must be a integer"
       }),
       reason: joi.string().required().messages({
         "string.empty": "reason cannot be empty",
+        "any.required": "reason is required",
       }),
       type: joi.string().valid(REQUEST_TYPE.ONBOARDING).required().messages({
         "string.empty": "type cannot be empty",
         "any.required": "type is required",
       }),
       requestedBy: joi.string().required().messages({
-        "string.empty": "requestedBy cannot be empty"
+        "string.empty": "requestedBy cannot be empty",
+        "any.required": "requestedBy is required",
       }),
       username: joi.string().required().messages({
-        "string.empty": "username cannot be empty"
+        "string.empty": "username cannot be empty",
+        "any.required": "username is required"
       })
     });
 
