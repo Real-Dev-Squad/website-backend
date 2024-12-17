@@ -22,8 +22,10 @@ describe("/requests Onboarding Extension", () => {
     describe("POST /requests", () => {
         let testUserId: string;
         const testUserDiscordId = "654321";
+        let testSuperUserDiscordId = "123456";
 
         beforeEach(async () => {
+            await addUser({...userData[4], discordId: testSuperUserDiscordId});
             testUserId = await addUser({...userData[6], discordId: testUserDiscordId, discordJoinedAt: "2023-04-06T01:47:34.488000+00:00"});
         })
         afterEach(async ()=>{
@@ -196,7 +198,7 @@ describe("/requests Onboarding Extension", () => {
             })
         })
     
-        it("should return 201 for successful response", (done)=> {
+        it("should return 201 for successful response when user has onboarding status", (done)=> {
             createUserStatusWithState(testUserId, userStatusModel, userState.ONBOARDING);
             chai.request(app)
             .post(`${postEndpoint}?dev=true`)
@@ -204,6 +206,26 @@ describe("/requests Onboarding Extension", () => {
             .send({
             ...body,
             requestedBy:testUserDiscordId
+            })
+            .end((err, res) => {
+            if (err) return done(err);
+            expect(res.statusCode).to.equal(201);
+            expect(res.body.message).to.equal("Onboarding extension request created successfully!");
+            expect(res.body.data.requestNumber).to.equal(1);
+            expect(res.body.data.reason).to.equal(body.reason);
+            expect(res.body.data.state).to.equal(REQUEST_STATE.PENDING)
+            done();
+            })
+        })
+
+        it("should return 201 for successful response when user is a super user", (done)=> {
+            chai.request(app)
+            .post(`${postEndpoint}?dev=true`)
+            .set("authorization", `Bearer ${botToken}`)
+            .send({
+                ...body,
+                userId: testUserDiscordId,
+                requestedBy: testSuperUserDiscordId
             })
             .end((err, res) => {
             if (err) return done(err);
