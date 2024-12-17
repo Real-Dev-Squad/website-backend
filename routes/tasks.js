@@ -54,8 +54,6 @@ router.patch(
   tasks.updateTask
 );
 router.get("/:id/details", tasks.getTask);
-router.get("/:userId", authenticate, tasks.getTasksByUser);
-
 router.get("/:username", tasks.getUserTasks);
 
 router.patch(
