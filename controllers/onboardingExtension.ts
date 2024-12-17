@@ -43,8 +43,9 @@ export const createOnboardingExtensionRequestController = async (req: Onboarding
     if(latestExtensionRequest && latestExtensionRequest.state === REQUEST_STATE.PENDING){
       return res.boom.badRequest(REQUEST_ALREADY_PENDING);
     }
-      
-    const firstDeadLine = new Date(discordJoinedAt).getTime() + (31*24*60*60*1000);
+    
+    const deadlineinMillisecond = 31*24*60*60*1000;
+    const firstDeadLine = new Date(discordJoinedAt).getTime() + deadlineinMillisecond;
     let requestNumber: number;
     let oldEndsOn: number;
 
