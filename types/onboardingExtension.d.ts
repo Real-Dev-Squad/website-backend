@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { Boom } from "express-boom";
 import { REQUEST_STATE, REQUEST_TYPE } from "../constants/requests";
-import { userData } from "./global";
 import { RequestQuery } from "./requests";
 
 export type OnboardingExtension = {
@@ -33,10 +32,9 @@ export type OnboardingExtensionRequestQuery = RequestQuery & {
 }
 
 export type OnboardingExtensionResponse = Response & {
-    Boom: Boom
+    boom: Boom
 }
 export type OnboardingExtensionCreateRequest = Request & {
-    CreateOnboardingExtension: CreateOnboardingExtensionBody;
+    body: CreateOnboardingExtensionBody;
     query: OnboardingExtensionRequestQuery;
-    Boom: Boom;
 }
