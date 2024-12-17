@@ -585,7 +585,7 @@ describe("Tasks", function () {
           expect(res).to.have.status(200);
           expect(res).to.have.header(
             "X-Deprecation-Warning",
-            "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:userId to get the task details."
+            "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:username to get the task details."
           );
           expect(res.body).to.be.a("array");
           expect(res.body[0].status).to.equal(COMPLETED);
@@ -636,7 +636,7 @@ describe("Tasks", function () {
       expect(res).to.have.status(200);
       expect(res).to.have.header(
         "X-Deprecation-Warning",
-        "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:userId to get the task details."
+        "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:username to get the task details."
       );
       expect(res.body).to.be.a("array");
       expect([taskId1, taskId2]).to.include(taskId1);
@@ -1697,119 +1697,6 @@ describe("Tasks", function () {
 
       expect(res).to.have.status(500);
       expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
-    });
-  });
-
-  describe("GET /tasks/:userId", function () {
-    it("Should return all the completed tasks of the user when query 'completed','dev'is true and version is 'v1'", async function () {
-      const { userId: assignedUser } = await userModel.addOrUpdate({
-        github_id: "prakashchoudhary07",
-        username: "user1",
-      });
-
-      const assignedTask = [
-        {
-          title: "Test task",
-          type: "feature",
-          endsOn: 1234,
-          startedOn: 4567,
-          status: "COMPLETED",
-          percentCompleted: 10,
-          participants: [],
-          assignee: "user1",
-          completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-          lossRate: { [DINERO]: 1 },
-          isNoteworthy: true,
-        },
-        {
-          title: "Test task",
-          type: "feature",
-          endsOn: 1234,
-          startedOn: 4567,
-          status: "COMPLETED",
-          percentCompleted: 10,
-          participants: [],
-          assignee: "user1",
-          completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-          lossRate: { [DINERO]: 1 },
-          isNoteworthy: true,
-        },
-      ];
-      await tasks.updateTask(assignedTask[0]);
-      await tasks.updateTask(assignedTask[1]);
-
-      const res = await chai
-        .request(app)
-        .get(`/tasks/${assignedUser}/?dev=true&completed=true&version=v1`)
-        .set("cookie", `${cookieName}=${authService.generateAuthToken({ userId: assignedUser })}`);
-
-      expect(res).to.have.status(200);
-      expect(res.body).to.be.a("array");
-      expect(res.body).to.satisfy((tasks) => tasks.every((task) => task.status === "COMPLETED"));
-    });
-
-    it("Should return all the tasks of the user when dev is true and version is v1", async function () {
-      const { userId: assignedUser } = await userModel.addOrUpdate({
-        github_id: "prakashchoudhary07",
-        username: "user1",
-      });
-
-      const assignedTask = [
-        {
-          title: "Test task",
-          type: "feature",
-          endsOn: 1234,
-          startedOn: 4567,
-          status: "IN_PROGRESS",
-          percentCompleted: 10,
-          participants: [],
-          assignee: "user1",
-          completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-          lossRate: { [DINERO]: 1 },
-          isNoteworthy: true,
-        },
-        {
-          title: "Test task",
-          type: "feature",
-          endsOn: 1234,
-          startedOn: 4567,
-          status: "BLOCKED",
-          percentCompleted: 10,
-          participants: [],
-          assignee: "user1",
-          completionAward: { [DINERO]: 3, [NEELAM]: 300 },
-          lossRate: { [DINERO]: 1 },
-          isNoteworthy: true,
-        },
-      ];
-      const { taskId: taskId1 } = await tasks.updateTask(assignedTask[0]);
-      const { taskId: taskId2 } = await tasks.updateTask(assignedTask[1]);
-
-      const res = await chai
-        .request(app)
-        .get(`/tasks/${assignedUser}/?dev=true&version=v1`)
-        .set("cookie", `${cookieName}=${authService.generateAuthToken({ userId: assignedUser })}`);
-
-      expect(res).to.have.status(200);
-      expect(res.body).to.be.a("array");
-      expect([taskId1, taskId2]).to.include(taskId1);
-    });
-
-    it("Should return 401 if not logged in", async function () {
-      const { userId: assignedUser } = await userModel.addOrUpdate({
-        github_id: "prakashchoudhary07",
-        username: "user1",
-      });
-
-      const res = await chai.request(app).get(`/tasks/${assignedUser}/?dev=true&version=v1`);
-
-      expect(res).to.have.status(401);
-      expect(res.body).to.be.an("object");
-      expect(res.body).to.eql({
-        statusCode: 401,
-        error: "Unauthorized",
-        message: "Unauthenticated User",
-      });
     });
   });
 });
