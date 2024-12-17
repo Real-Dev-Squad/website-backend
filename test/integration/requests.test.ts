@@ -995,7 +995,7 @@ describe("/requests Onboarding Extension", () => {
       .end((err, res) => {
         if (err) return done(err);
         expect(res.statusCode).to.equal(201);
-        expect(res.body.message).to.equal(REQUEST_CREATED_SUCCESSFULLY);
+        expect(res.body.message).to.equal("Onboarding extension request created successfully!");
         expect(res.body.data.requestNumber).to.equal(1);
         expect(res.body.data.reason).to.equal(body.reason);
         expect(res.body.data.state).to.equal(REQUEST_STATE.PENDING)
