@@ -64,7 +64,7 @@ describe("Onboarding Extension Request Validators", () => {
             try {
                 await createOnboardingExtensionRequestValidator(req as any, res as any, nextSpy);
             } catch (error) {
-                expect(error.details[0].message).to.equal(`"username" is required`);
+                expect(error.details[0].message).to.equal(`username is required`);
             }
         });
     });
