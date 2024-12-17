@@ -2,7 +2,6 @@ import {
   ERROR_WHILE_CREATING_REQUEST,
   LOG_ACTION,
   REQUEST_ALREADY_PENDING,
-  REQUEST_CREATED_SUCCESSFULLY,
   REQUEST_LOG_TYPE,
   REQUEST_STATE,
   REQUEST_TYPE,
@@ -27,11 +26,15 @@ export const createOnboardingExtensionRequestController = async (req: Onboarding
     const {id, roles, discordId} = user as unknown as {id: string, roles: { super_user: boolean}, discordId: string};
     const { data: userStatus } =  await getUserStatus(id);
 
-    if(!(roles?.super_user || (userStatus.currentStatus.state === userState.ONBOARDING && discordId === data.userId))){
+    if(!(roles?.super_user || (userStatus && userStatus.currentStatus.state === userState.ONBOARDING && discordId === data.userId))){
       return res.boom.unauthorized("Only super user and onboarding user are authorized to create an onboarding extension request");
     }
 
     const userResponse = await fetchUser({discordId: data.userId});
+    
+    if(!userResponse.userExists) {
+      return res.boom.notFound("User not found");
+    }
 
     const {id: userId, discordJoinedAt, username} = userResponse.user as unknown as {id: string, discordJoinedAt: Date, username: string};
 
@@ -90,7 +93,7 @@ export const createOnboardingExtensionRequestController = async (req: Onboarding
     await addLog(onboardingExtensionLog.type, onboardingExtensionLog.meta, onboardingExtensionLog.body);
 
     return res.status(201).json({
-      message: REQUEST_CREATED_SUCCESSFULLY,  
+      message: "Onboarding extension request created successfully!",  
       data: {
         id: onboardingExtension.id,
         ...onboardingExtension,
