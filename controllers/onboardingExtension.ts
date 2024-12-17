@@ -24,16 +24,16 @@ export const createOnboardingExtensionRequestController = async (req: Onboarding
       return res.boom.notFound("User not found");
     }
 
-    const {id, roles, username} = user as unknown as {id: string, roles: { super_user: boolean}, username: string};
+    const {id, roles, discordId} = user as unknown as {id: string, roles: { super_user: boolean}, discordId: string};
     const { data: userStatus } =  await getUserStatus(id);
 
-    if(!(roles?.super_user || (userStatus.currentStatus.state === userState.ONBOARDING && username === data.username))){
+    if(!(roles?.super_user || (userStatus.currentStatus.state === userState.ONBOARDING && discordId === data.userId))){
       return res.boom.unauthorized("Only super user and onboarding user are authorized to create an onboarding extension request");
     }
 
-    const userResponse = await fetchUser({username: data.username});
+    const userResponse = await fetchUser({discordId: data.userId});
 
-    const {id: userId, discordJoinedAt} = userResponse.user as unknown as {id: string, discordJoinedAt: Date};
+    const {id: userId, discordJoinedAt, username} = userResponse.user as unknown as {id: string, discordJoinedAt: Date, username: string};
 
     const latestExtensionRequest: OnboardingExtension = await getRequestByKeyValues({
         userId: userId,
@@ -69,7 +69,7 @@ export const createOnboardingExtensionRequestController = async (req: Onboarding
       type: REQUEST_TYPE.ONBOARDING,
       state: REQUEST_STATE.PENDING,
       userId: userId,
-      requestedBy: data.username,
+      requestedBy: username,
       oldEndsOn: oldEndsOn,
       newEndsOn: newEndsOn,
       reason: data.reason,

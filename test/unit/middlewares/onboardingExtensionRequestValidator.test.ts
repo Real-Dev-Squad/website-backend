@@ -21,7 +21,7 @@ describe("Onboarding Extension Request Validators", () => {
         const requestBody:CreateOnboardingExtensionBody = {
             numberOfDays: 1,
             reason: "This is reason",
-            username: "user-name-2",
+            userId: "22222",
             requestedBy: "1111",
             type: REQUEST_TYPE.ONBOARDING
         }
@@ -57,14 +57,14 @@ describe("Onboarding Extension Request Validators", () => {
             }
         });
 
-        it("should not validate for an invalid request on wrong username", async () => {
+        it("should not validate for an invalid request on wrong userId", async () => {
             req = {
-                body: { ...requestBody, username: undefined },
+                body: { ...requestBody, userId: undefined },
             };
             try {
                 await createOnboardingExtensionRequestValidator(req as any, res as any, nextSpy);
             } catch (error) {
-                expect(error.details[0].message).to.equal(`username is required`);
+                expect(error.details[0].message).to.equal(`userId is required`);
             }
         });
     });

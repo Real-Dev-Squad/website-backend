@@ -807,7 +807,6 @@ describe("/requests Onboarding Extension", () => {
   describe("POST /requests", () => {
     let testUserId: string;
     const testUserDiscordId = "654321";
-    const testUserName = userData[6].username;
     
     beforeEach(async () => {
       testUserId = await addUser({...userData[6], discordId: testUserDiscordId, discordJoinedAt: "2023-04-06T01:47:34.488000+00:00"});
@@ -824,8 +823,8 @@ describe("/requests Onboarding Extension", () => {
       type: REQUEST_TYPE.ONBOARDING,
       numberOfDays: 5,
       reason: "This is the reason",
-      requestedBy: "11111",
-      username: "user-name-2"
+      requestedBy: testUserDiscordId,
+      userId: testUserDiscordId,
     } 
     it("should return Feature not implemented when dev is not true", (done) => {
       chai.request(app)
@@ -894,15 +893,15 @@ describe("/requests Onboarding Extension", () => {
       })
     })
 
-    it("should return 400 response for invalid username", (done) => {
+    it("should return 400 response for invalid userId", (done) => {
       chai.request(app)
       .post(`${postEndpoint}?dev=true`)
       .set("authorization", `Bearer ${botToken}`)
-      .send({...body, username: undefined})
+      .send({...body, userId: undefined})
       .end((err, res) => {
         if (err) return done(err);
         expect(res.statusCode).to.equal(400);
-        expect(res.body.message).to.equal("username is required");
+        expect(res.body.message).to.equal("userId is required");
         expect(res.body.error).to.equal("Bad Request");
         done();
       })
@@ -917,7 +916,6 @@ describe("/requests Onboarding Extension", () => {
       .set("authorization", `Bearer ${botToken}`)
       .send({
         ...body,
-        username: testUserName,
         requestedBy:testUserDiscordId
       })
       .end((err, res)=>{
@@ -932,7 +930,7 @@ describe("/requests Onboarding Extension", () => {
       chai.request(app)
       .post(`${postEndpoint}?dev=true`)
       .set("authorization", `Bearer ${botToken}`)
-      .send(body)
+      .send({...body, requestedBy: "1111"})
       .end((err, res) => {
         if (err) return done(err);
         expect(res.statusCode).to.equal(404);
@@ -974,7 +972,6 @@ describe("/requests Onboarding Extension", () => {
       .set("authorization", `Bearer ${botToken}`)
       .send({
         ...body,
-        username: testUserName,
         requestedBy:testUserDiscordId
       })
       .end((err, res) => {
@@ -993,7 +990,6 @@ describe("/requests Onboarding Extension", () => {
       .set("authorization", `Bearer ${botToken}`)
       .send({
         ...body,
-        username: testUserName,
         requestedBy:testUserDiscordId
       })
       .end((err, res) => {

@@ -23,7 +23,7 @@ export type CreateOnboardingExtensionBody = {
     type: string;
     numberOfDays: number;
     requestedBy: string;
-    username: string;
+    userId: string;
     reason: string;
 }
 
