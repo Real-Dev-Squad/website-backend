@@ -29,6 +29,15 @@ import {
 } from "../../constants/requests";
 import { updateTask } from "../../models/tasks";
 import { validTaskAssignmentRequest, validTaskCreqtionRequest } from "../fixtures/taskRequests/taskRequests";
+import { CreateOnboardingExtensionBody } from "../../types/onboardingExtension";
+const { BAD_TOKEN, CLOUDFLARE_WORKER } = require("../../constants/bot");
+const { generateToken } = require("../../test/utils/generateBotToken");
+import sinon from "sinon";
+import { createUserStatusWithState } from "../../utils/userStatus";
+import { userState } from "../../constants/userStatus";
+const firestore = require("../../utils/firestore");
+const userStatusModel = firestore.collection("usersStatus");
+import * as requestsQuery from "../../models/requests"
 
 const userData = userDataFixture();
 chai.use(chaiHttp);
@@ -792,4 +801,182 @@ describe("/requests Task", function () {
         });
     });
   });
+});
+
+describe("/requests Onboarding Extension", () => {
+  describe("POST /requests", () => {
+    let testUserId: string;
+    const testUserDiscordId = "654321";
+    const testUserName = userData[6].username;
+    
+    beforeEach(async () => {
+      testUserId = await addUser({...userData[6], discordId: testUserDiscordId, discordJoinedAt: "2023-04-06T01:47:34.488000+00:00"});
+    })
+
+    afterEach(async ()=>{
+      sinon.restore();
+      await cleanDb();
+    })
+
+    const postEndpoint = "/requests";
+    const botToken = generateToken({name: CLOUDFLARE_WORKER})
+    const body: CreateOnboardingExtensionBody = {
+      type: REQUEST_TYPE.ONBOARDING,
+      numberOfDays: 5,
+      reason: "This is the reason",
+      requestedBy: "11111",
+      username: "user-name-2"
+    } 
+    it("should return Feature not implemented when dev is not true", (done) => {
+      chai.request(app)
+      .post(`${postEndpoint}`)
+      .send(body)
+      .end((err, res)=>{
+        if (err) return done(err);
+        expect(res.statusCode).to.equal(501);
+        expect(res.body.message).to.equal("Feature not implemented");
+        done();
+      })
+    })
+
+    it("should return Invalid Request when authorization header is missing", (done) => {
+      chai
+      .request(app)
+      .post(`${postEndpoint}?dev=true`)
+      .set("authorization", "")
+      .send(body)
+      .end((err, res) => {
+        if (err) return done(err);
+        expect(res.statusCode).to.equal(400);
+        expect(res.body.message).to.equal("Invalid Request");
+        done();
+      })
+    })
+
+    it("should return Unauthorized Bot for invalid token", (done) => {
+      chai.request(app)
+      .post(`${postEndpoint}?dev=true`)
+      .set("authorization", `Bearer ${BAD_TOKEN}`)
+      .send(body)
+      .end((err, res) => {
+        if (err) return done(err);
+        expect(res.statusCode).to.equal(401);
+        expect(res.body.message).to.equal("Unauthorized Bot");
+        done();
+      })
+    })
+
+    it("should return 400 response for invalid request body", (done) => {
+      chai.request(app)
+      .post(`${postEndpoint}?dev=true`)
+      .set("authorization", `Bearer ${botToken}`)
+      .send({...body, numberOfDays:"1"})
+      .end((err, res) => {
+        if (err) return done(err);
+        expect(res.statusCode).to.equal(400);
+        expect(res.body.message).to.equal("numberOfDays must be a number");
+        expect(res.body.error).to.equal("Bad Request");
+        done();
+      })
+    })
+
+    it("should return 500 response when fails to create extension request", (done) => {
+      sinon.stub(requestsQuery, "createRequest")
+      .throws("Error while creating extension request");
+      createUserStatusWithState(testUserId, userStatusModel, userState.ONBOARDING);
+      chai.request(app)
+      .post(`${postEndpoint}?dev=true`)
+      .set("authorization", `Bearer ${botToken}`)
+      .send({
+        ...body,
+        username: testUserName,
+        requestedBy:testUserDiscordId
+      })
+      .end((err, res)=>{
+        if (err) return done(err);
+        expect(res.statusCode).to.equal(500);
+        expect(res.body.message).to.equal("An internal server error occurred");
+        done();
+      })
+    })
+
+    it("should return 404 response when user does not exist", (done) => {
+      chai.request(app)
+      .post(`${postEndpoint}?dev=true`)
+      .set("authorization", `Bearer ${botToken}`)
+      .send(body)
+      .end((err, res) => {
+        if (err) return done(err);
+        expect(res.statusCode).to.equal(404);
+        expect(res.body.error).to.equal("Not Found");
+        expect(res.body.message).to.equal("User not found");
+        done();
+      })
+    })
+
+    it("should return 401 response when user is not a super user or status is not onboarding", (done)=> {
+      createUserStatusWithState(testUserId, userStatusModel, userState.ACTIVE);
+      chai.request(app)
+      .post(`${postEndpoint}?dev=true`)
+      .set("authorization", `Bearer ${botToken}`)
+      .send({
+        ...body,
+        requestedBy:testUserDiscordId
+      })
+      .end((err, res) => {
+        if (err) return done(err);
+        expect(res.statusCode).to.equal(401);
+        expect(res.body.error).to.equal("Unauthorized");
+        done();
+      })
+    })
+
+    it("should return 400 response when a user already has a pending request", (done)=> {
+      createUserStatusWithState(testUserId, userStatusModel, userState.ONBOARDING);
+      const extension = {
+        state: REQUEST_STATE.PENDING,
+        type: REQUEST_TYPE.ONBOARDING,
+        userId: testUserId,
+      }
+
+      createRequest(extension);
+
+      chai.request(app)
+      .post(`${postEndpoint}?dev=true`)
+      .set("authorization", `Bearer ${botToken}`)
+      .send({
+        ...body,
+        username: testUserName,
+        requestedBy:testUserDiscordId
+      })
+      .end((err, res) => {
+        if (err) return done(err);
+        expect(res.statusCode).to.equal(400);
+        expect(res.body.error).to.equal("Bad Request");
+        expect(res.body.message).to.equal(REQUEST_ALREADY_PENDING);
+        done();
+      })
+    })
+
+    it("should return 201 for successful response", (done)=> {
+      createUserStatusWithState(testUserId, userStatusModel, userState.ONBOARDING);
+      chai.request(app)
+      .post(`${postEndpoint}?dev=true`)
+      .set("authorization", `Bearer ${botToken}`)
+      .send({
+        ...body,
+        username: testUserName,
+        requestedBy:testUserDiscordId
+      })
+      .end((err, res) => {
+        if (err) return done(err);
+        expect(res.statusCode).to.equal(201);
+        expect(res.body.message).to.equal(REQUEST_CREATED_SUCCESSFULLY);
+        expect(res.body.data.requestNumber).to.equal(1);
+        expect(res.body.data.reason).to.equal(body.reason);
+        expect(res.body.data.state).to.equal(REQUEST_STATE.PENDING)
+        done();
+      })
+    })
+  })
 });
