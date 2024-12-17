@@ -9,9 +9,11 @@ import { ExtensionRequestRequest, ExtensionRequestResponse } from "../../types/e
 import { CustomResponse } from "../../typeDefinitions/global";
 import { UpdateRequest } from "../../types/requests";
 import { TaskRequestRequest, TaskRequestResponse } from "../../types/taskRequests";
+import { createOnboardingExtensionRequestValidator } from "./onboardingExtensionRequest";
+import { OnboardingExtensionCreateRequest, OnboardingExtensionResponse } from "../../types/onboardingExtension";
 
 export const createRequestsMiddleware = async (
-  req: OooRequestCreateRequest|ExtensionRequestRequest | TaskRequestRequest,
+  req: OooRequestCreateRequest|ExtensionRequestRequest | TaskRequestRequest | OnboardingExtensionCreateRequest,
   res: CustomResponse,
   next: NextFunction
 ) => {
@@ -27,6 +29,9 @@ export const createRequestsMiddleware = async (
         break;
       case REQUEST_TYPE.TASK:
         await createTaskRequestValidator(req as TaskRequestRequest, res as TaskRequestResponse, next);
+        break;
+      case REQUEST_TYPE.ONBOARDING:
+        await createOnboardingExtensionRequestValidator(req as OnboardingExtensionCreateRequest, res as OnboardingExtensionResponse, next);
         break;
       default:
         res.boom.badRequest(`Invalid request type: ${type}`);
