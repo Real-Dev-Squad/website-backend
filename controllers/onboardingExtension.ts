@@ -14,7 +14,7 @@ import { getUserStatus } from "../models/userStatus";
 import { OnboardingExtension, OnboardingExtensionCreateRequest, OnboardingExtensionResponse } from "../types/onboardingExtension";
 
 export const createOnboardingExtensionRequestController = async (req: OnboardingExtensionCreateRequest, res: OnboardingExtensionResponse) => {
-  try {;
+  try {
 
     const data = req.body;
     const {user, userExists} = await fetchUser({discordId: data.requestedBy});
@@ -41,7 +41,7 @@ export const createOnboardingExtensionRequestController = async (req: Onboarding
     const latestExtensionRequest: OnboardingExtension = await getRequestByKeyValues({
         userId: userId,
         type: REQUEST_TYPE.ONBOARDING
-    })
+    });
 
     if(latestExtensionRequest && latestExtensionRequest.state === REQUEST_STATE.PENDING){
       return res.boom.badRequest(REQUEST_ALREADY_PENDING);
@@ -98,7 +98,7 @@ export const createOnboardingExtensionRequestController = async (req: Onboarding
         id: onboardingExtension.id,
         ...onboardingExtension,
       }
-    })
+    });
   }catch (err) {
     logger.error(ERROR_WHILE_CREATING_REQUEST, err);
     return res.boom.badImplementation(ERROR_WHILE_CREATING_REQUEST);
