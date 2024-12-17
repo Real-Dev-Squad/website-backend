@@ -866,7 +866,7 @@ describe("/requests Onboarding Extension", () => {
       })
     })
 
-    it("should return 400 response for invalid request body", (done) => {
+    it("should return 400 response for invalid value type of numberOfDays", (done) => {
       chai.request(app)
       .post(`${postEndpoint}?dev=true`)
       .set("authorization", `Bearer ${botToken}`)
@@ -875,6 +875,34 @@ describe("/requests Onboarding Extension", () => {
         if (err) return done(err);
         expect(res.statusCode).to.equal(400);
         expect(res.body.message).to.equal("numberOfDays must be a number");
+        expect(res.body.error).to.equal("Bad Request");
+        done();
+      })
+    })
+
+    it("should return 400 response for invalid value of numberOfDays", (done) => {
+      chai.request(app)
+      .post(`${postEndpoint}?dev=true`)
+      .set("authorization", `Bearer ${botToken}`)
+      .send({...body, numberOfDays:1.4})
+      .end((err, res) => {
+        if (err) return done(err);
+        expect(res.statusCode).to.equal(400);
+        expect(res.body.message).to.equal("numberOfDays must be a integer");
+        expect(res.body.error).to.equal("Bad Request");
+        done();
+      })
+    })
+
+    it("should return 400 response for invalid username", (done) => {
+      chai.request(app)
+      .post(`${postEndpoint}?dev=true`)
+      .set("authorization", `Bearer ${botToken}`)
+      .send({...body, username: undefined})
+      .end((err, res) => {
+        if (err) return done(err);
+        expect(res.statusCode).to.equal(400);
+        expect(res.body.message).to.equal("username is required");
         expect(res.body.error).to.equal("Bad Request");
         done();
       })
