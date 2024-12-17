@@ -7,16 +7,16 @@ import {
   REQUEST_STATE,
   REQUEST_TYPE,
 } from "../constants/requests";
-import { CustomResponse } from "../typeDefinitions/global";
 import { userState } from "../constants/userStatus";
 import { addLog } from "../models/logs";
 import { createRequest, getRequestByKeyValues } from "../models/requests";
 import { fetchUser } from "../models/users";
 import { getUserStatus } from "../models/userStatus";
-import { OnboardingExtension, OnboardingExtensionCreateRequest } from "../types/onboardingExtension";
+import { OnboardingExtension, OnboardingExtensionCreateRequest, OnboardingExtensionResponse } from "../types/onboardingExtension";
 
-export const createOnboardingExtensionRequestController = async (req: OnboardingExtensionCreateRequest, res: CustomResponse) => {
-  try {
+export const createOnboardingExtensionRequestController = async (req: OnboardingExtensionCreateRequest, res: OnboardingExtensionResponse) => {
+  try {;
+
     const data = req.body;
     const {user, userExists} = await fetchUser({discordId: data.requestedBy});
 
@@ -44,14 +44,17 @@ export const createOnboardingExtensionRequestController = async (req: Onboarding
       return res.boom.badRequest(REQUEST_ALREADY_PENDING);
     }
     
-    const deadlineinMillisecond = 31*24*60*60*1000;
-    const firstDeadLine = new Date(discordJoinedAt).getTime() + deadlineinMillisecond;
+    const thirtyOneDaysInMillisecond = 31*24*60*60*1000;
+    const discordJoinedDateInMillisecond = new Date(discordJoinedAt).getTime();
+    const numberOfDaysInMillisecond = Math.floor(data.numberOfDays)*24*60*60*1000;
+
     let requestNumber: number;
     let oldEndsOn: number;
+    let newEndsOn: number;
 
     if(!latestExtensionRequest){
       requestNumber = 1;
-      oldEndsOn = firstDeadLine;
+      oldEndsOn = discordJoinedDateInMillisecond + thirtyOneDaysInMillisecond;
     }else if(latestExtensionRequest.state === REQUEST_STATE.REJECTED) {
       requestNumber = latestExtensionRequest.requestNumber + 1;
       oldEndsOn = latestExtensionRequest.oldEndsOn;
@@ -60,7 +63,7 @@ export const createOnboardingExtensionRequestController = async (req: Onboarding
       oldEndsOn = latestExtensionRequest.newEndsOn;
     }
     
-    const newEndsOn = Date.now();
+    newEndsOn = oldEndsOn + numberOfDaysInMillisecond;
 
     const onboardingExtension = await createRequest({
       type: REQUEST_TYPE.ONBOARDING,
