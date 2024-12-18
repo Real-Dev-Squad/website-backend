@@ -3,6 +3,7 @@ const {
   validateGroupRoleBody,
   validateMemberRoleBody,
   validateUpdateUsersNicknameStatusBody,
+  validateGenerateInviteForUserBody,
 } = require("../../../middlewares/validators/discordactions");
 const { expect } = require("chai");
 
@@ -120,6 +121,36 @@ describe("Middleware | Validators | discord actions", function () {
         body: {
           lastNicknameUpdate: 112.45478,
         },
+      };
+      await validateMemberRoleBody(req, res, nextSpy).catch((err) => {
+        expect(err).to.be.an.instanceOf(Error);
+      });
+      expect(nextSpy.callCount).to.be.equal(0);
+    });
+  });
+
+  describe("validateGenerateInviteForUserBody", function () {
+    it("lets the request pass to the next function", async function () {
+      const res = {};
+      const req = {
+        body: {
+          purpose: "testing",
+        },
+      };
+      const nextSpy = Sinon.spy();
+      await validateGenerateInviteForUserBody(req, res, nextSpy);
+      expect(nextSpy.calledOnce).to.be.equal(true);
+    });
+
+    it("stops the propogation to the next function", async function () {
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+      const nextSpy = Sinon.spy();
+      const req = {
+        body: {},
       };
       await validateMemberRoleBody(req, res, nextSpy).catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
