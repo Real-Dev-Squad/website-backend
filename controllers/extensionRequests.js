@@ -149,6 +149,11 @@ const getSelfExtensionRequests = async (req, res) => {
     const { id: userId } = req.userData;
     const { taskId, status } = req.query;
 
+    res.set(
+      "X-Deprecation-Warning",
+      "WARNING: This endpoint is being deprecated and will be removed in the future. Please use `/extension-requests/user/:userId` route to get the user extension-requests details based on userID."
+    );
+
     if (userId) {
       let allExtensionRequests;
       if (taskId) {
