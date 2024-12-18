@@ -16,7 +16,7 @@ const { devFlagMiddleware } = require("../middlewares/devFlag");
 
 router.post("/", authenticate, createExtensionRequest, extensionRequests.createTaskExtensionRequest);
 router.get("/", authenticate, getExtensionRequestsValidator, extensionRequests.fetchExtensionRequests);
-router.get("/self", authenticate, extensionRequests.getSelfExtensionRequests);
+router.get("/self", authenticate, extensionRequests.getSelfExtensionRequests); // This endpoint is being deprecated. Please use `/extension-requests/user/:userId` route to get the user extension-requests details based on userID."
 router.get(
   "/user/:userId",
   devFlagMiddleware,
