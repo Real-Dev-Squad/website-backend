@@ -1579,6 +1579,108 @@ describe("Users", function () {
     });
   });
 
+  describe("PUT /users/:userId/intro", function () {
+    let userStatusData;
+
+    beforeEach(async function () {
+      await userStatusModel.updateUserStatus(userId, userStatusDataAfterSignup);
+      const updateStatus = await userStatusModel.updateUserStatus(userId, userStatusDataAfterFillingJoinSection);
+      userStatusData = (await firestore.collection("usersStatus").doc(updateStatus.id).get()).data();
+    });
+
+    it("should return 409 if the data already present", function (done) {
+      addJoinData(joinData(userId)[3]);
+      chai
+        .request(app)
+        .put(`/users/${userId}/intro?dev=true`)
+        .set("Cookie", `${cookieName}=${jwt}`)
+        .send(joinData(userId)[3])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(409);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User data is already present!");
+          return done();
+        });
+    });
+
+    it("Should store the info in db", function (done) {
+      chai
+        .request(app)
+        .put(`/users/${userId}/intro?dev=true`)
+        .set("Cookie", `${cookieName}=${jwt}`)
+        .send(joinData()[2])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(201);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User join data and newstatus data added and updated successfully");
+          expect(userStatusData).to.have.own.property("currentStatus");
+          expect(userStatusData).to.have.own.property("monthlyHours");
+          expect(userStatusData.currentStatus.state).to.equal("ONBOARDING");
+          expect(userStatusData.monthlyHours.committed).to.equal(40);
+          return done();
+        });
+    });
+
+    it("Should return 401 for Unauthenticated User Request", function (done) {
+      chai
+        .request(app)
+        .put(`/users/${userId}/intro?dev=true`)
+        .set("Cookie", `${cookieName}=""`)
+        .send(joinData()[2])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Unauthenticated User");
+          return done();
+        });
+    });
+
+    it("Should return 400 for invalid Data", function (done) {
+      chai
+        .request(app)
+        .put(`/users/${userId}/intro?dev=true`)
+        .set("Cookie", `${cookieName}=${jwt}`)
+        .send(joinData()[1])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal('"firstName" is required');
+          return done();
+        });
+    });
+
+    it("Should return 403 for Forbidden access", function (done) {
+      const userId = "anotherUser123";
+      addJoinData(joinData(userId)[3]);
+
+      chai
+        .request(app)
+        .put(`/users/${userId}/intro?dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(joinData(userId)[3])
+        .end((err, res) => {
+          if (err) return done(err);
+
+          expect(res).to.have.status(403);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Unauthorized access");
+          return done();
+        });
+    });
+  });
+
   describe("PATCH /users/rejectDiff", function () {
     let profileDiffsId;
 
