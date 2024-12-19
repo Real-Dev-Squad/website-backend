@@ -40,8 +40,24 @@ const validateUpdateUsersNicknameStatusBody = async (req, res, next) => {
   }
 };
 
+const validateLazyLoadingParams = async (req, res, next) => {
+  const schema = Joi.object({
+    page: Joi.number().integer().min(0).optional(),
+    size: Joi.number().integer().min(1).max(100).optional(),
+    cursor: Joi.string().optional(),
+  });
+
+  try {
+    req.query = await schema.validateAsync(req.query);
+    next();
+  } catch (error) {
+    res.boom.badRequest(error.message);
+  }
+};
+
 module.exports = {
   validateGroupRoleBody,
   validateMemberRoleBody,
   validateUpdateUsersNicknameStatusBody,
+  validateLazyLoadingParams,
 };
