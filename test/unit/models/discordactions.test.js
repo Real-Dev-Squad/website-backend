@@ -19,7 +19,7 @@ const tasksModel = firestore.collection("tasks");
 
 const {
   createNewRole,
-  getAllGroupRoles,
+  getPaginatedGroupRoles,
   isGroupRoleExists,
   addGroupRoleToMember,
   deleteRoleFromDatabase,
@@ -93,27 +93,63 @@ describe("discordactions", function () {
     });
   });
 
-  describe("getAllGroupRoles", function () {
-    let getStub;
+  describe("getPaginatedGroupRoles", function () {
+    let orderByStub, startAfterStub, limitStub, getStub;
 
     beforeEach(function () {
-      getStub = sinon.stub(discordRoleModel, "get").resolves({
-        forEach: (callback) => groupData.forEach(callback),
+      orderByStub = sinon.stub();
+      startAfterStub = sinon.stub();
+      limitStub = sinon.stub();
+      getStub = sinon.stub();
+
+      orderByStub.returns({ startAfter: startAfterStub });
+      startAfterStub.returns({ limit: limitStub });
+      limitStub.returns({ get: getStub });
+      getStub.resolves({
+        docs: groupData.map((group) => ({
+          id: group.id,
+          data: () => group,
+        })),
       });
+
+      sinon.stub(discordRoleModel, "orderBy").returns(orderByStub);
     });
 
     afterEach(function () {
-      getStub.restore();
+      sinon.restore();
     });
 
-    it("should return all group-roles from the database", async function () {
-      const result = await getAllGroupRoles();
-      expect(result.groups).to.be.an("array");
+    it("should return paginated group-roles from the database", async function () {
+      const cursor = "validCursorDocId";
+      getStub.resolves({
+        docs: groupData.map((group) => ({
+          id: group.id,
+          data: () => group,
+        })),
+      });
+
+      const result = await getPaginatedGroupRoles({ cursor, limit: 2 });
+
+      expect(result).to.have.property("groups").that.is.an("array");
+      expect(result.groups).to.have.lengthOf(2);
+      expect(result).to.have.property("newLatestDoc").that.is.a("string");
+      expect(result).to.have.property("hasMore").that.is.a("boolean");
+    });
+
+    it("should handle pagination without a cursor", async function () {
+      const result = await getPaginatedGroupRoles({ limit: 2 });
+
+      // eslint-disable-next-line no-unused-expressions
+      expect(orderByStub).to.have.been.calledOnce;
+      // eslint-disable-next-line no-unused-expressions
+      expect(startAfterStub).not.to.have.been.called; // No cursor means no startAfter
+      expect(result.groups).to.have.lengthOf(2);
     });
 
     it("should throw an error if getting group-roles fails", async function () {
       getStub.rejects(new Error("Database error"));
-      return getAllGroupRoles().catch((err) => {
+
+      await getPaginatedGroupRoles({ cursor: "invalidCursor", limit: 2 }).catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal("Database error");
       });
