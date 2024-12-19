@@ -11,32 +11,37 @@ import { addLog } from "../models/logs";
 import { createRequest, getRequestByKeyValues } from "../models/requests";
 import { fetchUser } from "../models/users";
 import { getUserStatus } from "../models/userStatus";
+import { User } from "../typeDefinitions/users";
 import { OnboardingExtension, OnboardingExtensionCreateRequest, OnboardingExtensionResponse } from "../types/onboardingExtension";
 
 export const createOnboardingExtensionRequestController = async (req: OnboardingExtensionCreateRequest, res: OnboardingExtensionResponse) => {
   try {
 
     const data = req.body;
-    const {user, userExists} = await fetchUser({discordId: data.requestedBy});
-
+    const {user, userExists} = await fetchUser({discordId: data.userId});
+    
     if(!userExists) {
       return res.boom.notFound("User not found");
     }
 
-    const {id, roles, discordId} = user as unknown as {id: string, roles: { super_user: boolean}, discordId: string};
-    const { data: userStatus } =  await getUserStatus(id);
+    const { id: userId, discordId: userDiscordId, discordJoinedAt, username} = user as User;
+    const { data: userStatus } =  await getUserStatus(userId);
 
-    if(!(roles?.super_user || (userStatus && userStatus.currentStatus.state === userState.ONBOARDING && discordId === data.userId))){
-      return res.boom.unauthorized("Only super user and onboarding user are authorized to create an onboarding extension request");
+    if(!userStatus || userStatus.currentStatus.state != userState.ONBOARDING){
+      return res.boom.badRequest("User does not have onboarding status");
     }
 
-    const userResponse = await fetchUser({discordId: data.userId});
+    const requestedUserResponse = await fetchUser({discordId: data.requestedBy});
     
-    if(!userResponse.userExists) {
+    if(!requestedUserResponse.userExists) {
       return res.boom.notFound("User not found");
     }
 
-    const {id: userId, discordJoinedAt, username} = userResponse.user as unknown as {id: string, discordJoinedAt: Date, username: string};
+    const {roles, discordId: requestedUserDiscordId} = requestedUserResponse.user as User;
+
+    if(!(roles?.super_user || (requestedUserDiscordId === userDiscordId))){
+      return res.boom.unauthorized("Only super user and onboarding user are authorized to create an onboarding extension request");
+    }
 
     const latestExtensionRequest: OnboardingExtension = await getRequestByKeyValues({
         userId: userId,
