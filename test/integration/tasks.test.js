@@ -583,6 +583,10 @@ describe("Tasks", function () {
             return done;
           }
           expect(res).to.have.status(200);
+          expect(res).to.have.header(
+            "X-Deprecation-Warning",
+            "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:username to get the task details."
+          );
           expect(res.body).to.be.a("array");
           expect(res.body[0].status).to.equal(COMPLETED);
 
@@ -630,6 +634,10 @@ describe("Tasks", function () {
         .get("/tasks/self")
         .set("cookie", `${cookieName}=${authService.generateAuthToken({ userId: assignedUser })}`);
       expect(res).to.have.status(200);
+      expect(res).to.have.header(
+        "X-Deprecation-Warning",
+        "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:username to get the task details."
+      );
       expect(res.body).to.be.a("array");
       expect([taskId1, taskId2]).to.include(taskId1);
     });

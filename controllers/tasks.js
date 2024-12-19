@@ -251,20 +251,32 @@ const getUserTasks = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
+
+/**
+ * @deprecated
+ * WARNING: This API endpoint is being deprecated and will be removed in future versions.
+ * Please use the updated API endpoint: `/tasks/:username` for retrieving user's task details.
+ *
+ * This API is kept temporarily for backward compatibility.
+ */
+
 const getSelfTasks = async (req, res) => {
   try {
     const { username } = req.userData;
 
-    if (username) {
-      if (req.query.completed) {
-        const allCompletedTasks = await tasks.fetchUserCompletedTasks(username);
-        return res.json(allCompletedTasks);
-      } else {
-        const allTasks = await tasks.fetchSelfTasks(username);
-        return res.json(allTasks);
-      }
+    if (!username) {
+      return res.boom.notFound("User doesn't exist");
     }
-    return res.boom.notFound("User doesn't exist");
+
+    const tasksData = req.query.completed
+      ? await tasks.fetchUserCompletedTasks(username)
+      : await tasks.fetchSelfTasks(username);
+
+    res.set(
+      "X-Deprecation-Warning",
+      "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:username to get the task details."
+    );
+    return res.json(tasksData);
   } catch (err) {
     logger.error(`Error while fetching tasks: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
