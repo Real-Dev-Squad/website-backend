@@ -176,6 +176,22 @@ describe("Task Requests", function () {
           });
       });
 
+      it("should return 404 if the task request is not found for the given Id", function (done) {
+        chai
+          .request(app)
+          .get(`/taskRequests/1234`)
+          .set("cookie", `${cookieName}=${jwt}`)
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(404);
+            expect(res.body.message).to.be.equal("Task request not found");
+            return done();
+          });
+      });
+
       it("should return 404 if the resource is not found", function (done) {
         sinon.stub(taskRequestsModel, "fetchTaskRequestById").callsFake(() => []);
 
@@ -196,21 +212,26 @@ describe("Task Requests", function () {
     });
 
     describe("When the user is not a super user", function () {
+      let taskrequestid;
+
       before(async function () {
         userId = await addUser(member);
-        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId }));
-        jwt = authService.generateAuthToken({ userId });
+        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({
+          userId,
+        }));
+        jwt = authService.generateAuthToken({
+          userId,
+        });
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
-
         await userStatusModel.updateUserStatus(userId, idleUserStatus);
-        await taskRequestsModel.addOrUpdate(taskId, userId);
+        taskrequestid = (await taskRequestsModel.addOrUpdate(taskId, userId)).id;
       });
 
       it("should be successful when the user is not a super user", function (done) {
         chai
           .request(app)
-          .get(`/taskRequests/taskrequstid`)
+          .get(`/taskRequests/${taskrequestid}`)
           .set("cookie", `${cookieName}=${jwt}`)
           .end((err, res) => {
             if (err) {
