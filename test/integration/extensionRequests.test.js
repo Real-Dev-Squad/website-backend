@@ -362,6 +362,110 @@ describe("Extension Requests", function () {
     });
   });
 
+  describe("GET /extension-requests/user/:userId", function () {
+    it("should return success response and extension request of the authenticated user", function (done) {
+      chai
+        .request(app)
+        .get(`/extension-requests/user/${appOwner.id}?dev=true`)
+        .set("cookie", `${cookieName}=${appOwnerjwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal("Extension Requests returned successfully!");
+          expect(res.body.allExtensionRequests).to.be.a("array");
+          expect(res.body.allExtensionRequests[0].assignee).to.equal(appOwner.username);
+          expect([extensionRequestId1, extensionRequestId2]).contains(res.body.allExtensionRequests[0].id);
+          expect([extensionRequestId1, extensionRequestId2]).contains(res.body.allExtensionRequests[1].id);
+          expect(res.body.allExtensionRequests[1].assignee).to.equal(appOwner.username);
+          return done();
+        });
+    });
+
+    it("should return success response and all extension requests with query params", function (done) {
+      chai
+        .request(app)
+        .get(`/extension-requests/user/${appOwner.id}?dev=true`)
+        .query({ taskId: taskId2, status: "APPROVED" })
+        .set("cookie", `${cookieName}=${appOwnerjwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal("Extension Requests returned successfully!");
+          expect(res.body.allExtensionRequests).to.be.a("array");
+          expect(res.body.allExtensionRequests[0].assignee).to.equal(appOwner.username);
+          expect(res.body.allExtensionRequests[0].id).to.equal(extensionRequestId2);
+          return done();
+        });
+    });
+
+    it("should return success response and an empty array of extensionRequest if assignee is not same as latest one", function (done) {
+      chai
+        .request(app)
+        .get(`/extension-requests/user/${appOwner.id}?dev=true`)
+        .query({ taskId: taskId7 })
+        .set("cookie", `${cookieName}=${appOwnerjwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal("Extension Requests returned successfully!");
+          expect(res.body.allExtensionRequests).to.be.a("array").with.lengthOf(0);
+          return done();
+        });
+    });
+
+    it("should return success response and a single latestExtensionRequest if assignee same as latest one", function (done) {
+      chai
+        .request(app)
+        .get(`/extension-requests/user/${appOwner.id}?dev=true`)
+        .query({ taskId: taskId2 })
+        .set("cookie", `${cookieName}=${appOwnerjwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal("Extension Requests returned successfully!");
+          expect(res.body.allExtensionRequests).to.be.a("array").with.lengthOf(1);
+          return done();
+        });
+    });
+
+    it("Should return 401 if not logged in", function (done) {
+      chai
+        .request(app)
+        .get(`/extension-requests/user/${appOwner.id}?dev=true`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 401,
+            error: "Unauthorized",
+            message: "Unauthenticated User",
+          });
+
+          return done();
+        });
+    });
+  });
+
   describe("POST /extension-requests - creates a new extension requests", function () {
     it("Should return success response after adding the extension request", function (done) {
       chai
