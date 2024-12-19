@@ -127,15 +127,23 @@ const addOrUpdate = async (userData, userId = null, devFeatureFlag) => {
     }
 
     // userId is null, Add or Update user
-    let user;
+    let user = null;
+
     if (userData.github_user_id) {
       user = await userModel.where("github_user_id", "==", userData.github_user_id).limit(1).get();
     }
-    if (!user || (user && user.empty)) {
+
+    if (userData.github_id && (!user || user.empty)) {
       user = await userModel.where("github_id", "==", userData.github_id).limit(1).get();
     }
+
+    if (userData.email && (!user || user.empty)) {
+      user = await userModel.where("email", "==", userData.email).limit(1).get();
+    }
+
     if (user && !user.empty && user.docs !== null) {
-      await userModel.doc(user.docs[0].id).set({ ...userData, updated_at: Date.now() }, { merge: true });
+      const { created_at: createdAt, ...updatedUserData } = userData;
+      await userModel.doc(user.docs[0].id).set({ ...updatedUserData, updated_at: Date.now() }, { merge: true });
 
       const logData = {
         type: logType.USER_DETAILS_UPDATED,
@@ -153,7 +161,6 @@ const addOrUpdate = async (userData, userId = null, devFeatureFlag) => {
         role: Object.values(AUTHORITIES).find((role) => data.roles[role]) || AUTHORITIES.USER,
       };
     }
-
     // Add new user
     /*
        Adding default archived role enables us to query for only
@@ -377,7 +384,7 @@ const fetchUsers = async (usernames = []) => {
  * @param { Object }: Object with username and userId, any of the two can be used
  * @return {Promise<{userExists: boolean, user: <userModel>}|{userExists: boolean, user: <userModel>}>}
  */
-const fetchUser = async ({ userId = null, username = null, githubUsername = null, discordId = null }) => {
+const fetchUser = async ({ userId = null, username = null, githubUsername = null, discordId = null, email = null }) => {
   try {
     let userData, id;
     if (username) {
@@ -398,6 +405,12 @@ const fetchUser = async ({ userId = null, username = null, githubUsername = null
       });
     } else if (discordId) {
       const user = await userModel.where("discordId", "==", discordId).where("roles.archived", "==", false).get();
+      user.forEach((doc) => {
+        id = doc.id;
+        userData = doc.data();
+      });
+    } else if (email) {
+      const user = await userModel.where("email", "==", email).limit(1).get();
       user.forEach((doc) => {
         id = doc.id;
         userData = doc.data();
