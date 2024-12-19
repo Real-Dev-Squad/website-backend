@@ -19,8 +19,7 @@ const trade = async (req, res) => {
     if (!canUserTrade) {
       return res.boom.forbidden(errorMessage);
     }
-
-    return res.json({ userBalance });
+    return res.json({ message: "Congrats, Stock Trade done successfully!! 🎉🎉🎉🎊🎊🎊", userBalance });
   } catch (err) {
     logger.error(`Error during trading: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
