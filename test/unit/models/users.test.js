@@ -115,6 +115,47 @@ describe("users", function () {
       const { user } = await users.fetchUser({ githubUsername });
       expect(user).to.haveOwnProperty("github_created_at");
     });
+
+    it("it should filter out the id field while updating profileDiff", async function () {
+      const userData = userDataArray[0];
+      const { userId } = await users.addOrUpdate(userData);
+      const profileDiff = { id: "random-id", diff: "random-diff" };
+      await users.addOrUpdate(profileDiff, userId);
+      const data = (await userModel.doc(userId).get()).data();
+      expect(data).to.haveOwnProperty("diff");
+      expect(data.id).not.equal("random-id");
+    });
+
+    it("it should update profileDiff even if it is deeply nested", async function () {
+      const userData = userDataArray[0];
+      const { userId } = await users.addOrUpdate(userData);
+      const profileDiffs = {
+        level1: {
+          level2: {
+            level3: {
+              level4: {
+                level5: {
+                  level6: {
+                    level7: {
+                      level8: {
+                        level9: {
+                          level10: "nested-random-diff",
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+      await users.addOrUpdate(profileDiffs, userId);
+      const data = (await userModel.doc(userId).get()).data();
+      expect(data)
+        .to.have.nested.property("level1.level2.level3.level4.level5.level6.level7.level8.level9.level10")
+        .that.equals("nested-random-diff");
+    });
   });
 
   describe("addOrUpdate-Dev Feature Flag", function () {
