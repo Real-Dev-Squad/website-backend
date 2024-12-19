@@ -22,7 +22,21 @@ describe("/requests Onboarding Extension", () => {
     describe("POST /requests", () => {
         let testUserId: string;
         const testUserDiscordId = "654321";
-        let testSuperUserDiscordId = "123456";
+        const testSuperUserDiscordId = "123456";
+        const extensionRequest = {
+            state: REQUEST_STATE.APPROVED,
+            type: REQUEST_TYPE.ONBOARDING,
+            requestNumber: 1
+        };
+        const postEndpoint = "/requests";
+        const botToken = generateToken({name: CLOUDFLARE_WORKER})
+        const body: CreateOnboardingExtensionBody = {
+            type: REQUEST_TYPE.ONBOARDING,
+            numberOfDays: 5,
+            reason: "This is the reason",
+            requestedBy: testUserDiscordId,
+            userId: testUserDiscordId,
+        };
 
         beforeEach(async () => {
             await addUser({...userData[4], discordId: testSuperUserDiscordId});
@@ -32,24 +46,16 @@ describe("/requests Onboarding Extension", () => {
             sinon.restore();
             await cleanDb();
         })
-        const postEndpoint = "/requests";
-        const botToken = generateToken({name: CLOUDFLARE_WORKER})
-        const body: CreateOnboardingExtensionBody = {
-            type: REQUEST_TYPE.ONBOARDING,
-            numberOfDays: 5,
-            reason: "This is the reason",
-            requestedBy: testUserDiscordId,
-            userId: testUserDiscordId,
-        } 
+
         it("should return Feature not implemented when dev is not true", (done) => {
             chai.request(app)
             .post(`${postEndpoint}`)
             .send(body)
             .end((err, res)=>{
-            if (err) return done(err);
-            expect(res.statusCode).to.equal(501);
-            expect(res.body.message).to.equal("Feature not implemented");
-            done();
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(501);
+                expect(res.body.message).to.equal("Feature not implemented");
+                done();
             })
         })
     
@@ -60,10 +66,10 @@ describe("/requests Onboarding Extension", () => {
             .set("authorization", "")
             .send(body)
             .end((err, res) => {
-            if (err) return done(err);
-            expect(res.statusCode).to.equal(400);
-            expect(res.body.message).to.equal("Invalid Request");
-            done();
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(400);
+                expect(res.body.message).to.equal("Invalid Request");
+                done();
             })
         })
     
@@ -73,10 +79,10 @@ describe("/requests Onboarding Extension", () => {
             .set("authorization", `Bearer ${BAD_TOKEN}`)
             .send(body)
             .end((err, res) => {
-            if (err) return done(err);
-            expect(res.statusCode).to.equal(401);
-            expect(res.body.message).to.equal("Unauthorized Bot");
-            done();
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(401);
+                expect(res.body.message).to.equal("Unauthorized Bot");
+                done();
             })
         })
     
@@ -86,11 +92,11 @@ describe("/requests Onboarding Extension", () => {
             .set("authorization", `Bearer ${botToken}`)
             .send({...body, numberOfDays:"1"})
             .end((err, res) => {
-            if (err) return done(err);
-            expect(res.statusCode).to.equal(400);
-            expect(res.body.message).to.equal("numberOfDays must be a number");
-            expect(res.body.error).to.equal("Bad Request");
-            done();
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(400);
+                expect(res.body.message).to.equal("numberOfDays must be a number");
+                expect(res.body.error).to.equal("Bad Request");
+                done();
             })
         })
     
@@ -100,11 +106,11 @@ describe("/requests Onboarding Extension", () => {
             .set("authorization", `Bearer ${botToken}`)
             .send({...body, numberOfDays:1.4})
             .end((err, res) => {
-            if (err) return done(err);
-            expect(res.statusCode).to.equal(400);
-            expect(res.body.message).to.equal("numberOfDays must be a integer");
-            expect(res.body.error).to.equal("Bad Request");
-            done();
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(400);
+                expect(res.body.message).to.equal("numberOfDays must be a integer");
+                expect(res.body.error).to.equal("Bad Request");
+                done();
             })
         })
     
@@ -114,30 +120,27 @@ describe("/requests Onboarding Extension", () => {
             .set("authorization", `Bearer ${botToken}`)
             .send({...body, userId: undefined})
             .end((err, res) => {
-            if (err) return done(err);
-            expect(res.statusCode).to.equal(400);
-            expect(res.body.message).to.equal("userId is required");
-            expect(res.body.error).to.equal("Bad Request");
-            done();
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(400);
+                expect(res.body.message).to.equal("userId is required");
+                expect(res.body.error).to.equal("Bad Request");
+                done();
             })
         })
     
         it("should return 500 response when fails to create extension request", (done) => {
+            createUserStatusWithState(testUserId, userStatusModel, userState.ONBOARDING);
             sinon.stub(requestsQuery, "createRequest")
             .throws("Error while creating extension request");
-            createUserStatusWithState(testUserId, userStatusModel, userState.ONBOARDING);
             chai.request(app)
             .post(`${postEndpoint}?dev=true`)
             .set("authorization", `Bearer ${botToken}`)
-            .send({
-            ...body,
-            requestedBy:testUserDiscordId
-            })
+            .send(body)
             .end((err, res)=>{
-            if (err) return done(err);
-            expect(res.statusCode).to.equal(500);
-            expect(res.body.message).to.equal("An internal server error occurred");
-            done();
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(500);
+                expect(res.body.message).to.equal("An internal server error occurred");
+                done();
             })
         })
     
@@ -145,97 +148,145 @@ describe("/requests Onboarding Extension", () => {
             chai.request(app)
             .post(`${postEndpoint}?dev=true`)
             .set("authorization", `Bearer ${botToken}`)
-            .send({...body, requestedBy: "1111"})
+            .send({...body, userId: "11111"})
             .end((err, res) => {
-            if (err) return done(err);
-            expect(res.statusCode).to.equal(404);
-            expect(res.body.error).to.equal("Not Found");
-            expect(res.body.message).to.equal("User not found");
-            done();
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(404);
+                expect(res.body.error).to.equal("Not Found");
+                expect(res.body.message).to.equal("User not found");
+                done();
             })
         })
     
-        it("should return 401 response when user is not a super user or status is not onboarding", (done)=> {
+        it("should return 400 response when user's status is not onboarding", (done)=> {
             createUserStatusWithState(testUserId, userStatusModel, userState.ACTIVE);
             chai.request(app)
             .post(`${postEndpoint}?dev=true`)
             .set("authorization", `Bearer ${botToken}`)
-            .send({
-            ...body,
-            requestedBy:testUserDiscordId
-            })
+            .send(body)
             .end((err, res) => {
-            if (err) return done(err);
-            expect(res.statusCode).to.equal(401);
-            expect(res.body.error).to.equal("Unauthorized");
-            done();
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(400);
+                expect(res.body.error).to.equal("Bad Request");
+                expect(res.body.message).to.equal("User does not have onboarding status");
+                done();
+            })
+        })
+
+        it("should return 404 response when requested-user does not exist", (done) => {
+            createUserStatusWithState(testUserId, userStatusModel, userState.ONBOARDING);
+            chai.request(app)
+            .post(`${postEndpoint}?dev=true`)
+            .set("authorization", `Bearer ${botToken}`)
+            .send({...body, requestedBy: "11111"})
+            .end((err, res) => {
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(404);
+                expect(res.body.error).to.equal("Not Found");
+                expect(res.body.message).to.equal("User not found");
+                done();
             })
         })
     
         it("should return 400 response when a user already has a pending request", (done)=> {
             createUserStatusWithState(testUserId, userStatusModel, userState.ONBOARDING);
-            const extension = {
-            state: REQUEST_STATE.PENDING,
-            type: REQUEST_TYPE.ONBOARDING,
-            userId: testUserId,
-            }
-    
-            requestsQuery.createRequest(extension);
+            requestsQuery.createRequest({...extensionRequest, state: REQUEST_STATE.PENDING, userId: testUserId});
     
             chai.request(app)
             .post(`${postEndpoint}?dev=true`)
             .set("authorization", `Bearer ${botToken}`)
-            .send({
-            ...body,
-            requestedBy:testUserDiscordId
-            })
+            .send(body)
             .end((err, res) => {
-            if (err) return done(err);
-            expect(res.statusCode).to.equal(400);
-            expect(res.body.error).to.equal("Bad Request");
-            expect(res.body.message).to.equal(REQUEST_ALREADY_PENDING);
-            done();
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(400);
+                expect(res.body.error).to.equal("Bad Request");
+                expect(res.body.message).to.equal(REQUEST_ALREADY_PENDING);
+                done();
             })
         })
-    
-        it("should return 201 for successful response when user has onboarding status", (done)=> {
+        
+        it("should return 201 for successful response when user and requestedUser are same and has onboarding status", (done)=> {
+            createUserStatusWithState(testUserId, userStatusModel, userState.ONBOARDING);
+            chai.request(app)
+            .post(`${postEndpoint}?dev=true`)
+            .set("authorization", `Bearer ${botToken}`)
+            .send(body)
+            .end((err, res) => {
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(201);
+                expect(res.body.message).to.equal("Onboarding extension request created successfully!");
+                expect(res.body.data.requestNumber).to.equal(1);
+                expect(res.body.data.reason).to.equal(body.reason);
+                expect(res.body.data.state).to.equal(REQUEST_STATE.PENDING)
+                done();
+            })
+        })
+
+        it("should return 201 for successful response when requested-user is a super-user and user has onboarding status", (done)=> {
             createUserStatusWithState(testUserId, userStatusModel, userState.ONBOARDING);
             chai.request(app)
             .post(`${postEndpoint}?dev=true`)
             .set("authorization", `Bearer ${botToken}`)
             .send({
-            ...body,
-            requestedBy:testUserDiscordId
-            })
-            .end((err, res) => {
-            if (err) return done(err);
-            expect(res.statusCode).to.equal(201);
-            expect(res.body.message).to.equal("Onboarding extension request created successfully!");
-            expect(res.body.data.requestNumber).to.equal(1);
-            expect(res.body.data.reason).to.equal(body.reason);
-            expect(res.body.data.state).to.equal(REQUEST_STATE.PENDING)
-            done();
-            })
-        })
-
-        it("should return 201 for successful response when user is a super user", (done)=> {
-            chai.request(app)
-            .post(`${postEndpoint}?dev=true`)
-            .set("authorization", `Bearer ${botToken}`)
-            .send({
                 ...body,
-                userId: testUserDiscordId,
                 requestedBy: testSuperUserDiscordId
             })
             .end((err, res) => {
-            if (err) return done(err);
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(201);
+                expect(res.body.message).to.equal("Onboarding extension request created successfully!");
+                expect(res.body.data.requestNumber).to.equal(1);
+                expect(res.body.data.reason).to.equal(body.reason);
+                expect(res.body.data.state).to.equal(REQUEST_STATE.PENDING)
+                done();
+            })
+        })
+
+        it("should return 201 response when latest extension request is approved", async () => {
+            createUserStatusWithState(testUserId, userStatusModel, userState.ONBOARDING);
+            const latestApprovedExtension = await requestsQuery.createRequest({
+                ...extensionRequest, 
+                userId: testUserId, 
+                state: REQUEST_STATE.APPROVED,
+                newEndsOn: Date.now(),
+                oldEndsOn: Date.now() - 24*60*60*1000,
+            });
+
+            const res = await chai.request(app)
+            .post(`${postEndpoint}?dev=true`)
+            .set("authorization", `Bearer ${botToken}`)
+            .send(body);
+
             expect(res.statusCode).to.equal(201);
             expect(res.body.message).to.equal("Onboarding extension request created successfully!");
-            expect(res.body.data.requestNumber).to.equal(1);
+            expect(res.body.data.requestNumber).to.equal(2);
             expect(res.body.data.reason).to.equal(body.reason);
-            expect(res.body.data.state).to.equal(REQUEST_STATE.PENDING)
-            done();
-            })
+            expect(res.body.data.state).to.equal(REQUEST_STATE.PENDING);
+            expect(res.body.data.oldEndsOn).to.equal(latestApprovedExtension.newEndsOn);
+            expect(res.body.data.newEndsOn).to.equal(latestApprovedExtension.newEndsOn + (body.numberOfDays*24*60*60*1000));
+        })
+
+        it("should return 201 response when latest extension request is rejected", async () => {
+            createUserStatusWithState(testUserId, userStatusModel, userState.ONBOARDING);
+            const latestRejectedExtension = await requestsQuery.createRequest({
+                ...extensionRequest, 
+                state: REQUEST_STATE.REJECTED, 
+                userId: testUserId,
+                newEndsOn: Date.now(),
+                oldEndsOn: Date.now() - 24*60*60*1000,
+            });
+            const res = await chai.request(app)
+            .post(`${postEndpoint}?dev=true`)
+            .set("authorization", `Bearer ${botToken}`)
+            .send(body)
+
+            expect(res.statusCode).to.equal(201);
+            expect(res.body.message).to.equal("Onboarding extension request created successfully!");
+            expect(res.body.data.requestNumber).to.equal(2);
+            expect(res.body.data.reason).to.equal(body.reason);;
+            expect(res.body.data.state).to.equal(REQUEST_STATE.PENDING);
+            expect(res.body.data.oldEndsOn).to.equal(latestRejectedExtension.oldEndsOn);
+            expect(res.body.data.newEndsOn).to.equal(latestRejectedExtension.oldEndsOn + (body.numberOfDays*24*60*60*1000));
         })
     })
 });
