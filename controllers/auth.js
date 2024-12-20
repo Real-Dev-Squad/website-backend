@@ -54,8 +54,18 @@ function handleRedirectUrl(req) {
   };
 }
 
-async function handleGoogleLogin(req, res, user, authRedirectionUrl) {
+const getAuthCookieOptions = () => {
   const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
+  return {
+    domain: rdsUiUrl.hostname,
+    expires: new Date(Date.now() + config.get("userToken.ttl") * 1000),
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+  };
+};
+
+async function handleGoogleLogin(req, res, user, authRedirectionUrl) {
   try {
     if (!user.emails || user.emails.length === 0) {
       logger.error("Google login failed: No emails found in user data");
@@ -87,13 +97,7 @@ async function handleGoogleLogin(req, res, user, authRedirectionUrl) {
 
     const token = authService.generateAuthToken({ userId });
 
-    const cookieOptions = {
-      domain: rdsUiUrl.hostname,
-      expires: new Date(Date.now() + config.get("userToken.ttl") * 1000),
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-    };
+    const cookieOptions = getAuthCookieOptions();
 
     res.cookie(config.get("userToken.cookieName"), token, cookieOptions);
 
@@ -151,7 +155,6 @@ const githubAuthLogin = (req, res, next) => {
  */
 const githubAuthCallback = (req, res, next) => {
   let userData;
-  const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
   let { authRedirectionUrl, isMobileApp, isV2FlagPresent, devMode } = handleRedirectUrl(req);
   try {
     return passport.authenticate("github", { session: false }, async (err, accessToken, user) => {
@@ -188,13 +191,7 @@ const githubAuthCallback = (req, res, next) => {
 
       const token = authService.generateAuthToken({ userId });
 
-      const cookieOptions = {
-        domain: rdsUiUrl.hostname,
-        expires: new Date(Date.now() + config.get("userToken.ttl") * 1000),
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-      };
+      const cookieOptions = getAuthCookieOptions();
       // respond with a cookie
       res.cookie(config.get("userToken.cookieName"), token, cookieOptions);
 
