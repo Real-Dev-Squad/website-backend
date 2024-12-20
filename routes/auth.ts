@@ -4,10 +4,15 @@ import auth from "../controllers/auth";
 import authenticate from "../middlewares/authenticate";
 import userDeviceInfoValidator from "../middlewares/validators/qrCodeAuth";
 import qrCodeAuthValidator from "../middlewares/validators/qrCodeAuth";
+import { devFlagMiddleware } from "../middlewares/devFlag";
 
 router.get("/github/login", auth.githubAuthLogin);
 
 router.get("/github/callback", auth.githubAuthCallback);
+
+router.get("/google/login", devFlagMiddleware, auth.googleAuthLogin);
+
+router.get("/google/callback", auth.googleAuthCallback);
 
 router.get("/signout", auth.signout);
 

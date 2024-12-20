@@ -37,6 +37,11 @@ module.exports = {
     clientSecret: "GITHUB_CLIENT_SECRET",
   },
 
+  googleOauth: {
+    clientId: "GOOGLE_CLIENT_ID",
+    clientSecret: "GOOGLE_CLIENT_SECRET",
+  },
+
   githubAccessToken: "GITHUB_PERSONAL_ACCESS_TOKEN",
 
   firestore: "FIRESTORE_CONFIG",
