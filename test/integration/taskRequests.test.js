@@ -212,7 +212,7 @@ describe("Task Requests", function () {
     });
 
     describe("When the user is not a super user", function () {
-      let taskrequestid;
+      let taskRequestId;
 
       before(async function () {
         userId = await addUser(member);
@@ -225,13 +225,13 @@ describe("Task Requests", function () {
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
         await userStatusModel.updateUserStatus(userId, idleUserStatus);
-        taskrequestid = (await taskRequestsModel.addOrUpdate(taskId, userId)).id;
+        taskRequestId = (await taskRequestsModel.addOrUpdate(taskId, userId)).id;
       });
 
       it("should be successful when the user is not a super user", function (done) {
         chai
           .request(app)
-          .get(`/taskRequests/${taskrequestid}`)
+          .get(`/taskRequests/${taskRequestId}`)
           .set("cookie", `${cookieName}=${jwt}`)
           .end((err, res) => {
             if (err) {

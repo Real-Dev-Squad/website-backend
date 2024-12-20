@@ -173,7 +173,6 @@ const fetchTaskRequestById = async (taskRequestId) => {
 
     if (!taskRequestData) {
       return {
-        taskRequestData,
         taskRequestExists: false,
       };
     }
