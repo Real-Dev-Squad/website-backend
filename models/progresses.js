@@ -29,7 +29,7 @@ const createProgressDocument = async (progressData) => {
   if (taskId) {
     taskTitle = await assertTaskExists(taskId);
   }
-  const query = buildQueryForPostingProgress(progressData);
+  const query = await buildQueryForPostingProgress(progressData);
   const existingDocumentSnapshot = await query.where("date", "==", progressDateTimestamp).get();
   if (!existingDocumentSnapshot.empty) {
     throw new Conflict(`${type.charAt(0).toUpperCase() + type.slice(1)} ${PROGRESS_ALREADY_CREATED}`);
@@ -77,10 +77,11 @@ const getRangeProgressData = async (queryParams) => {
  * @returns {Promise<object>} A Promise that resolves with the progress records of the queried user or task.
  * @throws {Error} If the userId or taskId is invalid or does not exist.
  **/
-async function getProgressByDate(pathParams) {
+async function getProgressByDate(pathParams, queryParams) {
   const { type, typeId, date } = pathParams;
+  const { dev } = queryParams;
   await assertUserOrTaskExists({ [TYPE_MAP[type]]: typeId });
-  const query = buildQueryToSearchProgressByDay({ [TYPE_MAP[type]]: typeId, date });
+  const query = buildQueryToSearchProgressByDay({ [TYPE_MAP[type]]: typeId, date, dev });
   const result = await query.get();
   if (!result.size) {
     throw new NotFound(PROGRESS_DOCUMENT_NOT_FOUND);

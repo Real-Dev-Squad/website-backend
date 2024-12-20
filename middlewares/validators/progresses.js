@@ -70,6 +70,9 @@ const validateGetProgressRecordsQuery = async (req, res, next) => {
         .messages({
           "string.base": "orderBy must be a string",
         }),
+      dev: joi.boolean().optional().messages({
+        "boolean.base": "dev must be a boolean",
+      }),
     })
     .xor("type", "userId", "taskId")
     .messages({
@@ -92,6 +95,7 @@ const validateGetRangeProgressRecordsParams = async (req, res, next) => {
       taskId: joi.string().optional(),
       startDate: joi.date().iso().required(),
       endDate: joi.date().iso().min(joi.ref("startDate")).required(),
+      dev: joi.boolean().optional(),
     })
     .xor("userId", "taskId")
     .messages({

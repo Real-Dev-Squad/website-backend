@@ -52,6 +52,18 @@ const stubbedModelProgressData = (userId, createdAt, date) => {
   };
 };
 
+const stubbedModelProgressDataForDev = (userData, createdAt, date) => {
+  return {
+    userData,
+    createdAt,
+    date,
+    type: "user",
+    completed: "Implemented caching mechanism for frequent API requests",
+    planned: "Refactor code to follow coding best practices",
+    blockers: "Waiting for feedback from the code review",
+  };
+};
+
 const taskProgressDay1 = (taskId) => {
   return {
     taskId,
@@ -122,6 +134,18 @@ const stubbedModelTaskProgressData = (userId, taskId, createdAt, date) => {
     blockers: "Waiting for feedback from the code review",
   };
 };
+const stubbedModelTaskProgressDataForDev = (userData, taskId, createdAt, date) => {
+  return {
+    userData,
+    taskId,
+    createdAt,
+    date,
+    type: "task",
+    completed: "Implemented caching mechanism for frequent API requests",
+    planned: "Refactor code to follow coding best practices",
+    blockers: "Waiting for feedback from the code review",
+  };
+};
 
 module.exports = {
   standupProgressDay1,
@@ -130,4 +154,6 @@ module.exports = {
   taskProgressDay1,
   incompleteTaskProgress,
   stubbedModelTaskProgressData,
+  stubbedModelProgressDataForDev,
+  stubbedModelTaskProgressDataForDev,
 };

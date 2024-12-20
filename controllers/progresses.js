@@ -48,8 +48,14 @@ const createProgress = async (req, res) => {
   const {
     body: { type, completed, planned, blockers, taskId },
   } = req;
+  const isDevFeatureEnabled = req.query.dev === "true";
+
   try {
-    const { data, taskTitle } = await createProgressDocument({ ...req.body, userId: req.userData.id });
+    const { data, taskTitle } = await createProgressDocument({
+      ...req.body,
+      [isDevFeatureEnabled ? "userData" : "userId"]: isDevFeatureEnabled ? req.userData : req.userData.id,
+    });
+
     await sendTaskUpdate(completed, blockers, planned, req.userData.username, taskId, taskTitle);
     return res.status(201).json({
       data,
@@ -217,7 +223,7 @@ const getProgressRangeData = async (req, res) => {
 
 const getProgressBydDateController = async (req, res) => {
   try {
-    const data = await getProgressByDate(req.params);
+    const data = await getProgressByDate(req.params, req.query);
     return res.json({
       message: PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
       data,

@@ -11,6 +11,7 @@ const {
   standupProgressDay1,
   incompleteProgress,
   stubbedModelProgressData,
+  stubbedModelProgressDataForDev,
 } = require("../fixtures/progress/progresses");
 
 const userData = require("../fixtures/user/user")();
@@ -154,6 +155,62 @@ describe("Test Progress Updates API for Users", function () {
           if (err) return done(err);
           expect(res).to.have.status(401);
           expect(res.body.message).to.be.equal("Unauthenticated User");
+          return done();
+        });
+    });
+  });
+
+  describe("Verify the POST progress records when dev is true", function () {
+    let clock;
+    let user;
+    let userToken;
+    let fetchMock;
+
+    beforeEach(async function () {
+      fetchMock = sinon.stub(global, "fetch");
+      clock = sinon.useFakeTimers({
+        now: new Date(Date.UTC(2023, 4, 2, 0, 25)).getTime(), // UTC time equivalent to 5:55 AM IST
+        toFake: ["Date"],
+      });
+      user = await addUser(userData[8], true);
+      userToken = authService.generateAuthToken({ userId: user.id });
+      const progressData = stubbedModelProgressDataForDev(user, 1683935200000, 1683899200000);
+      await firestore.collection("progresses").doc("anotherUserProgressDocument").set(progressData);
+    });
+
+    afterEach(function () {
+      sinon.restore();
+      clock.restore();
+    });
+
+    it("stores the user progress document with userData field", function (done) {
+      fetchMock.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({}),
+        })
+      );
+      chai
+        .request(app)
+        .post(`/progresses?dev=true`)
+        .set("cookie", `${cookieName}=${userToken}`)
+        .send(standupProgressDay1)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(201);
+          expect(res.body).to.have.keys(["message", "data"]);
+          expect(res.body.data).to.have.keys([
+            "id",
+            "userData",
+            "type",
+            "completed",
+            "planned",
+            "blockers",
+            "createdAt",
+            "date",
+          ]);
+          expect(res.body.message).to.be.equal("User Progress document created successfully.");
+          expect(res.body.data.userData.id).to.be.equal(user.id);
           return done();
         });
     });

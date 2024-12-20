@@ -12,6 +12,7 @@ const {
   taskProgressDay1,
   stubbedModelTaskProgressData,
   incompleteTaskProgress,
+  stubbedModelTaskProgressDataForDev,
 } = require("../fixtures/progress/progresses");
 
 const userData = require("../fixtures/user/user")();
@@ -162,6 +163,71 @@ describe("Test Progress Updates API for Tasks", function () {
           if (err) return done(err);
           expect(res).to.have.status(401);
           expect(res.body.message).to.be.equal("Unauthenticated User");
+          return done();
+        });
+    });
+  });
+
+  describe("Verify POST Request Functionality when dev is true", function () {
+    let clock;
+    let user;
+    let userToken;
+    let taskId1;
+    let taskId2;
+    let fetchMock;
+
+    beforeEach(async function () {
+      fetchMock = sinon.stub(global, "fetch");
+      clock = sinon.useFakeTimers({
+        now: new Date(Date.UTC(2023, 4, 2, 0, 25)).getTime(), // UTC time equivalent to 5:55 AM IST
+        toFake: ["Date"],
+      });
+      user = await addUser(userData[1], true);
+      userToken = authService.generateAuthToken({ userId: user.id });
+      const taskObject1 = await tasks.updateTask(taskData[0]);
+      taskId1 = taskObject1.taskId;
+      const taskObject2 = await tasks.updateTask(taskData[1]);
+      taskId2 = taskObject2.taskId;
+
+      const progressData = stubbedModelTaskProgressDataForDev(user, taskId1, 1682935200000, 1682899200000);
+      await firestore.collection("progresses").doc("taskProgressDoc").set(progressData);
+    });
+
+    afterEach(function () {
+      sinon.restore();
+      clock.restore();
+    });
+
+    it("Stores the task progress entry with userData field when dev is true", function (done) {
+      fetchMock.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve({}),
+        })
+      );
+      chai
+        .request(app)
+        .post(`/progresses?dev=true`)
+        .set("Cookie", `${cookieName}=${userToken}`)
+        .send(taskProgressDay1(taskId2))
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(201);
+          expect(res.body).to.have.keys(["message", "data"]);
+          expect(res.body.data).to.have.keys([
+            "id",
+            "userData",
+            "taskId",
+            "type",
+            "completed",
+            "planned",
+            "blockers",
+            "createdAt",
+            "date",
+          ]);
+          expect(res.body.message).to.be.equal("Task Progress document created successfully.");
+          expect(res.body.data.userData.id).to.be.equal(user.id);
+          expect(res.body.data.taskId).to.be.equal(taskId2);
           return done();
         });
     });

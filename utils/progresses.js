@@ -33,11 +33,19 @@ const getProgressDateTimestamp = () => {
  * @param {string} params.taskId - The ID of the task to filter progress documents by, if `type` is "task".
  * @returns {Query} A Firestore query object that filters progress documents based on the given parameters.
  */
-const buildQueryForPostingProgress = ({ type, userId, taskId }) => {
-  const query =
-    type === "user"
-      ? progressesCollection.where("type", "==", "user").where("userId", "==", userId)
-      : progressesCollection.where("type", "==", "task").where("taskId", "==", taskId);
+const buildQueryForPostingProgress = async ({ type, userId, userData, taskId }) => {
+  const id = userId || userData?.id;
+  let query;
+  if (type === "user") {
+    query = progressesCollection.where("type", "==", "user").where("userId", "==", id);
+    const QuerySnapshot = await query.get();
+    if (QuerySnapshot.empty) {
+      query = progressesCollection.where("type", "==", "user").where("userData.id", "==", id);
+    }
+  } else {
+    query = progressesCollection.where("type", "==", "task").where("taskId", "==", taskId);
+  }
+
   return query;
 };
 
@@ -101,16 +109,16 @@ const assertUserOrTaskExists = async (queryParams) => {
  * @returns {Query} A Firestore query object that filters progress documents based on the given parameters.
  */
 const buildQueryToFetchDocs = (queryParams) => {
-  const { type, userId, taskId, orderBy } = queryParams;
+  const { type, userId, taskId, orderBy, dev } = queryParams;
   const orderByField = PROGRESS_VALID_SORT_FIELDS[0];
   const isAscOrDsc = orderBy && PROGRESS_VALID_SORT_FIELDS[0] === orderBy ? "asc" : "desc";
-
+  const userField = dev ? "userData.id" : "userId";
   if (type) {
     return progressesCollection.where("type", "==", type).orderBy(orderByField, isAscOrDsc);
   } else if (userId) {
     return progressesCollection
       .where("type", "==", "user")
-      .where("userId", "==", userId)
+      .where(userField, "==", userId)
       .orderBy(orderByField, isAscOrDsc);
   } else {
     return progressesCollection
@@ -148,10 +156,11 @@ const getProgressDocs = async (query) => {
  * @throws {Error} If neither userId nor taskId is provided in the queryParams object.
  */
 const buildRangeProgressQuery = (queryParams) => {
-  const { userId, taskId, startDate, endDate } = queryParams;
+  const { userId, taskId, startDate, endDate, dev } = queryParams;
   let query = progressesCollection;
+  const userField = dev ? "userData.id" : "userId";
   if (userId) {
-    query = query.where("type", "==", "user").where("userId", "==", userId);
+    query = query.where("type", "==", "user").where(userField, "==", userId);
   } else if (taskId) {
     query = query.where("type", "==", "task").where("taskId", "==", taskId);
   } else {
@@ -202,19 +211,21 @@ const getProgressRecords = async (query, queryParams) => {
  * @returns {Query} A Firestore query object that filters progress documents based on the given parameters.
  *
  */
-const buildQueryToSearchProgressByDay = (pathParams) => {
-  const { userId, taskId, date } = pathParams;
+const buildQueryToSearchProgressByDay = ({ userId, taskId, date, dev }) => {
+  const startOfDay = new Date(date).setUTCHours(0, 0, 0, 0);
+  const endOfDay = new Date(date).setUTCHours(23, 59, 59, 999);
   let query = progressesCollection;
+  const userField = dev === "true" ? "userData.id" : "userId";
   if (userId) {
-    query = query.where("type", "==", "user").where("userId", "==", userId);
+    query = query.where("type", "==", "user").where(userField, "==", userId);
   } else {
     query = query.where("type", "==", "task").where("taskId", "==", taskId);
   }
-  const dateTimeStamp = new Date(date).setUTCHours(0, 0, 0, 0);
-  query = query.where("date", "==", dateTimeStamp).limit(1);
+
+  query = query.where("date", ">=", startOfDay).where("date", "<=", endOfDay).limit(1);
+
   return query;
 };
-
 const buildProgressQueryForMissedUpdates = (taskId, startTimestamp, endTimestamp) => {
   return progressesModel
     .where("type", "==", "task")
