@@ -45,6 +45,7 @@ const validateLazyLoadingParams = async (req, res, next) => {
     page: Joi.number().integer().min(0).optional(),
     size: Joi.number().integer().min(1).max(100).optional(),
     cursor: Joi.string().optional(),
+    dev: Joi.string().valid("true").optional(),
   });
 
   try {

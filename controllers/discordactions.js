@@ -127,54 +127,36 @@ const deleteGroupRole = async (req, res) => {
  */
 const getPaginatedAllGroupRoles = async (req, res) => {
   try {
-    const { page = 0, size = 10, cursor, dev } = req.query;
-
-    const pageNumber = parseInt(page, 10);
+    const { page = 0, size = 10, dev } = req.query;
     const limit = parseInt(size, 10) || 10;
-
+    const offset = parseInt(page, 10) * limit;
     if (limit < 1 || limit > 100) {
       return res.boom.badRequest("Invalid size. Must be between 1 and 100.");
     }
-
+    const discordId = req.userData?.discordId;
     if (dev === "true") {
-      let query = discordRolesModel.orderBy("roleid").limit(limit + 1); // Fetch one extra for `hasMore`
+      const { roles, total } = await discordRolesModel.getPaginatedGroupRolesByPage({ offset, limit });
 
-      if (cursor) {
-        const cursorDoc = await discordRolesModel.doc(cursor).get();
-        if (!cursorDoc.exists) {
-          return res.boom.badRequest("Invalid cursor.");
-        }
-        query = query.startAfter(cursorDoc);
-      }
-
-      const snapshot = await query.get();
-      const roles = snapshot.docs.slice(0, limit).map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      const nextCursor = snapshot.docs.length > limit ? snapshot.docs[limit - 1].id : null;
-      const hasMore = !!nextCursor;
-
-      const discordId = req.userData?.discordId;
       const groupsWithMembershipInfo = await discordRolesModel.enrichGroupDataWithMembershipInfo(discordId, roles);
 
-      const next = nextCursor ? `/roles?cursor=${nextCursor}&page=${pageNumber + 1}&size=${limit}` : null;
-      const prev = pageNumber > 0 ? `/roles?cursor=${cursor}&page=${pageNumber - 1}&size=${limit}` : null;
+      const nextPage = offset + limit < total ? parseInt(page, 10) + 1 : null;
+      const prevPage = page > 0 ? parseInt(page, 10) - 1 : null;
+
+      const baseUrl = `${req.baseUrl}${req.path}`;
+
+      const next = nextPage !== null ? `${baseUrl}?page=${nextPage}&size=${limit}&dev=true` : null;
+      const prev = prevPage !== null ? `${baseUrl}?page=${prevPage}&size=${limit}&dev=true` : null;
 
       return res.json({
         message: "Roles fetched successfully!",
-        data: {
-          page: pageNumber,
-          size: limit,
+        groups: groupsWithMembershipInfo,
+        links: {
           next,
           prev,
-          hasMore,
         },
-        groups: groupsWithMembershipInfo,
       });
     }
     const { groups } = await discordRolesModel.getAllGroupRoles();
-    const discordId = req.userData?.discordId;
     const groupsWithMembershipInfo = await discordRolesModel.enrichGroupDataWithMembershipInfo(discordId, groups);
     return res.json({
       message: "Roles fetched successfully!",

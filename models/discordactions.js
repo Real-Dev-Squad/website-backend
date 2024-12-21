@@ -137,12 +137,9 @@ const getAllGroupRoles = async () => {
  */
 const getPaginatedGroupRoles = async ({ cursor, limit }) => {
   try {
-    let query = discordRoleModel.orderBy("roleid").limit(limit + 1); // Fetch one extra for `hasMore`
+    let query = discordRoleModel.orderBy("date", "desc").limit(limit + 1); // Fetch one extra for `hasMore`
 
     if (cursor) {
-      if (typeof cursor !== "string" || !cursor.trim()) {
-        throw new Error("Invalid cursor: Cursor must be a non-empty string");
-      }
       const cursorDoc = await discordRoleModel.doc(cursor).get();
       if (!cursorDoc.exists) {
         throw new Error("Invalid cursor: Document does not exist");
@@ -165,6 +162,36 @@ const getPaginatedGroupRoles = async ({ cursor, limit }) => {
   } catch (err) {
     logger.error(`Error in getPaginatedGroupRoles: ${err.message}`);
     throw new Error("Database error");
+  }
+};
+
+/**
+ * Fetches paginated group roles by page and size
+ *
+ * @param {Object} options - Pagination options
+ * @param {number} options.offset - Number of items to skip
+ * @param {number} options.limit - Maximum number of roles to fetch
+ * @returns {Promise<Object>} - Paginated roles and total count
+ */
+const getPaginatedGroupRolesByPage = async ({ offset, limit }) => {
+  try {
+    const snapshot = await discordRoleModel.orderBy("date", "desc").offset(offset).limit(limit).get();
+
+    const roles = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    const totalSnapshot = await discordRoleModel.get();
+    const total = totalSnapshot.size;
+
+    return {
+      roles,
+      total,
+    };
+  } catch (err) {
+    logger.error(`Error in getPaginatedGroupRolesByPage: ${err.message}`);
+    throw new Error("Database error while paginating group roles");
   }
 };
 
@@ -1130,6 +1157,7 @@ module.exports = {
   getGroupRolesForUser,
   getAllGroupRoles,
   getPaginatedGroupRoles,
+  getPaginatedGroupRolesByPage,
   getGroupRoleByName,
   updateGroupRole,
   addGroupRoleToMember,
