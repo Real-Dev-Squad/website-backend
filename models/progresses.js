@@ -13,6 +13,7 @@ const {
   getProgressDateTimestamp,
   buildQueryToSearchProgressByDay,
 } = require("../utils/progresses");
+const { fetchUser } = require("./users");
 const { PROGRESS_ALREADY_CREATED, PROGRESS_DOCUMENT_NOT_FOUND } = PROGRESSES_RESPONSE_MESSAGES;
 
 /**
@@ -47,9 +48,31 @@ const createProgressDocument = async (progressData) => {
  * @throws {Error} If the userId or taskId is invalid or does not exist.
  **/
 const getProgressDocument = async (queryParams) => {
+  const { dev } = queryParams;
   await assertUserOrTaskExists(queryParams);
   const query = buildQueryToFetchDocs(queryParams);
   const progressDocs = await getProgressDocs(query);
+
+  if (dev) {
+    try {
+      const uniqueUserIds = [...new Set(progressDocs.map((doc) => doc.userId))];
+      const usersData = await Promise.all(uniqueUserIds.map((userId) => fetchUser({ userId })));
+
+      const userLookupMap = usersData.reduce((lookup, { user }) => {
+        if (user) lookup[user.id] = user;
+        return lookup;
+      }, {});
+
+      const progressDocsWithUserDetails = progressDocs.map((doc) => {
+        const userDetails = userLookupMap[doc.userId] || null;
+        return { ...doc, userData: userDetails };
+      });
+
+      return progressDocsWithUserDetails;
+    } catch (err) {
+      return progressDocs.map((doc) => ({ ...doc, userData: null }));
+    }
+  }
   return progressDocs;
 };
 
@@ -77,8 +100,9 @@ const getRangeProgressData = async (queryParams) => {
  * @returns {Promise<object>} A Promise that resolves with the progress records of the queried user or task.
  * @throws {Error} If the userId or taskId is invalid or does not exist.
  **/
-async function getProgressByDate(pathParams) {
+async function getProgressByDate(pathParams, queryParams) {
   const { type, typeId, date } = pathParams;
+  const { dev } = queryParams;
   await assertUserOrTaskExists({ [TYPE_MAP[type]]: typeId });
   const query = buildQueryToSearchProgressByDay({ [TYPE_MAP[type]]: typeId, date });
   const result = await query.get();
@@ -86,7 +110,13 @@ async function getProgressByDate(pathParams) {
     throw new NotFound(PROGRESS_DOCUMENT_NOT_FOUND);
   }
   const doc = result.docs[0];
-  return { id: doc.id, ...doc.data() };
+  const docData = doc.data();
+  if (dev) {
+    const { user: userData } = await fetchUser({ userId: docData.userId });
+    return { id: doc.id, ...docData, userData };
+  }
+
+  return { id: doc.id, ...docData };
 }
 
 module.exports = { createProgressDocument, getProgressDocument, getRangeProgressData, getProgressByDate };
