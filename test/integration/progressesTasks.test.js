@@ -222,6 +222,34 @@ describe("Test Progress Updates API for Tasks", function () {
         });
     });
 
+    it("Returns the progress array for the task with userData object when dev is true", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses?taskId=${taskId1}&dev=true`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.keys(["message", "data", "count"]);
+          expect(res.body.data).to.be.an("array");
+          expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
+          res.body.data.forEach((progress) => {
+            expect(progress).to.have.keys([
+              "id",
+              "taskId",
+              "type",
+              "completed",
+              "planned",
+              "blockers",
+              "userData",
+              "userId",
+              "createdAt",
+              "date",
+            ]);
+          });
+          return done();
+        });
+    });
+
     it("Gives 400 status when anything other than -date or date is supplied", function (done) {
       chai
         .request(app)
@@ -302,6 +330,35 @@ describe("Test Progress Updates API for Tasks", function () {
               "completed",
               "planned",
               "blockers",
+              "userId",
+              "createdAt",
+              "date",
+            ]);
+          });
+          return done();
+        });
+    });
+
+    it("Returns the progress array for all the tasks with userData object when dev is true", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses?type=task&dev=true`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.keys(["message", "data", "count"]);
+          expect(res.body.data).to.be.an("array");
+          expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
+          expect(res.body.count).to.be.equal(4);
+          res.body.data.forEach((progress) => {
+            expect(progress).to.have.keys([
+              "id",
+              "taskId",
+              "type",
+              "completed",
+              "planned",
+              "blockers",
+              "userData",
               "userId",
               "createdAt",
               "date",
