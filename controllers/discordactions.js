@@ -119,26 +119,52 @@ const deleteGroupRole = async (req, res) => {
 };
 
 /**
- * Gets all group-roles
+ * Fetches all group roles or provides paginated results when ?dev=true is passed.
  *
- * @param res {Object} - Express response object
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
  */
-
-const getAllGroupRoles = async (req, res) => {
+const getPaginatedAllGroupRoles = async (req, res) => {
   try {
-    const { groups } = await discordRolesModel.getAllGroupRoles();
+    const { page = 0, size = 10, dev } = req.query;
+    const limit = parseInt(size, 10) || 10;
+    const offset = parseInt(page, 10) * limit;
+
+    if (limit < 1 || limit > 100) {
+      return res.boom.badRequest("Invalid size. Must be between 1 and 100.");
+    }
+
     const discordId = req.userData?.discordId;
+    if (dev === "true") {
+      const { roles, total } = await discordRolesModel.getPaginatedGroupRolesByPage({ offset, limit });
+      const groupsWithMembershipInfo = await discordRolesModel.enrichGroupDataWithMembershipInfo(discordId, roles);
+
+      const nextPage = offset + limit < total ? parseInt(page, 10) + 1 : null;
+      const prevPage = page > 0 ? parseInt(page, 10) - 1 : null;
+
+      const baseUrl = `${req.baseUrl}${req.path}`;
+      const next = nextPage !== null ? `${baseUrl}?page=${nextPage}&size=${limit}&dev=true` : null;
+      const prev = prevPage !== null ? `${baseUrl}?page=${prevPage}&size=${limit}&dev=true` : null;
+
+      return res.json({
+        message: "Roles fetched successfully!",
+        groups: groupsWithMembershipInfo,
+        links: { next, prev },
+      });
+    }
+
+    const { groups } = await discordRolesModel.getAllGroupRoles();
     const groupsWithMembershipInfo = await discordRolesModel.enrichGroupDataWithMembershipInfo(discordId, groups);
+
     return res.json({
       message: "Roles fetched successfully!",
       groups: groupsWithMembershipInfo,
     });
   } catch (err) {
-    logger.error(`Error while getting roles: ${err}`);
+    logger.error(`Error while fetching paginated group roles: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
-
 const getGroupsRoleId = async (req, res) => {
   try {
     const { discordId } = req.userData;
@@ -534,7 +560,7 @@ const getUserDiscordInvite = async (req, res) => {
 module.exports = {
   getGroupsRoleId,
   createGroupRole,
-  getAllGroupRoles,
+  getPaginatedAllGroupRoles,
   addGroupRoleToMember,
   deleteRole,
   updateDiscordImageForVerification,
