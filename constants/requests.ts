@@ -15,6 +15,7 @@ export const REQUEST_TYPE = {
   EXTENSION: "EXTENSION",
   TASK: "TASK",
   ALL: "ALL",
+  ONBOARDING: "ONBOARDING",
 };
 
 export const REQUEST_LOG_TYPE = {
