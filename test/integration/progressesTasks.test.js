@@ -222,7 +222,7 @@ describe("Test Progress Updates API for Tasks", function () {
         });
     });
 
-    it("Returns the progress array for the task with userData object when dev is true", function (done) {
+    it("Returns the progress array for the task with userData object", function (done) {
       chai
         .request(app)
         .get(`/progresses?taskId=${taskId1}&dev=true`)
@@ -339,7 +339,7 @@ describe("Test Progress Updates API for Tasks", function () {
         });
     });
 
-    it("Returns the progress array for all the tasks with userData object when dev is true", function (done) {
+    it("Returns the progress array for all the tasks with userData object", function (done) {
       chai
         .request(app)
         .get(`/progresses?type=task&dev=true`)

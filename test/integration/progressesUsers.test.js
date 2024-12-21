@@ -226,7 +226,7 @@ describe("Test Progress Updates API for Users", function () {
         });
     });
 
-    it("Returns the progress array for a specific user with userData object when dev is true", function (done) {
+    it("Returns the progress array for a specific user with userData object", function (done) {
       chai
         .request(app)
         .get(`/progresses?userId=${userId1}&dev=true`)
@@ -424,7 +424,7 @@ describe("Test Progress Updates API for Users", function () {
         });
     });
 
-    it("Returns the progress data for a specific user with userDat object when dev is true", function (done) {
+    it("Returns the progress data for a specific user with userData object", function (done) {
       chai
         .request(app)
         .get(`/progresses/user/${userId}/date/2023-05-02?dev=true`)
