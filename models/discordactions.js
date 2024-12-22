@@ -103,70 +103,7 @@ const deleteRoleFromDatabase = async (roleId, discordId) => {
 };
 
 /**
- *
- * @param roleData { Object }: Data of the new role
- * @returns {Promise<discordRoleModel|Object>}
- */
-
-const getAllGroupRoles = async () => {
-  try {
-    const data = await discordRoleModel.get();
-    const groups = [];
-    data.forEach((doc) => {
-      const group = {
-        id: doc.id,
-        ...doc.data(),
-      };
-      groups.push(group);
-    });
-    return { groups };
-  } catch (err) {
-    logger.error("Error in getting all group-roles", err);
-    throw err;
-  }
-};
-
-/**
- * Get Paginated Group Roles
- * Fetches group roles with support for lazy loading.
- *
- * @param {Object} options - Pagination options
- * @param {string} options.cursor - Firestore document ID for cursor
- * @param {number} options.limit - Maximum number of roles to fetch
- * @returns {Promise<Object>} - Paginated roles with metadata
- */
-const getPaginatedGroupRoles = async ({ cursor, limit }) => {
-  try {
-    let query = discordRoleModel.orderBy("date", "desc").limit(limit + 1); // Fetch one extra for `hasMore`
-
-    if (cursor) {
-      const cursorDoc = await discordRoleModel.doc(cursor).get();
-      if (!cursorDoc.exists) {
-        throw new Error("Invalid cursor: Document does not exist");
-      }
-      query = query.startAfter(cursorDoc);
-    }
-
-    const snapshot = await query.get();
-    const roles = snapshot.docs.slice(0, limit).map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-    const nextCursor = snapshot.docs.length > limit ? snapshot.docs[limit - 1].id : null;
-
-    return {
-      roles,
-      nextCursor,
-      hasMore: !!nextCursor,
-    };
-  } catch (err) {
-    logger.error(`Error in getPaginatedGroupRoles: ${err.message}`);
-    throw new Error("Database error");
-  }
-};
-
-/**
- * Fetches paginated group roles by page and size
+ * Fetches paginated group roles by page and size.
  *
  * @param {Object} options - Pagination options
  * @param {number} options.offset - Number of items to skip
@@ -185,13 +122,33 @@ const getPaginatedGroupRolesByPage = async ({ offset, limit }) => {
     const totalSnapshot = await discordRoleModel.get();
     const total = totalSnapshot.size;
 
-    return {
-      roles,
-      total,
-    };
+    return { roles, total };
   } catch (err) {
     logger.error(`Error in getPaginatedGroupRolesByPage: ${err.message}`);
     throw new Error("Database error while paginating group roles");
+  }
+};
+
+/**
+ *
+ * @param roleData { Object }: Data of the new role
+ * @returns {Promise<discordRoleModel|Object>}
+ */
+const getAllGroupRoles = async () => {
+  try {
+    const data = await discordRoleModel.get();
+    const groups = [];
+    data.forEach((doc) => {
+      const group = {
+        id: doc.id,
+        ...doc.data(),
+      };
+      groups.push(group);
+    });
+    return { groups };
+  } catch (err) {
+    logger.error("Error in getting all group-roles", err);
+    throw err;
   }
 };
 
@@ -1155,9 +1112,8 @@ module.exports = {
   createNewRole,
   removeMemberGroup,
   getGroupRolesForUser,
-  getAllGroupRoles,
-  getPaginatedGroupRoles,
   getPaginatedGroupRolesByPage,
+  getAllGroupRoles,
   getGroupRoleByName,
   updateGroupRole,
   addGroupRoleToMember,

@@ -119,45 +119,43 @@ const deleteGroupRole = async (req, res) => {
 };
 
 /**
- * Get Paginated All Group Roles with Lazy Loading
- * Implements cursor-based lazy loading with "dev=true" feature flag.
+ * Fetches all group roles or provides paginated results when ?dev=true is passed.
  *
- * @param req {Object} - Express request object
- * @param res {Object} - Express response object
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
  */
 const getPaginatedAllGroupRoles = async (req, res) => {
   try {
     const { page = 0, size = 10, dev } = req.query;
     const limit = parseInt(size, 10) || 10;
     const offset = parseInt(page, 10) * limit;
+
     if (limit < 1 || limit > 100) {
       return res.boom.badRequest("Invalid size. Must be between 1 and 100.");
     }
+
     const discordId = req.userData?.discordId;
     if (dev === "true") {
       const { roles, total } = await discordRolesModel.getPaginatedGroupRolesByPage({ offset, limit });
-
       const groupsWithMembershipInfo = await discordRolesModel.enrichGroupDataWithMembershipInfo(discordId, roles);
 
       const nextPage = offset + limit < total ? parseInt(page, 10) + 1 : null;
       const prevPage = page > 0 ? parseInt(page, 10) - 1 : null;
 
       const baseUrl = `${req.baseUrl}${req.path}`;
-
       const next = nextPage !== null ? `${baseUrl}?page=${nextPage}&size=${limit}&dev=true` : null;
       const prev = prevPage !== null ? `${baseUrl}?page=${prevPage}&size=${limit}&dev=true` : null;
 
       return res.json({
         message: "Roles fetched successfully!",
         groups: groupsWithMembershipInfo,
-        links: {
-          next,
-          prev,
-        },
+        links: { next, prev },
       });
     }
+
     const { groups } = await discordRolesModel.getAllGroupRoles();
     const groupsWithMembershipInfo = await discordRolesModel.enrichGroupDataWithMembershipInfo(discordId, groups);
+
     return res.json({
       message: "Roles fetched successfully!",
       groups: groupsWithMembershipInfo,
@@ -167,7 +165,6 @@ const getPaginatedAllGroupRoles = async (req, res) => {
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
-
 const getGroupsRoleId = async (req, res) => {
   try {
     const { discordId } = req.userData;
@@ -460,7 +457,7 @@ const syncDiscordGroupRolesInFirestore = async (req, res) => {
     });
     await Promise.all(batch);
 
-    const allRolesInFirestore = await discordRolesModel.getPaginatedGroupRoles();
+    const allRolesInFirestore = await discordRolesModel.getAllGroupRoles();
 
     return res.json({
       response: allRolesInFirestore.groups,

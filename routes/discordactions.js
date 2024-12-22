@@ -3,7 +3,6 @@ const authenticate = require("../middlewares/authenticate");
 const {
   createGroupRole,
   getGroupsRoleId,
-  getPaginatedAllGroupRoles,
   addGroupRoleToMember,
   deleteRole,
   updateDiscordImageForVerification,
@@ -16,6 +15,7 @@ const {
   syncDiscordGroupRolesInFirestore,
   setRoleToUsersWith31DaysPlusOnboarding,
   deleteGroupRole,
+  getPaginatedAllGroupRoles,
 } = require("../controllers/discordactions");
 const {
   validateGroupRoleBody,
