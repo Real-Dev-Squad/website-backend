@@ -185,7 +185,7 @@ const fetchTaskRequestById = async (taskRequestId) => {
       taskRequestExists: true,
     };
   } catch (err) {
-    logger.error("Error in updating task", err);
+    logger.error("Error in fetching taskRequest by Id", err);
   }
 
   return {
