@@ -296,7 +296,7 @@ describe("UserStatus", function () {
     it("Should store the User Status in the collection", function (done) {
       chai
         .request(app)
-        .patch(`/users/status/self`)
+        .patch(`/users/status/${testUserId}`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
         .send(userStatusDataForOooState)
         .end((err, res) => {
@@ -316,6 +316,24 @@ describe("UserStatus", function () {
         .request(app)
         .patch(`/users/status/${testUserId}`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .send(userStatusDataForOooState)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(201);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User Status created successfully.");
+          expect(res.body.data.currentStatus.state).to.equal("OOO");
+          return done();
+        });
+    });
+
+    it("Should store the User Status in the collection when requested by User", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/status/${testUserId}`)
+        .set("Cookie", `${cookieName}=${testUserJwt}`)
         .send(userStatusDataForOooState)
         .end((err, res) => {
           if (err) {
@@ -350,7 +368,7 @@ describe("UserStatus", function () {
     it("Should update the User Status without reason for short duration", function (done) {
       chai
         .request(app)
-        .patch(`/users/status/self`)
+        .patch(`/users/status/${userId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send(oooStatusDataForShortDuration)
         .end((err, res) => {
@@ -398,10 +416,27 @@ describe("UserStatus", function () {
         });
     });
 
+    it("Should return 401 for unauthorized request for user and superuser", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/status/${testUserId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(userStatusDataForOooState)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("You are not authorized to perform this action.");
+          return done();
+        });
+    });
+
     it("Should return 400 for incorrect state value", function (done) {
       chai
         .request(app)
-        .patch(`/users/status/self`)
+        .patch(`/users/status/${testUserId}`)
         .set("cookie", `${cookieName}=${testUserJwt}`)
         .send(generateUserStatusData("IN_OFFICE", Date.now(), Date.now()))
         .end((err, res) => {
@@ -421,7 +456,7 @@ describe("UserStatus", function () {
       const untilDate = Date.now() + 4 * 24 * 60 * 60 * 1000;
       chai
         .request(app)
-        .patch(`/users/status/self`)
+        .patch(`/users/status/${testUserId}`)
         .set("cookie", `${cookieName}=${testUserJwt}`)
         .send(generateUserStatusData("OOO", Date.now(), Date.now(), untilDate, ""))
         .end((err, res) => {
@@ -442,7 +477,7 @@ describe("UserStatus", function () {
       const fromDate = Date.now() - 4 * 24 * 60 * 60 * 1000;
       chai
         .request(app)
-        .patch(`/users/status/self`)
+        .patch(`/users/status/${testUserId}`)
         .set("cookie", `${cookieName}=${testUserJwt}`)
         .send(generateUserStatusData("OOO", Date.now(), fromDate, "", ""))
         .end((err, res) => {
@@ -464,7 +499,7 @@ describe("UserStatus", function () {
       const untilDate = Date.now() + 5 * 24 * 60 * 60 * 1000;
       chai
         .request(app)
-        .patch(`/users/status/self`)
+        .patch(`/users/status/${testUserId}`)
         .set("cookie", `${cookieName}=${testUserJwt}`)
         .send(generateUserStatusData("OOO", Date.now(), fromDate, untilDate, "Semester Exams"))
         .end((err, res) => {
@@ -493,7 +528,7 @@ describe("UserStatus", function () {
       let untilDateInUTC = convertTimestampToUTCStartOrEndOfDay(untilDate, true);
       const response2 = await chai
         .request(app)
-        .patch(`/users/status/self`)
+        .patch(`/users/status/${testUserId}`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
         .send(generateUserStatusData("OOO", Date.now(), fromDate, untilDate, "Vacation Trip"));
       expect(response2).to.have.status(200);
@@ -510,7 +545,7 @@ describe("UserStatus", function () {
       untilDateInUTC = convertTimestampToUTCStartOrEndOfDay(untilDate, true);
       const response3 = await chai
         .request(app)
-        .patch(`/users/status/self`)
+        .patch(`/users/status/${testUserId}`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
         .send(generateUserStatusData("OOO", Date.now(), fromDate, untilDate, "New plan for vacation Trip"));
       expect(response3).to.have.status(200);
@@ -521,7 +556,10 @@ describe("UserStatus", function () {
       expect(response3.body.data.futureStatus.until).to.equal(untilDateInUTC); // 5th Dec 2022
 
       // Checking the current status
-      const response4 = await chai.request(app).get(`/users/status/self`).set("Cookie", `${cookieName}=${testUserJwt}`);
+      const response4 = await chai
+        .request(app)
+        .get(`/users/status/${testUserId}`)
+        .set("Cookie", `${cookieName}=${testUserJwt}`);
       expect(response4).to.have.status(200);
       expect(response4.body).to.be.a("object");
       expect(response4.body.message).to.equal("User Status found successfully.");
@@ -541,7 +579,7 @@ describe("UserStatus", function () {
       let untilDateInUTC = convertTimestampToUTCStartOrEndOfDay(untilDate, true);
       const response1 = await chai
         .request(app)
-        .patch(`/users/status/self`)
+        .patch(`/users/status/${testUserId}`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
         .send(generateUserStatusData("OOO", Date.now(), fromDate, untilDate, "Vacation Trip"));
       expect(response1).to.have.status(201);
@@ -558,7 +596,7 @@ describe("UserStatus", function () {
       untilDateInUTC = convertTimestampToUTCStartOrEndOfDay(untilDate, true);
       const response2 = await chai
         .request(app)
-        .patch(`/users/status/self`)
+        .patch(`/users/status/${testUserId}`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
         .send(generateUserStatusData("OOO", Date.now(), fromDate, untilDate, "Changed plan for vacation Trip"));
       expect(response2).to.have.status(200);
