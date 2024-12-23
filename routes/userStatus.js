@@ -2,7 +2,7 @@ const express = require("express");
 const {
   deleteUserStatus,
   getUserStatus,
-  updateUserStatus,
+  updateUserStatuses,
   updateAllUserStatus,
   batchUpdateUsersStatus,
   getUserStatusControllers,
@@ -24,7 +24,7 @@ const { Services } = require("../constants/bot");
 router.get("/", validateGetQueryParams, getUserStatusControllers);
 router.get("/self", authenticate, getUserStatus);
 router.get("/:userId", getUserStatus);
-router.patch("/self", authenticate, validateUserStatus, updateUserStatusController);
+router.patch("/self", authenticate, validateUserStatus, updateUserStatusController); // this route is being deprecated, please use /users/status/:userId PATCH endpoint instead.
 router.patch("/update", authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]), updateAllUserStatus);
 router.patch(
   "/batch",
@@ -32,7 +32,7 @@ router.patch(
   validateMassUpdate,
   batchUpdateUsersStatus
 );
-router.patch("/:userId", authenticate, authorizeRoles([SUPERUSER]), validateUserStatus, updateUserStatus);
+router.patch("/:userId", authenticate, validateUserStatus, updateUserStatuses);
 router.delete("/:userId", authenticate, authorizeRoles([SUPERUSER]), deleteUserStatus);
 
 module.exports = router;

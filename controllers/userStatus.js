@@ -4,6 +4,9 @@ const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const dataAccess = require("../services/dataAccessLayer");
 const userStatusModel = require("../models/userStatus");
 const { userState, CANCEL_OOO } = require("../constants/userStatus");
+const ROLES = require("../constants/roles");
+const firestore = require("../utils/firestore");
+const usersCollection = firestore.collection("users");
 
 /**
  * Deletes a new User Status
@@ -107,6 +110,11 @@ const getAllUserStatus = async (req, res) => {
 const updateUserStatus = async (req, res) => {
   try {
     const userId = getUserIdBasedOnRoute(req);
+    const userDoc = await usersCollection.doc(userId).get();
+    if (!userDoc.exists) {
+      return res.boom.notFound("The User doesn't exist.");
+    }
+
     if (userId) {
       const dataToUpdate = req.body;
       const updateStatus = await userStatusModel.updateUserStatus(userId, dataToUpdate);
@@ -240,6 +248,26 @@ const updateUserStatusController = async (req, res, next) => {
   }
 };
 
+const updateUserStatuses = async (req, res, next) => {
+  try {
+    const { id: currentUserId, roles = {} } = req.userData;
+    const isSelf = req.params.userId === currentUserId;
+    const isSuperUser = roles[ROLES.SUPERUSER];
+
+    if (isSelf || isSuperUser) {
+      if (isSelf && Object.keys(req.body).includes(CANCEL_OOO)) {
+        return await cancelOOOStatus(req, res, next);
+      }
+      return await updateUserStatus(req, res, next);
+    }
+
+    return res.boom.unauthorized("You are not authorized to perform this action.");
+  } catch (err) {
+    logger.error(`Error in updateUserStatusController: ${err}`);
+    return res.boom.badImplementation("An unexpected error occurred.");
+  }
+};
+
 module.exports = {
   deleteUserStatus,
   getUserStatus,
@@ -250,4 +278,5 @@ module.exports = {
   getUserStatusControllers,
   batchUpdateUsersStatus,
   updateUserStatusController,
+  updateUserStatuses,
 };
