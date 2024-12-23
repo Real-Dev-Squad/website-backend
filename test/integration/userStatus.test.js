@@ -416,6 +416,23 @@ describe("UserStatus", function () {
         });
     });
 
+    it("Should return 401 for unauthorized request for user and superuser", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/status/${testUserId}`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(userStatusDataForOooState)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("You are not authorized to perform this action.");
+          return done();
+        });
+    });
+
     it("Should return 400 for incorrect state value", function (done) {
       chai
         .request(app)
