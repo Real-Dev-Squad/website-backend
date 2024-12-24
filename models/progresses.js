@@ -56,7 +56,17 @@ const getProgressDocument = async (queryParams) => {
   if (dev) {
     try {
       const uniqueUserIds = [...new Set(progressDocs.map((doc) => doc.userId))];
-      const usersData = await Promise.all(uniqueUserIds.map((userId) => fetchUser({ userId })));
+      const batchSize = 500;
+
+      const batches = Array.from({ length: Math.ceil(uniqueUserIds.length / batchSize) }, (_, index) =>
+        uniqueUserIds.slice(index * batchSize, index * batchSize + batchSize)
+      );
+
+      const batchPromises = batches.map((batch) => Promise.all(batch.map((userId) => fetchUser({ userId }))));
+
+      const usersDataBatches = await Promise.all(batchPromises);
+
+      const usersData = usersDataBatches.flat();
 
       const userLookupMap = usersData.reduce((lookup, { user }) => {
         if (user) lookup[user.id] = user;
@@ -67,7 +77,6 @@ const getProgressDocument = async (queryParams) => {
         const userDetails = userLookupMap[doc.userId] || null;
         return { ...doc, userData: userDetails };
       });
-
       return progressDocsWithUserDetails;
     } catch (err) {
       return progressDocs.map((doc) => ({ ...doc, userData: null }));

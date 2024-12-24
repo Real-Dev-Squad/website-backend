@@ -250,6 +250,21 @@ describe("Test Progress Updates API for Tasks", function () {
         });
     });
 
+    it("Returns a 404 error when the task does not exist", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses?taskId=nonExistingTaskId&dev=true`)
+        .end((err, res) => {
+          if (err) return done(err);
+
+          expect(res).to.have.status(404);
+          expect(res.body).to.have.keys(["message"]);
+          expect(res.body.message).to.be.equal(`Task with id nonExistingTaskId does not exist.`);
+
+          return done();
+        });
+    });
+
     it("Gives 400 status when anything other than -date or date is supplied", function (done) {
       chai
         .request(app)
