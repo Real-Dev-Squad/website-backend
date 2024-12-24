@@ -103,6 +103,33 @@ const deleteRoleFromDatabase = async (roleId, discordId) => {
 };
 
 /**
+ * Fetches paginated group roles by page and size.
+ *
+ * @param {Object} options - Pagination options
+ * @param {number} options.offset - Number of items to skip
+ * @param {number} options.limit - Maximum number of roles to fetch
+ * @returns {Promise<Object>} - Paginated roles and total count
+ */
+const getPaginatedGroupRolesByPage = async ({ offset, limit }) => {
+  try {
+    const snapshot = await discordRoleModel.orderBy("date", "desc").offset(offset).limit(limit).get();
+
+    const roles = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    const totalSnapshot = await discordRoleModel.get();
+    const total = totalSnapshot.size;
+
+    return { roles, total };
+  } catch (err) {
+    logger.error(`Error in getPaginatedGroupRolesByPage: ${err.message}`);
+    throw new Error("Database error while paginating group roles");
+  }
+};
+
+/**
  *
  * @param roleData { Object }: Data of the new role
  * @returns {Promise<discordRoleModel|Object>}
@@ -1085,6 +1112,7 @@ module.exports = {
   createNewRole,
   removeMemberGroup,
   getGroupRolesForUser,
+  getPaginatedGroupRolesByPage,
   getAllGroupRoles,
   getGroupRoleByName,
   updateGroupRole,
