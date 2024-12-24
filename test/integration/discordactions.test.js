@@ -1224,12 +1224,10 @@ describe("Discord actions", function () {
     let userAuthToken;
 
     beforeEach(async function () {
-      // Create a standard user instead of a superuser
-      const user = await addUser(userData[0]); // Assume userData[0] is a standard user fixture
+      const user = await addUser(userData[0]);
       userId = user;
       userAuthToken = authService.generateAuthToken({ userId });
 
-      // Mock adding roles to the database
       await discordRoleModel.add(groupData[0]);
       await discordRoleModel.add(groupData[1]);
     });
@@ -1274,7 +1272,7 @@ describe("Discord actions", function () {
 
     it("should return null for next link on the last page", function (done) {
       const size = 10;
-      const page = 2; // Assume this is the last page based on dataset size
+      const page = 2;
 
       chai
         .request(app)
@@ -1291,7 +1289,7 @@ describe("Discord actions", function () {
           expect(res.body.groups).to.be.an("array");
           expect(res.body.links).to.have.keys(["next", "prev"]);
           // eslint-disable-next-line no-unused-expressions
-          expect(res.body.links.next).to.be.null; // Assert next is null
+          expect(res.body.links.next).to.be.null;
           expect(res.body.links.prev).to.equal(`/discord-actions/groups?page=${page - 1}&size=${size}&dev=true`);
           return done();
         });
@@ -1312,7 +1310,7 @@ describe("Discord actions", function () {
 
     it("should return an empty array for groups on a page with no data", function (done) {
       const size = 10;
-      const page = 100; // Assume this page exceeds the dataset size
+      const page = 100;
 
       chai
         .request(app)
@@ -1323,7 +1321,7 @@ describe("Discord actions", function () {
           expect(res.body).to.be.an("object");
           expect(res.body.message).to.equal("Roles fetched successfully!");
           // eslint-disable-next-line no-unused-expressions
-          expect(res.body.groups).to.be.an("array").that.is.empty; // Assert empty groups
+          expect(res.body.groups).to.be.an("array").that.is.empty;
           expect(res.body.links).to.have.keys(["next", "prev"]);
           // eslint-disable-next-line no-unused-expressions
           expect(res.body.links.next).to.be.null;
