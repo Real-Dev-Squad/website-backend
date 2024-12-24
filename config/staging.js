@@ -30,4 +30,9 @@ module.exports = {
       appName: "RDS_API_staging",
     },
   },
+
+  googleOauth: { 
+    clientId: "593897984816-gkcmp57l5266f4vatlpd47mgc7vnvvh9.apps.googleusercontent.com", 
+    clientSecret: "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", 
+  }
 };
