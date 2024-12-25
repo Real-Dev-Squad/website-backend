@@ -36,6 +36,7 @@ const config = require("config");
 const { generateUniqueUsername } = require("../services/users");
 const userService = require("../services/users");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
+const usersCollection = firestore.collection("users");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -714,6 +715,12 @@ const updateUser = async (req, res) => {
     const { id: profileDiffId, message } = req.body;
     const devFeatureFlag = req.query.dev === "true";
     let profileDiffData;
+
+    const userDoc = await usersCollection.doc(req.params.userId).get();
+    if (!userDoc.exists) {
+      return res.boom.notFound("The User doesn't exist.");
+    }
+
     if (devFeatureFlag) {
       profileDiffData = await profileDiffsQuery.fetchProfileDiffUnobfuscated(profileDiffId);
     } else {
@@ -1096,6 +1103,26 @@ const updateUsernames = async (req, res) => {
   }
 };
 
+const updateProfile = async (req, res) => {
+  try {
+    const { id: currentUserId, roles = {} } = req.userData;
+    const isSelf = req.params.userId === currentUserId;
+    const isSuperUser = roles[ROLES.SUPERUSER];
+    const profile = req.query.profile === "true";
+
+    if (isSelf && profile) {
+      return await updateSelf(req, res);
+    } else if (isSuperUser) {
+      return await updateUser(req, res);
+    }
+
+    return res.boom.unauthorized("You are not authorized for this action.");
+  } catch (err) {
+    logger.error(`Error in updateUserStatusController: ${err}`);
+    return res.boom.badImplementation("An unexpected error occurred.");
+  }
+};
+
 module.exports = {
   verifyUser,
   generateChaincode,
@@ -1128,4 +1155,5 @@ module.exports = {
   isDeveloper,
   getIdentityStats,
   updateUsernames,
+  updateProfile,
 };
