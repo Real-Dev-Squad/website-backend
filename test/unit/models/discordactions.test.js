@@ -20,6 +20,7 @@ const tasksModel = firestore.collection("tasks");
 const {
   createNewRole,
   getAllGroupRoles,
+  getPaginatedGroupRolesByPage,
   isGroupRoleExists,
   addGroupRoleToMember,
   deleteRoleFromDatabase,
@@ -1296,6 +1297,49 @@ describe("discordactions", function () {
       } catch (err) {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal("Database error");
+      }
+    });
+  });
+
+  describe("getPaginatedGroupRolesByPage", function () {
+    let orderByStub, offsetStub, limitStub, getStub;
+
+    beforeEach(function () {
+      orderByStub = sinon.stub();
+      offsetStub = sinon.stub();
+      limitStub = sinon.stub();
+      getStub = sinon.stub();
+
+      orderByStub.returns({ offset: offsetStub });
+      offsetStub.returns({ limit: limitStub });
+      limitStub.returns({ get: getStub });
+
+      sinon.stub(discordRoleModel, "orderBy").returns(orderByStub);
+    });
+
+    afterEach(function () {
+      sinon.restore();
+    });
+
+    it("should return an empty array if no roles are found", async function () {
+      getStub.resolves({ docs: [] });
+
+      const result = await getPaginatedGroupRolesByPage({ offset: 0, limit: 10 });
+
+      expect(result).to.deep.equal({
+        roles: [],
+        total: 0,
+      });
+    });
+
+    it("should throw an error if a database error occurs", async function () {
+      getStub.rejects(new Error("Database error"));
+
+      try {
+        await getPaginatedGroupRolesByPage({ offset: 0, limit: 10 });
+      } catch (err) {
+        expect(err).to.be.instanceOf(Error);
+        expect(err.message).to.equal("Database error while paginating group roles");
       }
     });
   });
