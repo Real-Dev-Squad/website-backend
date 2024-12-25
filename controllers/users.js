@@ -1110,7 +1110,7 @@ const updateProfile = async (req, res) => {
     const isSuperUser = roles[ROLES.SUPERUSER];
     const profile = req.query.profile === "true";
 
-    if (isSelf && profile) {
+    if (isSelf && profile && req.query.dev === "true") {
       return await updateSelf(req, res);
     } else if (isSuperUser) {
       return await updateUser(req, res);

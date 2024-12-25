@@ -1827,7 +1827,7 @@ describe("Users", function () {
     it("Should update the user", function (done) {
       chai
         .request(app)
-        .patch(`/users/${userId}?profile=true`)
+        .patch(`/users/${userId}?profile=true&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           first_name: "Test first_name",
@@ -1846,7 +1846,7 @@ describe("Users", function () {
     it("Should update the user status", function (done) {
       chai
         .request(app)
-        .patch(`/users/${userId}?profile=true`)
+        .patch(`/users/${userId}?profile=true&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           status: "ooo",
@@ -1865,7 +1865,7 @@ describe("Users", function () {
     it("Should update the username with valid username", function (done) {
       chai
         .request(app)
-        .patch(`/users/${userId}?profile=true`)
+        .patch(`/users/${userId}?profile=true&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           username: "validUsername123",
@@ -1881,12 +1881,12 @@ describe("Users", function () {
         });
     });
 
-    it("Should allow updating user role when in_discord is not present and  is not developer", function (done) {
+    it("Should allow updating user role when in_discord is not present and is not developer", function (done) {
       addUser(newUser).then((newUserId) => {
         const newUserJwt = authService.generateAuthToken({ userId: newUserId });
         chai
           .request(app)
-          .patch(`/users/${newUserId}?profile=true`)
+          .patch(`/users/${newUserId}?profile=true&dev=true`)
           .set("cookie", `${cookieName}=${newUserJwt}`)
           .send({
             roles: {
@@ -1919,7 +1919,7 @@ describe("Users", function () {
 
       const updateRolesResponse = await chai
         .request(app)
-        .patch(`/users/${newUserId}?profile=true`)
+        .patch(`/users/${newUserId}?profile=true&dev=true`)
         .set("cookie", `${cookieName}=${newUserJwt}`)
         .send({
           roles: {
@@ -1943,7 +1943,7 @@ describe("Users", function () {
     it("Should not update the user roles when user has in_discord and developer true", function (done) {
       chai
         .request(app)
-        .patch(`/users/${userId}?profile=true`)
+        .patch(`/users/${userId}?profile=true&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           roles: {
@@ -1964,7 +1964,7 @@ describe("Users", function () {
     it("Should return 400 for invalid status value", function (done) {
       chai
         .request(app)
-        .patch(`/users/${userId}?profile=true`)
+        .patch(`/users/${userId}?profile=true&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           status: "blah",
@@ -1989,7 +1989,7 @@ describe("Users", function () {
     it("Should return 400 if required roles is missing", function (done) {
       chai
         .request(app)
-        .patch(`/users/${userId}?profile=true`)
+        .patch(`/users/${userId}?profile=true&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           roles: {
@@ -2011,7 +2011,7 @@ describe("Users", function () {
     it("Should return 400 if invalid roles", function (done) {
       chai
         .request(app)
-        .patch(`/users/${userId}?profile=true`)
+        .patch(`/users/${userId}?profile=true&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           roles: {
@@ -2034,7 +2034,7 @@ describe("Users", function () {
     it("Should return 400 for invalid username", function (done) {
       chai
         .request(app)
-        .patch(`/users/${userId}?profile=true`)
+        .patch(`/users/${userId}?profile=true&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           username: "@invalidUser-name",
@@ -2059,7 +2059,7 @@ describe("Users", function () {
     it("Should update the social id with valid social id", function (done) {
       chai
         .request(app)
-        .patch(`/users/${userId}?profile=true`)
+        .patch(`/users/${userId}?profile=true&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           twitter_id: "Valid_twitterId",
@@ -2077,7 +2077,7 @@ describe("Users", function () {
     it("Should return 400 for invalid Twitter ID", function (done) {
       chai
         .request(app)
-        .patch(`/users/${userId}?profile=true`)
+        .patch(`/users/${userId}?profile=true&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           twitter_id: "invalid@twitter_id",
@@ -2102,7 +2102,7 @@ describe("Users", function () {
     it("Should return 400 for invalid Linkedin ID", function (done) {
       chai
         .request(app)
-        .patch(`/users/${userId}?profile=true`)
+        .patch(`/users/${userId}?profile=true&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           linkedin_id: "invalid@linkedin_id",
@@ -2127,7 +2127,7 @@ describe("Users", function () {
     it("Should return 400 for invalid instagram ID", function (done) {
       chai
         .request(app)
-        .patch(`/users/${userId}?profile=true`)
+        .patch(`/users/${userId}?profile=true&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           instagram_id: "invalid@instagram_id",
@@ -2152,7 +2152,7 @@ describe("Users", function () {
     it("Should return 400 is space is included in the social ID", function (done) {
       chai
         .request(app)
-        .patch(`/users/${userId}?profile=true`)
+        .patch(`/users/${userId}?profile=true&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           linkedin_id: "Linkedin 123",
