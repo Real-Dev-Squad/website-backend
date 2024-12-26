@@ -1294,6 +1294,337 @@ describe("Tasks", function () {
     });
   });
 
+  describe("PATCH /tasks/:id/status", function () {
+    const taskStatusData = {
+      status: "AVAILABLE",
+      percentCompleted: 50,
+    };
+
+    const taskData = {
+      title: "Test task",
+      type: "feature",
+      endsOn: 1234,
+      startedOn: 4567,
+      status: "VERIFIED",
+      percentCompleted: 10,
+      participants: [],
+      completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+      lossRate: { [DINERO]: 1 },
+      isNoteworthy: true,
+    };
+
+    it("Should throw 400 Bad Request if the user tries to update the status of a task to AVAILABLE", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/${taskId1}/status?dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(taskStatusData)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.error).to.equal("Bad Request");
+          expect(res.body.message).to.equal("The value for the 'status' field is invalid.");
+          return done();
+        });
+    });
+
+    it("Should update the task status for given self taskid", function (done) {
+      taskStatusData.status = "IN_PROGRESS";
+      chai
+        .request(app)
+        .patch(`/tasks/${taskId1}/status?dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(taskStatusData)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.taskLog).to.have.property("type");
+          expect(res.body.taskLog).to.have.property("id");
+          expect(res.body.taskLog.body).to.be.a("object");
+          expect(res.body.taskLog.meta).to.be.a("object");
+          expect(res.body.message).to.equal("Task updated successfully!");
+
+          expect(res.body.taskLog.body.new.status).to.equal(taskStatusData.status);
+          expect(res.body.taskLog.body.new.percentCompleted).to.equal(taskStatusData.percentCompleted);
+          return done();
+        });
+    });
+
+    it("Should update the task status for given self taskid under feature flag", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/${taskId1}/status?dev=true&userStatusFlag=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ status: "DONE", percentCompleted: 100 })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body.taskLog).to.have.property("type");
+          expect(res.body.taskLog).to.have.property("id");
+          expect(res.body.taskLog.body).to.be.a("object");
+          expect(res.body.taskLog.meta).to.be.a("object");
+          expect(res.body.message).to.equal("Task updated successfully!");
+
+          expect(res.body.taskLog.body.new.status).to.equal("DONE");
+          expect(res.body.taskLog.body.new.percentCompleted).to.equal(100);
+          return done();
+        });
+    });
+
+    it("Should return fail response if task data has non-acceptable status value to update the task status for given self taskid", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/${taskId1}/status?dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, status: "invalidStatus" })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.error).to.equal("Bad Request");
+          return done();
+        });
+    });
+
+    it("Should return fail response if percentage is < 0 or  > 100", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/${taskId1}/status?dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, percentCompleted: -10 })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.error).to.equal("Bad Request");
+          return done();
+        });
+    });
+
+    it("Should return 404 if task doesnt exist", function (done) {
+      taskStatusData.status = "IN_PROGRESS";
+      chai
+        .request(app)
+        .patch(`/tasks/wrongtaskId/status?dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(taskStatusData)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(404);
+          expect(res.body.message).to.equal("Task doesn't exist");
+          return done();
+        });
+    });
+
+    it("Should return Forbidden error if task is not assigned to self", async function () {
+      const userId = await addUser(userData[0]);
+      const jwt = authService.generateAuthToken({ userId });
+
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId1}/status?dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`);
+
+      expect(res).to.have.status(403);
+      expect(res.body.message).to.equal("This task is not assigned to you");
+    });
+
+    it("Should give error for no cookie", function (done) {
+      chai
+        .request(app)
+        .patch(`/tasks/${taskId1}/status?dev=true`)
+        .send(taskStatusData)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(401);
+          expect(res.body.message).to.be.equal("Unauthenticated User");
+          return done();
+        });
+    });
+
+    it("Should give 403 if status is already 'VERIFIED' ", async function () {
+      taskStatusData.status = "IN_PROGRESS";
+      taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}/status?dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(taskStatusData);
+
+      expect(res).to.have.status(403);
+      expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
+    });
+
+    it("Should give 403 if new status is 'MERGED' ", async function () {
+      taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}/status?dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, status: "MERGED" });
+
+      expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
+    });
+
+    it("Should give 403 if new status is 'BACKLOG' ", async function () {
+      taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}/status?dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, status: "BACKLOG" });
+
+      expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
+    });
+
+    it("Should give 400 if percentCompleted is not 100 and new status is COMPLETED ", async function () {
+      taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}/status?dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, status: "COMPLETED" });
+
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.be.equal("Status cannot be updated as progress of task is not 100%.");
+    });
+
+    it("Should give 403 if current task status is DONE", async function () {
+      taskId = (await tasks.updateTask({ ...taskData, status: "DONE", assignee: appOwner.username })).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}/status?dev=true&userStatusFlag=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, status: "IN_REVIEW" });
+
+      expect(res.body.message).to.be.equal("Status cannot be updated. Please contact admin.");
+      expect(res).to.have.status(403);
+    });
+
+    it("Should give 400 if percentCompleted is not 100 and new status is VERIFIED ", async function () {
+      taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}/status?dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...taskStatusData, status: "VERIFIED" });
+
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.be.equal("Status cannot be updated as progress of task is not 100%.");
+    });
+
+    it("Should give 400 if status is COMPLETED and newpercent is less than 100", async function () {
+      const taskData = {
+        title: "Test task",
+        type: "feature",
+        endsOn: 1234,
+        startedOn: 4567,
+        status: "completed",
+        percentCompleted: 100,
+        participants: [],
+        assignee: appOwner.username,
+        completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+        lossRate: { [DINERO]: 1 },
+        isNoteworthy: true,
+      };
+      taskId = (await tasks.updateTask(taskData)).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}/status?dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ percentCompleted: 80 });
+
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.be.equal("Task percentCompleted can't updated as status is COMPLETED");
+    });
+
+    it("Should give 400 if current status of task is In Progress  and new status is not Blocked and both current and new percentCompleted are not 100 ", async function () {
+      const newDate = { ...updateTaskStatus[0], status: "IN_PROGRESS", percentCompleted: 80 };
+      taskId = (await tasks.updateTask(newDate)).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}/status?dev=true&userStatusFlag=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ status: "NEEDS_REVIEW" });
+
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.be.equal(
+        "The status of task can not be changed from In progress until progress of task is not 100%."
+      );
+    });
+
+    it("Should give 400 if new status of task is In Progress and current status of task is not Blocked and both current and new percentCompleted are not 0 ", async function () {
+      const newDate = { ...updateTaskStatus[0], status: "NEEDS_REVIEW", percentCompleted: 100 };
+      taskId = (await tasks.updateTask(newDate)).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}/status?dev=true&userStatusFlag=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ status: "IN_PROGRESS" });
+
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.be.equal(
+        "The status of task can not be changed to In progress until progress of task is not 0%."
+      );
+    });
+
+    it("Should give 400 if current status of task is Blocked and new status is not In Progress and both current and new percentCompleted are not 100 ", async function () {
+      const newDate = { ...updateTaskStatus[0], status: "BLOCKED", percentCompleted: 52 };
+      taskId = (await tasks.updateTask(newDate)).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}/status?dev=true&userStatusFlag=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ status: "NEEDS_REVIEW" });
+
+      expect(res).to.have.status(400);
+      expect(res.body.message).to.be.equal(
+        "The status of task can not be changed from Blocked until progress of task is not 100%."
+      );
+    });
+
+    it("Should give 200 if new status of task is In Progress and current status of task is Blocked", async function () {
+      const newDate = { ...updateTaskStatus[0], status: "BLOCKED", percentCompleted: 56 };
+      taskId = (await tasks.updateTask(newDate)).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}/status?dev=true&userStatusFlag=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ status: "IN_PROGRESS" });
+
+      expect(res).to.have.status(200);
+      expect(res.body.message).to.be.equal("Task updated successfully!");
+    });
+
+    it("Should give 200 if new status of task is Blocked and current status of task is In Progress", async function () {
+      const newDate = { ...updateTaskStatus[0], status: "IN_PROGRESS", percentCompleted: 59 };
+      taskId = (await tasks.updateTask(newDate)).taskId;
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/${taskId}/status?dev=true&userStatusFlag=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ status: "BLOCKED" });
+
+      expect(res).to.have.status(200);
+      expect(res.body.message).to.be.equal("Task updated successfully!");
+    });
+  });
+
   describe("GET /tasks/overdue", function () {
     it("Should return all the overdue Tasks", async function () {
       await tasks.updateTask(tasksData[0]);

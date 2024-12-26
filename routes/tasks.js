@@ -17,6 +17,7 @@ const { cacheResponse, invalidateCache } = require("../utils/cache");
 const { ALL_TASKS } = require("../constants/cacheKeys");
 const { verifyCronJob } = require("../middlewares/authorizeBot");
 const { CLOUDFLARE_WORKER, CRON_JOB_HANDLER } = require("../constants/bot");
+const { devFlagMiddleware } = require("../middlewares/devFlag");
 
 const oldAuthorizationMiddleware = authorizeRoles([APPOWNER, SUPERUSER]);
 const newAuthorizationMiddleware = authorizeAndAuthenticate(
@@ -59,6 +60,16 @@ router.get("/:username", tasks.getUserTasks);
 router.patch(
   "/self/:id",
   authenticate,
+  invalidateCache({ invalidationKeys: [ALL_TASKS] }),
+  updateSelfTask,
+  tasks.updateTaskStatus,
+  assignTask
+); // this route is being deprecated in favor of /tasks/:id/status, please use this new route.
+
+router.patch(
+  "/:id/status",
+  authenticate,
+  devFlagMiddleware,
   invalidateCache({ invalidationKeys: [ALL_TASKS] }),
   updateSelfTask,
   tasks.updateTaskStatus,
