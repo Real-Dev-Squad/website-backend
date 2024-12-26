@@ -30,6 +30,10 @@ module.exports = {
     identity_store_id: "test-identity-store-id",
   },
 
+  googleOauth: {
+    clientId: "cliendId",
+    clientSecret: "clientSecret",
+  },
   firestore: `{
     "type": "service_account",
     "project_id": "test-project-id-for-emulator",
