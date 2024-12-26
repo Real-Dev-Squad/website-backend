@@ -53,7 +53,7 @@ describe("Tasks services", function () {
       const res = await updateTaskStatusToDone(tasks);
 
       expect(res).to.deep.equal({
-        totalUpdatedStatus: 8,
+        totalUpdatedStatus: 9,
         totalOperationsFailed: 0,
         updatedTaskDetails: taskDetails,
         failedTaskDetails: [],
