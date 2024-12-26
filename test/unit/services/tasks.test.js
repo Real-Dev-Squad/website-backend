@@ -73,7 +73,7 @@ describe("Tasks services", function () {
 
       expect(res).to.deep.equal({
         totalUpdatedStatus: 0,
-        totalOperationsFailed: 8,
+        totalOperationsFailed: 9,
         updatedTaskDetails: [],
         failedTaskDetails: taskDetails,
       });
