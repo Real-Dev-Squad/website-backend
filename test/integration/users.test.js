@@ -1782,9 +1782,9 @@ describe("Users", function () {
             return done(err);
           }
 
-          expect(res).to.have.status(401);
-          expect(res.body.error).to.be.equal("Unauthorized");
-          expect(res.body.message).to.be.equal("You are not authorized for this action.");
+          expect(res).to.have.status(400);
+          expect(res.body.error).to.be.equal("Bad Request");
+          expect(res.body.message).to.be.equal("Invalid Request.");
           return done();
         });
     });

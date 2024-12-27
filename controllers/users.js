@@ -1116,7 +1116,7 @@ const updateProfile = async (req, res) => {
       return await updateUser(req, res);
     }
 
-    return res.boom.unauthorized("You are not authorized for this action.");
+    return res.boom.badRequest("Invalid Request.");
   } catch (err) {
     logger.error(`Error in updateUserStatusController: ${err}`);
     return res.boom.badImplementation("An unexpected error occurred.");
