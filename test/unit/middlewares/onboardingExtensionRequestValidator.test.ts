@@ -22,7 +22,6 @@ describe("Onboarding Extension Request Validators", () => {
             numberOfDays: 1,
             reason: "This is reason",
             userId: "22222",
-            requestedBy: "1111",
             type: REQUEST_TYPE.ONBOARDING
         }
         it("should validate for a valid create request", async () => {
