@@ -164,7 +164,7 @@ describe("/requests Onboarding Extension", () => {
             .end((err, res) => {
                 if (err) return done(err);
                 expect(res.statusCode).to.equal(401);
-                expect(res.body.error).to.equal("Unauthorized Request");
+                expect(res.body.error).to.equal("Unauthorized");
                 expect(res.body.message).to.equal(UNAUTHORIZED_TO_CREATE_ONBOARDING_EXTENSION_REQUEST);
                 done();
             })
