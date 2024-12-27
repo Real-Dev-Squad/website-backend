@@ -14,12 +14,13 @@ const { Services } = require("../constants/bot");
 const authenticateProfile = require("../middlewares/authenticateProfile");
 const { devFlagMiddleware } = require("../middlewares/devFlag");
 const { userAuthorization } = require("../middlewares/userAuthorization");
+const conditionalMiddleware = require("../middlewares/conditionalMiddleware");
 
 router.post("/", authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]), users.markUnverified);
 router.post("/update-in-discord", authenticate, authorizeRoles([SUPERUSER]), users.setInDiscordScript);
 router.post("/verify", authenticate, users.verifyUser);
 router.get("/userId/:userId", users.getUserById);
-router.patch("/self", authenticate, userValidator.updateUser, users.updateSelf);
+router.patch("/self", authenticate, userValidator.updateUser, users.updateSelf); // this route is being deprecated soon, please use alternate available `/users/:userId?profile=true` PATCH endpoint.
 router.get("/", authenticateProfile(authenticate), userValidator.getUsers, users.getUsers);
 router.get("/self", authenticate, users.getSelfDetails);
 router.get("/isDeveloper", authenticate, users.isDeveloper);
@@ -75,7 +76,7 @@ router.patch(
 router.get("/picture/:id", authenticate, authorizeRoles([SUPERUSER]), users.getUserImageForVerification);
 router.patch("/profileURL", authenticate, userValidator.updateProfileURL, users.profileURL);
 router.patch("/rejectDiff", authenticate, authorizeRoles([SUPERUSER]), users.rejectProfileDiff);
-router.patch("/:userId", authenticate, authorizeRoles([SUPERUSER]), users.updateUser);
+router.patch("/:userId", authenticate, conditionalMiddleware(userValidator.updateUser), users.updateProfile);
 router.get("/suggestedUsers/:skillId", authenticate, authorizeRoles([SUPERUSER]), users.getSuggestedUsers);
 module.exports = router;
 router.post("/batch-username-update", authenticate, authorizeRoles([SUPERUSER]), users.updateUsernames);
