@@ -6,6 +6,7 @@ const {
   fetchTaskRequests,
   approveTaskRequest,
   fetchPaginatedTaskRequests,
+  fetchTaskRequestById,
   addNewFields,
   removeOldField,
   addUsersCountAndCreatedAt,
@@ -194,6 +195,31 @@ describe("Task requests | models", function () {
       const requestData = { ...mockData.taskRequestData };
       const result = await createRequest(requestData, authenticatedUsername);
       expect(result.isCreationRequestApproved).to.be.equal(true);
+    });
+  });
+
+  describe("fetchTaskRequestById", function () {
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("should return task request data when task request exists", async function () {
+      const requestData = mockData.taskRequestData;
+      const addedTaskRequest = await createRequest(requestData, "testUser");
+      const result = await fetchTaskRequestById(addedTaskRequest.id);
+      const assert = require("chai").assert;
+      assert.isTrue(result.taskRequestExists, "Task request should exist");
+
+      expect(result.taskRequestExists).to.be.equal(true);
+      expect(result.taskRequestData.id).to.equal(addedTaskRequest.id);
+    });
+
+    it("should return taskRequestExists as false when task request does not exist", async function () {
+      const mockTaskRequestId = "taskRequest1234";
+      const requestData = mockData.taskRequestData;
+      await createRequest(requestData, "testUser");
+      const result = await fetchTaskRequestById(mockTaskRequestId);
+      expect(result.taskRequestExists).to.be.equal(false);
     });
   });
 
