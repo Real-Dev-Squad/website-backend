@@ -1,10 +1,12 @@
 import {
   ERROR_WHILE_CREATING_REQUEST,
   LOG_ACTION,
+  ONBOARDING_REQUEST_CREATED_SUCCESSFULLY,
   REQUEST_ALREADY_PENDING,
   REQUEST_LOG_TYPE,
   REQUEST_STATE,
   REQUEST_TYPE,
+  UNAUTHORIZED_TO_CREATE_ONBOARDING_EXTENSION_REQUEST,
 } from "../constants/requests";
 import { userState } from "../constants/userStatus";
 import { addLog } from "../models/logs";
@@ -24,23 +26,11 @@ export const createOnboardingExtensionRequestController = async (req: Onboarding
       return res.boom.notFound("User not found");
     }
 
-    const { id: userId, discordId: userDiscordId, discordJoinedAt, username} = user as User;
+    const { id: userId, discordJoinedAt, username} = user as User;
     const { data: userStatus } =  await getUserStatus(userId);
 
     if(!userStatus || userStatus.currentStatus.state != userState.ONBOARDING){
-      return res.boom.badRequest("User does not have onboarding status");
-    }
-
-    const requestedUserResponse = await fetchUser({discordId: data.requestedBy});
-    
-    if(!requestedUserResponse.userExists) {
-      return res.boom.notFound("User not found");
-    }
-
-    const {roles, discordId: requestedUserDiscordId} = requestedUserResponse.user as User;
-
-    if(!(roles?.super_user || (requestedUserDiscordId === userDiscordId))){
-      return res.boom.unauthorized("Only super user and onboarding user are authorized to create an onboarding extension request");
+      return res.boom.unauthorized(UNAUTHORIZED_TO_CREATE_ONBOARDING_EXTENSION_REQUEST);
     }
 
     const latestExtensionRequest: OnboardingExtension = await getRequestByKeyValues({
@@ -98,7 +88,7 @@ export const createOnboardingExtensionRequestController = async (req: Onboarding
     await addLog(onboardingExtensionLog.type, onboardingExtensionLog.meta, onboardingExtensionLog.body);
 
     return res.status(201).json({
-      message: "Onboarding extension request created successfully!",  
+      message: ONBOARDING_REQUEST_CREATED_SUCCESSFULLY,  
       data: {
         id: onboardingExtension.id,
         ...onboardingExtension,
