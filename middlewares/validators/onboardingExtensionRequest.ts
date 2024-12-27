@@ -28,10 +28,6 @@ export const createOnboardingExtensionRequestValidator = async (
         "string.empty": "type cannot be empty",
         "any.required": "type is required",
       }),
-      requestedBy: joi.string().required().messages({
-        "string.empty": "requestedBy cannot be empty",
-        "any.required": "requestedBy is required",
-      }),
       userId: joi.string().required().messages({
         "string.empty": "userId cannot be empty",
         "any.required": "userId is required"

@@ -22,7 +22,6 @@ export type OnboardingExtension = {
 export type CreateOnboardingExtensionBody = {
     type: string;
     numberOfDays: number;
-    requestedBy: string;
     userId: string;
     reason: string;
 }
