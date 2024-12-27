@@ -7,9 +7,9 @@ describe("skipAuthenticateForOnboardingExtensionRequest Middleware", () => {
     let req, res, next, authenticate: sinon.SinonSpy, verifyDiscordBot: sinon.SinonSpy;
     let middleware;
     beforeEach(() => {
-        middleware = skipAuthenticateForOnboardingExtensionRequest(authenticate, verifyDiscordBot);
         authenticate = sinon.spy();
         verifyDiscordBot = sinon.spy();
+        middleware = skipAuthenticateForOnboardingExtensionRequest(authenticate, verifyDiscordBot);
         req = {
             body:{},
             query:{},
