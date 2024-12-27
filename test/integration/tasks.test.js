@@ -28,9 +28,15 @@ const { logType } = require("../../constants/logs");
 const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
 const tasksService = require("../../services/tasks");
 chai.use(chaiHttp);
+const tags = require("../../models/tags");
+const levels = require("../../models/levels");
+const items = require("../../models/items");
+const taskController = require("../../controllers/tasks");
 
 const appOwner = userData[3];
 const superUser = userData[4];
+const genZUser = userData[20];
+const testUser = userData[2];
 
 let jwt, superUserJwt;
 const { createProgressDocument } = require("../../models/progresses");
@@ -77,14 +83,40 @@ const taskData = [
   },
 ];
 
+const tagData = {
+  reason: "adding skills to users",
+  name: "EMBER",
+  type: "SKILL",
+  createdBy: "",
+  date: new Date().getTime(),
+};
+
+const itemData = {
+  itemId: "",
+  itemType: "TASK",
+  tagPayload: [
+    {
+      tagId: "",
+      levelId: "",
+    },
+  ],
+};
+
+const levelData = {
+  name: "1",
+  value: 1,
+};
+
 describe("Tasks", function () {
-  let taskId1, taskId;
+  let taskId1, taskId, testUserId, testUserjwt;
 
   before(async function () {
     const userId = await addUser(appOwner);
     const superUserId = await addUser(superUser);
+    testUserId = await addUser(testUser);
     jwt = authService.generateAuthToken({ userId });
     superUserJwt = authService.generateAuthToken({ userId: superUserId });
+    testUserjwt = authService.generateAuthToken({ userId: testUserId });
 
     // Add the active task
     taskId = (await tasks.updateTask(taskData[0])).taskId;
@@ -1694,6 +1726,83 @@ describe("Tasks", function () {
       sinon.stub(tasksService, "fetchOrphanedTasks").rejects(new Error(INTERNAL_SERVER_ERROR));
 
       const res = await chai.request(app).get("/tasks?orphaned=true&dev=true");
+
+      expect(res).to.have.status(500);
+      expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
+    });
+  });
+
+  describe("PATCH /tasks/assign/:userId", function () {
+    let taskData, genZUserJwt, genZUserId;
+
+    beforeEach(async function () {
+      genZUserId = await addUser(genZUser);
+      genZUserJwt = authService.generateAuthToken({ userId: genZUserId });
+      taskData = tasksData[8];
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+      sinon.restore();
+    });
+
+    it("Should not assign a task to the user if they do not have status idle", async function () {
+      await tasks.updateTask(taskData);
+
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/assign/${testUserId}?dev=true`)
+        .set("cookie", `${cookieName}=${testUserjwt}`)
+        .send();
+
+      expect(res).to.have.status(200);
+      expect(res.body.message).to.be.equal("Task cannot be assigned to users with active or OOO status");
+    });
+
+    it("Should not assign a task to the user if task doesn't exist", async function () {
+      await tasks.updateTask(taskData);
+
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/assign/${genZUserId}?dev=true`)
+        .set("cookie", `${cookieName}=${genZUserJwt}`)
+        .send();
+
+      expect(res).to.have.status(200);
+      expect(res.body.message).to.be.equal("Task not found");
+    });
+
+    it("Should assign task to the user if their status is idle and task is available", async function () {
+      const taskAdd = await tasks.updateTask(taskData);
+      const levelAdd = await levels.addLevel(levelData);
+
+      tagData.createdBy = genZUserId;
+      const tagAdd = await tags.addTag(tagData);
+
+      itemData.itemId = taskAdd.taskId;
+      itemData.tagPayload[0].tagId = tagAdd.id;
+      itemData.tagPayload[0].levelId = levelAdd.id;
+
+      await items.addTagsToItem(itemData);
+
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/assign/${genZUserId}?dev=true`)
+        .set("cookie", `${cookieName}=${genZUserJwt}`)
+        .send();
+
+      expect(res).to.have.status(200);
+      expect(res.body.message).to.be.equal("Task assigned");
+    });
+
+    it("Should throw an error if Firestore batch operations fail", async function () {
+      sinon.stub(taskController, "assignTask").rejects(new Error(INTERNAL_SERVER_ERROR));
+
+      const res = await chai
+        .request(app)
+        .patch(`/tasks/assign/${genZUserId}?dev=true`)
+        .set("cookie", `${cookieName}=${genZUserJwt}`)
+        .send();
 
       expect(res).to.have.status(500);
       expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
