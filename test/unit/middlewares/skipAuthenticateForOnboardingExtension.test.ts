@@ -5,8 +5,9 @@ import { assert } from "chai";
 
 describe("skipAuthenticateForOnboardingExtensionRequest Middleware", () => {
     let req, res, next, authenticate: sinon.SinonSpy, verifyDiscordBot: sinon.SinonSpy;
-
+    let middleware;
     beforeEach(() => {
+        middleware = skipAuthenticateForOnboardingExtensionRequest(authenticate, verifyDiscordBot);
         authenticate = sinon.spy();
         verifyDiscordBot = sinon.spy();
         req = {
@@ -18,7 +19,6 @@ describe("skipAuthenticateForOnboardingExtensionRequest Middleware", () => {
 
     it("should call authenticate when type is not onboarding", () => {
         req.body.type = REQUEST_TYPE.TASK
-        const middleware = skipAuthenticateForOnboardingExtensionRequest(authenticate, verifyDiscordBot);
         middleware(req, res, next);
 
         assert.isTrue(authenticate.calledOnce, "authenticate should be called once");
@@ -29,7 +29,6 @@ describe("skipAuthenticateForOnboardingExtensionRequest Middleware", () => {
         req.query.dev = "false";
         req.body.type = REQUEST_TYPE.ONBOARDING;
 
-        const middleware = skipAuthenticateForOnboardingExtensionRequest(authenticate, verifyDiscordBot);
         middleware(req, res, next);
 
         assert.isTrue(verifyDiscordBot.notCalled, "verifyDiscordBot should not be called");
@@ -40,7 +39,6 @@ describe("skipAuthenticateForOnboardingExtensionRequest Middleware", () => {
         req.query.dev = "true";
         req.body.type = REQUEST_TYPE.ONBOARDING;
 
-        const middleware = skipAuthenticateForOnboardingExtensionRequest(authenticate, verifyDiscordBot);
         middleware(req, res, next);
 
         assert.isTrue(verifyDiscordBot.calledOnce, "verifyDiscordBot should be called once");
