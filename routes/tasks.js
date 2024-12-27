@@ -65,6 +65,15 @@ router.patch(
   updateSelfTask,
   tasks.updateTaskStatus,
   assignTask
+); // this route is being deprecated in favor of /tasks/:id/status.
+router.patch(
+  "/:id/status",
+  authenticate,
+  devFlagMiddleware,
+  invalidateCache({ invalidationKeys: [ALL_TASKS] }),
+  updateSelfTask,
+  tasks.updateTaskStatus,
+  assignTask
 );
 router.patch("/assign/self", authenticate, invalidateCache({ invalidationKeys: [ALL_TASKS] }), tasks.assignTask); // this route is being deprecated in favor of /assign/:userId.
 
