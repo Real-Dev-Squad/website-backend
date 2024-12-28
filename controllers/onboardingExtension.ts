@@ -49,6 +49,7 @@ export const createOnboardingExtensionRequestController = async (req: Onboarding
     let requestNumber: number;
     let oldEndsOn: number;
     let newEndsOn: number;
+    const currentDate = Date.now();
 
     if(!latestExtensionRequest){
       requestNumber = 1;
@@ -61,7 +62,12 @@ export const createOnboardingExtensionRequestController = async (req: Onboarding
       oldEndsOn = latestExtensionRequest.newEndsOn;
     }
     
-    newEndsOn = oldEndsOn + numberOfDaysInMillisecond;
+    if(currentDate > oldEndsOn){
+      newEndsOn = currentDate + numberOfDaysInMillisecond;
+    }
+    else {
+      newEndsOn = oldEndsOn + numberOfDaysInMillisecond;
+    }
 
     const onboardingExtension = await createRequest({
       type: REQUEST_TYPE.ONBOARDING,
