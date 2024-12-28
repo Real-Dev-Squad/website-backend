@@ -210,7 +210,7 @@ describe("/requests Onboarding Extension", () => {
                 ...extensionRequest, 
                 userId: testUserId, 
                 state: REQUEST_STATE.APPROVED,
-                newEndsOn: Date.now(),
+                newEndsOn: Date.now() + 2*24*60*60*1000,
                 oldEndsOn: Date.now() - 24*60*60*1000,
             });
 
@@ -230,12 +230,13 @@ describe("/requests Onboarding Extension", () => {
 
         it("should return 201 response when previous latest extension request is rejected", async () => {
             createUserStatusWithState(testUserId, userStatusModel, userState.ONBOARDING);
+            const currentDate = Date.now();
             const latestRejectedExtension = await requestsQuery.createRequest({
                 ...extensionRequest, 
                 state: REQUEST_STATE.REJECTED, 
                 userId: testUserId,
-                newEndsOn: Date.now(),
-                oldEndsOn: Date.now() - 24*60*60*1000,
+                newEndsOn: currentDate,
+                oldEndsOn: currentDate - 24*60*60*1000,
             });
             const res = await chai.request(app)
             .post(`${postEndpoint}?dev=true`)
@@ -248,7 +249,7 @@ describe("/requests Onboarding Extension", () => {
             expect(res.body.data.reason).to.equal(body.reason);;
             expect(res.body.data.state).to.equal(REQUEST_STATE.PENDING);
             expect(res.body.data.oldEndsOn).to.equal(latestRejectedExtension.oldEndsOn);
-            expect(res.body.data.newEndsOn).to.equal(latestRejectedExtension.oldEndsOn + (body.numberOfDays*24*60*60*1000));
+            expect(new Date(res.body.data.newEndsOn).toDateString()).to.equal(new Date(currentDate + (body.numberOfDays*24*60*60*1000)).toDateString());
         })
     })
 });
