@@ -4,6 +4,11 @@ import { updateRequest } from "../models/requests";
 import { OnboardingExtensionResponse, UpdateOnboardingExtensionRequest, UpdateOnboardingExtensionRequestBody } from "../types/onboardingExtension";
 
 export const updateOnboardingExtensionRequestStatus = async (req: UpdateOnboardingExtensionRequest, res: OnboardingExtensionResponse) => {
+    
+    const dev = req.query.dev === "true";
+    
+    if(!dev) return res.boom.notImplemented("Feature not implemented");
+
     const body = req.body as UpdateOnboardingExtensionRequestBody;
     const lastModifiedBy = req?.userData?.id;
     const extensionId = req.params.id;

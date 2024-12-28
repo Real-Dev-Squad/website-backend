@@ -1,6 +1,7 @@
 import { userData } from "./global";
 import { REQUEST_STATE, REQUEST_TYPE } from "./../constants/requests";
 import { Request, Response } from "express";
+import { RequestQuery } from "./requests";
 
 export type OnboardingExtensionResponse = Response & {
     boom: Boom
@@ -19,6 +20,6 @@ export type RequestParams = {
 export type UpdateOnboardingExtensionRequest = Request & {
     body: UpdateOnboardingExtensionRequestBody;
     userData: userData;
-    query: RequestQuery;
+    query: RequestQuery & { dev?: strimg };
     params: RequestParams;
 };
