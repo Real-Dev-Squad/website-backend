@@ -60,7 +60,7 @@ export const updateRequestsMiddleware = async (
       .messages({
         "any.only": "state must be APPROVED or REJECTED",
       }),
-    type: joi.string().valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION).required(),
+    type: joi.string().valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION, REQUEST_TYPE.ONBOARDING).required(),
   });
 
   try {
