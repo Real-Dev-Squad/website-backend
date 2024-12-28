@@ -12,10 +12,24 @@ export const updateOnboardingExtensionRequestStatus = async (req: UpdateOnboardi
     const body = req.body as UpdateOnboardingExtensionRequestBody;
     const lastModifiedBy = req?.userData?.id;
     const extensionId = req.params.id;
+    
+    let requestBody;
+
+    if(body.reason){
+        requestBody = {
+            state: body.state,
+            type: body.type,
+            message: body.reason
+        }
+    }else{
+        requestBody = {
+            ...body,
+        }
+    }
 
     try {
-        const response = await updateRequest(extensionId, body, lastModifiedBy, REQUEST_TYPE.ONBOARDING);
-        
+        const response = await updateRequest(extensionId, requestBody, lastModifiedBy, REQUEST_TYPE.ONBOARDING);
+
         if ("error" in response) {
             return res.boom.badRequest(response.error);
         }
