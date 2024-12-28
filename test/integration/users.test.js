@@ -1759,16 +1759,6 @@ describe("Users", function () {
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send({
           id: `${profileDiffsId}`,
-          first_name: "Ankur",
-          last_name: "Narkhede",
-          yoe: 0,
-          company: "",
-          designation: "AO",
-          github_id: "ankur1337",
-          linkedin_id: "ankurnarkhede",
-          twitter_id: "ankur909",
-          instagram_id: "",
-          website: "",
           message: "",
         })
         .end((err, res) => {
@@ -1792,9 +1782,9 @@ describe("Users", function () {
             return done(err);
           }
 
-          expect(res).to.have.status(401);
-          expect(res.body.error).to.be.equal("Unauthorized");
-          expect(res.body.message).to.be.equal("You are not authorized for this action.");
+          expect(res).to.have.status(400);
+          expect(res.body.error).to.be.equal("Bad Request");
+          expect(res.body.message).to.be.equal("Invalid Request.");
           return done();
         });
     });
@@ -1814,6 +1804,372 @@ describe("Users", function () {
             error: "Unauthorized",
             message: "Unauthenticated User",
           });
+          return done();
+        });
+    });
+  });
+
+  describe("PATCH /users/:userId?profile=true", function () {
+    beforeEach(function () {
+      fetchStub = Sinon.stub(global, "fetch");
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(getDiscordMembers),
+        })
+      );
+    });
+
+    afterEach(function () {
+      Sinon.restore();
+    });
+
+    it("Should update the user", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          first_name: "Test first_name",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(204);
+
+          return done();
+        });
+    });
+
+    it("Should update the user status", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          status: "ooo",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(204);
+
+          return done();
+        });
+    });
+
+    it("Should update the username with valid username", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          username: "validUsername123",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(204);
+
+          return done();
+        });
+    });
+
+    it("Should allow updating user role when in_discord is not present and is not developer", function (done) {
+      addUser(newUser).then((newUserId) => {
+        const newUserJwt = authService.generateAuthToken({ userId: newUserId });
+        chai
+          .request(app)
+          .patch(`/users/${newUserId}?profile=true&dev=true`)
+          .set("cookie", `${cookieName}=${newUserJwt}`)
+          .send({
+            roles: {
+              maven: true,
+            },
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(204);
+            return done();
+          });
+      });
+    });
+
+    it("Should not remove old roles when updating user roles", async function () {
+      const newUserId = await addUser(newUser);
+      const newUserJwt = authService.generateAuthToken({ userId: newUserId });
+
+      const getUserResponseBeforeUpdate = await chai
+        .request(app)
+        .get(`/users?profile=true`)
+        .set("cookie", `${cookieName}=${newUserJwt}`);
+
+      expect(getUserResponseBeforeUpdate).to.have.status(200);
+      expect(getUserResponseBeforeUpdate.body.roles).to.not.have.property("maven");
+      expect(getUserResponseBeforeUpdate.body.roles.in_discord).to.equal(false);
+
+      const updateRolesResponse = await chai
+        .request(app)
+        .patch(`/users/${newUserId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${newUserJwt}`)
+        .send({
+          roles: {
+            maven: true,
+          },
+        });
+
+      expect(updateRolesResponse).to.have.status(204);
+
+      const getUserResponseAfterUpdate = await chai
+        .request(app)
+        .get(`/users?profile=true`)
+        .set("cookie", `${cookieName}=${newUserJwt}`);
+
+      expect(getUserResponseAfterUpdate).to.have.status(200);
+      expect(getUserResponseAfterUpdate.body.roles).to.have.property("maven");
+      expect(getUserResponseAfterUpdate.body.roles.maven).to.equal(true);
+      expect(getUserResponseAfterUpdate.body.roles.in_discord).to.equal(false);
+    });
+
+    it("Should not update the user roles when user has in_discord and developer true", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          roles: {
+            maven: true,
+          },
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(403);
+
+          return done();
+        });
+    });
+
+    it("Should return 400 for invalid status value", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          status: "blah",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: "Bad Request",
+            message: '"status" must be one of [ooo, idle, active, onboarding]',
+          });
+
+          return done();
+        });
+    });
+
+    it("Should return 400 if required roles is missing", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          roles: {
+            in_discord: false,
+            developer: true,
+          },
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+
+          return done();
+        });
+    });
+
+    it("Should return 400 if invalid roles", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          roles: {
+            archived: "false",
+            in_discord: false,
+            developer: true,
+          },
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+
+          return done();
+        });
+    });
+
+    it("Should return 400 for invalid username", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          username: "@invalidUser-name",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: "Bad Request",
+            message: "Username must be between 4 and 32 characters long and contain only letters or numbers.",
+          });
+
+          return done();
+        });
+    });
+
+    it("Should update the social id with valid social id", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          twitter_id: "Valid_twitterId",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(204);
+          return done();
+        });
+    });
+
+    it("Should return 400 for invalid Twitter ID", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          twitter_id: "invalid@twitter_id",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: "Bad Request",
+            message: "Invalid Twitter ID. ID should not contain special character @ or spaces",
+          });
+
+          return done();
+        });
+    });
+
+    it("Should return 400 for invalid Linkedin ID", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          linkedin_id: "invalid@linkedin_id",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: "Bad Request",
+            message: "Invalid Linkedin ID. ID should not contain special character @ or spaces",
+          });
+
+          return done();
+        });
+    });
+
+    it("Should return 400 for invalid instagram ID", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          instagram_id: "invalid@instagram_id",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: "Bad Request",
+            message: "Invalid Instagram ID. ID should not contain special character @ or spaces",
+          });
+
+          return done();
+        });
+    });
+
+    it("Should return 400 is space is included in the social ID", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          linkedin_id: "Linkedin 123",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: "Bad Request",
+            message: "Invalid Linkedin ID. ID should not contain special character @ or spaces",
+          });
+
           return done();
         });
     });

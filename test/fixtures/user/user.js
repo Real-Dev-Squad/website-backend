@@ -441,5 +441,32 @@ module.exports = () => {
         url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
       },
     },
+    {
+      username: "vikasinghdon",
+      first_name: "Vikas",
+      last_name: "Singh",
+      discordId: "yashu_yashu",
+      yoe: 10,
+      img: "./img.png",
+      linkedin_id: "destroyer",
+      github_id: "pickme",
+      github_display_name: "Vikas Singh",
+      phone: "1234567890",
+      email: "awesome@vikas.com",
+      joined_discord: "2024-07-16T18:21:09.278000+00:00",
+      status: "idle",
+      tokens: {
+        githubAccessToken: "githubAccessToken",
+      },
+      roles: {
+        super_user: false,
+        archived: false,
+        in_discord: true,
+      },
+      picture: {
+        publicId: "",
+        url: "",
+      },
+    },
   ];
 };
