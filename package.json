@@ -18,7 +18,7 @@
   "dependencies": {
     "@aws-sdk/client-identitystore": "^3.665.0",
     "@types/nodemailer": "^6.4.15",
-    "axios": "1.7.2",
+    "axios": "1.7.4",
     "cloudinary": "2.0.3",
     "config": "3.3.7",
     "cookie-parser": "1.4.6",
@@ -40,6 +40,7 @@
     "nodemailer-mock": "^2.0.6",
     "passport": "0.7.0",
     "passport-github2": "0.1.12",
+    "passport-google-oauth20": "^2.0.0",
     "rate-limiter-flexible": "5.0.3",
     "winston": "3.13.0"
   },
