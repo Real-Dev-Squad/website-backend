@@ -13,6 +13,8 @@ import { createTaskExtensionRequest, updateTaskExtensionRequest } from "./extens
 import { UpdateRequest } from "../types/requests";
 import { TaskRequestRequest } from "../types/taskRequests";
 import { createTaskRequestController } from "./taskRequestsv2";
+import { updateOnboardingExtensionRequestStatus } from "./onboardingExtension";
+import { OnboardingExtensionResponse, UpdateOnboardingExtensionRequest } from "../types/onboardingExtension";
 
 export const createRequestController = async (
   req: OooRequestCreateRequest | ExtensionRequestRequest | TaskRequestRequest,
@@ -38,6 +40,8 @@ export const updateRequestController = async (req: UpdateRequest, res: CustomRes
       return await updateOooRequestController(req as UpdateRequest, res as ExtensionRequestResponse);
     case REQUEST_TYPE.EXTENSION:
       return await updateTaskExtensionRequest(req as UpdateRequest, res as ExtensionRequestResponse);
+    case REQUEST_TYPE.ONBOARDING:
+      return await updateOnboardingExtensionRequestStatus(req as unknown as UpdateOnboardingExtensionRequest, res as OnboardingExtensionResponse);
     default:
       return res.boom.badRequest("Invalid request type");
   }
