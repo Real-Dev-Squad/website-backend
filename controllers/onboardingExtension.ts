@@ -14,13 +14,14 @@ import { createRequest, getRequestByKeyValues } from "../models/requests";
 import { fetchUser } from "../models/users";
 import { getUserStatus } from "../models/userStatus";
 import { User } from "../typeDefinitions/users";
-import { OnboardingExtension, OnboardingExtensionCreateRequest, OnboardingExtensionResponse } from "../types/onboardingExtension";
+import { CreateOnboardingExtensionBody, OnboardingExtension, OnboardingExtensionCreateRequest, OnboardingExtensionResponse } from "../types/onboardingExtension";
 import { getNewDeadline } from "../utils/requests";
+import { convertDaysToMilliseconds } from "../utils/time";
 
 export const createOnboardingExtensionRequestController = async (req: OnboardingExtensionCreateRequest, res: OnboardingExtensionResponse) => {
   try {
 
-    const data = req.body;
+    const data = req.body as CreateOnboardingExtensionBody;
     const {user, userExists} = await fetchUser({discordId: data.userId});
     
     if(!userExists) {
@@ -43,9 +44,9 @@ export const createOnboardingExtensionRequestController = async (req: Onboarding
       return res.boom.badRequest(REQUEST_ALREADY_PENDING);
     }
     
-    const millisecondsInThirtyOneDays = 31*24*60*60*1000;
+    const millisecondsInThirtyOneDays = convertDaysToMilliseconds(31)
     const discordJoinedDateInMillisecond = new Date(discordJoinedAt).getTime();
-    const numberOfDaysInMillisecond = Math.floor(data.numberOfDays)*24*60*60*1000;
+    const numberOfDaysInMillisecond = convertDaysToMilliseconds(data.numberOfDays);
 
     let requestNumber: number;
     let oldEndsOn: number;
