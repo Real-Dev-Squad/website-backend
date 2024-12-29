@@ -1,6 +1,7 @@
 const chai = require("chai");
 const sinon = require("sinon");
 const { expect } = chai;
+const assert = require("chai").assert;
 const {
   createRequest,
   fetchTaskRequests,
@@ -207,7 +208,6 @@ describe("Task requests | models", function () {
       const requestData = mockData.taskRequestData;
       const addedTaskRequest = await createRequest(requestData, "testUser");
       const result = await fetchTaskRequestById(addedTaskRequest.id);
-      const assert = require("chai").assert;
       assert.isTrue(result.taskRequestExists, "Task request should exist");
 
       expect(result.taskRequestExists).to.be.equal(true);
