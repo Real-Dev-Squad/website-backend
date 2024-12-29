@@ -42,7 +42,7 @@ export const createOnboardingExtensionRequestController = async (req: Onboarding
       return res.boom.badRequest(REQUEST_ALREADY_PENDING);
     }
     
-    const thirtyOneDaysInMillisecond = 31*24*60*60*1000;
+    const millisecondsInThirtyOneDays = 31*24*60*60*1000;
     const discordJoinedDateInMillisecond = new Date(discordJoinedAt).getTime();
     const numberOfDaysInMillisecond = Math.floor(data.numberOfDays)*24*60*60*1000;
 
@@ -53,7 +53,7 @@ export const createOnboardingExtensionRequestController = async (req: Onboarding
 
     if(!latestExtensionRequest){
       requestNumber = 1;
-      oldEndsOn = discordJoinedDateInMillisecond + thirtyOneDaysInMillisecond;
+      oldEndsOn = discordJoinedDateInMillisecond + millisecondsInThirtyOneDays;
     }else if(latestExtensionRequest.state === REQUEST_STATE.REJECTED) {
       requestNumber = latestExtensionRequest.requestNumber + 1;
       oldEndsOn = latestExtensionRequest.oldEndsOn;
