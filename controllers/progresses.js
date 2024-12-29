@@ -4,6 +4,7 @@ const {
   getProgressDocument,
   getRangeProgressData,
   getProgressByDate,
+  getPaginatedProgressDocument,
 } = require("../models/progresses");
 const { PROGRESSES_RESPONSE_MESSAGES, INTERNAL_SERVER_ERROR_MESSAGE } = require("../constants/progresses");
 const { sendTaskUpdate } = require("../utils/sendTaskUpdate");
@@ -107,8 +108,38 @@ const createProgress = async (req, res) => {
  */
 
 const getProgress = async (req, res) => {
+  const { dev, page = 0, size = 100, type, userId, taskId } = req.query;
   try {
     const data = await getProgressDocument(req.query);
+    if (dev) {
+      const paginatedProgressDocs = await getPaginatedProgressDocument(req.query);
+      const limit = parseInt(size, 10);
+      const offset = parseInt(page, 10) * limit;
+      const total = data.length;
+      const nextPage = offset + limit < total ? parseInt(page, 10) + 1 : null;
+      const prevPage = page > 0 ? parseInt(page, 10) - 1 : null;
+
+      let baseUrl = `${req.baseUrl}`;
+      if (type) {
+        baseUrl += `?type=${type}`;
+      } else if (userId) {
+        baseUrl += `?userId=${userId}`;
+      } else if (taskId) {
+        baseUrl += `?taskId=${taskId}`;
+      }
+      const nextLink = nextPage !== null ? `${baseUrl}&page=${nextPage}&size=${size}&dev=${dev}` : null;
+      const prevLink = prevPage !== null ? `${baseUrl}&page=${prevPage}&size=${size}&dev=${dev}` : null;
+      return res.json({
+        message: PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
+        count: paginatedProgressDocs.length,
+        data: paginatedProgressDocs,
+        links: {
+          prev: prevLink,
+          next: nextLink,
+        },
+      });
+    }
+
     return res.json({
       message: PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
       count: data.length,
