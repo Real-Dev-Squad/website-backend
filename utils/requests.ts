@@ -4,3 +4,16 @@ export const getNewDeadline = (currentDate: number, oldEndsOn: number, numberOfD
     }
     return oldEndsOn + numberOfDaysInMillisecond;
 }
+
+export const convertDateStringToMilliseconds = (date: string) => {
+    const milliseconds = Date.parse(date);
+    if(!milliseconds) {
+        return {
+            isDate: false,
+        }
+    }
+    return {
+        isDate: true,
+        milliseconds,
+    }
+} 
