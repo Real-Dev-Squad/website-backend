@@ -44,7 +44,7 @@ export const createOnboardingExtensionRequestController = async (req: Onboarding
       return res.boom.badRequest(REQUEST_ALREADY_PENDING);
     }
     
-    const millisecondsInThirtyOneDays = convertDaysToMilliseconds(31)
+    const millisecondsInThirtyOneDays = convertDaysToMilliseconds(31);
     const numberOfDaysInMillisecond = convertDaysToMilliseconds(data.numberOfDays);
     const { isDate, milliseconds: discordJoinedDateInMillisecond } = convertDateStringToMilliseconds(discordJoinedAt);
 
