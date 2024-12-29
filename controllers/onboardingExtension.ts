@@ -15,7 +15,7 @@ import { fetchUser } from "../models/users";
 import { getUserStatus } from "../models/userStatus";
 import { User } from "../typeDefinitions/users";
 import { CreateOnboardingExtensionBody, OnboardingExtension, OnboardingExtensionCreateRequest, OnboardingExtensionResponse } from "../types/onboardingExtension";
-import { getNewDeadline } from "../utils/requests";
+import { convertDateStringToMilliseconds, getNewDeadline } from "../utils/requests";
 import { convertDaysToMilliseconds } from "../utils/time";
 
 export const createOnboardingExtensionRequestController = async (req: OnboardingExtensionCreateRequest, res: OnboardingExtensionResponse) => {
@@ -45,8 +45,13 @@ export const createOnboardingExtensionRequestController = async (req: Onboarding
     }
     
     const millisecondsInThirtyOneDays = convertDaysToMilliseconds(31)
-    const discordJoinedDateInMillisecond = new Date(discordJoinedAt).getTime();
     const numberOfDaysInMillisecond = convertDaysToMilliseconds(data.numberOfDays);
+    const { isDate, milliseconds: discordJoinedDateInMillisecond } = convertDateStringToMilliseconds(discordJoinedAt);
+
+    if(!isDate){
+      logger.error(ERROR_WHILE_CREATING_REQUEST, "Invalid date");
+      return res.boom.badImplementation(ERROR_WHILE_CREATING_REQUEST);
+    }
 
     let requestNumber: number;
     let oldEndsOn: number;
