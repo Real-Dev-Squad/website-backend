@@ -14,11 +14,27 @@ import { createRequest, getRequestByKeyValues } from "../models/requests";
 import { fetchUser } from "../models/users";
 import { getUserStatus } from "../models/userStatus";
 import { User } from "../typeDefinitions/users";
-import { CreateOnboardingExtensionBody, OnboardingExtension, OnboardingExtensionCreateRequest, OnboardingExtensionResponse } from "../types/onboardingExtension";
+import { 
+  CreateOnboardingExtensionBody, 
+  OnboardingExtension, 
+  OnboardingExtensionCreateRequest, 
+  OnboardingExtensionResponse 
+} from "../types/onboardingExtension";
 import { convertDateStringToMilliseconds, getNewDeadline } from "../utils/requests";
 import { convertDaysToMilliseconds } from "../utils/time";
 
-export const createOnboardingExtensionRequestController = async (req: OnboardingExtensionCreateRequest, res: OnboardingExtensionResponse) => {
+/**
+* Controller to handle the creation of onboarding extension requests.
+*
+* This function processes the request to create an extension for the onboarding period,
+* validates the user status, checks existing requests, calculates new deadlines,
+* and stores the new request in the database with logging.
+*
+* @param {OnboardingExtensionCreateRequest} req - The Express request object containing the body with extension details.
+* @param {OnboardingExtensionResponse} res - The Express response object used to send back the response.
+* @returns {Promise<OnboardingExtensionResponse>} Resolves to a response with the status and data or an error message.
+*/
+export const createOnboardingExtensionRequestController = async (req: OnboardingExtensionCreateRequest, res: OnboardingExtensionResponse): Promise<OnboardingExtensionResponse> => {
   try {
 
     const data = req.body as CreateOnboardingExtensionBody;
