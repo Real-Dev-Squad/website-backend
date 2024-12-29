@@ -1,0 +1,178 @@
+paths:
+  /arts:
+    get:
+      summary: Get all the arts
+      description: This endpoint retrieves all the arts
+      tags:
+        - Arts
+      responses:
+        200:
+          description: All the arts returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  arts:
+                    type: array
+                    items:
+                      $ref: "../components.yaml#/components/schemas/Art"
+                  message:
+                    type: string
+                    description: A message describing the result of the operation
+                    example: Arts returned successfully!
+                    default: No arts found
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
+
+  /arts/user/self:
+    get:
+      summary: Get all the arts created by the current user
+      description: This endpoint retrieves all the arts created by the current user
+      tags:
+        - Arts
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: All the arts of the current user returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  arts:
+                    type: array
+                    items:
+                      $ref: "../components.yaml#/components/schemas/Art"
+                  message:
+                    type: string
+                    description: A message describing the result of the operation
+                    example: Arts returned successfully!
+                    default: No arts found
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/401-Unauthorized"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
+
+  /arts/user/{userId}:
+    get:
+      summary: Get all the arts created by a specific user
+      description: This endpoint retrieves all the arts created by a specific user
+      tags:
+        - Arts
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          description: The ID of the user
+      responses:
+        200:
+          description: All the arts of the particular user returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  arts:
+                    type: array
+                    items:
+                      $ref: "../components.yaml#/components/schemas/Art"
+                  message:
+                    type: string
+                    description: A message describing the result of the operation
+                    example: User Arts of userId 3423 returned successfully!
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/401-Unauthorized"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
+
+  /arts/user/add:
+    post:
+      summary: Add an art
+      description: This endpoint adds an art
+      tags:
+        - Arts
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components.yaml#/components/schemas/Art"
+      responses:
+        200:
+          description: Art added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A message describing the result of the operation
+                    example: Art added successfully!
+                  id:
+                    type: string
+                    description: The ID of the added art
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/401-Unauthorized"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"

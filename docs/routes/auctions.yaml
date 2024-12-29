@@ -1,0 +1,175 @@
+paths:
+  /auctions:
+    get:
+      summary: Get all auctions
+      tags:
+        - Auctions
+      responses:
+        200:
+          description: All the auctions returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  auctions:
+                    type: array
+                    items:
+                      $ref: "../components.yaml#/components/schemas/Auction"
+                  message:
+                    type: string
+                    example: "Auctions retrieved successfully!"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
+    post:
+      summary: Creates a new auction
+      tags:
+        - Auctions
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components.yaml#/components/schemas/AuctionInput"
+      responses:
+        204:
+          description: New auction
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Message indicating successful creation of the auction
+                    example: Auction created successfully!
+                  id:
+                    type: string
+                    description: The ID of the newly created auction
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/401-Unauthorized"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
+
+  /auctions/{id}:
+    get:
+      summary: Get auction by ID
+      tags:
+        - Auctions
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The ID of the auction
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/schemas/Auction"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
+
+  /auctions/bid/{id}:
+    post:
+      summary: Makes a new bid given auctionId
+      tags:
+        - Auctions
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The ID of the auction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bid:
+                  type: number
+                  description: The bid amount
+                  example: 100.0
+      responses:
+        204:
+          description: New bid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Message indicating successful creation of the bid
+                    example: Successfully placed bid!
+                  id:
+                    type: string
+                    description: The ID of the newly created bid
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/401-Unauthorized"
+        403:
+          description: forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/403-Forbidden"
+        404:
+          description: Auction not found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
