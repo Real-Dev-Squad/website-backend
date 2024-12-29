@@ -33,6 +33,10 @@ export const createOnboardingExtensionRequestValidator = async (
         "any.required": "userId is required"
       })
     });
-
-  await schema.validateAsync(req.body, { abortEarly: false });
+  try{
+    await schema.validateAsync(req.body, { abortEarly: false });
+  }catch(error){
+    logger.error(`Error while validating request payload`, error);
+    throw error;
+  }
 };
