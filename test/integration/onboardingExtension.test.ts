@@ -21,7 +21,9 @@ chai.use(chaiHttp);
 describe("/requests Onboarding Extension", () => {
     describe("POST /requests", () => {
         let testUserId: string;
-        const testUserDiscordId = "654321";
+        let testUserIdForInvalidDiscordJoinedDate: string;
+        let testUserDiscordIdForInvalidDiscordJoinedDate: string = "54321";
+        const testUserDiscordId: string = "654321";
         const extensionRequest = {
             state: REQUEST_STATE.APPROVED,
             type: REQUEST_TYPE.ONBOARDING,
@@ -38,10 +40,24 @@ describe("/requests Onboarding Extension", () => {
 
         beforeEach(async () => {
             testUserId = await addUser({...userData[6], discordId: testUserDiscordId, discordJoinedAt: "2023-04-06T01:47:34.488000+00:00"});
+            testUserIdForInvalidDiscordJoinedDate = await addUser({...userData[1], discordId: testUserDiscordIdForInvalidDiscordJoinedDate, discordJoinedAt: "2023-04-06T01"});
         })
         afterEach(async ()=>{
             sinon.restore();
             await cleanDb();
+        })
+
+        it("should not called verifyDiscordBot and return 401 response when extension type is not onboarding", (done)=> {
+            chai.request(app)
+            .post(`${postEndpoint}?dev=true`)
+            .send({...body, type: REQUEST_TYPE.OOO})
+            .end((err, res)=>{
+                if(err) return done(err);
+                expect(res.statusCode).to.equal(401);
+                expect(res.body.error).to.equal("Unauthorized");
+                expect(res.body.message).to.equal("Unauthenticated User");
+                done();
+            })
         })
 
         it("should return Feature not implemented when dev is not true", (done) => {
@@ -140,7 +156,21 @@ describe("/requests Onboarding Extension", () => {
                 done();
             })
         })
-    
+        
+        it("should return 500 response when discordJoinedAt date string is invalid", (done) => {
+            createUserStatusWithState(testUserIdForInvalidDiscordJoinedDate, userStatusModel, userState.ONBOARDING);
+            chai.request(app)
+            .post(`${postEndpoint}?dev=true`)
+            .set("authorization", `Bearer ${botToken}`)
+            .send({...body, userId: testUserDiscordIdForInvalidDiscordJoinedDate})
+            .end((err, res)=>{
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(500);
+                expect(res.body.message).to.equal("An internal server error occurred");
+                done();
+            })
+        })
+
         it("should return 404 response when user does not exist", (done) => {
             chai.request(app)
             .post(`${postEndpoint}?dev=true`)
@@ -155,7 +185,7 @@ describe("/requests Onboarding Extension", () => {
             })
         })
     
-        it("should return 401 response when user's status is not onboarding", (done)=> {
+        it("should return 403 response when user's status is not onboarding", (done)=> {
             createUserStatusWithState(testUserId, userStatusModel, userState.ACTIVE);
             chai.request(app)
             .post(`${postEndpoint}?dev=true`)
@@ -163,8 +193,8 @@ describe("/requests Onboarding Extension", () => {
             .send(body)
             .end((err, res) => {
                 if (err) return done(err);
-                expect(res.statusCode).to.equal(401);
-                expect(res.body.error).to.equal("Unauthorized");
+                expect(res.statusCode).to.equal(403);
+                expect(res.body.error).to.equal("Forbidden");
                 expect(res.body.message).to.equal(UNAUTHORIZED_TO_CREATE_ONBOARDING_EXTENSION_REQUEST);
                 done();
             })
