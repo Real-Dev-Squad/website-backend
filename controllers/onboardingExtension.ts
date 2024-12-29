@@ -15,6 +15,7 @@ import { fetchUser } from "../models/users";
 import { getUserStatus } from "../models/userStatus";
 import { User } from "../typeDefinitions/users";
 import { OnboardingExtension, OnboardingExtensionCreateRequest, OnboardingExtensionResponse } from "../types/onboardingExtension";
+import { getNewDeadline } from "../utils/requests";
 
 export const createOnboardingExtensionRequestController = async (req: OnboardingExtensionCreateRequest, res: OnboardingExtensionResponse) => {
   try {
@@ -48,7 +49,6 @@ export const createOnboardingExtensionRequestController = async (req: Onboarding
 
     let requestNumber: number;
     let oldEndsOn: number;
-    let newEndsOn: number;
     const currentDate = Date.now();
 
     if(!latestExtensionRequest){
@@ -62,13 +62,8 @@ export const createOnboardingExtensionRequestController = async (req: Onboarding
       oldEndsOn = latestExtensionRequest.newEndsOn;
     }
     
-    if(currentDate > oldEndsOn){
-      newEndsOn = currentDate + numberOfDaysInMillisecond;
-    }
-    else {
-      newEndsOn = oldEndsOn + numberOfDaysInMillisecond;
-    }
-
+    const newEndsOn = getNewDeadline(currentDate, oldEndsOn, numberOfDaysInMillisecond);
+    
     const onboardingExtension = await createRequest({
       type: REQUEST_TYPE.ONBOARDING,
       state: REQUEST_STATE.PENDING,
