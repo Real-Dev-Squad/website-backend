@@ -32,7 +32,7 @@ export const createOnboardingExtensionRequestController = async (req: Onboarding
     const { data: userStatus } =  await getUserStatus(userId);
 
     if(!userStatus || userStatus.currentStatus.state != userState.ONBOARDING){
-      return res.boom.unauthorized(UNAUTHORIZED_TO_CREATE_ONBOARDING_EXTENSION_REQUEST);
+      return res.boom.forbidden(UNAUTHORIZED_TO_CREATE_ONBOARDING_EXTENSION_REQUEST);
     }
 
     const latestExtensionRequest: OnboardingExtension = await getRequestByKeyValues({
