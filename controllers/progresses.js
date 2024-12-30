@@ -127,8 +127,8 @@ const getProgress = async (req, res) => {
       } else if (taskId) {
         baseUrl += `?taskId=${taskId}`;
       }
-      const nextLink = nextPage !== null ? `${baseUrl}&page=${nextPage}&size=${size}&dev=${dev}` : null;
-      const prevLink = prevPage !== null ? `${baseUrl}&page=${prevPage}&size=${size}&dev=${dev}` : null;
+      const nextLink = nextPage ? `${baseUrl}&page=${nextPage}&size=${size}&dev=${dev}` : null;
+      const prevLink = prevPage ? `${baseUrl}&page=${prevPage}&size=${size}&dev=${dev}` : null;
       return res.json({
         message: PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
         count: paginatedProgressDocs.length,

@@ -73,22 +73,15 @@ const validateGetProgressRecordsQuery = async (req, res, next) => {
       dev: joi.boolean().optional().messages({
         "any.only": "dev field is restricted to either 'true' or 'false'",
       }),
-      size: joi
-        .string()
-        .optional()
-        .pattern(/^[1-9]\d?$|^100$/)
-        .messages({
-          "string.empty": "size must contain value in range 1-100",
-          "string.pattern.base": "size must be in range 1-100",
-        }),
-      page: joi
-        .string()
-        .optional()
-        .pattern(/^0$|^[1-9]\d*$/)
-        .messages({
-          "string.empty": "page must contain a positive number or zero",
-          "string.pattern.base": "page value either be a positive number or zero",
-        }),
+      size: joi.number().optional().min(1).max(100).messages({
+        "number.base": "size must be a number",
+        "number.min": "size must be in the range 1-100",
+        "number.max": "size must be in the range 1-100",
+      }),
+      page: joi.number().optional().min(0).messages({
+        "number.base": "page must be a number",
+        "number.min": "page must be a positive number or zero",
+      }),
     })
     .xor("type", "userId", "taskId")
     .messages({
