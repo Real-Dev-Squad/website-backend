@@ -516,4 +516,104 @@ describe("Test Progress Updates API for Tasks", function () {
         });
     });
   });
+
+  describe("GET /progresses (getPaginatedProgressDocument)", function () {
+    let userId;
+    let taskObject1;
+    let taskId1;
+
+    beforeEach(async function () {
+      userId = await addUser(userData[1]);
+      taskObject1 = await tasks.updateTask(taskData[0]);
+      taskId1 = taskObject1.taskId;
+      const progressData1 = stubbedModelTaskProgressData(userId, taskId1, 1683626400000, 1683590400000); // 2023-05-09
+      const progressData2 = stubbedModelTaskProgressData(userId, taskId1, 1683885600000, 1683849600000); // 2023-05-12
+      await firestore.collection("progresses").doc("taskProgressDocument1").set(progressData1);
+      await firestore.collection("progresses").doc("taskProgressDocument2").set(progressData2);
+    });
+
+    it("should return paginated results when dev=true is passed", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses?type=task&dev=true&page=0&size=1`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.keys(["message", "data", "count", "links"]);
+          expect(res.body.links).to.have.keys(["next", "prev"]);
+          expect(res.body.data).to.be.an("array");
+          expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
+          expect(res.body.count).to.be.equal(1);
+          res.body.data.forEach((progress) => {
+            expect(progress).to.have.keys([
+              "id",
+              "type",
+              "completed",
+              "planned",
+              "blockers",
+              "userId",
+              "taskId",
+              "createdAt",
+              "date",
+            ]);
+          });
+
+          return done();
+        });
+    });
+
+    it("should return null for next link on the last page", function (done) {
+      const size = 1;
+      const page = 1;
+
+      chai
+        .request(app)
+        .get(`/progresses?type=task&dev=true&page=${page}&size=${size}`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.keys(["message", "data", "count", "links"]);
+          expect(res.body.links).to.have.keys(["next", "prev"]);
+          expect(res.body.data).to.be.an("array");
+          expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
+          expect(res.body.links.next).to.be.equal(null);
+          expect(res.body.links.prev).to.equal(`/progresses?type=task&page=${page - 1}&size=${size}&dev=true`);
+          return done();
+        });
+    });
+
+    it("should return a bad request error for invalid size parameter", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses?type=task&dev=true&page=0&size=104`)
+        .end((_err, res) => {
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("size must be in range 1-100");
+          return done();
+        });
+    });
+
+    it("should return an empty array of progresses data on a page with no data", function (done) {
+      const size = 10;
+      const page = 100;
+
+      chai
+        .request(app)
+        .get(`/progresses?type=task&dev=true&page=${page}&size=${size}`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Progress document retrieved successfully.");
+          // eslint-disable-next-line no-unused-expressions
+          expect(res.body.data).to.be.an("array").that.is.empty;
+          expect(res.body.links).to.have.keys(["next", "prev"]);
+          // eslint-disable-next-line no-unused-expressions
+          expect(res.body.links.next).to.be.null;
+          expect(res.body.links.prev).to.equal(`/progresses?type=task&page=${page - 1}&size=${size}&dev=true`);
+          return done();
+        });
+    });
+  });
 });
