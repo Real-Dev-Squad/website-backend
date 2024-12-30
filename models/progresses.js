@@ -13,7 +13,7 @@ const {
   getProgressDateTimestamp,
   buildQueryToSearchProgressByDay,
 } = require("../utils/progresses");
-const { fetchUser } = require("./users");
+const { fetchUserByIds, fetchUser } = require("./users");
 const { PROGRESS_ALREADY_CREATED, PROGRESS_DOCUMENT_NOT_FOUND } = PROGRESSES_RESPONSE_MESSAGES;
 
 /**
@@ -54,33 +54,7 @@ const getProgressDocument = async (queryParams) => {
   const progressDocs = await getProgressDocs(query);
 
   if (dev) {
-    try {
-      const uniqueUserIds = [...new Set(progressDocs.map((doc) => doc.userId))];
-      const batchSize = 500;
-
-      const batches = Array.from({ length: Math.ceil(uniqueUserIds.length / batchSize) }, (_, index) =>
-        uniqueUserIds.slice(index * batchSize, index * batchSize + batchSize)
-      );
-
-      const batchPromises = batches.map((batch) => Promise.all(batch.map((userId) => fetchUser({ userId }))));
-
-      const usersDataBatches = await Promise.all(batchPromises);
-
-      const usersData = usersDataBatches.flat();
-
-      const userLookupMap = usersData.reduce((lookup, { user }) => {
-        if (user) lookup[user.id] = user;
-        return lookup;
-      }, {});
-
-      const progressDocsWithUserDetails = progressDocs.map((doc) => {
-        const userDetails = userLookupMap[doc.userId] || null;
-        return { ...doc, userData: userDetails };
-      });
-      return progressDocsWithUserDetails;
-    } catch (err) {
-      return progressDocs.map((doc) => ({ ...doc, userData: null }));
-    }
+    return await addUserDetailsToProgressDocs(progressDocs);
   }
   return progressDocs;
 };
@@ -128,4 +102,39 @@ async function getProgressByDate(pathParams, queryParams) {
   return { id: doc.id, ...docData };
 }
 
-module.exports = { createProgressDocument, getProgressDocument, getRangeProgressData, getProgressByDate };
+/**
+ * Adds user details to progress documents by fetching unique users.
+ * This function retrieves user details for each user ID in the progress documents and attaches the user data to each document.
+ *
+ * @param {Array<object>} progressDocs - An array of progress documents. Each document should include a `userId` property.
+ * @returns {Promise<Array<object>>} A Promise that resolves to an array of progress documents with the `userData` field populated.
+ *                                   If an error occurs while fetching the user details, the `userData` field will be set to `null` for each document.
+ */
+const addUserDetailsToProgressDocs = async (progressDocs) => {
+  try {
+    const uniqueUserIds = [...new Set(progressDocs.map((doc) => doc.userId))];
+
+    const uniqueUsersData = await fetchUserByIds(uniqueUserIds);
+
+    const allUsers = uniqueUsersData.flat();
+    const userByIdMap = allUsers.reduce((lookup, user) => {
+      if (user) lookup[user.id] = user;
+      return lookup;
+    }, {});
+
+    return progressDocs.map((doc) => {
+      const userDetails = userByIdMap[doc.userId] || null;
+      return { ...doc, userData: userDetails };
+    });
+  } catch (err) {
+    return progressDocs.map((doc) => ({ ...doc, userData: null }));
+  }
+};
+
+module.exports = {
+  createProgressDocument,
+  getProgressDocument,
+  getRangeProgressData,
+  getProgressByDate,
+  addUserDetailsToProgressDocs,
+};
