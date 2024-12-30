@@ -133,30 +133,33 @@ const buildQueryToFetchDocs = (queryParams) => {
  * @returns {Query} A Firestore query object that filters and paginates progress documents based on the given parameters.
  */
 
-const buildQueryToFetchPaginatedDocs = (queryParams) => {
+const buildQueryToFetchPaginatedDocs = async (queryParams) => {
   const { type, userId, taskId, orderBy, size = 100, page = 0 } = queryParams;
   const orderByField = PROGRESS_VALID_SORT_FIELDS[0];
   const isAscOrDsc = orderBy && PROGRESS_VALID_SORT_FIELDS[0] === orderBy ? "asc" : "desc";
   const limit = parseInt(size, 10);
   const offset = parseInt(page, 10) * limit;
 
+  let baseQuery;
   if (type) {
-    return progressesCollection.where("type", "==", type).limit(limit).offset(offset).orderBy(orderByField, isAscOrDsc);
+    baseQuery = progressesCollection.where("type", "==", type).orderBy(orderByField, isAscOrDsc);
   } else if (userId) {
-    return progressesCollection
+    baseQuery = progressesCollection
       .where("type", "==", "user")
       .where("userId", "==", userId)
-      .limit(limit)
-      .offset(offset)
       .orderBy(orderByField, isAscOrDsc);
   } else {
-    return progressesCollection
+    baseQuery = progressesCollection
       .where("type", "==", "task")
       .where("taskId", "==", taskId)
-      .limit(limit)
-      .offset(offset)
       .orderBy(orderByField, isAscOrDsc);
   }
+
+  const totalProgress = await baseQuery.get();
+  const totalProgressCount = totalProgress.size;
+
+  baseQuery = baseQuery.limit(limit).offset(offset);
+  return { baseQuery, totalProgressCount };
 };
 
 /**

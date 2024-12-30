@@ -67,9 +67,10 @@ const getProgressDocument = async (queryParams) => {
 const getPaginatedProgressDocument = async (queryParams) => {
   await assertUserOrTaskExists(queryParams);
   const page = queryParams.page || 0;
-  const query = buildQueryToFetchPaginatedDocs(queryParams);
-  const progressDocs = await getPaginatedProgressDocs(query, page);
-  return progressDocs;
+  const { baseQuery, totalProgressCount } = await buildQueryToFetchPaginatedDocs(queryParams);
+
+  const progressDocs = await getPaginatedProgressDocs(baseQuery, page);
+  return { progressDocs, totalProgressCount };
 };
 /**
  * This function fetches the progress records for a particular user or task within the specified date range, from start to end date.

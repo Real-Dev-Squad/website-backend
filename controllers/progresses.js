@@ -110,15 +110,12 @@ const createProgress = async (req, res) => {
 const getProgress = async (req, res) => {
   const { dev, page = 0, size = 100, type, userId, taskId } = req.query;
   try {
-    const data = await getProgressDocument(req.query);
     if (dev) {
-      const paginatedProgressDocs = await getPaginatedProgressDocument(req.query);
+      const { progressDocs, totalProgressCount } = await getPaginatedProgressDocument(req.query);
       const limit = parseInt(size, 10);
       const offset = parseInt(page, 10) * limit;
-      const total = data.length;
-      const nextPage = offset + limit < total ? parseInt(page, 10) + 1 : null;
+      const nextPage = offset + limit < totalProgressCount ? parseInt(page, 10) + 1 : null;
       const prevPage = page > 0 ? parseInt(page, 10) - 1 : null;
-
       let baseUrl = `${req.baseUrl}`;
       if (type) {
         baseUrl += `?type=${type}`;
@@ -127,19 +124,19 @@ const getProgress = async (req, res) => {
       } else if (taskId) {
         baseUrl += `?taskId=${taskId}`;
       }
-      const nextLink = nextPage ? `${baseUrl}&page=${nextPage}&size=${size}&dev=${dev}` : null;
-      const prevLink = prevPage ? `${baseUrl}&page=${prevPage}&size=${size}&dev=${dev}` : null;
+      const nextLink = nextPage !== null ? `${baseUrl}&page=${nextPage}&size=${size}&dev=${dev}` : null;
+      const prevLink = prevPage !== null ? `${baseUrl}&page=${prevPage}&size=${size}&dev=${dev}` : null;
       return res.json({
         message: PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
-        count: paginatedProgressDocs.length,
-        data: paginatedProgressDocs,
+        count: progressDocs.length,
+        data: progressDocs,
         links: {
           prev: prevLink,
           next: nextLink,
         },
       });
     }
-
+    const data = await getProgressDocument(req.query);
     return res.json({
       message: PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
       count: data.length,
