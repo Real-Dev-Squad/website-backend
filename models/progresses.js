@@ -13,6 +13,7 @@ const {
   getProgressDateTimestamp,
   buildQueryToSearchProgressByDay,
   buildQueryToFetchPaginatedDocs,
+  getPaginatedProgressDocs,
 } = require("../utils/progresses");
 const { PROGRESS_ALREADY_CREATED, PROGRESS_DOCUMENT_NOT_FOUND } = PROGRESSES_RESPONSE_MESSAGES;
 
@@ -65,8 +66,9 @@ const getProgressDocument = async (queryParams) => {
  **/
 const getPaginatedProgressDocument = async (queryParams) => {
   await assertUserOrTaskExists(queryParams);
+  const page = queryParams.page || 0;
   const query = buildQueryToFetchPaginatedDocs(queryParams);
-  const progressDocs = await getProgressDocs(query);
+  const progressDocs = await getPaginatedProgressDocs(query, page);
   return progressDocs;
 };
 /**

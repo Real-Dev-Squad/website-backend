@@ -177,6 +177,31 @@ const getProgressDocs = async (query) => {
   return docsData;
 };
 /**
+ * Retrieves progress documents from Firestore based on the given query and page number.
+ *
+ * @param {Query} query - A Firestore query object for fetching progress documents.
+ * @param {number} [pageNumber] - The current page number (optional). If not provided, it will check for documents without pagination.
+ * @returns {Array.<Object>} An array of objects representing the retrieved progress documents.
+ * Each object contains the document ID (`id`) and its associated data.
+ *
+ * @throws {NotFound} If no progress documents are found and no page number is specified.
+ */
+const getPaginatedProgressDocs = async (query, page) => {
+  const progressesDocs = await query.get();
+  if (!page && !progressesDocs.size) {
+    throw new NotFound(PROGRESS_DOCUMENT_NOT_FOUND);
+  }
+  if (!progressesDocs.size) {
+    return [];
+  }
+  const docsData = [];
+  progressesDocs.forEach((doc) => {
+    docsData.push({ id: doc.id, ...doc.data() });
+  });
+  return docsData;
+};
+
+/**
  * Builds a Firestore query for retrieving progress documents within a date range and optionally filtered by user ID or task ID.
  * @param {Object} queryParams - An object containing the query parameters.
  * @param {string} queryParams.userId - (Optional) The user ID to filter progress documents by.
@@ -270,6 +295,7 @@ module.exports = {
   assertUserOrTaskExists,
   buildQueryToFetchDocs,
   getProgressDocs,
+  getPaginatedProgressDocs,
   buildRangeProgressQuery,
   getProgressRecords,
   buildQueryToSearchProgressByDay,
