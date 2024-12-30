@@ -9,6 +9,120 @@ const {
   USER_DOES_NOT_EXIST_ERROR,
 } = require("../constants/errorMessages");
 
+const googleAuthLogin = (req, res, next) => {
+  const { redirectURL } = req.query;
+  return passport.authenticate("google", {
+    scope: ["email"],
+    state: redirectURL,
+  })(req, res, next);
+};
+
+function handleRedirectUrl(req) {
+  const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
+  let authRedirectionUrl = rdsUiUrl;
+  let isMobileApp = false;
+  let isV2FlagPresent = false;
+  let devMode = false;
+
+  if ("state" in req.query) {
+    try {
+      const redirectUrl = new URL(req.query.state);
+      if (redirectUrl.searchParams.get("isMobileApp") === "true") {
+        isMobileApp = true;
+        redirectUrl.searchParams.delete("isMobileApp");
+      }
+
+      if (`.${redirectUrl.hostname}`.endsWith(`.${rdsUiUrl.hostname}`)) {
+        // Matching *.realdevsquad.com
+        authRedirectionUrl = redirectUrl;
+        devMode = Boolean(redirectUrl.searchParams.get("dev"));
+      } else {
+        logger.error(`Malicious redirect URL provided URL: ${redirectUrl}, Will redirect to RDS`);
+      }
+      if (redirectUrl.searchParams.get("v2") === "true") {
+        isV2FlagPresent = true;
+      }
+    } catch (error) {
+      logger.error("Invalid redirect URL provided", error);
+    }
+  }
+  return {
+    authRedirectionUrl,
+    isMobileApp,
+    isV2FlagPresent,
+    devMode,
+  };
+}
+
+const getAuthCookieOptions = () => {
+  const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
+  return {
+    domain: rdsUiUrl.hostname,
+    expires: new Date(Date.now() + config.get("userToken.ttl") * 1000),
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+  };
+};
+
+async function handleGoogleLogin(req, res, user, authRedirectionUrl) {
+  try {
+    if (!user.emails || user.emails.length === 0) {
+      logger.error("Google login failed: No emails found in user data");
+      return res.boom.unauthorized("No email found in Google account");
+    }
+    const primaryEmail = user.emails.find((email) => email.verified === true);
+    if (!primaryEmail) {
+      logger.error("Google login failed: No verified email found");
+      return res.boom.unauthorized("No verified email found in Google account");
+    }
+
+    const userData = {
+      email: primaryEmail.value,
+      created_at: Date.now(),
+      updated_at: null,
+    };
+
+    const userDataFromDB = await users.fetchUser({ email: userData.email });
+
+    if (userDataFromDB.userExists) {
+      if (userDataFromDB.user.roles?.developer) {
+        const errorMessage = encodeURIComponent("Google login is restricted for developer role.");
+        const separator = authRedirectionUrl.search ? "&" : "?";
+        return res.redirect(`${authRedirectionUrl}${separator}error=${errorMessage}`);
+      }
+    }
+
+    const { userId, incompleteUserDetails } = await users.addOrUpdate(userData);
+
+    const token = authService.generateAuthToken({ userId });
+
+    const cookieOptions = getAuthCookieOptions();
+
+    res.cookie(config.get("userToken.cookieName"), token, cookieOptions);
+
+    if (incompleteUserDetails) {
+      authRedirectionUrl = "https://my.realdevsquad.com/new-signup";
+    }
+
+    return res.redirect(authRedirectionUrl);
+  } catch (err) {
+    logger.error("Unexpected error during Google login", err);
+    return res.boom.unauthorized("User cannot be authenticated");
+  }
+}
+
+const googleAuthCallback = (req, res, next) => {
+  const { authRedirectionUrl } = handleRedirectUrl(req);
+  return passport.authenticate("google", { session: false }, async (err, accessToken, user) => {
+    if (err) {
+      logger.error(err);
+      return res.boom.unauthorized("User cannot be authenticated");
+    }
+    return await handleGoogleLogin(req, res, user, authRedirectionUrl);
+  })(req, res, next);
+};
+
 /**
  * Makes authentication call to GitHub statergy
  *
@@ -41,33 +155,7 @@ const githubAuthLogin = (req, res, next) => {
  */
 const githubAuthCallback = (req, res, next) => {
   let userData;
-  let isMobileApp = false;
-  const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
-  let authRedirectionUrl = rdsUiUrl;
-  let devMode = false;
-  let isV2FlagPresent = false;
-
-  if ("state" in req.query) {
-    try {
-      const redirectUrl = new URL(req.query.state);
-      if (redirectUrl.searchParams.get("isMobileApp") === "true") {
-        isMobileApp = true;
-        redirectUrl.searchParams.delete("isMobileApp");
-      }
-
-      if (redirectUrl.searchParams.get("v2") === "true") isV2FlagPresent = true;
-
-      if (`.${redirectUrl.hostname}`.endsWith(`.${rdsUiUrl.hostname}`)) {
-        // Matching *.realdevsquad.com
-        authRedirectionUrl = redirectUrl;
-        devMode = Boolean(redirectUrl.searchParams.get("dev"));
-      } else {
-        logger.error(`Malicious redirect URL provided URL: ${redirectUrl}, Will redirect to RDS`);
-      }
-    } catch (error) {
-      logger.error("Invalid redirect URL provided", error);
-    }
-  }
+  let { authRedirectionUrl, isMobileApp, isV2FlagPresent, devMode } = handleRedirectUrl(req);
   try {
     return passport.authenticate("github", { session: false }, async (err, accessToken, user) => {
       if (err) {
@@ -77,23 +165,33 @@ const githubAuthCallback = (req, res, next) => {
       userData = {
         github_id: user.username,
         github_display_name: user.displayName,
+        email: user._json.email,
         github_created_at: Number(new Date(user._json.created_at).getTime()),
         github_user_id: user.id,
         created_at: Date.now(),
         updated_at: null,
       };
 
+      if (!userData.email) {
+        const githubBaseUrl = config.get("githubApi.baseUrl");
+        const res = await fetch(`${githubBaseUrl}/user/emails`, {
+          headers: {
+            Authorization: `token ${accessToken}`,
+          },
+        });
+        const emails = await res.json();
+        const primaryEmails = emails.filter((item) => item.primary);
+
+        if (primaryEmails.length > 0) {
+          userData.email = primaryEmails[0].email;
+        }
+      }
+
       const { userId, incompleteUserDetails, role } = await users.addOrUpdate(userData);
 
       const token = authService.generateAuthToken({ userId });
 
-      const cookieOptions = {
-        domain: rdsUiUrl.hostname,
-        expires: new Date(Date.now() + config.get("userToken.ttl") * 1000),
-        httpOnly: true,
-        secure: true,
-        sameSite: "lax",
-      };
+      const cookieOptions = getAuthCookieOptions();
       // respond with a cookie
       res.cookie(config.get("userToken.cookieName"), token, cookieOptions);
 
@@ -232,6 +330,8 @@ const fetchDeviceDetails = async (req, res) => {
 module.exports = {
   githubAuthLogin,
   githubAuthCallback,
+  googleAuthLogin,
+  googleAuthCallback,
   signout,
   storeUserDeviceInfo,
   updateAuthStatus,
