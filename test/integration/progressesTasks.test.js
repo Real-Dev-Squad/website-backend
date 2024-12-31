@@ -562,6 +562,35 @@ describe("Test Progress Updates API for Tasks", function () {
         });
     });
 
+    it("should not return paginated results when dev=false is passed", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses?type=task&dev=false&page=0&size=1`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.keys(["message", "data", "count"]);
+          expect(res.body.data).to.be.an("array");
+          expect(res.body.count).to.not.equal(1);
+          expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
+          res.body.data.forEach((progress) => {
+            expect(progress).to.have.keys([
+              "id",
+              "type",
+              "completed",
+              "planned",
+              "blockers",
+              "userId",
+              "taskId",
+              "createdAt",
+              "date",
+            ]);
+          });
+
+          return done();
+        });
+    });
+
     it("should return null for next link on the last page", function (done) {
       const size = 1;
       const page = 1;
