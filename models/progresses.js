@@ -53,7 +53,7 @@ const getProgressDocument = async (queryParams) => {
   const query = buildQueryToFetchDocs(queryParams);
   const progressDocs = await getProgressDocs(query);
 
-  if (dev) {
+  if (dev === "true") {
     return await addUserDetailsToProgressDocs(progressDocs);
   }
   return progressDocs;
@@ -94,7 +94,7 @@ async function getProgressByDate(pathParams, queryParams) {
   }
   const doc = result.docs[0];
   const docData = doc.data();
-  if (dev) {
+  if (dev === "true") {
     const { user: userData } = await fetchUser({ userId: docData.userId });
     return { id: doc.id, ...docData, userData };
   }

@@ -250,6 +250,33 @@ describe("Test Progress Updates API for Tasks", function () {
         });
     });
 
+    it("Returns the progress array for the task without userData field if dev is false", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses?taskId=${taskId1}&dev=false`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.keys(["message", "data", "count"]);
+          expect(res.body.data).to.be.an("array");
+          expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
+          res.body.data.forEach((progress) => {
+            expect(progress).to.have.keys([
+              "id",
+              "taskId",
+              "type",
+              "completed",
+              "planned",
+              "blockers",
+              "userId",
+              "createdAt",
+              "date",
+            ]);
+          });
+          return done();
+        });
+    });
+
     it("Returns a 404 error when the task does not exist", function (done) {
       chai
         .request(app)
