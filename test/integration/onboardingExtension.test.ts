@@ -39,6 +39,34 @@ describe("/requests Onboarding Extension", () => {
             sinon.restore();
             await cleanDb();
         })
+        
+        it("should return 401 response when user is not a super user", (done) => {
+            chai.request(app)
+            .put(putEndpoint)
+            .set("authorization", `Bearer ${generateAuthToken({userId: "111"})}`)
+            .send(body)
+            .end((err, res) => {
+                if(err) return done(err);
+                expect(res.statusCode).to.equal(401);
+                expect(res.body.error).to.equal("Unauthorized");
+                expect(res.body.message).to.equal("You are not authorized for this action.")
+                done();
+            })
+        })
+
+        it("should return Invalid request type for incorrect value of type", (done) => {
+            chai.request(app)
+            .put("/requests/1111?dev=true")
+            .set("authorization", `Bearer ${authToken}`)
+            .send({...body, type: "<InvalidType>"})
+            .end((err, res)=>{
+                if(err) return done(err);
+                expect(res.statusCode).to.equal(400);
+                expect(res.body.error).to.equal("Bad Request");
+                expect(res.body.message).to.equal('"type" must be one of [OOO, EXTENSION, ONBOARDING]');
+                done();
+            })
+        })
 
         it("should return Feature not implemented when dev is not true", (done) => {
             chai.request(app)
@@ -108,7 +136,7 @@ describe("/requests Onboarding Extension", () => {
             })
         })
 
-        it("should return 400 response for invalid type", (done) => {
+        it("should return 400 response when type is not onboarding and extensionId is correct", (done) => {
             chai.request(app)
             .put(putEndpoint)
             .set("authorization", `Bearer ${authToken}`)
