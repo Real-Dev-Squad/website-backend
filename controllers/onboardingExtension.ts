@@ -3,7 +3,14 @@ import { addLog } from "../models/logs";
 import { updateRequest } from "../models/requests";
 import { OnboardingExtensionResponse, UpdateOnboardingExtensionRequest, UpdateOnboardingExtensionRequestBody } from "../types/onboardingExtension";
 
-export const updateOnboardingExtensionRequestStatus = async (req: UpdateOnboardingExtensionRequest, res: OnboardingExtensionResponse) => {
+/**
+ * Updates the status of an onboarding extension request.
+ *
+ * @param {UpdateOnboardingExtensionRequest} req - The request object containing the update details.
+ * @param {OnboardingExtensionResponse} res - The response object to send the result of the update.
+ * @returns {Promise<OnboardingExtensionResponse>} Sends the response with the result of the update operation.
+ */
+export const updateOnboardingExtensionRequestStatus = async (req: UpdateOnboardingExtensionRequest, res: OnboardingExtensionResponse): Promise<OnboardingExtensionResponse> => {
     
     const dev = req.query.dev === "true";
     
