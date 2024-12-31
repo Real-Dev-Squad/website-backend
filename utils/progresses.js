@@ -121,6 +121,48 @@ const buildQueryToFetchDocs = (queryParams) => {
 };
 
 /**
+ * Builds a Firestore query for retrieving a paginated list of progress documents within a date range
+ * and optionally filtered by user ID or task ID.
+ * @param {Object} queryParams - An object containing the query parameters.
+ * @param {string} queryParams.userId - (Optional) The user ID to filter progress documents by.
+ * @param {string} queryParams.taskId - (Optional) The task ID to filter progress documents by.
+ * @param {string} queryParams.type - (Optional) The type to filter progress documents by.
+ * @param {string} queryParams.orderBy - (Optional) The field to sort the documents by.
+ * @param {number} queryParams.size - (Optional) The number of documents per page. Defaults to 100.
+ * @param {number} queryParams.page - (Optional) The page number for pagination. Defaults to 0 (first page).
+ * @returns {Query} A Firestore query object that filters and paginates progress documents based on the given parameters.
+ */
+
+const buildQueryToFetchPaginatedDocs = async (queryParams) => {
+  const { type, userId, taskId, orderBy, size = 100, page = 0 } = queryParams;
+  const orderByField = PROGRESS_VALID_SORT_FIELDS[0];
+  const isAscOrDsc = orderBy && PROGRESS_VALID_SORT_FIELDS[0] === orderBy ? "asc" : "desc";
+  const limit = parseInt(size, 10);
+  const offset = parseInt(page, 10) * limit;
+
+  let baseQuery;
+  if (type) {
+    baseQuery = progressesCollection.where("type", "==", type).orderBy(orderByField, isAscOrDsc);
+  } else if (userId) {
+    baseQuery = progressesCollection
+      .where("type", "==", "user")
+      .where("userId", "==", userId)
+      .orderBy(orderByField, isAscOrDsc);
+  } else {
+    baseQuery = progressesCollection
+      .where("type", "==", "task")
+      .where("taskId", "==", taskId)
+      .orderBy(orderByField, isAscOrDsc);
+  }
+
+  const totalProgress = await baseQuery.get();
+  const totalProgressCount = totalProgress.size;
+
+  baseQuery = baseQuery.limit(limit).offset(offset);
+  return { baseQuery, totalProgressCount };
+};
+
+/**
  * Retrieves progress documents from Firestore based on the given query.
  * @param {Query} query - A Firestore query object for fetching progress documents.
  * @returns {Array.<Object>} An array of objects representing the retrieved progress documents. Each object contains the document ID and its data.
@@ -137,6 +179,31 @@ const getProgressDocs = async (query) => {
   });
   return docsData;
 };
+/**
+ * Retrieves progress documents from Firestore based on the given query and page number.
+ *
+ * @param {Query} query - A Firestore query object for fetching progress documents.
+ * @param {number} [pageNumber] - The current page number (optional). If not provided, it will check for documents without pagination.
+ * @returns {Array.<Object>} An array of objects representing the retrieved progress documents.
+ * Each object contains the document ID (`id`) and its associated data.
+ *
+ * @throws {NotFound} If no progress documents are found and no page number is specified.
+ */
+const getPaginatedProgressDocs = async (query, page) => {
+  const progressesDocs = await query.get();
+  if (!page && !progressesDocs.size) {
+    throw new NotFound(PROGRESS_DOCUMENT_NOT_FOUND);
+  }
+  if (!progressesDocs.size) {
+    return [];
+  }
+  const docsData = [];
+  progressesDocs.forEach((doc) => {
+    docsData.push({ id: doc.id, ...doc.data() });
+  });
+  return docsData;
+};
+
 /**
  * Builds a Firestore query for retrieving progress documents within a date range and optionally filtered by user ID or task ID.
  * @param {Object} queryParams - An object containing the query parameters.
@@ -231,8 +298,10 @@ module.exports = {
   assertUserOrTaskExists,
   buildQueryToFetchDocs,
   getProgressDocs,
+  getPaginatedProgressDocs,
   buildRangeProgressQuery,
   getProgressRecords,
   buildQueryToSearchProgressByDay,
   buildProgressQueryForMissedUpdates,
+  buildQueryToFetchPaginatedDocs,
 };

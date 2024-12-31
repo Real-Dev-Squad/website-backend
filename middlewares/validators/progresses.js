@@ -70,6 +70,18 @@ const validateGetProgressRecordsQuery = async (req, res, next) => {
         .messages({
           "string.base": "orderBy must be a string",
         }),
+      dev: joi.boolean().optional().messages({
+        "any.only": "dev field is restricted to either 'true' or 'false'",
+      }),
+      size: joi.number().optional().min(1).max(100).messages({
+        "number.base": "size must be a number",
+        "number.min": "size must be in the range 1-100",
+        "number.max": "size must be in the range 1-100",
+      }),
+      page: joi.number().optional().min(0).messages({
+        "number.base": "page must be a number",
+        "number.min": "page must be a positive number or zero",
+      }),
     })
     .xor("type", "userId", "taskId")
     .messages({
