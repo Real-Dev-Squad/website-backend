@@ -110,7 +110,7 @@ const createProgress = async (req, res) => {
 const getProgress = async (req, res) => {
   const { dev, page = 0, size = 100, type, userId, taskId } = req.query;
   try {
-    if (dev) {
+    if (dev === "true") {
       const { progressDocs, totalProgressCount } = await getPaginatedProgressDocument(req.query);
       const limit = parseInt(size, 10);
       const offset = parseInt(page, 10) * limit;
