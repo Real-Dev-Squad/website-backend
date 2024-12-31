@@ -20,6 +20,6 @@ export type RequestParams = {
 export type UpdateOnboardingExtensionRequest = Request & {
     body: UpdateOnboardingExtensionRequestBody;
     userData: userData;
-    query: RequestQuery & { dev?: strimg };
+    query: RequestQuery & { dev?: string };
     params: RequestParams;
 };
