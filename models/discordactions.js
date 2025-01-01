@@ -28,6 +28,8 @@ const { FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
 const discordService = require("../services/discordService");
 const { buildTasksQueryForMissedUpdates } = require("../utils/tasks");
 const { buildProgressQueryForMissedUpdates } = require("../utils/progresses");
+const { getRequestByKeyValues } = require("./requests");
+const { REQUEST_TYPE, REQUEST_STATE } = require("../constants/requests");
 const allMavens = [];
 
 /**
@@ -753,12 +755,39 @@ const updateIdle7dUsersOnDiscord = async (dev) => {
   };
 };
 
+const skipOnboardingUsersHavingApprovedExtensionRequest = async (users = []) => {
+  const filteredUsers = [];
+  for (const user of users) {
+    try {
+      const latestApprovedExtension = await getRequestByKeyValues({
+        type: REQUEST_TYPE.ONBOARDING,
+        state: REQUEST_STATE.APPROVED,
+        userId: user.id,
+      });
+
+      if (latestApprovedExtension && latestApprovedExtension.newEndsOn > Date.now()) {
+        continue;
+      }
+      filteredUsers.push(user);
+    } catch (error) {
+      logger.error("Error while fetching latest approved extension: ", error);
+    }
+  }
+
+  return filteredUsers;
+};
+
 const updateUsersWith31DaysPlusOnboarding = async () => {
   try {
-    const allOnboardingUsers31DaysCompleted = await getUsersBasedOnFilter({
+    let allOnboardingUsers31DaysCompleted = await getUsersBasedOnFilter({
       state: userState.ONBOARDING,
       time: "31d",
     });
+
+    allOnboardingUsers31DaysCompleted = await skipOnboardingUsersHavingApprovedExtensionRequest(
+      allOnboardingUsers31DaysCompleted
+    );
+
     const discordMembers = await getDiscordMembers();
     const groupOnboardingRole = await getGroupRole("group-onboarding-31d+");
     const groupOnboardingRoleId = groupOnboardingRole.role.roleid;
@@ -1131,4 +1160,5 @@ module.exports = {
   addInviteToInviteModel,
   groupUpdateLastJoinDate,
   deleteGroupRole,
+  skipOnboardingUsersHavingApprovedExtensionRequest,
 };
