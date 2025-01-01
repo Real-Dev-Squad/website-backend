@@ -40,6 +40,7 @@ const {
   removeMemberGroup,
   getGroupRoleByName,
   getGroupRolesForUser,
+  skipOnboardingUsersHavingApprovedExtensionRequest,
 } = require("../../../models/discordactions");
 const {
   groupData,
@@ -63,6 +64,8 @@ const { stubbedModelTaskProgressData } = require("../../fixtures/progress/progre
 const { convertDaysToMilliseconds } = require("../../../utils/time");
 const { generateUserStatusData } = require("../../fixtures/userStatus/userStatus");
 const { userState } = require("../../../constants/userStatus");
+const { REQUEST_TYPE, REQUEST_STATE } = require("../../../constants/requests");
+const { createRequest } = require("../../../models/requests");
 
 chai.should();
 
@@ -1064,6 +1067,7 @@ describe("discordactions", function () {
 
   describe("updateUsersWith31DaysPlusOnboarding", function () {
     let fetchStub;
+    let userId0;
 
     beforeEach(async function () {
       fetchStub = sinon.stub(global, "fetch");
@@ -1087,7 +1091,7 @@ describe("discordactions", function () {
         roles: { archived: false, in_discord: true },
       };
 
-      const userId0 = await addUser(userData[0]);
+      userId0 = await addUser(userData[0]);
       const userId1 = await addUser(userData[1]);
       const userId2 = await addUser(userData[2]);
 
@@ -1131,6 +1135,48 @@ describe("discordactions", function () {
     afterEach(async function () {
       sinon.restore();
       await cleanDb();
+    });
+
+    it("should add grouponboarding31D when user has an approved extension request but dealine has been passed", async function () {
+      await createRequest({
+        type: REQUEST_TYPE.ONBOARDING,
+        state: REQUEST_STATE.APPROVED,
+        newEndsOn: Date.now() - convertDaysToMilliseconds(2),
+        userId: userId0,
+      });
+
+      const res = await updateUsersWith31DaysPlusOnboarding();
+      expect(res.totalOnboardingUsers31DaysCompleted.count).to.equal(2);
+      expect(res.totalOnboarding31dPlusRoleApplied.count).to.equal(1);
+      expect(res.totalOnboarding31dPlusRoleRemoved.count).to.equal(1);
+    });
+
+    it("should add grouponboarding31D when user does not have approved extension request", async function () {
+      await createRequest({
+        type: REQUEST_TYPE.ONBOARDING,
+        state: REQUEST_STATE.PENDING,
+        newEndsOn: Date.now() + convertDaysToMilliseconds(2),
+        userId: userId0,
+      });
+
+      const res = await updateUsersWith31DaysPlusOnboarding();
+      expect(res.totalOnboardingUsers31DaysCompleted.count).to.equal(2);
+      expect(res.totalOnboarding31dPlusRoleApplied.count).to.equal(1);
+      expect(res.totalOnboarding31dPlusRoleRemoved.count).to.equal(1);
+    });
+
+    it("should not add grouponboarding31D when user has approved extension request", async function () {
+      await createRequest({
+        type: REQUEST_TYPE.ONBOARDING,
+        state: REQUEST_STATE.APPROVED,
+        newEndsOn: Date.now() + convertDaysToMilliseconds(2),
+        userId: userId0,
+      });
+
+      const res = await updateUsersWith31DaysPlusOnboarding();
+      expect(res.totalOnboardingUsers31DaysCompleted.count).to.equal(1);
+      expect(res.totalOnboarding31dPlusRoleApplied.count).to.equal(1);
+      expect(res.totalOnboarding31dPlusRoleRemoved.count).to.equal(1);
     });
 
     it("apply, or remove grouponboarding31D", async function () {
@@ -1341,6 +1387,35 @@ describe("discordactions", function () {
         expect(err).to.be.instanceOf(Error);
         expect(err.message).to.equal("Database error while paginating group roles");
       }
+    });
+  });
+
+  describe("skipOnboardingUsersHavingApprovedExtensionRequest", function () {
+    const userId0 = "11111";
+    const userId1 = "12345";
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should return filtered users", async function () {
+      await createRequest({
+        state: REQUEST_STATE.APPROVED,
+        type: REQUEST_TYPE.ONBOARDING,
+        newEndsOn: Date.now() + convertDaysToMilliseconds(2),
+        userId: userId0,
+      });
+      const users = await skipOnboardingUsersHavingApprovedExtensionRequest([{ id: userId0 }, { id: userId1 }]);
+      expect(users.length).to.equal(1);
+      expect(users[0].id).to.equal(userId1);
+    });
+
+    it("should not return filtered users", async function () {
+      const users = await skipOnboardingUsersHavingApprovedExtensionRequest([{ id: userId0 }, { id: userId1 }]);
+      expect(users.length).to.equal(2);
+      expect(users[0].id).to.equal(userId0);
+      expect(users[1].id).to.equal(userId1);
     });
   });
 });
