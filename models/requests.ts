@@ -89,7 +89,7 @@ export const getRequests = async (query: any) => {
 
     if (requestedBy) {
       const requestedByUserId = await getUserId(requestedBy);
-      requestQuery = requestQuery.where("requestedBy", "==", requestedByUserId);
+      requestQuery = requestQuery.where("requestedBy", "in", [requestedByUserId, requestedBy]);
     }
     if (type) {
       requestQuery = requestQuery.where("type", "==", type);
