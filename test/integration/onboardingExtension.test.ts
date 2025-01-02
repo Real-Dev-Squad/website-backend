@@ -10,7 +10,8 @@ import {
     REQUEST_ALREADY_PENDING, 
     REQUEST_STATE, REQUEST_TYPE, 
     ONBOARDING_REQUEST_CREATED_SUCCESSFULLY, 
-    UNAUTHORIZED_TO_CREATE_ONBOARDING_EXTENSION_REQUEST 
+    UNAUTHORIZED_TO_CREATE_ONBOARDING_EXTENSION_REQUEST, 
+    REQUEST_FETCHED_SUCCESSFULLY
 } from "../../constants/requests";
 const { generateToken } = require("../../test/utils/generateBotToken");
 import app from "../../server";
@@ -299,4 +300,82 @@ describe("/requests Onboarding Extension", () => {
             .to.equal(new Date(currentDate + (body.numberOfDays*24*60*60*1000)).toDateString());
         })
     })
+
+    describe("GET /requests",() => {
+        const getEndpoint = "/requests";
+        const username = userData[4].username;
+    
+        beforeEach(async () =>  {
+            await addUser(userData[4]);
+        });
+    
+        afterEach(async () =>  {
+            await cleanDb();
+        });
+    
+        it("should return 204 content when onboarding extension request does not exist", (done) =>  {
+            requestsQuery.createRequest({ type: REQUEST_TYPE.OOO });
+            chai.request(app)
+            .get(`${getEndpoint}?type=ONBOARDING`)
+            .end((err, res) => {
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(204);
+                return done();
+            });
+        });
+    
+        it("should fetch onboarding extension request by requestedBy field", (done) =>  {
+            requestsQuery.createRequest({ type: REQUEST_TYPE.ONBOARDING, requestedBy: username });
+            chai.request(app)
+            .get(`${getEndpoint}?requestedBy=${username}&type=ONBOARDING`)
+            .end((err, res) => {
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.message).to.equal(REQUEST_FETCHED_SUCCESSFULLY);
+                expect(res.body.data[0].type).to.equal(REQUEST_TYPE.ONBOARDING);
+                expect(res.body.data[0].requestedBy).to.equal(username);
+                return done();
+            });
+        });
+    
+        it("shopuld return 204 response when onboarding extension request does not exist for a user", (done) =>  {
+            requestsQuery.createRequest({ type: REQUEST_TYPE.OOO, requestedBy: username });
+            chai.request(app)
+            .get(`${getEndpoint}?requestedBy=${username}&type=ONBOARDING`)
+            .end((err, res) => {
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(204);
+                return done();
+            });
+        });
+    
+        it("should fetch onboarding extension request by type field", (done) =>  {
+            requestsQuery.createRequest({ type: REQUEST_TYPE.ONBOARDING });
+            chai.request(app)
+            .get(`${getEndpoint}?type=ONBOARDING`)
+            .end((err, res) => {
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.message).to.equal(REQUEST_FETCHED_SUCCESSFULLY);
+                expect(res.body.data.length).to.equal(1);
+                expect(res.body.data[0].type).to.equal(REQUEST_TYPE.ONBOARDING);
+                return done();
+            });
+        });
+    
+        it("should fetch onboarding extension request by state field", (done) =>  {
+            requestsQuery.createRequest({ type: REQUEST_TYPE.ONBOARDING, state: REQUEST_STATE.APPROVED });
+            chai.request(app)
+            .get(`${getEndpoint}?state=APPROVED`)
+            .end((err, res) => {
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.message).to.equal(REQUEST_FETCHED_SUCCESSFULLY);
+                expect(res.body.data.length).to.equal(1);
+                expect(res.body.data[0].type).to.equal(REQUEST_TYPE.ONBOARDING);
+                expect(res.body.data[0].state).to.equal(REQUEST_STATE.APPROVED);
+                return done();
+            });
+        });
+    });
 });
