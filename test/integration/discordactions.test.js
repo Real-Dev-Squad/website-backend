@@ -48,6 +48,9 @@ chai.use(chaiHttp);
 const { userStatusDataForOooState } = require("../fixtures/userStatus/userStatus");
 const { generateCronJobToken } = require("../utils/generateBotToken");
 const { CRON_JOB_HANDLER } = require("../../constants/bot");
+const { createRequest } = require("../../models/requests");
+const { REQUEST_TYPE, REQUEST_STATE } = require("../../constants/requests");
+const { convertDaysToMilliseconds } = require("../../utils/time");
 
 describe("Discord actions", function () {
   let superUserId;
@@ -853,6 +856,8 @@ describe("Discord actions", function () {
   });
 
   describe("PUT /discord-actions/group-onboarding-31d-plus", function () {
+    let userId;
+
     beforeEach(async function () {
       userData[0] = {
         ...userData[0],
@@ -884,6 +889,7 @@ describe("Discord actions", function () {
       const addUsersPromises = allUsers.map((user) => addUser(user));
       const userIds = await Promise.all(addUsersPromises);
 
+      userId = userIds[0];
       const updateUserStatusPromises = userIds.map((userId, index) => {
         if (index === 3) return updateUserStatus(userId, generateUserStatusData("IDLE", new Date(), new Date()));
         return updateUserStatus(userId, generateUserStatusData("ONBOARDING", new Date(), new Date()));
@@ -903,6 +909,28 @@ describe("Discord actions", function () {
     afterEach(async function () {
       sinon.restore();
       await cleanDb();
+    });
+
+    it("should filter users who have approved extension request and update groupOnboarding31d+ role", function (done) {
+      createRequest({
+        type: REQUEST_TYPE.ONBOARDING,
+        state: REQUEST_STATE.APPROVED,
+        userId: userId,
+        newEndsOn: Date.now() + convertDaysToMilliseconds(2),
+      });
+      chai
+        .request(app)
+        .put(`/discord-actions/group-onboarding-31d-plus`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(201);
+          expect(res.body.message).to.be.equal("All Users with 31 Days Plus Onboarding are updated successfully.");
+          expect(res.body.totalOnboardingUsers31DaysCompleted.count).to.be.equal(2);
+          expect(res.body.totalOnboarding31dPlusRoleApplied.count).to.be.equal(2);
+          expect(res.body.totalOnboarding31dPlusRoleRemoved.count).to.be.equal(1);
+          return done();
+        });
     });
 
     it("should update role for onboarding users with 31 days completed", function (done) {
