@@ -29,3 +29,15 @@ export type UpdateRequest = Request & {
   query: RequestQuery;
   params: RequestParams;
 };
+
+export type UpdateRequestBeforeApprovalBody = {
+  reason?: string
+  newEndsOn: number
+}
+
+export type UpdateRequestBeforeApproval = Request & {
+  body: UpdateRequestBeforeApprovalBody;
+  userData: userData;
+  query: RequestQuery;
+  params: RequestParams;
+}
