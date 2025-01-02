@@ -1,8 +1,11 @@
 import {
     ERROR_WHILE_CREATING_REQUEST,
     ERROR_WHILE_UPDATING_REQUEST,
+    INVALID_REQUEST_DEADLINE,
+    INVALID_REQUEST_TYPE,
     LOG_ACTION,
     ONBOARDING_REQUEST_CREATED_SUCCESSFULLY,
+    PENDING_REQUEST_UPDATED,
     REQUEST_ALREADY_PENDING,
     REQUEST_APPROVED_SUCCESSFULLY,
     REQUEST_DOES_NOT_EXIST,
@@ -10,7 +13,9 @@ import {
     REQUEST_REJECTED_SUCCESSFULLY,
     REQUEST_STATE,
     REQUEST_TYPE,
+    REQUEST_UPDATED_SUCCESSFULLY,
     UNAUTHORIZED_TO_CREATE_ONBOARDING_EXTENSION_REQUEST,
+    UNAUTHORIZED_TO_UPDATE_REQUEST,
 } from "../constants/requests";
 import { userState } from "../constants/userStatus";
 import { addLog } from "../services/logService";
@@ -24,10 +29,14 @@ import {
     OnboardingExtensionCreateRequest, 
     OnboardingExtensionResponse, 
     UpdateOnboardingExtensionStateRequest,
-    UpdateOnboardingExtensionStateRequestBody
+    UpdateOnboardingExtensionStateRequestBody,
+    UpdateOnboardingExtensionRequest,
+    UpdateOnboardingExtensionRequestBody
 } from "../types/onboardingExtension";
 import { convertDateStringToMilliseconds, getNewDeadline } from "../utils/requests";
 import { convertDaysToMilliseconds } from "../utils/time";
+import firestore from "../utils/firestore";
+const requestModel = firestore.collection("requests");
 
 /**
 * Controller to handle the creation of onboarding extension requests.
@@ -195,6 +204,86 @@ export const updateOnboardingExtensionRequestState = async (
                 ...response,
             },
         });
+    }catch(error){
+        logger.error(ERROR_WHILE_UPDATING_REQUEST, error);
+        return res.boom.badImplementation(ERROR_WHILE_UPDATING_REQUEST);
+    }
+}
+
+/*
+ * Updates an onboarding extension request.
+ *
+ * @async
+ * @function updateOnboardingExtensionRequestController
+ * @param {UpdateOnboardingExtensionRequest} req - The request object containing parameters, query, and body.
+ * @param {OnboardingExtensionResponse} res - The response object used to send back the HTTP response.
+ * @returns {Promise<OnboardingExtensionResponse>} - Returns a promise that resolves to a response indicating success or failure.
+ */
+export const updateOnboardingExtensionRequestController = async (
+    req: UpdateOnboardingExtensionRequest, 
+    res: OnboardingExtensionResponse): Promise<OnboardingExtensionResponse> => 
+{
+    
+    const body = req.body as UpdateOnboardingExtensionRequestBody;
+    const id = req.params.id;
+    const lastModifiedBy = req?.userData?.id;
+    const isSuperuser = req?.userData?.roles?.super_user === true;
+    const dev = req.query.dev === "true";
+
+    if(!dev) return res.boom.notImplemented("Feature not implemented");
+
+    try{
+        const extensionRequestDoc = await requestModel.doc(id).get();
+
+        if(!extensionRequestDoc.exists){
+            return res.boom.notFound(REQUEST_DOES_NOT_EXIST);
+        }
+
+        const extensionRequest = extensionRequestDoc.data() as OnboardingExtension;
+        
+        if(!isSuperuser && lastModifiedBy !== extensionRequest.userId) {
+            return res.boom.forbidden(UNAUTHORIZED_TO_UPDATE_REQUEST);
+        }
+
+        if(extensionRequest.type !== REQUEST_TYPE.ONBOARDING) {
+            return res.boom.badRequest(INVALID_REQUEST_TYPE)
+        }
+        
+        if(extensionRequest.state != REQUEST_STATE.PENDING){
+            return res.boom.badRequest(PENDING_REQUEST_UPDATED);
+        }
+
+        if(extensionRequest.oldEndsOn > body.newEndsOn) {
+            return res.boom.badRequest(INVALID_REQUEST_DEADLINE);
+        }
+
+        const requestBody = {
+            ...body, 
+            lastModifiedBy,
+            updatedAt: Date.now(),
+        }
+    
+        await requestModel.doc(id).update(requestBody);
+    
+        const requestLog = {
+            type: REQUEST_LOG_TYPE.REQUEST_UPDATED,
+            meta: {
+                requestId: extensionRequestDoc.id,
+                action: LOG_ACTION.UPDATE,
+                createdBy: lastModifiedBy,
+            },
+            body: requestBody,
+        };
+    
+        await addLog(requestLog.type, requestLog.meta, requestLog.body);
+        
+        return res.status(200).json({
+            message: REQUEST_UPDATED_SUCCESSFULLY,
+            data: {
+            id: extensionRequestDoc.id,
+            ...requestBody
+            }
+        })
     }catch(error){
         logger.error(ERROR_WHILE_UPDATING_REQUEST, error);
         return res.boom.badImplementation(ERROR_WHILE_UPDATING_REQUEST);
