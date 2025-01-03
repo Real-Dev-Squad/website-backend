@@ -9,6 +9,9 @@ export const updateOnboardingExtensionRequestController = async (req: UpdateOnbo
     const body = req.body as UpdateOnboardingExtensionRequestBody;
     const id = req.params.id;
     const lastModifiedBy = req?.userData?.id;
+    const dev = req.query.dev === "true";
+
+    if(!dev) return res.boom.notImplemented("Feature not implemented");
 
     try{
         const extensionRequest = await requestModel.doc(id).get() as unknown as {id: string, oldEndsOn: number, state: string};
