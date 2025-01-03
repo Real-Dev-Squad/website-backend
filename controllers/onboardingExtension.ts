@@ -29,7 +29,7 @@ export const updateOnboardingExtensionRequestStatus = async (req: UpdateOnboardi
             message: body.reason
         }
     }else{
-        requestBody = body
+        requestBody = body;
     }
 
     try {
