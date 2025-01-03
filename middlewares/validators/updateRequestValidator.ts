@@ -3,7 +3,7 @@ import joi from "joi";
 import { CustomResponse } from "../../types/global";
 import { REQUEST_TYPE } from "../../constants/requests";
 
-const updateOnboardingExtensionRequestValidator = async (req: Request, res: CustomResponse, next: NextFunction) => {
+export const updateOnboardingExtensionRequestValidator = async (req: Request, res: CustomResponse, next: NextFunction) => {
     const schema = joi
     .object()
     .strict()
