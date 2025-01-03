@@ -10,7 +10,7 @@ import { OnboardingExtensionResponse, UpdateOnboardingExtensionStateRequest, Upd
  * @param {OnboardingExtensionResponse} res - The response object to send the result of the update.
  * @returns {Promise<OnboardingExtensionResponse>} Sends the response with the result of the update operation.
  */
-export const updateOnboardingExtensionRequestStatus = async (req: UpdateOnboardingExtensionStateRequest, res: OnboardingExtensionResponse): Promise<OnboardingExtensionResponse> => {
+export const updateOnboardingExtensionRequestState = async (req: UpdateOnboardingExtensionStateRequest, res: OnboardingExtensionResponse): Promise<OnboardingExtensionResponse> => {
     
     const dev = req.query.dev === "true";
     
