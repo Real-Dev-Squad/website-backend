@@ -45,7 +45,7 @@ export const updateOnboardingExtensionRequestController = async (req: UpdateOnbo
         const requestLog = {
             type: REQUEST_LOG_TYPE.REQUEST_UPDATED,
             meta: {
-                requestId: extensionRequest.id,
+                requestId: extensionRequestDoc.id,
                 action: LOG_ACTION.UPDATE,
                 createdBy: lastModifiedBy,
                 createdAt: Date.now(),
@@ -58,7 +58,7 @@ export const updateOnboardingExtensionRequestController = async (req: UpdateOnbo
         return res.status(200).json({
             message: "Request updated successfully",
             data: {
-            id: extensionRequest.id,
+            id: extensionRequestDoc.id,
             ...requestBody
             }
         })
