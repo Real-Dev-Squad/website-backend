@@ -2,7 +2,7 @@ import firestore from "../utils/firestore";
 import { CustomResponse } from "../types/global";
 import { UpdateOnboardingExtensionRequest, UpdateOnboardingExtensionRequestBody } from "../types/onboardingExtension";
 import { ERROR_WHILE_UPDATING_REQUEST, LOG_ACTION, REQUEST_DOES_NOT_EXIST, REQUEST_LOG_TYPE, REQUEST_STATE, REQUEST_TYPE } from "../constants/requests";
-import { addLog } from "../models/logs";
+import { addLog } from "../services/logService";
 const requestModel = firestore.collection("requests");
 
 export const updateOnboardingExtensionRequestController = async (req: UpdateOnboardingExtensionRequest, res: CustomResponse) => {
