@@ -518,18 +518,18 @@ describe("Test Progress Updates API for Tasks", function () {
   });
 
   describe("GET /progresses (getPaginatedProgressDocument)", function () {
-    let userId;
-    let taskObject1;
-    let taskId1;
-
     beforeEach(async function () {
-      userId = await addUser(userData[1]);
-      taskObject1 = await tasks.updateTask(taskData[0]);
-      taskId1 = taskObject1.taskId;
+      const userId = await addUser(userData[1]);
+      const taskObject1 = await tasks.updateTask(taskData[0]);
+      const taskId1 = taskObject1.taskId;
       const progressData1 = stubbedModelTaskProgressData(userId, taskId1, 1683626400000, 1683590400000); // 2023-05-09
       const progressData2 = stubbedModelTaskProgressData(userId, taskId1, 1683885600000, 1683849600000); // 2023-05-12
       await firestore.collection("progresses").doc("taskProgressDocument1").set(progressData1);
       await firestore.collection("progresses").doc("taskProgressDocument2").set(progressData2);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
     });
 
     it("should return paginated results when dev=true is passed", function (done) {
@@ -618,7 +618,7 @@ describe("Test Progress Updates API for Tasks", function () {
         .end((_err, res) => {
           expect(res).to.have.status(400);
           expect(res.body).to.be.an("object");
-          expect(res.body.message).to.equal("size must be in range 1-100");
+          expect(res.body.message).to.equal("size must be in the range 1-100");
           return done();
         });
     });

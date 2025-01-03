@@ -422,16 +422,17 @@ describe("Test Progress Updates API for Users", function () {
   });
 
   describe("GET /progresses (getPaginatedProgressDocument)", function () {
-    let userId1;
-    let userId2;
-
     beforeEach(async function () {
-      userId1 = await addUser(userData[0]);
-      userId2 = await addUser(userData[1]);
+      const userId1 = await addUser(userData[0]);
+      const userId2 = await addUser(userData[1]);
       const progressData1 = stubbedModelProgressData(userId1, 1683957764140, 1683936000000);
       const progressData2 = stubbedModelProgressData(userId2, 1683957764140, 1683936000000);
       await firestore.collection("progresses").doc("progressDoc1").set(progressData1);
       await firestore.collection("progresses").doc("progressDoc2").set(progressData2);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
     });
 
     it("should return paginated results when dev=true is passed", function (done) {
@@ -490,7 +491,7 @@ describe("Test Progress Updates API for Users", function () {
         .end((_err, res) => {
           expect(res).to.have.status(400);
           expect(res.body).to.be.an("object");
-          expect(res.body.message).to.equal("size must be in range 1-100");
+          expect(res.body.message).to.equal("size must be in the range 1-100");
           return done();
         });
     });
