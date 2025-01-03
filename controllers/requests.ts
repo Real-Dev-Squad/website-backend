@@ -13,6 +13,9 @@ import { createTaskExtensionRequest, updateTaskExtensionRequest } from "./extens
 import { UpdateRequest } from "../types/requests";
 import { TaskRequestRequest } from "../types/taskRequests";
 import { createTaskRequestController } from "./taskRequestsv2";
+import { Request } from "express";
+import { updateOnboardingExtensionRequestController } from "./onboardingExtension";
+import { UpdateOnboardingExtensionRequest } from "../types/onboardingExtension";
 
 export const createRequestController = async (
   req: OooRequestCreateRequest | ExtensionRequestRequest | TaskRequestRequest,
@@ -97,3 +100,14 @@ export const getRequestsController = async (req: any, res: any) => {
     return res.boom.badImplementation(ERROR_WHILE_FETCHING_REQUEST);
   }
 };
+
+export const updateRequestBeforeApprovalController = async (req: Request, res: CustomResponse) => {
+  const type = req.body.type;
+  switch(type){
+    case REQUEST_TYPE.ONBOARDING:
+      await updateOnboardingExtensionRequestController(req as unknown as UpdateOnboardingExtensionRequest, res);
+      break;
+    default:
+      return res.boom.badRequest("Invalid request");
+  }
+}
