@@ -14,11 +14,13 @@ export const updateOnboardingExtensionRequestController = async (req: UpdateOnbo
     if(!dev) return res.boom.notImplemented("Feature not implemented");
 
     try{
-        const extensionRequest = await requestModel.doc(id).get() as unknown as {id: string, oldEndsOn: number, state: string};
+        const extensionRequestDoc = await requestModel.doc(id).get();
 
-        if(!extensionRequest){
+        if(!extensionRequestDoc.exists){
             return res.boom.notFound(REQUEST_DOES_NOT_EXIST);
         }
+
+        const extensionRequest = extensionRequestDoc.data();
 
         if(extensionRequest.oldEndsOn > body.newEndsOn) {
             return res.boom.badRequest("Request new deadline must be greater than old deadline.");
