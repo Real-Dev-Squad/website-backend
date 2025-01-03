@@ -10,28 +10,25 @@ import { OnboardingExtensionResponse, UpdateOnboardingExtensionStateRequest, Upd
  * @param {OnboardingExtensionResponse} res - The response object to send the result of the update.
  * @returns {Promise<OnboardingExtensionResponse>} Sends the response with the result of the update operation.
  */
-export const updateOnboardingExtensionRequestStatus = async (req: UpdateOnboardingExtensionRequest, res: OnboardingExtensionResponse): Promise<OnboardingExtensionResponse> => {
+export const updateOnboardingExtensionRequestStatus = async (req: UpdateOnboardingExtensionStateRequest, res: OnboardingExtensionResponse): Promise<OnboardingExtensionResponse> => {
     
     const dev = req.query.dev === "true";
     
     if(!dev) return res.boom.notImplemented("Feature not implemented");
 
-    const body = req.body as UpdateOnboardingExtensionRequestBody;
+    const body = req.body as UpdateOnboardingExtensionStateRequestBody;
     const lastModifiedBy = req?.userData?.id;
     const extensionId = req.params.id;
-    
-    let requestBody;
 
-    if(body.reason){
-        requestBody = {
-            state: body.state,
-            type: body.type,
-            message: body.reason
-        }
-    }else{
-        requestBody = body;
+    let requestBody: UpdateOnboardingExtensionStateRequestBody = {
+        state: body.state,
+        type: body.type,
     }
 
+    if(body.message){
+        requestBody = { ...requestBody, message: body.message };
+    }
+    
     try {
         const response = await updateRequest(extensionId, requestBody, lastModifiedBy, REQUEST_TYPE.ONBOARDING);
 

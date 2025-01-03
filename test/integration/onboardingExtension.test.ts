@@ -18,7 +18,7 @@ describe("/requests Onboarding Extension", () => {
         const body = {
             type: REQUEST_TYPE.ONBOARDING,
             state: REQUEST_STATE.APPROVED,
-            reason: "test-reason"
+            message: "test-message"
         }
         let latestExtension;
         let userId: string;
