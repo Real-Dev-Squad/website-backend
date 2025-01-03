@@ -1,7 +1,7 @@
 import { ERROR_WHILE_UPDATING_REQUEST, LOG_ACTION, REQUEST_APPROVED_SUCCESSFULLY, REQUEST_LOG_TYPE, REQUEST_REJECTED_SUCCESSFULLY, REQUEST_STATE, REQUEST_TYPE } from "../constants/requests";
 import { addLog } from "../models/logs";
 import { updateRequest } from "../models/requests";
-import { OnboardingExtensionResponse, UpdateOnboardingExtensionRequest, UpdateOnboardingExtensionRequestBody } from "../types/onboardingExtension";
+import { OnboardingExtensionResponse, UpdateOnboardingExtensionStateRequest, UpdateOnboardingExtensionStateRequestBody } from "../types/onboardingExtension";
 
 /**
  * Updates the status of an onboarding extension request.

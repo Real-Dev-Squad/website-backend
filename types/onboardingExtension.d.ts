@@ -7,9 +7,9 @@ export type OnboardingExtensionResponse = Response & {
     boom: Boom
 }
 
-export type UpdateOnboardingExtensionRequestBody = {
+export type UpdateOnboardingExtensionStateRequestBody = {
     type: REQUEST_TYPE.ONBOARDING;
-    reason?: string;
+    message?: string;
     state: REQUEST_STATE.APPROVED | REQUEST_STATE.REJECTED;
 };
 
@@ -17,8 +17,8 @@ export type RequestParams = {
     id: string;
 };
 
-export type UpdateOnboardingExtensionRequest = Request & {
-    body: UpdateOnboardingExtensionRequestBody;
+export type UpdateOnboardingExtensionStateRequest = Request & {
+    body: UpdateOnboardingExtensionStateRequestBody;
     userData: userData;
     query: RequestQuery & { dev?: string };
     params: RequestParams;
