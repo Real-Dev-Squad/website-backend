@@ -222,7 +222,7 @@ describe("/requests OOO", function () {
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal('"type" must be one of [OOO, EXTENSION]');
+          expect(res.body.message).to.equal('"type" must be one of [OOO, EXTENSION, ONBOARDING]');
           done();
         });
     });
