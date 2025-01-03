@@ -6,7 +6,8 @@ import sinon from "sinon";
 import chaiHttp from "chai-http";
 import cleanDb from "../utils/cleanDb";
 import app from "../../server";
-import * as requestsQuery from "../../models/requests"
+import * as requestsQuery from "../../models/requests";
+import * as log from "../../models/logs";
 import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/requests";
 import { generateAuthToken } from "../../services/authService";
 import { convertDaysToMilliseconds } from "../../utils/time";
@@ -21,19 +22,20 @@ describe("/requests Onboarding Extension", () => {
             newEndsOn: Date.now() + convertDaysToMilliseconds(3),
             reason: "<dummy-reason"
         }
-        let latestExtension;
+        let latestValidExtension;
         let userId: string;
         let patchEndpoint: string;
         let authToken: string;
         let latestApprovedExtension;
-        let latestRejectedExtension;
-
+        let latestInvalidExtension;
+        let oooId;
         beforeEach(async () => {
             userId = await addUser(userData[4])
-            latestExtension =  await requestsQuery.createRequest({state: REQUEST_STATE.PENDING, type: REQUEST_TYPE.ONBOARDING, requestNumber: 1});
-            latestApprovedExtension = await requestsQuery.createRequest({state: REQUEST_STATE.APPROVED, type: REQUEST_TYPE.ONBOARDING, requestNumber: 2});
-            latestRejectedExtension = await requestsQuery.createRequest({state: REQUEST_STATE.REJECTED, type: REQUEST_TYPE.ONBOARDING, requestNumber: 2});
-            patchEndpoint = `/requests/${latestExtension.id}?dev=true`;
+            latestInvalidExtension =  await requestsQuery.createRequest({state: REQUEST_STATE.PENDING, type: REQUEST_TYPE.ONBOARDING, oldEndsOn: Date.now() + convertDaysToMilliseconds(5)});
+            latestValidExtension = await requestsQuery.createRequest({state: REQUEST_STATE.PENDING, type: REQUEST_TYPE.ONBOARDING, oldEndsOn: Date.now() - convertDaysToMilliseconds(3)})
+            latestApprovedExtension = await requestsQuery.createRequest({state: REQUEST_STATE.APPROVED, type: REQUEST_TYPE.ONBOARDING, oldEndsOn: Date.now()});
+            oooId = await requestsQuery.createRequest({type: REQUEST_TYPE.OOO});
+            patchEndpoint = `/requests/${latestValidExtension.id}?dev=true`;
             authToken = generateAuthToken({userId});
         })
         afterEach(async () => {
@@ -109,101 +111,60 @@ describe("/requests Onboarding Extension", () => {
             })
         })
 
-        it("should return 400 response for invalid extension id", (done) => {
+        it("should return 404 response for invalid extension id", (done) => {
             chai.request(app)
             .patch(`/requests/1111?dev=true`)
             .set("authorization", `Bearer ${authToken}`)
             .send(body)
             .end((err, res) => {
                 if (err) return done(err);
-                expect(res.statusCode).to.equal(400);
+                expect(res.statusCode).to.equal(404);
                 expect(res.body.message).to.equal("Request does not exist");
-                expect(res.body.error).to.equal("Bad Request");
+                expect(res.body.error).to.equal("Not Found");
                 done();
             })
         })
 
-        it("should return 400 response when type is not onboarding and extensionId is correct", (done) => {
+        it("should return 404 response when request type is not onboarding", (done) => {
             chai.request(app)
-            .put(patchEndpoint)
+            .patch(`/requests/${oooId}?dev=true`)
             .set("authorization", `Bearer ${authToken}`)
-            .send({...body, type: REQUEST_TYPE.OOO})
+            .send(body)
             .end((err, res) => {
                 if (err) return done(err);
-                expect(res.statusCode).to.equal(400);
+                expect(res.statusCode).to.equal(404);
                 expect(res.body.message).to.equal("Request does not exist");
-                expect(res.body.error).to.equal("Bad Request");
-                console.log(res.body)
+                expect(res.body.error).to.equal("Not Found");
                 done();
             })
         })
 
-        it("should return 400 response when extension state is approved", (done) => {
+
+
+        it("should return 400 response when old dealdine is greater than new deadline", (done) => {
             chai.request(app)
-            .put(`/requests/${latestApprovedExtension.id}?dev=true`)
+            .patch(`/requests/${latestInvalidExtension.id}?dev=true`)
             .set("authorization", `Bearer ${authToken}`)
             .send(body)
             .end((err, res) => {
                 if (err) return done(err);
                 expect(res.statusCode).to.equal(400);
-                expect(res.body.message).to.equal("Request already approved");
+                expect(res.body.message).to.equal("Request new deadline must be greater than old deadline.");
                 expect(res.body.error).to.equal("Bad Request");
                 done();
             })
         })
 
-        it("should return 400 response when extension state is rejected", (done) => {
+        it("should return 400 response when extension state is not pending", (done) => {
             chai.request(app)
-            .put(`/requests/${latestRejectedExtension.id}?dev=true`)
+            .patch(`/requests/${latestApprovedExtension.id}?dev=true`)
             .set("authorization", `Bearer ${authToken}`)
             .send(body)
             .end((err, res) => {
                 if (err) return done(err);
                 expect(res.statusCode).to.equal(400);
-                expect(res.body.message).to.equal("Request already rejected");
+                expect(res.body.message).to.equal("Request state is not pending");
                 expect(res.body.error).to.equal("Bad Request");
-                done();
-            })
-        })
-
-        it("should return 200 for success response when request is approved", (done) => {
-            chai.request(app)
-            .put(patchEndpoint)
-            .set("authorization", `Bearer ${authToken}`)
-            .send(body)
-            .end((err, res) => {
-                if (err) return done(err);
-                expect(res.statusCode).to.equal(200);
-                expect(res.body.message).to.equal("Request approved successfully");
-                done();
-            })
-        })
-
-        it("should return 200 for success response when request is rejected", (done) => {
-            chai.request(app)
-            .put(patchEndpoint)
-            .set("authorization", `Bearer ${authToken}`)
-            .send({...body, state: REQUEST_STATE.REJECTED})
-            .end((err, res) => {
-                if (err) return done(err);
-                expect(res.statusCode).to.equal(200);
-                expect(res.body.message).to.equal("Request rejected successfully");
-                done();
-            })
-        })
-
-        it("should return 500 response when fails to update extension request", (done) => {
-            sinon.stub(requestsQuery, "updateRequest")
-            .throws("Error while creating extension request");
-            chai.request(app)
-            .put(patchEndpoint)
-            .set("authorization", `Bearer ${authToken}`)
-            .send(body)
-            .end((err, res)=>{
-                if (err) return done(err);
-                expect(res.statusCode).to.equal(500);
-                expect(res.body.message).to.equal("An internal server error occurred");
-                expect(res.body.error).to.equal("Internal Server Error")
                 done();
             })
         })
