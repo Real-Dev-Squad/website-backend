@@ -11,6 +11,6 @@ export type UpdateOnboardingExtensionRequestBody = {
 export type UpdateOnboardingExtensionRequest = Request & {
     body: UpdateOnboardingExtensionRequestBody;
     userData: userData;
-    query: RequestQuery & {dev: boolean};
+    query: RequestQuery & {dev: string};
     params: RequestParams;
 }
