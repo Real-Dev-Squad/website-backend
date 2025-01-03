@@ -1,7 +1,7 @@
 import firestore from "../utils/firestore";
 import { CustomResponse } from "../types/global";
 import { UpdateOnboardingExtensionRequest, UpdateOnboardingExtensionRequestBody } from "../types/onboardingExtension";
-import { ERROR_WHILE_UPDATING_REQUEST, LOG_ACTION, REQUEST_DOES_NOT_EXIST, REQUEST_LOG_TYPE, REQUEST_STATE } from "../constants/requests";
+import { ERROR_WHILE_UPDATING_REQUEST, LOG_ACTION, REQUEST_DOES_NOT_EXIST, REQUEST_LOG_TYPE, REQUEST_STATE, REQUEST_TYPE } from "../constants/requests";
 import { addLog } from "../models/logs";
 const requestModel = firestore.collection("requests");
 
@@ -22,14 +22,18 @@ export const updateOnboardingExtensionRequestController = async (req: UpdateOnbo
 
         const extensionRequest = extensionRequestDoc.data();
 
-        if(extensionRequest.oldEndsOn > body.newEndsOn) {
-            return res.boom.badRequest("Request new deadline must be greater than old deadline.");
+        if(extensionRequest.type !== REQUEST_TYPE.ONBOARDING) {
+            return res.boom.badRequest("Invalid request type")
         }
-    
+        
         if(extensionRequest.state != REQUEST_STATE.PENDING){
             return res.boom.badRequest("Request state is not pending");
         }
-    
+
+        if(extensionRequest.oldEndsOn > body.newEndsOn) {
+            return res.boom.badRequest("Request new deadline must be greater than old deadline.");
+        }
+
         const requestBody = {
             ...body, 
             lastModifiedBy,
