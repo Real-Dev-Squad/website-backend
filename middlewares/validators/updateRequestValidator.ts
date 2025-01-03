@@ -15,7 +15,7 @@ const updateOnboardingExtensionRequestValidator = async (req: Request, res: Cust
             'number.positive': 'newEndsOn must be positive',
             'number.greater': 'newEndsOn must be greater than current date',
         }),
-        type: joi.string().valid([REQUEST_TYPE.ONBOARDING]).required().messages({
+        type: joi.string().equal(REQUEST_TYPE.ONBOARDING).required().messages({
             "type.any": "type is required",
         })
     });
