@@ -15,6 +15,7 @@ export const REQUEST_TYPE = {
   EXTENSION: "EXTENSION",
   TASK: "TASK",
   ALL: "ALL",
+  ONBOARDING: "ONBOARDING",
 };
 
 export const REQUEST_LOG_TYPE = {
@@ -53,3 +54,6 @@ export const TASK_REQUEST_MESSAGES = {
   ERROR_CREATING_TASK_REQUEST: "Error while creating task request",
   TASK_REQUEST_UPDATED_SUCCESS: "Task request updated successfully",
 };
+
+export const ONBOARDING_REQUEST_CREATED_SUCCESSFULLY = "Onboarding extension request created successfully"
+export const UNAUTHORIZED_TO_CREATE_ONBOARDING_EXTENSION_REQUEST = "Only super user and onboarding user are authorized to create an onboarding extension request"
