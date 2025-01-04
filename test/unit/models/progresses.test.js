@@ -5,6 +5,7 @@ const { addUserDetailsToProgressDocs } = require("../../../models/progresses");
 const cleanDb = require("../../utils/cleanDb");
 const users = require("../../../models/users");
 const userDataArray = require("../../fixtures/user/user")();
+const { removeSensitiveInfo } = require("../../../services/dataAccessLayer");
 describe("getProgressDocument", function () {
   afterEach(function () {
     cleanDb();
@@ -18,6 +19,8 @@ describe("getProgressDocument", function () {
     const { userId: userId2 } = await users.addOrUpdate(userData2);
     const updatedUserData = { ...userData, id: userId };
     const updatedUserData2 = { ...userData2, id: userId2 };
+    removeSensitiveInfo(updatedUserData);
+    removeSensitiveInfo(updatedUserData2);
     const mockProgressDocs = [
       { userId: userId, taskId: 101 },
       { userId: userId2, taskId: 102 },

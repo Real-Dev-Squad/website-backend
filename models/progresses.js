@@ -13,7 +13,7 @@ const {
   getProgressDateTimestamp,
   buildQueryToSearchProgressByDay,
 } = require("../utils/progresses");
-const { fetchUserByIds, fetchUser } = require("./users");
+const { retrieveUsers } = require("../services/dataAccessLayer");
 const { PROGRESS_ALREADY_CREATED, PROGRESS_DOCUMENT_NOT_FOUND } = PROGRESSES_RESPONSE_MESSAGES;
 
 /**
@@ -95,7 +95,7 @@ async function getProgressByDate(pathParams, queryParams) {
   const doc = result.docs[0];
   const docData = doc.data();
   if (dev === "true") {
-    const { user: userData } = await fetchUser({ userId: docData.userId });
+    const { user: userData } = await retrieveUsers({ id: docData.userId });
     return { id: doc.id, ...docData, userData };
   }
 
@@ -114,8 +114,9 @@ const addUserDetailsToProgressDocs = async (progressDocs) => {
   try {
     const uniqueUserIds = [...new Set(progressDocs.map((doc) => doc.userId))];
 
-    const uniqueUsersData = await fetchUserByIds(uniqueUserIds);
-
+    const uniqueUsersData = await retrieveUsers({
+      userIds: uniqueUserIds,
+    });
     const allUsers = uniqueUsersData.flat();
     const userByIdMap = allUsers.reduce((lookup, user) => {
       if (user) lookup[user.id] = user;
