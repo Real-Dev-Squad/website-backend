@@ -47,7 +47,7 @@ describe("/requests Onboarding Extension", () => {
             await cleanDb();
         })
 
-        it("should not called verifyDiscordBot and return 401 response when extension type is not onboarding", (done)=> {
+        it("should not call verifyDiscordBot and return 401 response when extension type is not onboarding", (done)=> {
             chai.request(app)
             .post(`${postEndpoint}?dev=true`)
             .send({...body, type: REQUEST_TYPE.OOO})
