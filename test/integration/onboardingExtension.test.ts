@@ -6,7 +6,12 @@ import sinon from "sinon";
 import chaiHttp from "chai-http";
 import cleanDb from "../utils/cleanDb";
 import { CreateOnboardingExtensionBody } from "../../types/onboardingExtension";
-import { REQUEST_ALREADY_PENDING, REQUEST_STATE, REQUEST_TYPE, ONBOARDING_REQUEST_CREATED_SUCCESSFULLY, UNAUTHORIZED_TO_CREATE_ONBOARDING_EXTENSION_REQUEST } from "../../constants/requests";
+import { 
+    REQUEST_ALREADY_PENDING, 
+    REQUEST_STATE, REQUEST_TYPE, 
+    ONBOARDING_REQUEST_CREATED_SUCCESSFULLY, 
+    UNAUTHORIZED_TO_CREATE_ONBOARDING_EXTENSION_REQUEST 
+} from "../../constants/requests";
 const { generateToken } = require("../../test/utils/generateBotToken");
 import app from "../../server";
 import { createUserStatusWithState } from "../../utils/userStatus";
@@ -23,6 +28,7 @@ describe("/requests Onboarding Extension", () => {
         let testUserId: string;
         let testUserIdForInvalidDiscordJoinedDate: string;
         let testUserDiscordIdForInvalidDiscordJoinedDate: string = "54321";
+
         const testUserDiscordId: string = "654321";
         const extensionRequest = {
             state: REQUEST_STATE.APPROVED,
@@ -39,9 +45,18 @@ describe("/requests Onboarding Extension", () => {
         };
 
         beforeEach(async () => {
-            testUserId = await addUser({...userData[6], discordId: testUserDiscordId, discordJoinedAt: "2023-04-06T01:47:34.488000+00:00"});
-            testUserIdForInvalidDiscordJoinedDate = await addUser({...userData[1], discordId: testUserDiscordIdForInvalidDiscordJoinedDate, discordJoinedAt: "2023-04-06T01"});
-        })
+            testUserId = await addUser({
+                ...userData[6], 
+                discordId: testUserDiscordId, 
+                discordJoinedAt: "2023-04-06T01:47:34.488000+00:00"
+            });
+            testUserIdForInvalidDiscordJoinedDate = await addUser({
+                ...userData[1], 
+                discordId: testUserDiscordIdForInvalidDiscordJoinedDate, 
+                discordJoinedAt: "2023-04-06T01"
+            });
+        });
+
         afterEach(async ()=>{
             sinon.restore();
             await cleanDb();
@@ -229,7 +244,7 @@ describe("/requests Onboarding Extension", () => {
                 expect(res.body.message).to.equal(ONBOARDING_REQUEST_CREATED_SUCCESSFULLY);
                 expect(res.body.data.requestNumber).to.equal(1);
                 expect(res.body.data.reason).to.equal(body.reason);
-                expect(res.body.data.state).to.equal(REQUEST_STATE.PENDING)
+                expect(res.body.data.state).to.equal(REQUEST_STATE.PENDING);
                 done();
             })
         })
@@ -268,10 +283,11 @@ describe("/requests Onboarding Extension", () => {
                 newEndsOn: currentDate,
                 oldEndsOn: currentDate - 24*60*60*1000,
             });
+            
             const res = await chai.request(app)
             .post(`${postEndpoint}?dev=true`)
             .set("authorization", `Bearer ${botToken}`)
-            .send(body)
+            .send(body);
 
             expect(res.statusCode).to.equal(201);
             expect(res.body.message).to.equal(ONBOARDING_REQUEST_CREATED_SUCCESSFULLY);
@@ -279,7 +295,8 @@ describe("/requests Onboarding Extension", () => {
             expect(res.body.data.reason).to.equal(body.reason);;
             expect(res.body.data.state).to.equal(REQUEST_STATE.PENDING);
             expect(res.body.data.oldEndsOn).to.equal(latestRejectedExtension.oldEndsOn);
-            expect(new Date(res.body.data.newEndsOn).toDateString()).to.equal(new Date(currentDate + (body.numberOfDays*24*60*60*1000)).toDateString());
+            expect(new Date(res.body.data.newEndsOn).toDateString())
+            .to.equal(new Date(currentDate + (body.numberOfDays*24*60*60*1000)).toDateString());
         })
     })
 });
