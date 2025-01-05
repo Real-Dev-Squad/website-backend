@@ -1,4 +1,5 @@
 export type User = {
+  id?: string
   username?: string;
   first_name?: string;
   last_name?: string;
@@ -17,7 +18,8 @@ export type User = {
   roles?: {
     member?: boolean;
     in_discord?: boolean;
-  };
+    super_user?: boolean;
+  }
   tokens?: {
     githubAccessToken?: string;
   };
