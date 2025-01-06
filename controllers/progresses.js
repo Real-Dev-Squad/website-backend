@@ -245,7 +245,7 @@ const getProgressRangeData = async (req, res) => {
 
 const getProgressBydDateController = async (req, res) => {
   try {
-    const data = await getProgressByDate(req.params);
+    const data = await getProgressByDate(req.params, req.query);
     return res.json({
       message: PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
       data,

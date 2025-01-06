@@ -63,6 +63,9 @@ const validateGetProgressRecordsQuery = async (req, res, next) => {
       taskId: joi.string().optional().allow("").messages({
         "string.base": "taskId must be a string",
       }),
+      dev: joi.boolean().optional().messages({
+        "boolean.base": "dev must be a boolean value (true or false).",
+      }),
       orderBy: joi
         .string()
         .optional()
@@ -104,6 +107,7 @@ const validateGetRangeProgressRecordsParams = async (req, res, next) => {
       taskId: joi.string().optional(),
       startDate: joi.date().iso().required(),
       endDate: joi.date().iso().min(joi.ref("startDate")).required(),
+      dev: joi.boolean().optional(),
     })
     .xor("userId", "taskId")
     .messages({
@@ -133,6 +137,7 @@ const validateGetDayProgressParams = async (req, res, next) => {
       }),
     typeId: joi.string().required(),
     date: joi.date().iso().required(),
+    dev: joi.boolean().optional(),
   });
   try {
     await schema.validateAsync(req.params, { abortEarly: false });

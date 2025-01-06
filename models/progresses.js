@@ -15,6 +15,7 @@ const {
   buildQueryToFetchPaginatedDocs,
   getPaginatedProgressDocs,
 } = require("../utils/progresses");
+const { retrieveUsers } = require("../services/dataAccessLayer");
 const { PROGRESS_ALREADY_CREATED, PROGRESS_DOCUMENT_NOT_FOUND } = PROGRESSES_RESPONSE_MESSAGES;
 
 /**
@@ -49,9 +50,14 @@ const createProgressDocument = async (progressData) => {
  * @throws {Error} If the userId or taskId is invalid or does not exist.
  **/
 const getProgressDocument = async (queryParams) => {
+  const { dev } = queryParams;
   await assertUserOrTaskExists(queryParams);
   const query = buildQueryToFetchDocs(queryParams);
   const progressDocs = await getProgressDocs(query);
+
+  if (dev === "true") {
+    return await addUserDetailsToProgressDocs(progressDocs);
+  }
   return progressDocs;
 };
 
@@ -96,8 +102,9 @@ const getRangeProgressData = async (queryParams) => {
  * @returns {Promise<object>} A Promise that resolves with the progress records of the queried user or task.
  * @throws {Error} If the userId or taskId is invalid or does not exist.
  **/
-async function getProgressByDate(pathParams) {
+async function getProgressByDate(pathParams, queryParams) {
   const { type, typeId, date } = pathParams;
+  const { dev } = queryParams;
   await assertUserOrTaskExists({ [TYPE_MAP[type]]: typeId });
   const query = buildQueryToSearchProgressByDay({ [TYPE_MAP[type]]: typeId, date });
   const result = await query.get();
@@ -105,8 +112,44 @@ async function getProgressByDate(pathParams) {
     throw new NotFound(PROGRESS_DOCUMENT_NOT_FOUND);
   }
   const doc = result.docs[0];
-  return { id: doc.id, ...doc.data() };
+  const docData = doc.data();
+  if (dev === "true") {
+    const { user: userData } = await retrieveUsers({ id: docData.userId });
+    return { id: doc.id, ...docData, userData };
+  }
+
+  return { id: doc.id, ...docData };
 }
+
+/**
+ * Adds user details to progress documents by fetching unique users.
+ * This function retrieves user details for each user ID in the progress documents and attaches the user data to each document.
+ *
+ * @param {Array<object>} progressDocs - An array of progress documents. Each document should include a `userId` property.
+ * @returns {Promise<Array<object>>} A Promise that resolves to an array of progress documents with the `userData` field populated.
+ *                                   If an error occurs while fetching the user details, the `userData` field will be set to `null` for each document.
+ */
+const addUserDetailsToProgressDocs = async (progressDocs) => {
+  try {
+    const uniqueUserIds = [...new Set(progressDocs.map((doc) => doc.userId))];
+
+    const uniqueUsersData = await retrieveUsers({
+      userIds: uniqueUserIds,
+    });
+    const allUsers = uniqueUsersData.flat();
+    const userByIdMap = allUsers.reduce((lookup, user) => {
+      if (user) lookup[user.id] = user;
+      return lookup;
+    }, {});
+
+    return progressDocs.map((doc) => {
+      const userDetails = userByIdMap[doc.userId] || null;
+      return { ...doc, userData: userDetails };
+    });
+  } catch (err) {
+    return progressDocs.map((doc) => ({ ...doc, userData: null }));
+  }
+};
 
 module.exports = {
   createProgressDocument,
@@ -114,4 +157,5 @@ module.exports = {
   getPaginatedProgressDocument,
   getRangeProgressData,
   getProgressByDate,
+  addUserDetailsToProgressDocs,
 };
