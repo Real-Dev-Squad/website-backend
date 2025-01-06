@@ -75,7 +75,8 @@ const getPaginatedProgressDocument = async (queryParams) => {
   const page = queryParams.page || 0;
   const { baseQuery, totalProgressCount } = await buildQueryToFetchPaginatedDocs(queryParams);
 
-  const progressDocs = await getPaginatedProgressDocs(baseQuery, page);
+  let progressDocs = await getPaginatedProgressDocs(baseQuery, page);
+  progressDocs = await addUserDetailsToProgressDocs(progressDocs);
   return { progressDocs, totalProgressCount };
 };
 /**
