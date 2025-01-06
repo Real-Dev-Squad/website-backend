@@ -755,26 +755,46 @@ const updateIdle7dUsersOnDiscord = async (dev) => {
   };
 };
 
+/**
+ * Filters out onboarding users who have an approved onboarding extension request that is still valid.
+ *
+ * This function iterates through the given list of onboarding users and checks if each user has a valid
+ * approved onboarding extension request. If a valid extension request exists with a `newEndsOn`
+ * date greater than the current date, the user is skipped. Otherwise, the user is added to the
+ * returned list.
+ *
+ * @async
+ * @function skipOnboardingUsersHavingApprovedExtensionRequest
+ * @param {Array<Object>} [users=[]] - An array of user objects to be filtered. Each user object
+ *                                     must have an `id` property.
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of users who do not have
+ *                                   a valid approved onboarding extension request.
+ */
 const skipOnboardingUsersHavingApprovedExtensionRequest = async (users = []) => {
-  const filteredUsers = [];
-  for (const user of users) {
-    try {
-      const latestApprovedExtension = await getRequestByKeyValues({
-        type: REQUEST_TYPE.ONBOARDING,
-        state: REQUEST_STATE.APPROVED,
-        userId: user.id,
-      });
+  const currentTime = Date.now();
 
-      if (latestApprovedExtension && latestApprovedExtension.newEndsOn > Date.now()) {
-        continue;
+  const results = await Promise.all(
+    users.map(async (user) => {
+      try {
+        const latestApprovedExtension = await getRequestByKeyValues({
+          type: REQUEST_TYPE.ONBOARDING,
+          state: REQUEST_STATE.APPROVED,
+          userId: user.id,
+        });
+
+        if (latestApprovedExtension && latestApprovedExtension.newEndsOn > currentTime) {
+          return null;
+        }
+
+        return user;
+      } catch (error) {
+        logger.error(`Error while fetching latest approved extension for user ${user.id}:`, error);
+        return null;
       }
-      filteredUsers.push(user);
-    } catch (error) {
-      logger.error("Error while fetching latest approved extension: ", error);
-    }
-  }
+    })
+  );
 
-  return filteredUsers;
+  return results.filter(Boolean);
 };
 
 const updateUsersWith31DaysPlusOnboarding = async () => {
