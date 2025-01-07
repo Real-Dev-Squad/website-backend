@@ -71,6 +71,8 @@ export const updateRequest = async (id: string, body: any, lastModifiedBy: strin
 
 export const getRequests = async (query: any) => {
   let { id, type, requestedBy, state, prev, next, page, size = SIZE } = query;
+  const dev = query.dev === "true";
+
   size = parseInt(size);
   page = parseInt(page);
   try {
@@ -86,11 +88,15 @@ export const getRequests = async (query: any) => {
         ...requestDoc.data(),
       };
     }
-
-    if (requestedBy) {
-      const requestedByUserId = await getUserId(requestedBy);
-      requestQuery = requestQuery.where("requestedBy", "in", [requestedByUserId, requestedBy]);
+    
+    if(requestedBy && dev){
+      requestQuery = requestQuery.where("requestedBy", "==", requestedBy);
     }
+    else if (requestedBy) {
+      const requestedByUserId = await getUserId(requestedBy);
+      requestQuery = requestQuery.where("requestedBy", "==", requestedByUserId);
+    }
+
     if (type) {
       requestQuery = requestQuery.where("type", "==", type);
     }

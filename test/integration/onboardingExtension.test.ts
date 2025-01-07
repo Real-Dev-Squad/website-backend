@@ -327,7 +327,7 @@ describe("/requests Onboarding Extension", () => {
         it("should fetch onboarding extension request by requestedBy field", (done) =>  {
             requestsQuery.createRequest({ type: REQUEST_TYPE.ONBOARDING, requestedBy: username });
             chai.request(app)
-            .get(`${getEndpoint}?requestedBy=${username}&type=ONBOARDING`)
+            .get(`${getEndpoint}?requestedBy=${username}&type=ONBOARDING&dev=true`)
             .end((err, res) => {
                 if (err) return done(err);
                 expect(res.statusCode).to.equal(200);
