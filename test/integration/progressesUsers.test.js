@@ -14,7 +14,7 @@ const {
 } = require("../fixtures/progress/progresses");
 
 const userData = require("../fixtures/user/user")();
-
+const { INTERNAL_SERVER_ERROR_MESSAGE } = require("../../constants/progresses");
 const cookieName = config.get("userToken.cookieName");
 const { expect } = chai;
 
@@ -613,8 +613,7 @@ describe("Test Progress Updates API for Users", function () {
 
           expect(res).to.have.status(500);
           expect(res.body).to.deep.equal({
-            message:
-              "The server has encountered an unexpected error. Please contact the administrator for more information.",
+            message: INTERNAL_SERVER_ERROR_MESSAGE,
           });
           return done();
         });
