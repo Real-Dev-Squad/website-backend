@@ -5,7 +5,7 @@ const firestore = require("../../utils/firestore");
 const app = require("../../server");
 const authService = require("../../services/authService");
 const tasks = require("../../models/tasks");
-
+const progressesModel = require("../../models/progresses");
 const addUser = require("../utils/addUser");
 const cleanDb = require("../utils/cleanDb");
 const {
@@ -229,7 +229,7 @@ describe("Test Progress Updates API for Tasks", function () {
         .end((err, res) => {
           if (err) return done(err);
           expect(res).to.have.status(200);
-          expect(res.body).to.have.keys(["message", "data", "count"]);
+          expect(res.body).to.have.keys(["message", "data", "count", "links"]);
           expect(res.body.data).to.be.an("array");
           expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
           res.body.data.forEach((progress) => {
@@ -388,7 +388,7 @@ describe("Test Progress Updates API for Tasks", function () {
         .end((err, res) => {
           if (err) return done(err);
           expect(res).to.have.status(200);
-          expect(res.body).to.have.keys(["message", "data", "count"]);
+          expect(res.body).to.have.keys(["message", "data", "count", "links"]);
           expect(res.body.data).to.be.an("array");
           expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
           expect(res.body.count).to.be.equal(4);
@@ -651,6 +651,7 @@ describe("Test Progress Updates API for Tasks", function () {
               "planned",
               "blockers",
               "userId",
+              "userData",
               "taskId",
               "createdAt",
               "date",
@@ -740,6 +741,28 @@ describe("Test Progress Updates API for Tasks", function () {
           // eslint-disable-next-line no-unused-expressions
           expect(res.body.links.next).to.be.null;
           expect(res.body.links.prev).to.equal(`/progresses?type=task&page=${page - 1}&size=${size}&dev=true`);
+          return done();
+        });
+    });
+
+    it("Should return 500 Internal Server Error if there is an exception", function (done) {
+      sinon.stub(progressesModel, "getPaginatedProgressDocument").throws(new Error("Database error"));
+
+      chai
+        .request(app)
+        .get(`/progresses?type=task&dev=true&page=0&size=1`)
+        .end((err, res) => {
+          if (err) return done(err);
+
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(500);
+          expect(res.body).to.deep.equal({
+            message:
+              "The server has encountered an unexpected error. Please contact the administrator for more information.",
+          });
           return done();
         });
     });
