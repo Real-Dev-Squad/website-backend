@@ -1,12 +1,11 @@
 const { Conflict, NotFound } = require("http-errors");
+const progressesModel = require("../models/progresses");
 const {
-  createProgressDocument,
-  getProgressDocument,
-  getRangeProgressData,
-  getProgressByDate,
-  getPaginatedProgressDocument,
-} = require("../models/progresses");
-const { PROGRESSES_RESPONSE_MESSAGES, INTERNAL_SERVER_ERROR_MESSAGE } = require("../constants/progresses");
+  PROGRESSES_RESPONSE_MESSAGES,
+  INTERNAL_SERVER_ERROR_MESSAGE,
+  PROGRESSES_SIZE,
+  PROGRESSES_PAGE_SIZE,
+} = require("../constants/progresses");
 const { sendTaskUpdate } = require("../utils/sendTaskUpdate");
 const { PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED, PROGRESS_DOCUMENT_CREATED_SUCCEEDED } = PROGRESSES_RESPONSE_MESSAGES;
 
@@ -50,7 +49,7 @@ const createProgress = async (req, res) => {
     body: { type, completed, planned, blockers, taskId },
   } = req;
   try {
-    const { data, taskTitle } = await createProgressDocument({ ...req.body, userId: req.userData.id });
+    const { data, taskTitle } = await progressesModel.createProgressDocument({ ...req.body, userId: req.userData.id });
     await sendTaskUpdate(completed, blockers, planned, req.userData.username, taskId, taskTitle);
     return res.status(201).json({
       data,
@@ -108,10 +107,10 @@ const createProgress = async (req, res) => {
  */
 
 const getProgress = async (req, res) => {
-  const { dev, page = 0, size = 100, type, userId, taskId } = req.query;
+  const { dev, page = PROGRESSES_PAGE_SIZE, size = PROGRESSES_SIZE, type, userId, taskId } = req.query;
   try {
     if (dev === "true") {
-      const { progressDocs, totalProgressCount } = await getPaginatedProgressDocument(req.query);
+      const { progressDocs, totalProgressCount } = await progressesModel.getPaginatedProgressDocument(req.query);
       const limit = parseInt(size, 10);
       const offset = parseInt(page, 10) * limit;
       const nextPage = offset + limit < totalProgressCount ? parseInt(page, 10) + 1 : null;
@@ -136,7 +135,7 @@ const getProgress = async (req, res) => {
         },
       });
     }
-    const data = await getProgressDocument(req.query);
+    const data = await progressesModel.getProgressDocument(req.query);
     return res.json({
       message: PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
       count: data.length,
@@ -191,7 +190,7 @@ const getProgress = async (req, res) => {
 
 const getProgressRangeData = async (req, res) => {
   try {
-    const data = await getRangeProgressData(req.query);
+    const data = await progressesModel.getRangeProgressData(req.query);
     return res.json({
       message: PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
       data,
@@ -245,7 +244,7 @@ const getProgressRangeData = async (req, res) => {
 
 const getProgressBydDateController = async (req, res) => {
   try {
-    const data = await getProgressByDate(req.params, req.query);
+    const data = await progressesModel.getProgressByDate(req.params, req.query);
     return res.json({
       message: PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
       data,

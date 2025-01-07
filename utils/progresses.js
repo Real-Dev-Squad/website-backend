@@ -8,6 +8,8 @@ const {
   PROGRESSES_RESPONSE_MESSAGES: { PROGRESS_DOCUMENT_NOT_FOUND },
   MILLISECONDS_IN_DAY,
   PROGRESS_VALID_SORT_FIELDS,
+  PROGRESSES_PAGE_SIZE,
+  PROGRESSES_SIZE,
 } = require("../constants/progresses");
 const { convertTimestampToUTCStartOrEndOfDay } = require("./time");
 const progressesCollection = fireStore.collection("progresses");
@@ -134,7 +136,7 @@ const buildQueryToFetchDocs = (queryParams) => {
  */
 
 const buildQueryToFetchPaginatedDocs = async (queryParams) => {
-  const { type, userId, taskId, orderBy, size = 100, page = 0 } = queryParams;
+  const { type, userId, taskId, orderBy, size = PROGRESSES_SIZE, page = PROGRESSES_PAGE_SIZE } = queryParams;
   const orderByField = PROGRESS_VALID_SORT_FIELDS[0];
   const isAscOrDsc = orderBy && PROGRESS_VALID_SORT_FIELDS[0] === orderBy ? "asc" : "desc";
   const limit = parseInt(size, 10);
