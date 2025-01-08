@@ -19,7 +19,7 @@ describe("progressModel", function () {
     sinon.restore();
   });
 
-  describe("buildQueryToFetchPaginatedDocs", function () {
+  describe("getPaginatedProgressDocument", function () {
     let userId;
     let userId2;
     let userId3;
@@ -102,7 +102,7 @@ describe("progressModel", function () {
     });
   });
 
-  describe("getProgressDocument", function () {
+  describe("addUserDetailsToProgressDocs", function () {
     afterEach(function () {
       cleanDb();
       sinon.restore();
