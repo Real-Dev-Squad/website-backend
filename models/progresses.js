@@ -62,14 +62,12 @@ const getProgressDocument = async (queryParams) => {
 };
 
 /**
- * This function retrieves a paginated list of progress documents for a specific user or task,
- * or for all users or all tasks if no specific user or task is provided.
- * @param queryParams {object} This is the data that will be used for querying.
- * It should be an object that includes key-value pairs for the fields - type, userId, taskId,
- * and optionally pagination details such as page number and page size.
- * @returns {Promise<object>} A Promise that resolves with the paginated progress document objects.
- * @throws {Error} If the userId or taskId is invalid or does not exist.
+ * Retrieves a paginated list of progress documents based on the provided query parameters.
+ * @param {object} queryParams - Query data, including type, userId, taskId, and optional pagination details (page and pageSize).
+ * @returns {Promise<object>} Resolves with paginated progress documents.
+ * @throws {Error} If userId or taskId is invalid or not found.
  **/
+
 const getPaginatedProgressDocument = async (queryParams) => {
   await assertUserOrTaskExists(queryParams);
   const page = queryParams.page || 0;

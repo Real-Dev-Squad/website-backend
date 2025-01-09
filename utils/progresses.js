@@ -123,16 +123,10 @@ const buildQueryToFetchDocs = (queryParams) => {
 };
 
 /**
- * Builds a Firestore query for retrieving a paginated list of progress documents within a date range
- * and optionally filtered by user ID or task ID.
- * @param {Object} queryParams - An object containing the query parameters.
- * @param {string} queryParams.userId - (Optional) The user ID to filter progress documents by.
- * @param {string} queryParams.taskId - (Optional) The task ID to filter progress documents by.
- * @param {string} queryParams.type - (Optional) The type to filter progress documents by.
- * @param {string} queryParams.orderBy - (Optional) The field to sort the documents by.
- * @param {number} queryParams.size - (Optional) The number of documents per page. Defaults to 100.
- * @param {number} queryParams.page - (Optional) The page number for pagination. Defaults to 0 (first page).
- * @returns {Query} A Firestore query object that filters and paginates progress documents based on the given parameters.
+ * Builds a Firestore query to retrieve a paginated list of progress documents within a date range,
+ * optionally filtered by user ID, task ID, type, and sorted by a specific field.
+ * @param {Object} queryParams - Query parameters including userId, taskId, type, orderBy, size, and page.
+ * @returns {Query} A Firestore query object for filtered and paginated progress documents.
  */
 
 const buildQueryToFetchPaginatedDocs = async (queryParams) => {
