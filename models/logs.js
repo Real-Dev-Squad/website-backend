@@ -193,20 +193,28 @@ const fetchAllLogs = async (query) => {
         throw error;
       }
 
-      const buildTimestamp = (date) => ({
-        _seconds: Math.floor(date / 1000),
-        _nanoseconds: 0,
+      const buildTimestamp = (milliseconds) => ({
+        _seconds: Math.floor(milliseconds / 1000),
+        _nanoseconds: (milliseconds % 1000) * 1000000,
       });
 
       if (startDate) {
-        requestQuery = requestQuery.where("timestamp", ">=", buildTimestamp(startDate));
+        const startTimestamp = buildTimestamp(startDate);
+        requestQuery = requestQuery
+          .where("timestamp._seconds", ">=", startTimestamp._seconds)
+          .where("timestamp._nanoseconds", ">=", startTimestamp._nanoseconds);
       }
+
       if (endDate) {
-        requestQuery = requestQuery.where("timestamp", "<=", buildTimestamp(endDate));
+        const endTimestamp = buildTimestamp(endDate);
+        requestQuery = requestQuery
+          .where("timestamp._seconds", "<=", endTimestamp._seconds)
+          .where("timestamp._nanoseconds", "<=", endTimestamp._nanoseconds);
       }
     }
 
-    requestQuery = requestQuery.orderBy("timestamp", "desc");
+    requestQuery = requestQuery.orderBy("timestamp._seconds", "desc").orderBy("timestamp._nanoseconds", "desc");
+
     let requestQueryDoc = requestQuery;
 
     if (prev) {
@@ -239,7 +247,7 @@ const fetchAllLogs = async (query) => {
     const allLogs = [];
     if (!snapshot.empty) {
       snapshot.forEach((doc) => {
-        allLogs.push({ ...doc.data() });
+        allLogs.push({ id: doc.id, ...doc.data() });
       });
     }
 
