@@ -215,7 +215,7 @@ describe("/requests Onboarding Extension", () => {
             })
         })
     
-        it("should return 400 response when a user already has a pending request", (done)=> {
+        it("should return 409 response when a user already has a pending request", (done)=> {
             createUserStatusWithState(testUserId, userStatusModel, userState.ONBOARDING);
             requestsQuery.createRequest({...extensionRequest, state: REQUEST_STATE.PENDING, userId: testUserId});
     
@@ -225,8 +225,8 @@ describe("/requests Onboarding Extension", () => {
             .send(body)
             .end((err, res) => {
                 if (err) return done(err);
-                expect(res.statusCode).to.equal(400);
-                expect(res.body.error).to.equal("Bad Request");
+                expect(res.statusCode).to.equal(409);
+                expect(res.body.error).to.equal("Conflict");
                 expect(res.body.message).to.equal(REQUEST_ALREADY_PENDING);
                 done();
             })
