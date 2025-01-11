@@ -338,7 +338,7 @@ describe("/requests Onboarding Extension", () => {
             });
         });
     
-        it("shopuld return 204 response when onboarding extension request does not exist for a user", (done) =>  {
+        it("should return 204 response when onboarding extension request does not exist for a user", (done) =>  {
             requestsQuery.createRequest({ type: REQUEST_TYPE.OOO, requestedBy: username });
             chai.request(app)
             .get(`${getEndpoint}?requestedBy=${username}&type=ONBOARDING`)
