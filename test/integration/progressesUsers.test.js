@@ -226,6 +226,60 @@ describe("Test Progress Updates API for Users", function () {
         });
     });
 
+    it("Returns the progress array for a specific user with userData object", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses?userId=${userId1}&dev=true`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.keys(["message", "data", "count"]);
+          expect(res.body.data).to.be.an("array");
+          expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
+          res.body.data.forEach((progress) => {
+            expect(progress).to.have.keys([
+              "id",
+              "type",
+              "completed",
+              "planned",
+              "blockers",
+              "userId",
+              "userData",
+              "createdAt",
+              "date",
+            ]);
+          });
+          return done();
+        });
+    });
+
+    it("Returns the progress array for all the user with userData object when dev is true", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses?type=user&dev=true`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.keys(["message", "data", "count"]);
+          expect(res.body.data).to.be.an("array");
+          expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
+          res.body.data.forEach((progress) => {
+            expect(progress).to.have.keys([
+              "id",
+              "type",
+              "completed",
+              "planned",
+              "blockers",
+              "userId",
+              "userData",
+              "createdAt",
+              "date",
+            ]);
+          });
+          return done();
+        });
+    });
+
     it("Returns 400 for bad request", function (done) {
       chai
         .request(app)
@@ -362,6 +416,31 @@ describe("Test Progress Updates API for Users", function () {
             "completed",
             "planned",
             "blockers",
+            "userId",
+            "createdAt",
+            "date",
+          ]);
+          return done();
+        });
+    });
+
+    it("Returns the progress data for a specific user with userData object", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses/user/${userId}/date/2023-05-02?dev=true`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.keys(["message", "data"]);
+          expect(res.body.data).to.be.an("object");
+          expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
+          expect(res.body.data).to.have.keys([
+            "id",
+            "type",
+            "completed",
+            "planned",
+            "blockers",
+            "userData",
             "userId",
             "createdAt",
             "date",
