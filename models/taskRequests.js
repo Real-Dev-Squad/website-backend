@@ -427,7 +427,7 @@ const approveTaskRequest = async (taskRequestId, user, authorUserId) => {
           priority: DEFAULT_TASK_PRIORITY,
           createdAt: currentEpochTime,
           updatedAt: currentEpochTime,
-          startedOn: userRequestData.proposedStartDate / 1000,
+          startedOn: userRequestData.createdAt / 1000,
           endsOn: userRequestData.proposedDeadline / 1000,
           github: {
             issue: {
