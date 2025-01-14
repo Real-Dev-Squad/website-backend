@@ -1,4 +1,5 @@
 const tradeService = require("../services/tradingService");
+const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 /**
  * New Trading Request
  *
@@ -18,11 +19,10 @@ const trade = async (req, res) => {
     if (!canUserTrade) {
       return res.boom.forbidden(errorMessage);
     }
-
-    return res.json({ userBalance });
+    return res.json({ message: "Congrats, Stock Trade done successfully!! 🎉🎉🎉🎊🎊🎊", userBalance });
   } catch (err) {
     logger.error(`Error during trading: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 

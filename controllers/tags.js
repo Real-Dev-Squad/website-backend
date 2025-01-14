@@ -1,5 +1,6 @@
 const TagModel = require("../models/tags");
 const admin = require("firebase-admin");
+const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 /**
  * Creates a new tag
@@ -28,7 +29,7 @@ const addTag = async (req, res) => {
     }
   } catch (err) {
     logger.error(`Error while creating new tag: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -48,7 +49,7 @@ const deleteTag = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while deleting the tag: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -67,7 +68,7 @@ const getAllTags = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while fetching all the tag: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
@@ -81,7 +82,7 @@ const getTagsByType = async (req, res) => {
     });
   } catch (err) {
     logger.error(`Error while fetching the tags: ${err}`);
-    return res.boom.badImplementation("An internal server error occurred");
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 

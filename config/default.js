@@ -11,15 +11,37 @@ module.exports = {
   port: 3000,
   enableFileLogs: true,
   enableConsoleLogs: false,
-
+  discordUnverifiedRoleId: "<discordUnverifiedRoleId>",
+  discordDeveloperRoleId: "<discordDeveloperRoleId>",
+  discordMavenRoleId: "<discordMavenRoleId>",
+  discordMissedUpdatesRoleId: "<discordMissedUpdatesRoleId>",
   githubApi: {
     baseUrl: "https://api.github.com",
     org: "Real-Dev-Squad",
   },
 
+  aws: {
+    region: "<aws-region>",
+    access_key: "<aws-access-key>",
+    secret_key: "<aws-secret-key>",
+    identity_store_id: "<identity-store-id>",
+  },
+
   githubOauth: {
     clientId: "<clientId>",
     clientSecret: "<clientSecret>",
+  },
+
+  googleOauth: {
+    clientId: "<clientId>",
+    clientSecret: "<clientSecret>",
+  },
+
+  emailServiceConfig: {
+    email: "<RDS_EMAIL>",
+    password: "<EMAIL PASSWORD GENERATED AFTER 2FA>",
+    host: "<smtp host>",
+    port: "<number>",
   },
 
   firestore: `{
@@ -45,6 +67,13 @@ module.exports = {
       routes: {
         authRedirection: "/goto",
       },
+      goalAPI: {
+        baseUrl: "https://goals-api.realdevsquad.com",
+        cookieName: `goals-session-${NODE_ENV}`,
+      },
+    },
+    discordBot: {
+      baseUrl: "<DISCORD_BOT_BASE_URL>",
     },
   },
 
@@ -54,6 +83,7 @@ module.exports = {
 
   userToken: {
     cookieName: `rds-session-${NODE_ENV}`,
+    cookieV2Name: `rds-session-v2-${NODE_ENV}`,
     ttl: 30 * 24 * 60 * 60, // in seconds
     refreshTtl: 180 * 24 * 60 * 60, // in seconds
     publicKey: "<publicKey>",
@@ -78,6 +108,15 @@ module.exports = {
     CLOUDFLARE_X_AUTH_EMAIL: "Cloudflare_User_Email",
   },
 
+  rdsServerlessBot: {
+    rdsServerLessPrivateKey: "RDS_SERVERLESS_PRIVATE_KEY",
+    ttl: 60,
+  },
+
+  cronJobHandler: {
+    publicKey: "CRON_JOB_PUBLIC_KEY",
+  },
+
   integrations: {
     newrelic: {
       appName: "RDS_API_production",
@@ -87,5 +126,15 @@ module.exports = {
 
   routesCacheTTL: {
     "/members": 900,
+  },
+
+  Event100ms: {
+    APP_ACCESS_KEY: "EVENT_100MS_APP_ACCESS_KEY",
+    APP_SECRET: "EVENT_100MS_APP_SECRET",
+  },
+  githubAccessToken: "GITHUB_PERSONAL_ACCESS_TOKEN",
+
+  externalServices: {
+    EXTERNAL_SERVICE_PUBLIC_KEY: "EXTERNAL_SERVICE_PUBLIC_KEY",
   },
 };

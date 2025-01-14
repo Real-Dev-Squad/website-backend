@@ -27,9 +27,6 @@ const fetchUsers = async (queryParams = {}) => {
         const curatedMemberData = {
           id: doc.id,
           ...memberData,
-          tokens: undefined,
-          phone: undefined,
-          email: undefined,
         };
         curatedMemberData.isMember = !!(memberData.roles && memberData.roles.member);
         allMembers.push(curatedMemberData);
@@ -57,6 +54,7 @@ const moveToMembers = async (userId) => {
     const roles = user.roles ? { ...user.roles, member: true } : { member: true };
     await userModel.doc(userId).update({
       roles,
+      updated_at: Date.now(),
     });
     return { isAlreadyMember: false, movedToMember: true };
   } catch (err) {
@@ -80,9 +78,6 @@ const fetchUsersWithRole = async (role) => {
         onlyMembers.push({
           id: doc.id,
           ...doc.data(),
-          phone: undefined,
-          email: undefined,
-          tokens: undefined,
         });
       });
     }
@@ -107,6 +102,7 @@ const addArchiveRoleToMembers = async (userId) => {
     const roles = { ...user.roles, [ROLES.ARCHIVED]: true };
     await userModel.doc(userId).update({
       roles,
+      updated_at: Date.now(),
     });
     return { isArchived: false };
   } catch (err) {

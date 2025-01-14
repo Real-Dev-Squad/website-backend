@@ -1,8 +1,6 @@
 const contributionsService = require("../services/contributions");
-const { fetchUser } = require("../models/users");
-
-const ERROR_MESSAGE = "Something went wrong. Please try again or contact admin";
-
+const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+const dataAccess = require("../services/dataAccessLayer");
 /**
  * Get the  contributions of the user
  * @param {Object} req - Express request object
@@ -11,8 +9,8 @@ const ERROR_MESSAGE = "Something went wrong. Please try again or contact admin";
 
 const getUserContributions = async (req, res) => {
   try {
-    const username = req.params.username;
-    const result = await fetchUser({ username: req.params.username });
+    const { username } = req.params;
+    const result = await dataAccess.retrieveUsers({ username: req.params.username });
     if (result.userExists) {
       const contributions = await contributionsService.getUserContributions(username);
       return res.json(contributions);
@@ -20,7 +18,7 @@ const getUserContributions = async (req, res) => {
     return res.boom.notFound("User doesn't exist");
   } catch (err) {
     logger.error(`Error while retriving contributions ${err}`);
-    return res.boom.badImplementation(ERROR_MESSAGE);
+    return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
 

@@ -103,7 +103,19 @@ const extractPRdetails = (data) => {
  */
 
 const extractTaskdetails = (data) => {
-  const { id, title, purpose, endsOn, startedOn, dependsOn, status, participants, featureUrl, isNoteworthy } = data;
+  const {
+    id,
+    title,
+    purpose,
+    endsOn,
+    startedOn,
+    dependsOn,
+    status,
+    participants,
+    featureUrl,
+    isNoteworthy,
+    isCollapsed,
+  } = data;
   return {
     id,
     title,
@@ -115,6 +127,7 @@ const extractTaskdetails = (data) => {
     participants,
     featureUrl,
     isNoteworthy,
+    isCollapsed,
   };
 };
 

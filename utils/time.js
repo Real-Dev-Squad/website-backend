@@ -24,7 +24,15 @@ const convertHoursToMilliseconds = (hours) => {
 const convertDaysToMilliseconds = (days) => {
   return days * 24 * 60 * 60 * 1000;
 };
-
+/**
+ * Converts milliseconds to seconds
+ * @param milliseconds {number} : to be converted
+ * @returns {number} : seconds
+ */
+const convertMillisToSeconds = (milliseconds) => {
+  if (typeof milliseconds !== "number") throw Error("Not a number");
+  return Math.round(milliseconds / 1000);
+};
 /**
  * Returns time in seconds of timestamp after given duration
  * @param timestamp {integer} : base time in milliseconds
@@ -55,10 +63,41 @@ const getBeforeHourTime = (timestamp, hours = 0) => {
   return currentTime;
 };
 
+/**
+ * Converts a timestamp to either the start or end of a day in UTC time.
+ *
+ * @param {number} timestamp - The timestamp to be converted.
+ * @param {boolean} isEndOfDay - A flag indicating whether to convert to the end of the day (true) or the start of the day (false).
+ * @returns {number} The converted timestamp.
+ */
+const convertTimestampToUTCStartOrEndOfDay = (timestamp, isEndOfDay = false) => {
+  if (isNaN(timestamp)) {
+    return null;
+  }
+  const currTime = new Date(timestamp);
+  if (isEndOfDay) {
+    currTime.setUTCHours(23, 59, 59, 999);
+  } else {
+    currTime.setUTCHours(0, 0, 0, 0);
+  }
+  return currTime.getTime();
+};
+
+/**
+ * Returns Current Epoch time stamp
+ * @returns {EpochTimeStamp}: Current Epoch time
+ */
+const getCurrentEpochTime = () => {
+  return Math.round(Date.now() / 1000);
+};
+
 module.exports = {
   convertDaysToMilliseconds,
   convertHoursToMilliseconds,
   convertMinutesToMilliseconds,
   getTimeInSecondAfter,
   getBeforeHourTime,
+  convertTimestampToUTCStartOrEndOfDay,
+  getCurrentEpochTime,
+  convertMillisToSeconds,
 };

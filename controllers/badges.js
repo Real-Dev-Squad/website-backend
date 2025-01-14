@@ -2,7 +2,7 @@ const { ERROR_MESSAGES, SUCCESS_MESSAGES } = require("../constants/badges");
 const { CONTROLLERS: CONTROLLERS_ERROR_MESSAGES } = ERROR_MESSAGES;
 const { CONTROLLERS: CONTROLLERS_SUCCESS_MESSAGES } = SUCCESS_MESSAGES;
 const badgeQuery = require("../models/badges");
-const { fetchUser } = require("../models/users");
+const dataAccess = require("../services/dataAccessLayer");
 const imageService = require("../services/imageService");
 
 /**
@@ -76,7 +76,7 @@ async function postBadge(req, res) {
 async function postUserBadges(req, res) {
   try {
     const { badgeIds, userId } = req.body;
-    const { userExists } = await fetchUser({ userId });
+    const { userExists } = await dataAccess.retrieveUsers({ id: userId });
     if (!userExists) {
       throw Error(ERROR_MESSAGES.MISC.USER_ID_DOES_NOT_EXIST);
     }

@@ -10,6 +10,7 @@ module.exports = {
   port: port,
   enableFileLogs: false,
   enableConsoleLogs: true,
+  discordNewComersChannelId: "709080951824842783",
 
   services: {
     rdsApi: {
@@ -21,6 +22,11 @@ module.exports = {
       routes: {
         authRedirection: "/healthcheck",
       },
+    },
+
+    goalAPI: {
+      baseUrl: "https://staging-goals-api.realdevsquad.com",
+      secretKey: "123456789",
     },
   },
 
