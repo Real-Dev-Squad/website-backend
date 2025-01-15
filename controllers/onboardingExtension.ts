@@ -57,7 +57,7 @@ export const createOnboardingExtensionRequestController = async (req: Onboarding
         });
 
         if(latestExtensionRequest && latestExtensionRequest.state === REQUEST_STATE.PENDING){
-            return res.boom.badRequest(REQUEST_ALREADY_PENDING);
+            return res.boom.conflict(REQUEST_ALREADY_PENDING);
         }
         
         const millisecondsInThirtyOneDays = convertDaysToMilliseconds(31);

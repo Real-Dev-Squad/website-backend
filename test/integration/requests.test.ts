@@ -356,7 +356,7 @@ describe("/requests OOO", function () {
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body.error).to.equal("Bad Request");
-          expect(res.body.message).to.equal('"type" must be one of [OOO, EXTENSION, TASK, ALL]');
+          expect(res.body.message).to.equal('"type" must be one of [OOO, EXTENSION, TASK, ALL, ONBOARDING]');
           done();
         });
     });
