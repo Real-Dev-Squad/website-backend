@@ -78,13 +78,13 @@
     "typescript": "5.3.3"
   },
   "engines": {
-    "node": "20.x"
+    "node": "22.x"
   },
   "pre-commit": [
     "lint"
   ],
   "volta": {
-    "node": "20.11.1",
+    "node": "22.13.0",
     "yarn": "1.22.21"
   }
 }
