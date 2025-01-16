@@ -36,6 +36,7 @@ import {
 import { convertDateStringToMilliseconds, getNewDeadline } from "../utils/requests";
 import { convertDaysToMilliseconds } from "../utils/time";
 import firestore from "../utils/firestore";
+import { logType } from "../constants/logs";
 const requestModel = firestore.collection("requests");
 
 /**
@@ -236,24 +237,41 @@ export const updateOnboardingExtensionRequestController = async (
         const extensionRequestDoc = await requestModel.doc(id).get();
 
         if(!extensionRequestDoc.exists){
+            await addLog(logType.REQUEST_DOES_NOT_EXIST, { id }, { message: REQUEST_DOES_NOT_EXIST });
             return res.boom.notFound(REQUEST_DOES_NOT_EXIST);
         }
 
         const extensionRequest = extensionRequestDoc.data() as OnboardingExtension;
         
         if(!isSuperuser && lastModifiedBy !== extensionRequest.userId) {
+            await addLog(logType.UNAUTHORIZED_TO_UPDATE_REQUEST, 
+                { lastModifiedBy, userId: extensionRequest.userId }, 
+                { message: UNAUTHORIZED_TO_UPDATE_REQUEST }
+            );
             return res.boom.forbidden(UNAUTHORIZED_TO_UPDATE_REQUEST);
         }
 
         if(extensionRequest.type !== REQUEST_TYPE.ONBOARDING) {
-            return res.boom.badRequest(INVALID_REQUEST_TYPE)
+            await addLog(logType.INVALID_REQUEST_TYPE, 
+                { type: extensionRequest.type }, 
+                { message: INVALID_REQUEST_TYPE }
+            );
+            return res.boom.badRequest(INVALID_REQUEST_TYPE);
         }
         
         if(extensionRequest.state != REQUEST_STATE.PENDING){
+            await addLog(logType.PENDING_REQUEST_CAN_BE_UPDATED,
+                { state: extensionRequest.state },
+                { message:PENDING_REQUEST_UPDATED }
+            );
             return res.boom.badRequest(PENDING_REQUEST_UPDATED);
         }
 
-        if(extensionRequest.oldEndsOn > body.newEndsOn) {
+        if(extensionRequest.oldEndsOn >= body.newEndsOn) {
+            await addLog(logType.INVALID_REQUEST_DEADLINE, 
+                { oldEndsOn: extensionRequest.oldEndsOn, newEndsOn: body.newEndsOn },
+                { message: INVALID_REQUEST_DEADLINE }
+            );
             return res.boom.badRequest(INVALID_REQUEST_DEADLINE);
         }
 
