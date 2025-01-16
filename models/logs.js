@@ -247,7 +247,7 @@ const fetchAllLogs = async (query) => {
     const allLogs = [];
     if (!snapshot.empty) {
       snapshot.forEach((doc) => {
-        allLogs.push({ id: doc.id, ...doc.data() });
+        allLogs.push({ ...doc.data() });
       });
     }
 
