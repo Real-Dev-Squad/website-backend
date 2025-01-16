@@ -13,8 +13,8 @@ import { createTaskExtensionRequest, updateTaskExtensionRequest } from "./extens
 import { UpdateRequest } from "../types/requests";
 import { TaskRequestRequest } from "../types/taskRequests";
 import { createTaskRequestController } from "./taskRequestsv2";
-import { OnboardingExtensionCreateRequest, OnboardingExtensionResponse } from "../types/onboardingExtension";
-import { createOnboardingExtensionRequestController } from "./onboardingExtension";
+import { OnboardingExtensionCreateRequest, OnboardingExtensionResponse, UpdateOnboardingExtensionStateRequest } from "../types/onboardingExtension";
+import { createOnboardingExtensionRequestController, updateOnboardingExtensionRequestState } from "./onboardingExtension";
 
 export const createRequestController = async (
   req: OooRequestCreateRequest | ExtensionRequestRequest | TaskRequestRequest | OnboardingExtensionCreateRequest,
@@ -42,6 +42,8 @@ export const updateRequestController = async (req: UpdateRequest, res: CustomRes
       return await updateOooRequestController(req as UpdateRequest, res as ExtensionRequestResponse);
     case REQUEST_TYPE.EXTENSION:
       return await updateTaskExtensionRequest(req as UpdateRequest, res as ExtensionRequestResponse);
+    case REQUEST_TYPE.ONBOARDING:
+      return await updateOnboardingExtensionRequestState(req as unknown as UpdateOnboardingExtensionStateRequest, res as OnboardingExtensionResponse);
     default:
       return res.boom.badRequest("Invalid request type");
   }
