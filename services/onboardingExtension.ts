@@ -91,7 +91,7 @@ export const validateOnboardingExtensionUpdateRequest = async (
 /**
  * Updates an onboarding extension request.
  * 
- * @param {object} extensionRequestDoc - The extension request document.
+ * @param {string} id - The extension request document.
  * @param {UpdateOnboardingExtensionRequestBody} body - New request details.
  * @param {string} lastModifiedBy - ID of the user updating the request.
  * @returns {Promise<object>} Updated request body.
