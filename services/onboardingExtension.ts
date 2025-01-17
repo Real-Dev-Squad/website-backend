@@ -58,7 +58,6 @@ export const validateOnboardingExtensionUpdateRequest = async (
                 { type: extensionRequest.type }, 
                 { message: INVALID_REQUEST_TYPE }
             );
-            
             return {
                 error: INVALID_REQUEST_TYPE
             };
