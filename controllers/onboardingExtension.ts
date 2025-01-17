@@ -208,14 +208,12 @@ export const updateOnboardingExtensionRequestState = async (
     }
 }
 
-/*
+/**
  * Updates an onboarding extension request.
- *
- * @async
- * @function updateOnboardingExtensionRequestController
- * @param {UpdateOnboardingExtensionRequest} req - The request object containing parameters, query, and body.
- * @param {OnboardingExtensionResponse} res - The response object used to send back the HTTP response.
- * @returns {Promise<OnboardingExtensionResponse>} - Returns a promise that resolves to a response indicating success or failure.
+ * 
+ * @param {UpdateOnboardingExtensionRequest} req - The request object.
+ * @param {OnboardingExtensionResponse} res - The response object.
+ * @returns {Promise<OnboardingExtensionResponse>} Resolves with success or failure.
  */
 export const updateOnboardingExtensionRequestController = async (
     req: UpdateOnboardingExtensionRequest, 

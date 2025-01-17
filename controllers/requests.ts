@@ -107,6 +107,14 @@ export const getRequestsController = async (req: any, res: any) => {
   }
 };
 
+/**
+ * Processes update requests before acknowledgment based on type.
+ * 
+ * @param {Request} req - The request object.
+ * @param {CustomResponse} res - The response object.
+ * @returns {Promise<void>} Resolves or sends an error for invalid types.
+ */
+
 export const updateRequestBeforeAcknowledgedController = async (req: Request, res: CustomResponse) => {
   const type = req.body.type;
   switch(type){

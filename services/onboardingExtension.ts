@@ -15,6 +15,16 @@ import { addLog } from "./logService";
 import firestore from "../utils/firestore";
 const requestModel = firestore.collection("requests");
 
+/**
+ * Validates the onboarding extension update request.
+ * 
+ * @param {object} extensionRequestDoc - The extension request document.
+ * @param {string} id - Unique identifier for the request.
+ * @param {boolean} isSuperuser - Whether the user has superuser privileges.
+ * @param {string} lastModifiedBy - ID of the user modifying the request.
+ * @param {number} newEndsOn - Proposed new end date.
+ * @returns {Promise<object>} Error details if validation fails.
+ */
 export const validateOnboardingExtensionUpdateRequest = async (
     extensionRequestDoc, 
     id: string, 
@@ -79,6 +89,14 @@ export const validateOnboardingExtensionUpdateRequest = async (
     }
 }
 
+/**
+ * Updates an onboarding extension request.
+ * 
+ * @param {object} extensionRequestDoc - The extension request document.
+ * @param {UpdateOnboardingExtensionRequestBody} body - New request details.
+ * @param {string} lastModifiedBy - ID of the user updating the request.
+ * @returns {Promise<object>} Updated request body.
+ */
 export const updateOnboardingExtensionRequest = async (
     extensionRequestDoc, 
     body: UpdateOnboardingExtensionRequestBody, 

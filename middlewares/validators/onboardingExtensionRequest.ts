@@ -41,10 +41,18 @@ export const createOnboardingExtensionRequestValidator = async (
   }
 };
 
+/**
+ * Validates onboarding extension request payload.
+ * 
+ * @param {UpdateOnboardingExtensionRequest} req - Request object.
+ * @param {OnboardingExtensionResponse} res - Response object.
+ * @param {NextFunction} next - Next middleware if valid.
+ * @returns {Promise<void>} Resolves or sends errors.
+ */
 export const updateOnboardingExtensionRequestValidator = async (
   req: UpdateOnboardingExtensionRequest, 
   res: OnboardingExtensionResponse, 
-  next: NextFunction) => {
+  next: NextFunction): Promise<void> => {
   const schema = joi
   .object()
   .strict()
