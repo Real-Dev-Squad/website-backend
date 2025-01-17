@@ -238,7 +238,7 @@ export const updateOnboardingExtensionRequestController = async (
             body.newEndsOn,
         )
 
-        if ('error' in validationResponse){
+        if (validationResponse){
             if(validationResponse.error === REQUEST_DOES_NOT_EXIST){
                 return res.boom.notFound(validationResponse.error);
             }
