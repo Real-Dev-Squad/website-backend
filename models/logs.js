@@ -213,7 +213,7 @@ const fetchAllLogs = async (query) => {
       }
     }
 
-    requestQuery = requestQuery.orderBy("timestamp._seconds", "desc").orderBy("timestamp._nanoseconds", "desc");
+    requestQuery = requestQuery.orderBy("timestamp", "desc");
 
     let requestQueryDoc = requestQuery;
 
