@@ -13,6 +13,7 @@ const { RQLQueryParser } = require("../utils/RQLParser");
 const firestore = require("../utils/firestore");
 const { buildTaskRequests, generateLink, transformTaskRequests } = require("../utils/task-requests");
 const { getCurrentEpochTime } = require("../utils/time");
+const { convertMillisToSeconds } = require("../utils/time");
 const taskRequestsCollection = firestore.collection("taskRequests");
 const tasksModel = require("./tasks");
 const userModel = require("./users");
@@ -399,94 +400,61 @@ const approveTaskRequest = async (taskRequestId, user, authorUserId) => {
       ) {
         return { isTaskRequestInvalid: true };
       }
-      if (taskRequestData.requestType === TASK_REQUEST_TYPE.CREATION) {
-        // TODO : extract the common code after the migration of the task request model. https://github.com/Real-Dev-Squad/website-backend/issues/1613
-        let userRequestData;
-        taskRequestData.users.forEach((userElement) => {
-          if (userElement.userId === user.id) {
-            userElement.status = TASK_REQUEST_STATUS.APPROVED;
-            userRequestData = userElement;
-          }
-        });
-        const updatedTaskRequest = {
-          users: taskRequestData.users,
-          approvedTo: user.id,
-          status: TASK_REQUEST_STATUS.APPROVED,
-          lastModifiedBy: authorUserId,
-          lastModifiedAt: Date.now(),
-        };
-        // End of TODO
-        const updateTaskRequestPromise = transaction.update(taskRequestDocRef, updatedTaskRequest);
-        const currentEpochTime = getCurrentEpochTime();
-        const newTaskRequestData = {
-          assignee: user.id,
-          title: taskRequestData.taskTitle,
-          type: TASK_TYPE.FEATURE,
-          percentCompleted: 0,
-          status: TASK_STATUS.ASSIGNED,
-          priority: DEFAULT_TASK_PRIORITY,
-          createdAt: currentEpochTime,
-          updatedAt: currentEpochTime,
-          startedOn: userRequestData.proposedStartDate / 1000,
-          endsOn: userRequestData.proposedDeadline / 1000,
-          github: {
-            issue: {
-              url: taskRequestData.externalIssueUrl,
-              html_url: taskRequestData.externalIssueHtmlUrl,
-            },
-          },
-        };
-        const newTaskDocRef = tasksCollection.doc();
-        const addTaskPromise = transaction.set(newTaskDocRef, newTaskRequestData);
-        await Promise.all([updateTaskRequestPromise, addTaskPromise]);
-        return {
-          approvedTo: user.username,
-          taskRequest: {
-            ...updatedTaskRequest,
-            taskId: newTaskDocRef.id,
-          },
-        };
-      } else {
-        // TODO : extract the common code and remove the unnecessary if-condition after the migration of the task request model. https://github.com/Real-Dev-Squad/website-backend/issues/1613
-        const updatedTaskRequest = {
-          approvedTo: user.id,
-          status: TASK_REQUEST_STATUS.APPROVED,
-          lastModifiedBy: authorUserId,
-          lastModifiedAt: Date.now(),
-        };
-        let userRequestData;
-        if (taskRequestData.users) {
-          taskRequestData.users.forEach((userElement) => {
-            if (userElement.userId === user.id) {
-              userElement.status = TASK_REQUEST_STATUS.APPROVED;
-              userRequestData = userElement;
-            }
-          });
-          updatedTaskRequest.users = taskRequestData.users;
-        }
-        // End of TODO
-        const updateTaskRequestPromise = transaction.update(taskRequestDocRef, updatedTaskRequest);
-        const updatedTaskData = { assignee: user.id, status: TASK_STATUS.ASSIGNED, updatedAt: getCurrentEpochTime() };
-        // TODO : remove the unnecessary if-condition after the migration of the task request model. https://github.com/Real-Dev-Squad/website-backend/issues/1613
-        if (userRequestData) {
-          updatedTaskData.startedOn = userRequestData.proposedStartDate / 1000;
-          updatedTaskData.endsOn = userRequestData.proposedDeadline / 1000;
-        }
-        // End of TODO
-        const oldTaskDocRef = tasksCollection.doc(taskRequestData.taskId);
-        const updateTaskPromise = transaction.update(oldTaskDocRef, updatedTaskData);
-        await Promise.all([updateTaskRequestPromise, updateTaskPromise]);
-        return {
-          approvedTo: user.username,
-          taskRequest: {
-            ...updatedTaskRequest,
-            taskId: oldTaskDocRef.id,
-          },
-        };
+
+      let userRequestData;
+      if (taskRequestData.users) {
+        userRequestData = taskRequestData.users.find((userElement) => userElement.userId === user.id);
+        if (userRequestData) userRequestData.status = TASK_REQUEST_STATUS.APPROVED;
       }
+
+      const updatedTaskRequest = {
+        users: taskRequestData.users,
+        approvedTo: user.id,
+        status: TASK_REQUEST_STATUS.APPROVED,
+        lastModifiedBy: authorUserId,
+        lastModifiedAt: Date.now(),
+      };
+
+      const currentEpochTime = getCurrentEpochTime();
+      const newTaskRequestData = {
+        assignee: user.id,
+        title: taskRequestData.taskTitle,
+        type: TASK_TYPE.FEATURE,
+        percentCompleted: 0,
+        status: TASK_STATUS.ASSIGNED,
+        priority: DEFAULT_TASK_PRIORITY,
+        createdAt: currentEpochTime,
+        updatedAt: currentEpochTime,
+        startedOn: convertMillisToSeconds(userRequestData?.createdAt || Date.now()),
+        endsOn: convertMillisToSeconds(userRequestData?.proposedDeadline || Date.now()),
+        github: {
+          issue: {
+            url: taskRequestData.externalIssueUrl,
+            html_url: taskRequestData.externalIssueHtmlUrl,
+          },
+        },
+      };
+
+      const newTaskDocRef = tasksCollection.doc();
+      const updateTaskRequestPromise = transaction.update(taskRequestDocRef, updatedTaskRequest);
+      const addTaskPromise = transaction.set(newTaskDocRef, newTaskRequestData);
+
+      await Promise.all([updateTaskRequestPromise, addTaskPromise]);
+
+      return {
+        approvedTo: user.username,
+        taskRequest: {
+          ...updatedTaskRequest,
+          taskId: newTaskDocRef.id,
+        },
+      };
     });
   } catch (err) {
-    logger.error("Error in approving task", err);
+    logger.error("Error in approving task", err, {
+      taskRequestId,
+      user,
+      errorDetails: err.message,
+    });
     throw err;
   }
 };

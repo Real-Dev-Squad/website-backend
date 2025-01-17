@@ -5,7 +5,7 @@ import userDataFixture from "../fixtures/user/user";
 import sinon from "sinon";
 import chaiHttp from "chai-http";
 import cleanDb from "../utils/cleanDb";
-import { CreateOnboardingExtensionBody } from "../../types/onboardingExtension";
+import { CreateOnboardingExtensionBody, OnboardingExtension } from "../../types/onboardingExtension";
 import { 
     REQUEST_ALREADY_PENDING, 
     REQUEST_STATE, REQUEST_TYPE, 
@@ -20,6 +20,7 @@ const firestore = require("../../utils/firestore");
 const userStatusModel = firestore.collection("usersStatus");
 import * as requestsQuery from "../../models/requests"
 import { userState } from "../../constants/userStatus";
+import { generateAuthToken } from "../../services/authService";
 const { CLOUDFLARE_WORKER, BAD_TOKEN } = require("../../constants/bot");
 const userData = userDataFixture();
 chai.use(chaiHttp);
@@ -378,4 +379,223 @@ describe("/requests Onboarding Extension", () => {
             });
         });
     });
+
+    describe("PUT /requests", () => {
+        const body = {
+            type: REQUEST_TYPE.ONBOARDING,
+            state: REQUEST_STATE.APPROVED,
+            message: "test-message"
+        };
+        let latestExtension: OnboardingExtension;
+        let userId: string;
+        let putEndpoint: string;
+        let authToken: string;
+        let latestApprovedExtension: OnboardingExtension;
+        let latestRejectedExtension: OnboardingExtension;
+
+        beforeEach(async () => {
+            userId = await addUser(userData[4]);
+            latestExtension =  await requestsQuery.createRequest({ 
+                state: REQUEST_STATE.PENDING, 
+                type: REQUEST_TYPE.ONBOARDING, 
+                requestNumber: 1
+            });
+            latestApprovedExtension = await requestsQuery.createRequest({
+                state: REQUEST_STATE.APPROVED, 
+                type: REQUEST_TYPE.ONBOARDING, requestNumber: 2
+            });
+            latestRejectedExtension = await requestsQuery.createRequest({
+                state: REQUEST_STATE.REJECTED, 
+                type: REQUEST_TYPE.ONBOARDING, 
+                requestNumber: 2
+            });
+            putEndpoint = `/requests/${latestExtension.id}?dev=true`;
+            authToken = generateAuthToken({userId});
+        })
+        
+        afterEach(async () => {
+            sinon.restore();
+            await cleanDb();
+        })
+        
+        it("should return 401 response when user is not a super user", (done) => {
+            chai.request(app)
+            .put(putEndpoint)
+            .set("authorization", `Bearer ${generateAuthToken({userId: "111"})}`)
+            .send(body)
+            .end((err, res) => {
+                if(err) return done(err);
+                expect(res.statusCode).to.equal(401);
+                expect(res.body.error).to.equal("Unauthorized");
+                expect(res.body.message).to.equal("You are not authorized for this action.");
+                done();
+            })
+        })
+
+        it("should return Invalid request type for incorrect value of type", (done) => {
+            chai.request(app)
+            .put("/requests/1111?dev=true")
+            .set("authorization", `Bearer ${authToken}`)
+            .send({...body, type: "<InvalidType>"})
+            .end((err, res)=>{
+                if(err) return done(err);
+                expect(res.statusCode).to.equal(400);
+                expect(res.body.error).to.equal("Bad Request");
+                expect(res.body.message).to.equal('"type" must be one of [OOO, EXTENSION, ONBOARDING]');
+                done();
+            })
+        })
+
+        it("should return Feature not implemented when dev is not true", (done) => {
+            chai.request(app)
+            .put(`/requests/1111?dev=false`)
+            .send(body)
+            .set("authorization", `Bearer ${authToken}`)
+            .end((err, res)=>{
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(501);
+                expect(res.body.message).to.equal("Feature not implemented");
+                done();
+            })
+        })
+
+        it("should return Unauthenticated User when authorization header is missing", (done) => {
+            chai.request(app)
+            .put(putEndpoint)
+            .set("authorization", "")
+            .send(body)
+            .end((err, res) => {
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(401);
+                expect(res.body.message).to.equal("Unauthenticated User");
+                done();
+            })
+        })
+
+        it("should return Unauthenticated User for invalid token", (done) => {
+            chai.request(app)
+            .put(putEndpoint)
+            .set("authorization", `Bearer ${BAD_TOKEN}`)
+            .send(body)
+            .end((err, res) => {
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(401);
+                expect(res.body.message).to.equal("Unauthenticated User");
+                done();
+            })
+        })
+
+        it("should return 400 response for invalid value of state", (done) => {
+            chai.request(app)
+            .put(putEndpoint)
+            .set("authorization", `Bearer ${authToken}`)
+            .send({...body, state: REQUEST_STATE.PENDING})
+            .end((err, res) => {
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(400);
+                expect(res.body.message).to.equal("state must be APPROVED or REJECTED");
+                expect(res.body.error).to.equal("Bad Request");
+                done();
+            })
+        })
+
+        it("should return 404 response for invalid extension id", (done) => {
+            chai.request(app)
+            .put(`/requests/1111?dev=true`)
+            .set("authorization", `Bearer ${authToken}`)
+            .send(body)
+            .end((err, res) => {
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(404);
+                expect(res.body.message).to.equal("Request does not exist");
+                expect(res.body.error).to.equal("Not Found");
+                done();
+            })
+        })
+
+        it("should return 400 response when type is not onboarding and extensionId is correct", (done) => {
+            chai.request(app)
+            .put(putEndpoint)
+            .set("authorization", `Bearer ${authToken}`)
+            .send({...body, type: REQUEST_TYPE.OOO})
+            .end((err, res) => {
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(400);
+                expect(res.body.message).to.equal("Request does not exist");
+                expect(res.body.error).to.equal("Bad Request");
+                done();
+            })
+        })
+
+        it("should return 400 response when extension state is approved", (done) => {
+            chai.request(app)
+            .put(`/requests/${latestApprovedExtension.id}?dev=true`)
+            .set("authorization", `Bearer ${authToken}`)
+            .send(body)
+            .end((err, res) => {
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(400);
+                expect(res.body.message).to.equal("Request already approved");
+                expect(res.body.error).to.equal("Bad Request");
+                done();
+            })
+        })
+
+        it("should return 400 response when extension state is rejected", (done) => {
+            chai.request(app)
+            .put(`/requests/${latestRejectedExtension.id}?dev=true`)
+            .set("authorization", `Bearer ${authToken}`)
+            .send(body)
+            .end((err, res) => {
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(400);
+                expect(res.body.message).to.equal("Request already rejected");
+                expect(res.body.error).to.equal("Bad Request");
+                done();
+            })
+        })
+
+        it("should return 200 for success response when request is approved", (done) => {
+            chai.request(app)
+            .put(putEndpoint)
+            .set("authorization", `Bearer ${authToken}`)
+            .send(body)
+            .end((err, res) => {
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.message).to.equal("Request approved successfully");
+                done();
+            })
+        })
+
+        it("should return 200 for success response when request is rejected", (done) => {
+            chai.request(app)
+            .put(putEndpoint)
+            .set("authorization", `Bearer ${authToken}`)
+            .send({...body, state: REQUEST_STATE.REJECTED})
+            .end((err, res) => {
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.message).to.equal("Request rejected successfully");
+                done();
+            })
+        })
+
+        it("should return 500 response when fails to update extension request", (done) => {
+            sinon.stub(requestsQuery, "updateRequest")
+            .throws("Error while creating extension request");
+            chai.request(app)
+            .put(putEndpoint)
+            .set("authorization", `Bearer ${authToken}`)
+            .send(body)
+            .end((err, res)=>{
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(500);
+                expect(res.body.message).to.equal("An internal server error occurred");
+                expect(res.body.error).to.equal("Internal Server Error")
+                done();
+            })
+        })
+    });
 });
+    
