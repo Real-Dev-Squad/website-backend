@@ -98,9 +98,10 @@ export const validateOnboardingExtensionUpdateRequest = async (
  * @returns {Promise<object>} Updated request body.
  */
 export const updateOnboardingExtensionRequest = async (
-    extensionRequestDoc, 
+    id: string, 
     body: UpdateOnboardingExtensionRequestBody, 
-    lastModifiedBy: string) => {
+    lastModifiedBy: string
+) => {
     try{
         const requestBody = {
             ...body, 
@@ -108,12 +109,12 @@ export const updateOnboardingExtensionRequest = async (
             updatedAt: Date.now(),
         }
         
-        await requestModel.doc(extensionRequestDoc.id).update(requestBody);
+        await requestModel.doc(id).update(requestBody);
     
         const requestLog = {
             type: REQUEST_LOG_TYPE.REQUEST_UPDATED,
             meta: {
-                requestId: extensionRequestDoc.id,
+                requestId: id,
                 action: LOG_ACTION.UPDATE,
                 createdBy: lastModifiedBy,
             },

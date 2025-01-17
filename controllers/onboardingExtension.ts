@@ -249,7 +249,7 @@ export const updateOnboardingExtensionRequestController = async (
         }
         
         const requestBody = await updateOnboardingExtensionRequest(
-            extensionRequestDoc,
+            id,
             body,
             lastModifiedBy,
         )
