@@ -200,16 +200,12 @@ const fetchAllLogs = async (query) => {
 
       if (startDate) {
         const startTimestamp = buildTimestamp(startDate);
-        requestQuery = requestQuery
-          .where("timestamp._seconds", ">=", startTimestamp._seconds)
-          .where("timestamp._nanoseconds", ">=", startTimestamp._nanoseconds);
+        requestQuery = requestQuery.where("timestamp._seconds", ">=", startTimestamp._seconds);
       }
 
       if (endDate) {
         const endTimestamp = buildTimestamp(endDate);
-        requestQuery = requestQuery
-          .where("timestamp._seconds", "<=", endTimestamp._seconds)
-          .where("timestamp._nanoseconds", "<=", endTimestamp._nanoseconds);
+        requestQuery = requestQuery.where("timestamp._seconds", "<=", endTimestamp._seconds);
       }
     }
 
