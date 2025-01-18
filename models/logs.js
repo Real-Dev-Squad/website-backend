@@ -193,20 +193,24 @@ const fetchAllLogs = async (query) => {
         throw error;
       }
 
-      const buildTimestamp = (date) => ({
-        _seconds: Math.floor(date / 1000),
-        _nanoseconds: 0,
+      const buildTimestamp = (milliseconds) => ({
+        _seconds: Math.floor(milliseconds / 1000),
+        _nanoseconds: (milliseconds % 1000) * 1000000,
       });
 
       if (startDate) {
-        requestQuery = requestQuery.where("timestamp", ">=", buildTimestamp(startDate));
+        const startTimestamp = buildTimestamp(startDate);
+        requestQuery = requestQuery.where("timestamp._seconds", ">=", startTimestamp._seconds);
       }
+
       if (endDate) {
-        requestQuery = requestQuery.where("timestamp", "<=", buildTimestamp(endDate));
+        const endTimestamp = buildTimestamp(endDate);
+        requestQuery = requestQuery.where("timestamp._seconds", "<=", endTimestamp._seconds);
       }
     }
 
     requestQuery = requestQuery.orderBy("timestamp", "desc");
+
     let requestQueryDoc = requestQuery;
 
     if (prev) {
