@@ -7,6 +7,7 @@ export const userState = {
 
 export const statusState = {
   UPCOMING: "UPCOMING",
+  PENDING: "PENDING",
   APPLIED: "APPLIED",
   NOT_APPLIED: "NOT_APPLIED",
 };
