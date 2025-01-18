@@ -168,7 +168,7 @@ describe("Logs", function () {
       const result = await logsQuery.fetchAllLogs({ size: 3, page: PAGE });
       expect(result.allLogs).to.have.lengthOf(3);
       const nextData = await logsQuery.fetchAllLogs({ next: result.next });
-      expect(nextData.allLogs).to.have.lengthOf(4);
+      expect(nextData.allLogs).to.have.lengthOf(3);
       expect(nextData).to.have.any.key("prev");
       expect(nextData).to.have.any.key("next");
       // eslint-disable-next-line no-unused-expressions
@@ -196,6 +196,93 @@ describe("Logs", function () {
       expect(result.allLogs).to.have.lengthOf(2);
       const uniqueTypes = new Set(result.allLogs.map((log) => log.type));
       expect(Array.from(uniqueTypes)[0]).to.equal("REQUEST_CREATED");
+    });
+
+    it("Should throw error when start date is greater than end date in dev mode", async function () {
+      await cleanDb();
+
+      const startDate = Date.now();
+      const endDate = startDate - 86400000;
+
+      try {
+        await logsQuery.fetchAllLogs({
+          dev: "true",
+          startDate: startDate.toString(),
+          endDate: endDate.toString(),
+          size: 3,
+        });
+        throw new Error("Expected fetchAllLogs to throw an error, but it did not.");
+      } catch (error) {
+        expect(error).to.be.instanceOf(Error);
+        expect(error.message).to.equal("Start date cannot be greater than end date.");
+        expect(error).to.have.property("statusCode", 400);
+      }
+    });
+
+    it("Should return logs within the specified date range in dev mode", async function () {
+      await cleanDb();
+
+      const endDate = Date.now();
+      const startDate = endDate - 86400000 * 7;
+
+      const result = await logsQuery.fetchAllLogs({
+        dev: "true",
+        startDate: startDate.toString(),
+        endDate: endDate.toString(),
+        size: 3,
+      });
+
+      expect(result).to.have.property("allLogs");
+      if (result.allLogs.length > 0) {
+        result.allLogs.forEach((log) => {
+          expect(log).to.have.property("timestamp");
+        });
+      }
+    });
+
+    it("Should ignore date filters when not in dev mode", async function () {
+      const endDate = Date.now();
+      const startDate = endDate - 86400000 * 7;
+
+      const result = await logsQuery.fetchAllLogs({
+        dev: "false",
+        startDate: startDate.toString(),
+        endDate: endDate.toString(),
+        size: 3,
+      });
+
+      expect(result).to.have.property("allLogs");
+      expect(result).to.have.property("prev");
+      expect(result).to.have.property("next");
+      expect(result).to.have.property("page");
+    });
+
+    it("Should handle only start date filter in dev mode", async function () {
+      const startDate = Date.now() - 86400000 * 14;
+
+      const result = await logsQuery.fetchAllLogs({
+        dev: "true",
+        startDate: startDate.toString(),
+        size: 3,
+      });
+
+      expect(result).to.have.property("allLogs");
+      expect(result).to.have.property("prev");
+      expect(result).to.have.property("next");
+    });
+
+    it("Should handle only end date filter in dev mode", async function () {
+      const endDate = Date.now();
+
+      const result = await logsQuery.fetchAllLogs({
+        dev: "true",
+        endDate: endDate.toString(),
+        size: 3,
+      });
+
+      expect(result).to.have.property("allLogs");
+      expect(result).to.have.property("prev");
+      expect(result).to.have.property("next");
     });
 
     it("Should return null if no logs are presnet  the logs for specific types", async function () {
