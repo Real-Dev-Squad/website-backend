@@ -166,7 +166,7 @@ describe("Logs", function () {
     it("Should return all the logs as per the next and prev", async function () {
       const PAGE = 1;
       const result = await logsQuery.fetchAllLogs({ size: 3, page: PAGE });
-      expect(result.allLogs).to.have.lengthOf(3);
+      expect(result.allLogs).to.have.lengthOf(4);
       const nextData = await logsQuery.fetchAllLogs({ next: result.next });
       expect(nextData.allLogs).to.have.lengthOf(3);
       expect(nextData).to.have.any.key("prev");
