@@ -30,6 +30,8 @@ export const createRequestController = async (
       return await createTaskRequestController(req as TaskRequestRequest, res as CustomResponse);
     case REQUEST_TYPE.ONBOARDING:
       return await createOnboardingExtensionRequestController(req as OnboardingExtensionCreateRequest, res as OnboardingExtensionResponse);
+    case REQUEST_TYPE.ONBOARDING:
+      return await createOnboardingExtensionRequestController(req as OnboardingExtensionCreateRequest, res as OnboardingExtensionResponse);
     default:
       return res.boom.badRequest("Invalid request type");
   }
