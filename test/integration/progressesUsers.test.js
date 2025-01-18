@@ -233,7 +233,7 @@ describe("Test Progress Updates API for Users", function () {
         .end((err, res) => {
           if (err) return done(err);
           expect(res).to.have.status(200);
-          expect(res.body).to.have.keys(["message", "data", "count"]);
+          expect(res.body).to.have.keys(["message", "data", "count", "links"]);
           expect(res.body.data).to.be.an("array");
           expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
           res.body.data.forEach((progress) => {
@@ -260,7 +260,7 @@ describe("Test Progress Updates API for Users", function () {
         .end((err, res) => {
           if (err) return done(err);
           expect(res).to.have.status(200);
-          expect(res.body).to.have.keys(["message", "data", "count"]);
+          expect(res.body).to.have.keys(["message", "data", "count", "links"]);
           expect(res.body.data).to.be.an("array");
           expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
           res.body.data.forEach((progress) => {
