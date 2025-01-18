@@ -65,7 +65,8 @@ export const updateRequestsMiddleware = async (
       .messages({
         "any.only": "state must be APPROVED or REJECTED",
       }),
-    type: joi.string().valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION).required(),
+    type: joi.string().valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION, REQUEST_TYPE.ONBOARDING).required(),
+    message: joi.string().optional()
   });
 
   try {
@@ -84,7 +85,7 @@ export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: O
     id: joi.string().optional(),
     type: joi
       .string()
-      .valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION, REQUEST_TYPE.TASK, REQUEST_TYPE.ALL)
+      .valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION, REQUEST_TYPE.TASK, REQUEST_TYPE.ALL, REQUEST_TYPE.ONBOARDING)
       .optional(),
     requestedBy: joi.string().insensitive().optional(),
     state: joi
