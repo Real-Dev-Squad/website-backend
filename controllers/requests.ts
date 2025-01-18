@@ -18,6 +18,7 @@ import { createOnboardingExtensionRequestController, updateOnboardingExtensionRe
 
 export const createRequestController = async (
   req: OooRequestCreateRequest | ExtensionRequestRequest | TaskRequestRequest | OnboardingExtensionCreateRequest,
+  req: OooRequestCreateRequest | ExtensionRequestRequest | TaskRequestRequest | OnboardingExtensionCreateRequest,
   res: CustomResponse
 ) => {
   const type = req.body.type;
@@ -28,6 +29,8 @@ export const createRequestController = async (
       return await createTaskExtensionRequest(req as ExtensionRequestRequest, res as ExtensionRequestResponse);
     case REQUEST_TYPE.TASK:
       return await createTaskRequestController(req as TaskRequestRequest, res as CustomResponse);
+    case REQUEST_TYPE.ONBOARDING:
+      return await createOnboardingExtensionRequestController(req as OnboardingExtensionCreateRequest, res as OnboardingExtensionResponse);
     case REQUEST_TYPE.ONBOARDING:
       return await createOnboardingExtensionRequestController(req as OnboardingExtensionCreateRequest, res as OnboardingExtensionResponse);
     default:
