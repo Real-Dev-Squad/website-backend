@@ -18,7 +18,6 @@ import { createOnboardingExtensionRequestController, updateOnboardingExtensionRe
 
 export const createRequestController = async (
   req: OooRequestCreateRequest | ExtensionRequestRequest | TaskRequestRequest | OnboardingExtensionCreateRequest,
-  req: OooRequestCreateRequest | ExtensionRequestRequest | TaskRequestRequest | OnboardingExtensionCreateRequest,
   res: CustomResponse
 ) => {
   const type = req.body.type;
