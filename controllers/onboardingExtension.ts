@@ -10,7 +10,9 @@ import {
     REQUEST_REJECTED_SUCCESSFULLY,
     REQUEST_STATE,
     REQUEST_TYPE,
+    REQUEST_UPDATED_SUCCESSFULLY,
     UNAUTHORIZED_TO_CREATE_ONBOARDING_EXTENSION_REQUEST,
+    UNAUTHORIZED_TO_UPDATE_REQUEST,
 } from "../constants/requests";
 import { userState } from "../constants/userStatus";
 import { addLog } from "../services/logService";
@@ -24,10 +26,15 @@ import {
     OnboardingExtensionCreateRequest, 
     OnboardingExtensionResponse, 
     UpdateOnboardingExtensionStateRequest,
-    UpdateOnboardingExtensionStateRequestBody
+    UpdateOnboardingExtensionStateRequestBody,
+    UpdateOnboardingExtensionRequest,
+    UpdateOnboardingExtensionRequestBody
 } from "../types/onboardingExtension";
 import { convertDateStringToMilliseconds, getNewDeadline } from "../utils/requests";
 import { convertDaysToMilliseconds } from "../utils/time";
+import firestore from "../utils/firestore";
+import { updateOnboardingExtensionRequest, validateOnboardingExtensionUpdateRequest } from "../services/onboardingExtension";
+const requestModel = firestore.collection("requests");
 
 /**
 * Controller to handle the creation of onboarding extension requests.
@@ -195,6 +202,65 @@ export const updateOnboardingExtensionRequestState = async (
                 ...response,
             },
         });
+    }catch(error){
+        logger.error(ERROR_WHILE_UPDATING_REQUEST, error);
+        return res.boom.badImplementation(ERROR_WHILE_UPDATING_REQUEST);
+    }
+}
+
+/**
+ * Updates an onboarding extension request.
+ * 
+ * @param {UpdateOnboardingExtensionRequest} req - The request object.
+ * @param {OnboardingExtensionResponse} res - The response object.
+ * @returns {Promise<OnboardingExtensionResponse>} Resolves with success or failure.
+ */
+export const updateOnboardingExtensionRequestController = async (
+    req: UpdateOnboardingExtensionRequest, 
+    res: OnboardingExtensionResponse): Promise<OnboardingExtensionResponse> => 
+{
+    
+    const body = req.body as UpdateOnboardingExtensionRequestBody;
+    const id = req.params.id;
+    const lastModifiedBy = req?.userData?.id;
+    const isSuperuser = req?.userData?.roles?.super_user === true;
+    const dev = req.query.dev === "true";
+
+    if(!dev) return res.boom.notImplemented("Feature not implemented");
+
+    try{
+        const extensionRequestDoc = await requestModel.doc(id).get();
+        const validationResponse = await validateOnboardingExtensionUpdateRequest(
+            extensionRequestDoc, 
+            id,
+            isSuperuser,
+            lastModifiedBy,
+            body.newEndsOn,
+        )
+
+        if (validationResponse){
+            if(validationResponse.error === REQUEST_DOES_NOT_EXIST){
+                return res.boom.notFound(validationResponse.error);
+            }
+            if(validationResponse.error === UNAUTHORIZED_TO_UPDATE_REQUEST){
+                return res.boom.forbidden(UNAUTHORIZED_TO_UPDATE_REQUEST); 
+            }
+            return res.boom.badRequest(validationResponse.error);
+        }
+        
+        const requestBody = await updateOnboardingExtensionRequest(
+            id,
+            body,
+            lastModifiedBy,
+        )
+
+        return res.status(200).json({
+            message: REQUEST_UPDATED_SUCCESSFULLY,
+            data: {
+            id: extensionRequestDoc.id,
+            ...requestBody
+            }
+        })
     }catch(error){
         logger.error(ERROR_WHILE_UPDATING_REQUEST, error);
         return res.boom.badImplementation(ERROR_WHILE_UPDATING_REQUEST);
