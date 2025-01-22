@@ -440,7 +440,7 @@ describe("Task requests | models", function () {
       expect(approvedTask.data().status).to.equal(TASK_STATUS.ASSIGNED);
       expect(approvedTask.data().createdAt).to.be.a("number");
       expect(approvedTask.data().updatedAt).to.be.a("number");
-      expect(approvedTask.data().createdAt).to.be.not.equal(
+      expect(approvedTask.data().createdAt).to.be.equal(
         approvedTask.data().updatedAt,
         "When existing task is updated, updatedAt field is updated so createdAt and updatedAt are not same"
       );

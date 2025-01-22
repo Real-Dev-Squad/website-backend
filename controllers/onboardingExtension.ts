@@ -1,16 +1,20 @@
 import {
     ERROR_WHILE_CREATING_REQUEST,
+    ERROR_WHILE_UPDATING_REQUEST,
     LOG_ACTION,
     ONBOARDING_REQUEST_CREATED_SUCCESSFULLY,
     REQUEST_ALREADY_PENDING,
+    REQUEST_APPROVED_SUCCESSFULLY,
+    REQUEST_DOES_NOT_EXIST,
     REQUEST_LOG_TYPE,
+    REQUEST_REJECTED_SUCCESSFULLY,
     REQUEST_STATE,
     REQUEST_TYPE,
     UNAUTHORIZED_TO_CREATE_ONBOARDING_EXTENSION_REQUEST,
 } from "../constants/requests";
 import { userState } from "../constants/userStatus";
 import { addLog } from "../services/logService";
-import { createRequest, getRequestByKeyValues } from "../models/requests";
+import { createRequest, getRequestByKeyValues, updateRequest } from "../models/requests";
 import { fetchUser } from "../models/users";
 import { getUserStatus } from "../models/userStatus";
 import { User } from "../typeDefinitions/users";
@@ -18,7 +22,9 @@ import {
     CreateOnboardingExtensionBody, 
     OnboardingExtension, 
     OnboardingExtensionCreateRequest, 
-    OnboardingExtensionResponse 
+    OnboardingExtensionResponse, 
+    UpdateOnboardingExtensionStateRequest,
+    UpdateOnboardingExtensionStateRequestBody
 } from "../types/onboardingExtension";
 import { convertDateStringToMilliseconds, getNewDeadline } from "../utils/requests";
 import { convertDaysToMilliseconds } from "../utils/time";
@@ -34,7 +40,11 @@ import { convertDaysToMilliseconds } from "../utils/time";
 * @param {OnboardingExtensionResponse} res - The Express response object used to send back the response.
 * @returns {Promise<OnboardingExtensionResponse>} Resolves to a response with the status and data or an error message.
 */
-export const createOnboardingExtensionRequestController = async (req: OnboardingExtensionCreateRequest, res: OnboardingExtensionResponse): Promise<OnboardingExtensionResponse> => {
+export const createOnboardingExtensionRequestController = async (
+    req: OnboardingExtensionCreateRequest, 
+    res: OnboardingExtensionResponse )
+    : Promise<OnboardingExtensionResponse> => {
+
     try {
 
         const data = req.body as CreateOnboardingExtensionBody;
@@ -57,7 +67,7 @@ export const createOnboardingExtensionRequestController = async (req: Onboarding
         });
 
         if(latestExtensionRequest && latestExtensionRequest.state === REQUEST_STATE.PENDING){
-            return res.boom.badRequest(REQUEST_ALREADY_PENDING);
+            return res.boom.conflict(REQUEST_ALREADY_PENDING);
         }
         
         const millisecondsInThirtyOneDays = convertDaysToMilliseconds(31);
@@ -122,3 +132,71 @@ export const createOnboardingExtensionRequestController = async (req: Onboarding
         return res.boom.badImplementation(ERROR_WHILE_CREATING_REQUEST);
     }
 };
+
+/**
+ * Updates the state of an onboarding extension request.
+ *
+ * @param {UpdateOnboardingExtensionStateRequest} req - The request object containing the update details.
+ * @param {OnboardingExtensionResponse} res - The response object to send the result of the update.
+ * @returns {Promise<OnboardingExtensionResponse>} Sends the response with the result of the update operation.
+ */
+export const updateOnboardingExtensionRequestState = async (
+    req: UpdateOnboardingExtensionStateRequest, 
+    res: OnboardingExtensionResponse )
+    : Promise<OnboardingExtensionResponse> => {
+    
+    const dev = req.query.dev === "true";
+    
+    if(!dev) return res.boom.notImplemented("Feature not implemented");
+
+    const body = req.body as UpdateOnboardingExtensionStateRequestBody;
+    const lastModifiedBy = req?.userData?.id;
+    const extensionId = req.params.id;
+
+    let requestBody: UpdateOnboardingExtensionStateRequestBody = {
+        state: body.state,
+        type: body.type,
+    }
+
+    if(body.message){
+        requestBody = { ...requestBody, message: body.message };
+    }
+    
+    try {
+        const response = await updateRequest(extensionId, requestBody, lastModifiedBy, REQUEST_TYPE.ONBOARDING);
+
+        if ("error" in response) {
+            if (response.error === REQUEST_DOES_NOT_EXIST) {
+                return res.boom.notFound(response.error);
+            }
+            return res.boom.badRequest(response.error);
+        }
+
+        const [logType, returnMessage] = response.state === REQUEST_STATE.APPROVED 
+            ? [REQUEST_LOG_TYPE.REQUEST_APPROVED, REQUEST_APPROVED_SUCCESSFULLY]
+            : [REQUEST_LOG_TYPE.REQUEST_REJECTED, REQUEST_REJECTED_SUCCESSFULLY];
+
+        const requestLog = {
+            type: logType,
+            meta: {
+                requestId: extensionId,
+                action: LOG_ACTION.UPDATE,
+                createdBy: lastModifiedBy,
+            },
+            body: response,
+        };
+
+        await addLog(requestLog.type, requestLog.meta, requestLog.body);
+        
+        return res.status(200).json({
+            message: returnMessage,
+            data: {
+                id: response.id,
+                ...response,
+            },
+        });
+    }catch(error){
+        logger.error(ERROR_WHILE_UPDATING_REQUEST, error);
+        return res.boom.badImplementation(ERROR_WHILE_UPDATING_REQUEST);
+    }
+}
