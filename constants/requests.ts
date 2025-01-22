@@ -61,6 +61,6 @@ export const UNAUTHORIZED_TO_CREATE_ONBOARDING_EXTENSION_REQUEST = "Only super u
 
 export const PENDING_REQUEST_UPDATED = "Only pending extension request can be updated";
 export const INVALID_REQUEST_TYPE = "Invalid request type";
-export const INVALID_REQUEST_DEADLINE = "Request new deadline must be greater than old deadline";
+export const INVALID_REQUEST_DEADLINE = "New deadline of the request must be greater than old deadline";
 export const REQUEST_UPDATED_SUCCESSFULLY = "Request updated successfully";
 export const UNAUTHORIZED_TO_UPDATE_REQUEST = "Unauthorized to update request";
