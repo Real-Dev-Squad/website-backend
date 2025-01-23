@@ -12,6 +12,8 @@ const {
   assertTaskExists,
   getProgressDateTimestamp,
   buildQueryToSearchProgressByDay,
+  buildQueryToFetchPaginatedDocs,
+  getPaginatedProgressDocs,
 } = require("../utils/progresses");
 const { retrieveUsers } = require("../services/dataAccessLayer");
 const { PROGRESS_ALREADY_CREATED, PROGRESS_DOCUMENT_NOT_FOUND } = PROGRESSES_RESPONSE_MESSAGES;
@@ -59,6 +61,22 @@ const getProgressDocument = async (queryParams) => {
   return progressDocs;
 };
 
+/**
+ * Retrieves a paginated list of progress documents based on the provided query parameters.
+ * @param {object} queryParams - Query data, including type, userId, taskId, and optional pagination details (page and pageSize).
+ * @returns {Promise<object>} Resolves with paginated progress documents.
+ * @throws {Error} If userId or taskId is invalid or not found.
+ **/
+
+const getPaginatedProgressDocument = async (queryParams) => {
+  await assertUserOrTaskExists(queryParams);
+  const page = queryParams.page || 0;
+  const { baseQuery, totalProgressCount } = await buildQueryToFetchPaginatedDocs(queryParams);
+
+  let progressDocs = await getPaginatedProgressDocs(baseQuery, page);
+  progressDocs = await addUserDetailsToProgressDocs(progressDocs);
+  return { progressDocs, totalProgressCount };
+};
 /**
  * This function fetches the progress records for a particular user or task within the specified date range, from start to end date.
  * @param queryParams {object} This is the data that will be used for querying. It should be an object that includes key-value pairs for the fields - userId, taskId, startDate, and endDate.
@@ -135,6 +153,7 @@ const addUserDetailsToProgressDocs = async (progressDocs) => {
 module.exports = {
   createProgressDocument,
   getProgressDocument,
+  getPaginatedProgressDocument,
   getRangeProgressData,
   getProgressByDate,
   addUserDetailsToProgressDocs,
