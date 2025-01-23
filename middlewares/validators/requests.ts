@@ -9,8 +9,8 @@ import { ExtensionRequestRequest, ExtensionRequestResponse } from "../../types/e
 import { CustomResponse } from "../../typeDefinitions/global";
 import { UpdateRequest } from "../../types/requests";
 import { TaskRequestRequest, TaskRequestResponse } from "../../types/taskRequests";
-import { createOnboardingExtensionRequestValidator } from "./onboardingExtensionRequest";
-import { OnboardingExtensionCreateRequest, OnboardingExtensionResponse } from "../../types/onboardingExtension";
+import { createOnboardingExtensionRequestValidator, updateOnboardingExtensionRequestValidator } from "./onboardingExtensionRequest";
+import { OnboardingExtensionCreateRequest, OnboardingExtensionResponse, UpdateOnboardingExtensionRequest } from "../../types/onboardingExtension";
 
 export const createRequestsMiddleware = async (
   req: OooRequestCreateRequest|ExtensionRequestRequest | TaskRequestRequest | OnboardingExtensionCreateRequest,
@@ -119,5 +119,30 @@ export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: O
     const errorMessages = error.details.map((detail) => detail.message);
     logger.error(`Error while validating request query : ${errorMessages}`);
     res.boom.badRequest(errorMessages);
+  }
+};
+
+/**
+ * Validates update requests based on their type.
+ * 
+ * @param {UpdateOnboardingExtensionRequest} req - Request object.
+ * @param {CustomResponse} res - Response object.
+ * @param {NextFunction} next - Next middleware if valid.
+ * @returns {Promise<void>} Resolves or sends errors.
+ */
+export const updateRequestValidator = async (
+  req: UpdateOnboardingExtensionRequest,
+  res: CustomResponse,
+  next: NextFunction
+  ): Promise<void> => {
+  const type = req.body.type;
+  switch (type) {
+      case REQUEST_TYPE.ONBOARDING:
+          await updateOnboardingExtensionRequestValidator(
+            req, 
+            res as OnboardingExtensionResponse, next);
+          break;
+      default:
+          return res.boom.badRequest("Invalid type");
   }
 };
