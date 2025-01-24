@@ -4,10 +4,16 @@ const { months, discordNicknameLength } = require("../constants/users");
 const dataAccessLayer = require("../services/dataAccessLayer");
 const discordService = require("../services/discordService");
 const ROLES = require("../constants/roles");
+const dataAccess = require("../services/dataAccessLayer");
+const logger = require("./logger");
 const addUserToDBForTest = async (userData) => {
   await userModel.add(userData);
 };
-
+const { NotFound, BadRequest } = require("http-errors");
+const { isLastPRMergedWithinDays } = require("../services/githubService");
+const { getUserStatus } = require("../models/userStatus");
+const userService = require("../services/users");
+const { getOverdueTasks } = require("../models/tasks");
 /**
  * Used for receiving userId when providing username
  *
@@ -291,6 +297,149 @@ const updateNickname = async (userId, status = {}) => {
   }
 };
 
+/**
+ * @param userId { string }: Id of the User
+ * @returns Promise<object>
+ */
+const findUserById = async (userId) => {
+  let result;
+  try {
+    result = await dataAccess.retrieveUsers({ id: userId });
+    if (!result.userExists) {
+      throw NotFound("User doesn't exist");
+    }
+    return result.user;
+  } catch (error) {
+    logger.error(`Error while fetching user: ${error}`);
+    throw error;
+  }
+};
+
+/**
+ * @param userData { Object }: req.userData
+ * @returns Promise<object>
+ */
+const getUserByProfileData = async (userData) => {
+  if (!userData.id) {
+    throw BadRequest("User ID not provided.");
+  }
+
+  try {
+    const result = await dataAccess.retrieveUsers({ id: userData.id });
+    return result.user;
+  } catch (error) {
+    logger.error(`Error while fetching user: ${error}`);
+    throw error;
+  }
+};
+
+/**
+ * @param days {number}: days since last unmerged pr.
+ * @returns Promise<object[]>
+ */
+const getUsersByUnmergedPrs = async (days) => {
+  try {
+    const inDiscordUser = await dataAccess.retrieveUsersWithRole(ROLES.INDISCORD);
+    const users = [];
+
+    for (const user of inDiscordUser) {
+      const username = user.github_id;
+      const isMerged = await isLastPRMergedWithinDays(username, days);
+      if (!isMerged) {
+        users.push(user.id);
+      }
+    }
+
+    return users;
+  } catch (error) {
+    logger.error(`Error while fetching all users: ${error}`);
+    throw error;
+  }
+};
+
+/**
+ * @param discordId { string }: discordId of the user
+ * @returns Promise<object>
+ */
+const getUserByDiscordId = async (discordId) => {
+  let result, user;
+  try {
+    result = await dataAccess.retrieveUsers({ discordId });
+    user = result.user;
+    if (!result.userExists) {
+      return null;
+    }
+
+    const userStatusResult = await getUserStatus(user.id);
+    if (userStatusResult.userStatusExists) {
+      user.state = userStatusResult.data.currentStatus.state;
+    }
+  } catch (error) {
+    logger.error(`Error while fetching user: ${error}`);
+    throw error;
+  }
+  return user;
+};
+
+/**
+ * @param queryObject { Object }: request query object
+ * @returns Promise<object>
+ */
+const getDepartedUsers = async (queryObject) => {
+  try {
+    const result = await dataAccess.retrieveUsers({ query: queryObject });
+    const departedUsers = await userService.getUsersWithIncompleteTasks(result.users);
+    if (departedUsers.length === 0) return [];
+    return { result, departedUsers };
+  } catch (error) {
+    logger.error("Error when fetching users who abandoned tasks:", error);
+    throw error;
+  }
+};
+
+/**
+ * @param days { number }: overdue days
+ * @param dev {boolean}: dev feature flag
+ * @returns Promise<object[]>
+ */
+const getUsersByOverDueTasks = async (days, dev) => {
+  try {
+    const tasksData = await getOverdueTasks(days);
+    if (!tasksData.length) {
+      return [];
+    }
+    const userIds = new Set();
+    const usersData = [];
+
+    tasksData.forEach((task) => {
+      if (task.assignee) {
+        userIds.add(task.assignee);
+      }
+    });
+
+    const userInfo = await dataAccess.retrieveUsers({ userIds: Array.from(userIds) });
+    userInfo.forEach((user) => {
+      if (!user.roles.archived) {
+        const userTasks = tasksData.filter((task) => task.assignee === user.id);
+        const userData = {
+          id: user.id,
+          discordId: user.discordId,
+          username: user.username,
+        };
+        if (dev) {
+          userData.tasks = userTasks;
+        }
+        usersData.push(userData);
+      }
+    });
+
+    return usersData;
+  } catch (error) {
+    logger.error(`Error while fetching users and tasks: ${error}`);
+    throw error;
+  }
+};
+
 module.exports = {
   addUserToDBForTest,
   getUserId,
@@ -307,4 +456,10 @@ module.exports = {
   parseSearchQuery,
   generateOOONickname,
   updateNickname,
+  findUserById,
+  getUserByProfileData,
+  getUsersByUnmergedPrs,
+  getUserByDiscordId,
+  getDepartedUsers,
+  getUsersByOverDueTasks,
 };
