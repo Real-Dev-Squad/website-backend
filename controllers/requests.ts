@@ -60,6 +60,13 @@ export const getRequestsController = async (req: any, res: any) => {
       return res.status(204).send();
     }
 
+       if (query.id) {
+         return res.status(200).json({
+           message: REQUEST_FETCHED_SUCCESSFULLY,
+           data: requests,
+         });
+       }
+
     const { allRequests, next, prev, page } = requests;
     if (allRequests.length === 0) {
       return res.status(204).send();
