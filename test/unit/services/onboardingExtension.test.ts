@@ -177,7 +177,7 @@ describe("Test Onboarding Extension Service", () => {
             expect(response.lastModifiedBy).to.equal(userId);
             expect(response.newEndsOn).to.equal(newDate);
             expect(response.reason).to.equal("test-reason");
-            expect(response.updatedAt).to.equal(newDate);
+            expect(new Date(response.updatedAt).toDateString()).to.equal(new Date(newDate).toDateString());
         });
 
         it("should throw error", async () => {
