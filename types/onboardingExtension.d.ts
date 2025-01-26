@@ -56,3 +56,16 @@ export type UpdateOnboardingExtensionStateRequest = Request & {
     query: OnboardingExtensionRequestQuery;
     params: RequestParams;
 };
+
+export type UpdateOnboardingExtensionRequestBody = {
+    reason?: string
+    newEndsOn: number
+    type: REQUEST_TYPE.ONBOARDING
+}
+
+export type UpdateOnboardingExtensionRequest = Request & {
+    body: UpdateOnboardingExtensionRequestBody;
+    userData: userData;
+    query: OnboardingExtensionRequestQuery;
+    params: RequestParams;
+}
