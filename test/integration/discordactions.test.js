@@ -48,6 +48,9 @@ chai.use(chaiHttp);
 const { userStatusDataForOooState } = require("../fixtures/userStatus/userStatus");
 const { generateCronJobToken } = require("../utils/generateBotToken");
 const { CRON_JOB_HANDLER } = require("../../constants/bot");
+const { createRequest } = require("../../models/requests");
+const { REQUEST_TYPE, REQUEST_STATE } = require("../../constants/requests");
+const { convertDaysToMilliseconds } = require("../../utils/time");
 
 describe("Discord actions", function () {
   let superUserId;
@@ -853,6 +856,8 @@ describe("Discord actions", function () {
   });
 
   describe("PUT /discord-actions/group-onboarding-31d-plus", function () {
+    let userId;
+
     beforeEach(async function () {
       userData[0] = {
         ...userData[0],
@@ -884,6 +889,7 @@ describe("Discord actions", function () {
       const addUsersPromises = allUsers.map((user) => addUser(user));
       const userIds = await Promise.all(addUsersPromises);
 
+      userId = userIds[0];
       const updateUserStatusPromises = userIds.map((userId, index) => {
         if (index === 3) return updateUserStatus(userId, generateUserStatusData("IDLE", new Date(), new Date()));
         return updateUserStatus(userId, generateUserStatusData("ONBOARDING", new Date(), new Date()));
@@ -903,6 +909,28 @@ describe("Discord actions", function () {
     afterEach(async function () {
       sinon.restore();
       await cleanDb();
+    });
+
+    it("should filter users who have approved extension request and update groupOnboarding31d+ role", function (done) {
+      createRequest({
+        type: REQUEST_TYPE.ONBOARDING,
+        state: REQUEST_STATE.APPROVED,
+        userId: userId,
+        newEndsOn: Date.now() + convertDaysToMilliseconds(2),
+      });
+      chai
+        .request(app)
+        .put(`/discord-actions/group-onboarding-31d-plus`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(201);
+          expect(res.body.message).to.be.equal("All Users with 31 Days Plus Onboarding are updated successfully.");
+          expect(res.body.totalOnboardingUsers31DaysCompleted.count).to.be.equal(2);
+          expect(res.body.totalOnboarding31dPlusRoleApplied.count).to.be.equal(2);
+          expect(res.body.totalOnboarding31dPlusRoleRemoved.count).to.be.equal(1);
+          return done();
+        });
     });
 
     it("should update role for onboarding users with 31 days completed", function (done) {
@@ -1214,6 +1242,135 @@ describe("Discord actions", function () {
           expect(res.body.totalIdleUsers).to.be.equal(2);
           expect(res.body.totalGroupIdleRolesApplied.count).to.be.equal(2);
           expect(res.body.totalUserRoleToBeAdded).to.be.equal(2);
+          return done();
+        });
+    });
+  });
+
+  describe("GET /discord-actions/groups (getPaginatedAllGroupRoles)", function () {
+    let userId;
+    let userAuthToken;
+
+    beforeEach(async function () {
+      const user = await addUser(userData[0]);
+      userId = user;
+      userAuthToken = authService.generateAuthToken({ userId });
+
+      await discordRoleModel.add(groupData[0]);
+      await discordRoleModel.add(groupData[1]);
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should return paginated results when dev=true is passed", function (done) {
+      chai
+        .request(app)
+        .get("/discord-actions/groups?dev=true&page=1&size=10")
+        .set("cookie", `${cookieName}=${userAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Roles fetched successfully!");
+          expect(res.body.groups).to.be.an("array");
+
+          const groups = res.body.groups;
+          groups.forEach((group) => {
+            expect(group).to.have.keys([
+              "roleid",
+              "rolename",
+              "memberCount",
+              "firstName",
+              "lastName",
+              "image",
+              "isMember",
+            ]);
+          });
+
+          expect(res.body.links).to.have.keys(["next", "prev"]);
+          return done();
+        });
+    });
+
+    it("should return null for next link on the last page", function (done) {
+      const size = 10;
+      const page = 2;
+
+      chai
+        .request(app)
+        .get(`/discord-actions/groups?dev=true&page=${page}&size=${size}`)
+        .set("cookie", `${cookieName}=${userAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Roles fetched successfully!");
+          expect(res.body.groups).to.be.an("array");
+          expect(res.body.links).to.have.keys(["next", "prev"]);
+          // eslint-disable-next-line no-unused-expressions
+          expect(res.body.links.next).to.be.null;
+          expect(res.body.links.prev).to.equal(`/discord-actions/groups?page=${page - 1}&size=${size}&dev=true`);
+          return done();
+        });
+    });
+
+    it("should return a bad request error for invalid size parameter", function (done) {
+      chai
+        .request(app)
+        .get("/discord-actions/groups?dev=true&size=101&page=1")
+        .set("cookie", `${cookieName}=${userAuthToken}`)
+        .end((_err, res) => {
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal('"size" must be less than or equal to 100');
+          return done();
+        });
+    });
+
+    it("should return an empty array for groups on a page with no data", function (done) {
+      const size = 10;
+      const page = 100;
+
+      chai
+        .request(app)
+        .get(`/discord-actions/groups?dev=true&page=${page}&size=${size}`)
+        .set("cookie", `${cookieName}=${userAuthToken}`)
+        .end((_err, res) => {
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Roles fetched successfully!");
+          // eslint-disable-next-line no-unused-expressions
+          expect(res.body.groups).to.be.an("array").that.is.empty;
+          expect(res.body.links).to.have.keys(["next", "prev"]);
+          // eslint-disable-next-line no-unused-expressions
+          expect(res.body.links.next).to.be.null;
+          expect(res.body.links.prev).to.equal(`/discord-actions/groups?page=${page - 1}&size=${size}&dev=true`);
+          return done();
+        });
+    });
+
+    it("should handle internal server errors", function (done) {
+      sinon.stub(discordRolesModel, "getPaginatedGroupRolesByPage").throws(new Error("Database error"));
+
+      chai
+        .request(app)
+        .get("/discord-actions/groups?dev=true")
+        .set("cookie", `${cookieName}=${userAuthToken}`)
+        // eslint-disable-next-line node/handle-callback-err
+        .end((err, res) => {
+          expect(res).to.have.status(500);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("An internal server error occurred");
+          sinon.restore();
           return done();
         });
     });

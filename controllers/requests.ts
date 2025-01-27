@@ -13,9 +13,14 @@ import { createTaskExtensionRequest, updateTaskExtensionRequest } from "./extens
 import { UpdateRequest } from "../types/requests";
 import { TaskRequestRequest } from "../types/taskRequests";
 import { createTaskRequestController } from "./taskRequestsv2";
+import { OnboardingExtensionCreateRequest, OnboardingExtensionResponse, UpdateOnboardingExtensionStateRequest } from "../types/onboardingExtension";
+import { createOnboardingExtensionRequestController, updateOnboardingExtensionRequestController, updateOnboardingExtensionRequestState } from "./onboardingExtension";
+import { UpdateOnboardingExtensionRequest } from "../types/onboardingExtension";
+
+import { Request } from "express";
 
 export const createRequestController = async (
-  req: OooRequestCreateRequest | ExtensionRequestRequest | TaskRequestRequest,
+  req: OooRequestCreateRequest | ExtensionRequestRequest | TaskRequestRequest | OnboardingExtensionCreateRequest,
   res: CustomResponse
 ) => {
   const type = req.body.type;
@@ -26,6 +31,8 @@ export const createRequestController = async (
       return await createTaskExtensionRequest(req as ExtensionRequestRequest, res as ExtensionRequestResponse);
     case REQUEST_TYPE.TASK:
       return await createTaskRequestController(req as TaskRequestRequest, res as CustomResponse);
+    case REQUEST_TYPE.ONBOARDING:
+      return await createOnboardingExtensionRequestController(req as OnboardingExtensionCreateRequest, res as OnboardingExtensionResponse);
     default:
       return res.boom.badRequest("Invalid request type");
   }
@@ -38,6 +45,8 @@ export const updateRequestController = async (req: UpdateRequest, res: CustomRes
       return await updateOooRequestController(req as UpdateRequest, res as ExtensionRequestResponse);
     case REQUEST_TYPE.EXTENSION:
       return await updateTaskExtensionRequest(req as UpdateRequest, res as ExtensionRequestResponse);
+    case REQUEST_TYPE.ONBOARDING:
+      return await updateOnboardingExtensionRequestState(req as unknown as UpdateOnboardingExtensionStateRequest, res as OnboardingExtensionResponse);
     default:
       return res.boom.badRequest("Invalid request type");
   }
@@ -50,6 +59,13 @@ export const getRequestsController = async (req: any, res: any) => {
     if (!requests) {
       return res.status(204).send();
     }
+
+       if (query.id) {
+         return res.status(200).json({
+           message: REQUEST_FETCHED_SUCCESSFULLY,
+           data: requests,
+         });
+       }
 
     const { allRequests, next, prev, page } = requests;
     if (allRequests.length === 0) {
@@ -97,3 +113,21 @@ export const getRequestsController = async (req: any, res: any) => {
     return res.boom.badImplementation(ERROR_WHILE_FETCHING_REQUEST);
   }
 };
+
+/**
+ * Processes update requests before acknowledgment based on type.
+ * 
+ * @param {Request} req - The request object.
+ * @param {CustomResponse} res - The response object.
+ * @returns {Promise<void>} Resolves or sends an error for invalid types.
+ */
+export const updateRequestBeforeAcknowledgedController = async (req: Request, res: CustomResponse) => {
+  const type = req.body.type;
+  switch(type){
+    case REQUEST_TYPE.ONBOARDING:
+      await updateOnboardingExtensionRequestController(req as UpdateOnboardingExtensionRequest, res as OnboardingExtensionResponse);
+      break;
+    default:
+      return res.boom.badRequest("Invalid request");
+  }
+}

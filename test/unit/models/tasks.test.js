@@ -336,8 +336,8 @@ describe("tasks", function () {
 
     it("Should update task status COMPLETED to DONE", async function () {
       const res = await tasks.updateTaskStatus();
-      expect(res.totalTasks).to.be.equal(8);
-      expect(res.totalUpdatedStatus).to.be.equal(8);
+      expect(res.totalTasks).to.be.equal(9);
+      expect(res.totalUpdatedStatus).to.be.equal(9);
     });
 
     it("should throw an error if firebase batch operation fails", async function () {

@@ -15,6 +15,7 @@ export const REQUEST_TYPE = {
   EXTENSION: "EXTENSION",
   TASK: "TASK",
   ALL: "ALL",
+  ONBOARDING: "ONBOARDING",
 };
 
 export const REQUEST_LOG_TYPE = {
@@ -23,6 +24,7 @@ export const REQUEST_LOG_TYPE = {
   REQUEST_REJECTED: "REQUEST_REJECTED",
   REQUEST_BLOCKED: "REQUEST_BLOCKED",
   REQUEST_CANCELLED: "REQUEST_CANCELLED",
+  REQUEST_UPDATED: "REQUEST_UPDATED",
 };
 
 export const REQUEST_CREATED_SUCCESSFULLY = "Request created successfully";
@@ -53,3 +55,12 @@ export const TASK_REQUEST_MESSAGES = {
   ERROR_CREATING_TASK_REQUEST: "Error while creating task request",
   TASK_REQUEST_UPDATED_SUCCESS: "Task request updated successfully",
 };
+
+export const ONBOARDING_REQUEST_CREATED_SUCCESSFULLY = "Onboarding extension request created successfully"
+export const UNAUTHORIZED_TO_CREATE_ONBOARDING_EXTENSION_REQUEST = "Only super user and onboarding user are authorized to create an onboarding extension request"
+
+export const PENDING_REQUEST_UPDATED = "Only pending extension request can be updated";
+export const INVALID_REQUEST_TYPE = "Invalid request type";
+export const INVALID_REQUEST_DEADLINE = "New deadline of the request must be greater than old deadline";
+export const REQUEST_UPDATED_SUCCESSFULLY = "Request updated successfully";
+export const UNAUTHORIZED_TO_UPDATE_REQUEST = "Unauthorized to update request";

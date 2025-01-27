@@ -5,7 +5,7 @@ const firestore = require("../../utils/firestore");
 const app = require("../../server");
 const authService = require("../../services/authService");
 const tasks = require("../../models/tasks");
-
+const progressesModel = require("../../models/progresses");
 const addUser = require("../utils/addUser");
 const cleanDb = require("../utils/cleanDb");
 const {
@@ -16,7 +16,7 @@ const {
 
 const userData = require("../fixtures/user/user")();
 const taskData = require("../fixtures/tasks/tasks")();
-
+const { INTERNAL_SERVER_ERROR_MESSAGE } = require("../../constants/progresses");
 const cookieName = config.get("userToken.cookieName");
 const { expect } = chai;
 
@@ -222,6 +222,76 @@ describe("Test Progress Updates API for Tasks", function () {
         });
     });
 
+    it("Returns the progress array for the task with userData object", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses?taskId=${taskId1}&dev=true`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.keys(["message", "data", "count", "links"]);
+          expect(res.body.data).to.be.an("array");
+          expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
+          res.body.data.forEach((progress) => {
+            expect(progress).to.have.keys([
+              "id",
+              "taskId",
+              "type",
+              "completed",
+              "planned",
+              "blockers",
+              "userData",
+              "userId",
+              "createdAt",
+              "date",
+            ]);
+          });
+          return done();
+        });
+    });
+
+    it("Returns the progress array for the task without userData field if dev is false", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses?taskId=${taskId1}&dev=false`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.keys(["message", "data", "count"]);
+          expect(res.body.data).to.be.an("array");
+          expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
+          res.body.data.forEach((progress) => {
+            expect(progress).to.have.keys([
+              "id",
+              "taskId",
+              "type",
+              "completed",
+              "planned",
+              "blockers",
+              "userId",
+              "createdAt",
+              "date",
+            ]);
+          });
+          return done();
+        });
+    });
+
+    it("Returns a 404 error when the task does not exist", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses?taskId=nonExistingTaskId&dev=true`)
+        .end((err, res) => {
+          if (err) return done(err);
+
+          expect(res).to.have.status(404);
+          expect(res.body).to.have.keys(["message"]);
+          expect(res.body.message).to.be.equal(`Task with id nonExistingTaskId does not exist.`);
+
+          return done();
+        });
+    });
+
     it("Gives 400 status when anything other than -date or date is supplied", function (done) {
       chai
         .request(app)
@@ -302,6 +372,35 @@ describe("Test Progress Updates API for Tasks", function () {
               "completed",
               "planned",
               "blockers",
+              "userId",
+              "createdAt",
+              "date",
+            ]);
+          });
+          return done();
+        });
+    });
+
+    it("Returns the progress array for all the tasks with userData object", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses?type=task&dev=true`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.keys(["message", "data", "count", "links"]);
+          expect(res.body.data).to.be.an("array");
+          expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
+          expect(res.body.count).to.be.equal(4);
+          res.body.data.forEach((progress) => {
+            expect(progress).to.have.keys([
+              "id",
+              "taskId",
+              "type",
+              "completed",
+              "planned",
+              "blockers",
+              "userData",
               "userId",
               "createdAt",
               "date",
@@ -512,6 +611,157 @@ describe("Test Progress Updates API for Tasks", function () {
           if (err) return done(err);
           expect(res).to.have.status(404);
           expect(res.body.message).to.be.equal("No progress records found.");
+          return done();
+        });
+    });
+  });
+
+  describe("GET /progresses (getPaginatedProgressDocument)", function () {
+    beforeEach(async function () {
+      const userId = await addUser(userData[1]);
+      const taskObject1 = await tasks.updateTask(taskData[0]);
+      const taskId1 = taskObject1.taskId;
+      const progressData1 = stubbedModelTaskProgressData(userId, taskId1, 1683626400000, 1683590400000); // 2023-05-09
+      const progressData2 = stubbedModelTaskProgressData(userId, taskId1, 1683885600000, 1683849600000); // 2023-05-12
+      await firestore.collection("progresses").doc("taskProgressDocument1").set(progressData1);
+      await firestore.collection("progresses").doc("taskProgressDocument2").set(progressData2);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("should return paginated results when dev=true is passed", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses?type=task&dev=true&page=0&size=1`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.keys(["message", "data", "count", "links"]);
+          expect(res.body.links).to.have.keys(["next", "prev"]);
+          expect(res.body.data).to.be.an("array");
+          expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
+          expect(res.body.count).to.be.equal(1);
+          res.body.data.forEach((progress) => {
+            expect(progress).to.have.keys([
+              "id",
+              "type",
+              "completed",
+              "planned",
+              "blockers",
+              "userId",
+              "userData",
+              "taskId",
+              "createdAt",
+              "date",
+            ]);
+          });
+
+          return done();
+        });
+    });
+
+    it("should not return paginated results when dev=false is passed", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses?type=task&dev=false&page=0&size=1`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.keys(["message", "data", "count"]);
+          expect(res.body.data).to.be.an("array");
+          expect(res.body.count).to.not.equal(1);
+          expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
+          res.body.data.forEach((progress) => {
+            expect(progress).to.have.keys([
+              "id",
+              "type",
+              "completed",
+              "planned",
+              "blockers",
+              "userId",
+              "taskId",
+              "createdAt",
+              "date",
+            ]);
+          });
+
+          return done();
+        });
+    });
+
+    it("should return null for next link on the last page", function (done) {
+      const size = 1;
+      const page = 1;
+
+      chai
+        .request(app)
+        .get(`/progresses?type=task&dev=true&page=${page}&size=${size}`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.keys(["message", "data", "count", "links"]);
+          expect(res.body.links).to.have.keys(["next", "prev"]);
+          expect(res.body.data).to.be.an("array");
+          expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
+          expect(res.body.links.next).to.be.equal(null);
+          expect(res.body.links.prev).to.equal(`/progresses?type=task&page=${page - 1}&size=${size}&dev=true`);
+          return done();
+        });
+    });
+
+    it("should return a bad request error for invalid size parameter", function (done) {
+      chai
+        .request(app)
+        .get(`/progresses?type=task&dev=true&page=0&size=104`)
+        .end((_err, res) => {
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("size must be in the range 1-100");
+          return done();
+        });
+    });
+
+    it("should return an empty array of progresses data on a page with no data", function (done) {
+      const size = 10;
+      const page = 100;
+
+      chai
+        .request(app)
+        .get(`/progresses?type=task&dev=true&page=${page}&size=${size}`)
+        .end((err, res) => {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Progress document retrieved successfully.");
+          // eslint-disable-next-line no-unused-expressions
+          expect(res.body.data).to.be.an("array").that.is.empty;
+          expect(res.body.links).to.have.keys(["next", "prev"]);
+          // eslint-disable-next-line no-unused-expressions
+          expect(res.body.links.next).to.be.null;
+          expect(res.body.links.prev).to.equal(`/progresses?type=task&page=${page - 1}&size=${size}&dev=true`);
+          return done();
+        });
+    });
+
+    it("Should return 500 Internal Server Error if there is an exception", function (done) {
+      sinon.stub(progressesModel, "getPaginatedProgressDocument").throws(new Error("Database error"));
+
+      chai
+        .request(app)
+        .get(`/progresses?type=task&dev=true&page=0&size=1`)
+        .end((err, res) => {
+          if (err) return done(err);
+
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(500);
+          expect(res.body).to.deep.equal({
+            message: INTERNAL_SERVER_ERROR_MESSAGE,
+          });
           return done();
         });
     });

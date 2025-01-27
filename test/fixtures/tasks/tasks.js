@@ -140,5 +140,23 @@ module.exports = () => {
       createdAt: 1644753600,
       updatedAt: 1644753600,
     },
+    {
+      title: "Test task",
+      type: "feature",
+      endsOn: 1234,
+      startedOn: 4567,
+      status: "AVAILABLE",
+      percentCompleted: 0,
+      category: "FRONTEND",
+      level: 3,
+      participants: [],
+      completionAward: { [DINERO]: 3, [NEELAM]: 300 },
+      lossRate: { [DINERO]: 1 },
+      priority: "HIGH",
+      isNoteworthy: true,
+      assignee: false,
+      createdAt: 1644753600,
+      updatedAt: 1644753600,
+    },
   ];
 };

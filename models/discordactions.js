@@ -28,6 +28,8 @@ const { FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
 const discordService = require("../services/discordService");
 const { buildTasksQueryForMissedUpdates } = require("../utils/tasks");
 const { buildProgressQueryForMissedUpdates } = require("../utils/progresses");
+const { getRequestByKeyValues } = require("./requests");
+const { REQUEST_TYPE, REQUEST_STATE } = require("../constants/requests");
 const allMavens = [];
 
 /**
@@ -100,6 +102,33 @@ const deleteRoleFromDatabase = async (roleId, discordId) => {
     logger.error(errorMessage);
   }
   return false;
+};
+
+/**
+ * Fetches paginated group roles by page and size.
+ *
+ * @param {Object} options - Pagination options
+ * @param {number} options.offset - Number of items to skip
+ * @param {number} options.limit - Maximum number of roles to fetch
+ * @returns {Promise<Object>} - Paginated roles and total count
+ */
+const getPaginatedGroupRolesByPage = async ({ offset, limit }) => {
+  try {
+    const snapshot = await discordRoleModel.orderBy("date", "desc").offset(offset).limit(limit).get();
+
+    const roles = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    const totalSnapshot = await discordRoleModel.get();
+    const total = totalSnapshot.size;
+
+    return { roles, total };
+  } catch (err) {
+    logger.error(`Error in getPaginatedGroupRolesByPage: ${err.message}`);
+    throw new Error("Database error while paginating group roles");
+  }
 };
 
 /**
@@ -726,12 +755,59 @@ const updateIdle7dUsersOnDiscord = async (dev) => {
   };
 };
 
+/**
+ * Filters out onboarding users who have an approved onboarding extension request that is still valid.
+ *
+ * This function iterates through the given list of onboarding users and checks if each user has a valid
+ * approved onboarding extension request. If a valid extension request exists with a `newEndsOn`
+ * date greater than the current date, the user is skipped. Otherwise, the user is added to the
+ * returned list.
+ *
+ * @async
+ * @function skipOnboardingUsersHavingApprovedExtensionRequest
+ * @param {Array<Object>} [users=[]] - An array of user objects to be filtered. Each user object
+ *                                     must have an `id` property.
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of users who do not have
+ *                                   a valid approved onboarding extension request.
+ */
+const skipOnboardingUsersHavingApprovedExtensionRequest = async (users = []) => {
+  const currentTime = Date.now();
+
+  const results = await Promise.all(
+    users.map(async (user) => {
+      try {
+        const latestApprovedExtension = await getRequestByKeyValues({
+          type: REQUEST_TYPE.ONBOARDING,
+          state: REQUEST_STATE.APPROVED,
+          userId: user.id,
+        });
+
+        if (latestApprovedExtension && latestApprovedExtension.newEndsOn > currentTime) {
+          return null;
+        }
+
+        return user;
+      } catch (error) {
+        logger.error(`Error while fetching latest approved extension for user ${user.id}:`, error);
+        return null;
+      }
+    })
+  );
+
+  return results.filter(Boolean);
+};
+
 const updateUsersWith31DaysPlusOnboarding = async () => {
   try {
-    const allOnboardingUsers31DaysCompleted = await getUsersBasedOnFilter({
+    let allOnboardingUsers31DaysCompleted = await getUsersBasedOnFilter({
       state: userState.ONBOARDING,
       time: "31d",
     });
+
+    allOnboardingUsers31DaysCompleted = await skipOnboardingUsersHavingApprovedExtensionRequest(
+      allOnboardingUsers31DaysCompleted
+    );
+
     const discordMembers = await getDiscordMembers();
     const groupOnboardingRole = await getGroupRole("group-onboarding-31d+");
     const groupOnboardingRoleId = groupOnboardingRole.role.roleid;
@@ -1085,6 +1161,7 @@ module.exports = {
   createNewRole,
   removeMemberGroup,
   getGroupRolesForUser,
+  getPaginatedGroupRolesByPage,
   getAllGroupRoles,
   getGroupRoleByName,
   updateGroupRole,
@@ -1103,4 +1180,5 @@ module.exports = {
   addInviteToInviteModel,
   groupUpdateLastJoinDate,
   deleteGroupRole,
+  skipOnboardingUsersHavingApprovedExtensionRequest,
 };

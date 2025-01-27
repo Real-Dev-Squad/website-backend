@@ -17,6 +17,8 @@ const { cacheResponse, invalidateCache } = require("../utils/cache");
 const { ALL_TASKS } = require("../constants/cacheKeys");
 const { verifyCronJob } = require("../middlewares/authorizeBot");
 const { CLOUDFLARE_WORKER, CRON_JOB_HANDLER } = require("../constants/bot");
+const { devFlagMiddleware } = require("../middlewares/devFlag");
+const { userAuthorization } = require("../middlewares/userAuthorization");
 
 const oldAuthorizationMiddleware = authorizeRoles([APPOWNER, SUPERUSER]);
 const newAuthorizationMiddleware = authorizeAndAuthenticate(
@@ -35,6 +37,7 @@ const enableDevModeMiddleware = (req, res, next) => {
 
 router.get("/", getTasksValidator, cacheResponse({ invalidationKey: ALL_TASKS, expiry: 10 }), tasks.fetchTasks);
 router.get("/self", authenticate, tasks.getSelfTasks);
+
 router.get("/overdue", authenticate, authorizeRoles([SUPERUSER]), tasks.overdueTasks);
 router.post(
   "/",
@@ -54,6 +57,7 @@ router.patch(
 );
 router.get("/:id/details", tasks.getTask);
 router.get("/:username", tasks.getUserTasks);
+
 router.patch(
   "/self/:id",
   authenticate,
@@ -61,8 +65,26 @@ router.patch(
   updateSelfTask,
   tasks.updateTaskStatus,
   assignTask
+); // this route is being deprecated in favor of /tasks/:id/status.
+router.patch(
+  "/:id/status",
+  authenticate,
+  devFlagMiddleware,
+  invalidateCache({ invalidationKeys: [ALL_TASKS] }),
+  updateSelfTask,
+  tasks.updateTaskStatus,
+  assignTask
 );
-router.patch("/assign/self", authenticate, invalidateCache({ invalidationKeys: [ALL_TASKS] }), tasks.assignTask);
+router.patch("/assign/self", authenticate, invalidateCache({ invalidationKeys: [ALL_TASKS] }), tasks.assignTask); // this route is being deprecated in favor of /assign/:userId.
+
+router.patch(
+  "/assign/:userId",
+  authenticate,
+  devFlagMiddleware,
+  userAuthorization,
+  invalidateCache({ invalidationKeys: [ALL_TASKS] }),
+  tasks.assignTask
+);
 
 router.get("/users/discord", verifyCronJob, getUsersValidator, tasks.getUsersHandler);
 

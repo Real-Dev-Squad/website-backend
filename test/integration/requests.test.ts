@@ -222,7 +222,7 @@ describe("/requests OOO", function () {
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal('"type" must be one of [OOO, EXTENSION]');
+          expect(res.body.message).to.equal('"type" must be one of [OOO, EXTENSION, ONBOARDING]');
           done();
         });
     });
@@ -272,6 +272,17 @@ describe("/requests OOO", function () {
           done();
         });
     });
+
+       it("should return the request by Id query", function (done) {
+         chai
+           .request(app)
+           .get(`/requests?id=${oooRequestId}`)
+           .end(function (err, res) {
+             expect(res).to.have.status(200);
+             expect(res.body.data.id === oooRequestId);
+             done();
+           });
+       });
 
     it("should return all requests by specific user", function (done) {
       chai
@@ -356,7 +367,7 @@ describe("/requests OOO", function () {
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body.error).to.equal("Bad Request");
-          expect(res.body.message).to.equal('"type" must be one of [OOO, EXTENSION, TASK, ALL]');
+          expect(res.body.message).to.equal('"type" must be one of [OOO, EXTENSION, TASK, ALL, ONBOARDING]');
           done();
         });
     });
