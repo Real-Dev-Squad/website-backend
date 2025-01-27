@@ -1,8 +1,3 @@
-import { isLastPRMergedWithinDays } from "../services/githubService";
-import { getUserStatus } from "../models/userStatus";
-import userService from "../services/users";
-import { getOverdueTasks } from "../models/tasks";
-
 const chaincodeQuery = require("../models/chaincodes");
 const userQuery = require("../models/users");
 const profileDiffsQuery = require("../models/profileDiffs");
@@ -39,6 +34,7 @@ const { generateUniqueUsername } = require("../services/users");
 const { NotFound, BadRequest } = require("http-errors");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 const usersCollection = firestore.collection("users");
+const userService = require("../services/users");
 
 const verifyUser = async (req, res) => {
   const userId = req.userData.id;
@@ -91,7 +87,6 @@ const getUserById = async (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
-    // getting user details by id if present.
     const reqQueryObject = req.query;
     const { q, dev: devParam, query, departed, id, profile: profileParam, discordId } = reqQueryObject;
     const userData = req.userData || {};
@@ -108,107 +103,102 @@ const getUsers = async (req, res) => {
       return res.boom.notFound("Route not found");
     }
 
-    try {
-      if (id) {
-        const user = await findUserById(id);
+    if (id) {
+      const user = await userService.findUserById(id);
+      return res.json({
+        message: "User returned successfully!",
+        user: user,
+      });
+    }
+
+    if (profile) {
+      return res.send(await userService.getUserByProfileData(userData));
+    }
+
+    if (!transformedQuery?.days && transformedQuery?.filterBy === "unmerged_prs") {
+      return res.boom.badRequest(`Days is required for filterBy ${transformedQuery?.filterBy}`);
+    }
+
+    if (filterBy === "unmerged_prs" && days) {
+      const users = await userService.getUsersByUnmergedPrs(days);
+      return res.json({
+        message: "Inactive users returned successfully!",
+        count: users.length,
+        users: users,
+      });
+    }
+
+    if (discordId) {
+      if (dev) {
+        const user = await userService.getUserByDiscordId(discordId);
         return res.json({
-          message: "User returned successfully!",
+          message: user ? "User returned successfully!" : "User not found",
           user: user,
         });
+      } else {
+        return res.boom.notFound("Route not found");
       }
+    }
 
-      if (profile) {
-        return res.send(await getUserByProfileData(userData));
+    if (isDeparted) {
+      if (!dev) {
+        return res.boom.notFound("Route not found");
       }
-
-      if (!transformedQuery?.days && transformedQuery?.filterBy === "unmerged_prs") {
-        return res.boom.badRequest(`Days is required for filterBy ${transformedQuery?.filterBy}`);
-      }
-
-      if (filterBy === "unmerged_prs" && days) {
-        const users = await getUsersByUnmergedPrs(days);
-        return res.json({
-          message: "Inactive users returned successfully!",
-          count: users.length,
-          users: users,
-        });
-      }
-
-      if (discordId) {
-        if (dev) {
-          const user = await getUserByDiscordId(discordId);
-          return res.json({
-            message: user ? "User returned successfully!" : "User not found",
-            user: user,
-          });
-        } else {
-          return res.boom.notFound("Route not found");
-        }
-      }
-
-      if (isDeparted) {
-        if (!dev) {
-          return res.boom.notFound("Route not found");
-        }
-        const { result, departedUsers } = await getDepartedUsers(reqQueryObject);
-        if (departedUsers.length === 0) return res.status(204).send();
-        return res.json({
-          message: "Users with abandoned tasks fetched successfully",
-          users: departedUsers,
-          links: {
-            next: result.nextId ? getPaginationLink(reqQueryObject, "next", result.nextId) : "",
-            prev: result.prevId ? getPaginationLink(reqQueryObject, "prev", result.prevId) : "",
-          },
-        });
-      }
-
-      if (filterBy === OVERDUE_TASKS) {
-        const users = await getUsersByOverDueTasks(days, dev);
-        if (!users || users.length === 0) {
-          return res.json({
-            message: "No users found",
-            users: [],
-          });
-        }
-        return res.json({
-          message: "Users returned successfully!",
-          count: users.length,
-          users: users,
-        });
-      }
-
-      if (qualifiers?.filterBy) {
-        const allPRs = await getFilteredPRsOrIssues(qualifiers);
-        const usernames = getUsernamesFromPRs(allPRs);
-        const users = await dataAccess.retrieveUsers({ usernames: usernames });
-        return res.json({
-          message: "Users returned successfully!",
-          users,
-        });
-      }
-
-      const data = await dataAccess.retrieveUsers({ query: reqQueryObject });
-
+      const { result, departedUsers } = await userService.getDepartedUsers(reqQueryObject);
+      if (departedUsers.length === 0) return res.status(204).send();
       return res.json({
-        message: "Users returned successfully!",
-        users: data.users,
+        message: "Users with abandoned tasks fetched successfully",
+        users: departedUsers,
         links: {
-          next: data.nextId ? getPaginationLink(reqQueryObject, "next", data.nextId) : "",
-          prev: data.prevId ? getPaginationLink(reqQueryObject, "prev", data.prevId) : "",
+          next: result.nextId ? getPaginationLink(reqQueryObject, "next", result.nextId) : "",
+          prev: result.prevId ? getPaginationLink(reqQueryObject, "prev", result.prevId) : "",
         },
       });
-    } catch (e) {
-      if (e instanceof NotFound) {
-        return res.boom.notFound(e.message);
-      }
-      if (e instanceof BadRequest) {
-        return res.boom.BadRequest(e.message);
-      }
-
-      return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
     }
-  } catch (error) {
-    logger.error(`Error while fetching all users: ${error}`);
+
+    if (filterBy === OVERDUE_TASKS) {
+      const users = await userService.getUsersByOverDueTasks(days, dev);
+      if (!users || users.length === 0) {
+        return res.json({
+          message: "No users found",
+          users: [],
+        });
+      }
+      return res.json({
+        message: "Users returned successfully!",
+        count: users.length,
+        users: users,
+      });
+    }
+
+    if (qualifiers?.filterBy) {
+      const allPRs = await getFilteredPRsOrIssues(qualifiers);
+      const usernames = getUsernamesFromPRs(allPRs);
+      const users = await dataAccess.retrieveUsers({ usernames: usernames });
+      return res.json({
+        message: "Users returned successfully!",
+        users,
+      });
+    }
+
+    const data = await dataAccess.retrieveUsers({ query: reqQueryObject });
+
+    return res.json({
+      message: "Users returned successfully!",
+      users: data.users,
+      links: {
+        next: data.nextId ? getPaginationLink(reqQueryObject, "next", data.nextId) : "",
+        prev: data.prevId ? getPaginationLink(reqQueryObject, "prev", data.prevId) : "",
+      },
+    });
+  } catch (e) {
+    if (e instanceof NotFound) {
+      return res.boom.notFound(e.message);
+    }
+    if (e instanceof BadRequest) {
+      return res.boom.BadRequest(e.message);
+    }
+
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
@@ -1039,149 +1029,6 @@ const updateProfile = async (req, res) => {
   } catch (err) {
     logger.error(`Error in updateUserStatusController: ${err}`);
     return res.boom.badImplementation("An unexpected error occurred.");
-  }
-};
-
-/**
- * @param userId { string }: Id of the User
- * @returns Promise<object>
- */
-const findUserById = async (userId) => {
-  let result;
-  try {
-    result = await dataAccess.retrieveUsers({ id: userId });
-    if (!result.userExists) {
-      throw NotFound("User doesn't exist");
-    }
-    return result.user;
-  } catch (error) {
-    logger.error(`Error while fetching user: ${error}`);
-    throw error;
-  }
-};
-
-/**
- * @param userData { Object }: req.userData
- * @returns Promise<object>
- */
-const getUserByProfileData = async (userData) => {
-  if (!userData.id) {
-    throw BadRequest("User ID not provided.");
-  }
-
-  try {
-    const result = await dataAccess.retrieveUsers({ id: userData.id });
-    return result.user;
-  } catch (error) {
-    logger.error(`Error while fetching user: ${error}`);
-    throw error;
-  }
-};
-
-/**
- * @param days {number}: days since last unmerged pr.
- * @returns Promise<object[]>
- */
-const getUsersByUnmergedPrs = async (days) => {
-  try {
-    const inDiscordUser = await dataAccess.retrieveUsersWithRole(ROLES.INDISCORD);
-    const users = [];
-
-    for (const user of inDiscordUser) {
-      const username = user.github_id;
-      const isMerged = await isLastPRMergedWithinDays(username, days);
-      if (!isMerged) {
-        users.push(user.id);
-      }
-    }
-
-    return users;
-  } catch (error) {
-    logger.error(`Error while fetching all users: ${error}`);
-    throw error;
-  }
-};
-
-/**
- * @param discordId { string }: discordId of the user
- * @returns Promise<object>
- */
-const getUserByDiscordId = async (discordId) => {
-  let result, user;
-  try {
-    result = await dataAccess.retrieveUsers({ discordId });
-    user = result.user;
-    if (!result.userExists) {
-      return null;
-    }
-
-    const userStatusResult = await getUserStatus(user.id);
-    if (userStatusResult.userStatusExists) {
-      user.state = userStatusResult.data.currentStatus.state;
-    }
-  } catch (error) {
-    logger.error(`Error while fetching user: ${error}`);
-    throw error;
-  }
-  return user;
-};
-
-/**
- * @param queryObject { Object }: request query object
- * @returns Promise<object>
- */
-const getDepartedUsers = async (queryObject) => {
-  try {
-    const result = await dataAccess.retrieveUsers({ query: queryObject });
-    const departedUsers = await userService.getUsersWithIncompleteTasks(result.users);
-    if (!departedUsers || departedUsers.length === 0) return { departedUsers: [] };
-    return { result, departedUsers };
-  } catch (error) {
-    logger.error("Error when fetching users who abandoned tasks:", error);
-    throw error;
-  }
-};
-
-/**
- * @param days { number }: overdue days
- * @param dev {boolean}: dev feature flag
- * @returns Promise<object[]>
- */
-const getUsersByOverDueTasks = async (days, dev) => {
-  try {
-    const tasksData = await getOverdueTasks(days);
-    if (!tasksData.length) {
-      return [];
-    }
-    const userIds = new Set();
-    const usersData = [];
-
-    tasksData.forEach((task) => {
-      if (task.assignee) {
-        userIds.add(task.assignee);
-      }
-    });
-
-    const userInfo = await dataAccess.retrieveUsers({ userIds: Array.from(userIds) });
-    userInfo.forEach((user) => {
-      if (!user.roles.archived) {
-        const userTasks = tasksData.filter((task) => task.assignee === user.id);
-        const userData = {
-          id: user.id,
-          discordId: user.discordId,
-          username: user.username,
-        };
-        if (dev) {
-          userData.tasks = userTasks;
-        }
-        usersData.push(userData);
-      }
-    });
-
-    return usersData;
-  } catch (error) {
-    logger.error(`Error while fetching users and tasks: ${error}`);
-    throw error;
   }
 };
 

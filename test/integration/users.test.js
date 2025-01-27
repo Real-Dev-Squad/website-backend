@@ -47,7 +47,7 @@ const {
   usersData: abandonedUsersData,
   tasksData: abandonedTasksData,
 } = require("../fixtures/abandoned-tasks/departed-users");
-const userService = require("../../services/users");
+const dataAccess = require("../../services/dataAccessLayer");
 chai.use(chaiHttp);
 
 describe("Users", function () {
@@ -1488,7 +1488,7 @@ describe("Users", function () {
     });
 
     it("should handle errors gracefully if getUsersWithIncompleteTasks fails", async function () {
-      Sinon.stub(userService, "getUsersWithIncompleteTasks").rejects(new Error(SOMETHING_WENT_WRONG));
+      Sinon.stub(dataAccess, "retrieveUsers").throws(new Error(SOMETHING_WENT_WRONG));
 
       const res = await chai.request(app).get("/users?departed=true&dev=true");
 
