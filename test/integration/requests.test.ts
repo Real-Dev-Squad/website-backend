@@ -273,6 +273,17 @@ describe("/requests OOO", function () {
         });
     });
 
+       it("should return the request by Id query", function (done) {
+         chai
+           .request(app)
+           .get(`/requests?id=${oooRequestId}`)
+           .end(function (err, res) {
+             expect(res).to.have.status(200);
+             expect(res.body.data.id === oooRequestId);
+             done();
+           });
+       });
+
     it("should return all requests by specific user", function (done) {
       chai
         .request(app)
