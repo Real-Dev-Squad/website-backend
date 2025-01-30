@@ -196,6 +196,7 @@ const fetchAllLogs = async (query) => {
       if (startDate) {
         requestQuery = requestQuery.where("timestamp._seconds", ">=", parseInt(startDate, 10));
       }
+
       if (endDate) {
         requestQuery = requestQuery.where("timestamp._seconds", "<=", parseInt(endDate, 10));
       }

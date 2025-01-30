@@ -11,7 +11,13 @@ import {
     REQUEST_STATE, REQUEST_TYPE, 
     ONBOARDING_REQUEST_CREATED_SUCCESSFULLY, 
     UNAUTHORIZED_TO_CREATE_ONBOARDING_EXTENSION_REQUEST, 
-    REQUEST_FETCHED_SUCCESSFULLY
+    REQUEST_FETCHED_SUCCESSFULLY,
+    INVALID_REQUEST_DEADLINE,
+    PENDING_REQUEST_UPDATED,
+    REQUEST_UPDATED_SUCCESSFULLY,
+    INVALID_REQUEST_TYPE,
+    REQUEST_DOES_NOT_EXIST,
+    UNAUTHORIZED_TO_UPDATE_REQUEST
 } from "../../constants/requests";
 const { generateToken } = require("../../test/utils/generateBotToken");
 import app from "../../server";
@@ -22,6 +28,9 @@ import * as requestsQuery from "../../models/requests"
 import { userState } from "../../constants/userStatus";
 import { generateAuthToken } from "../../services/authService";
 const { CLOUDFLARE_WORKER, BAD_TOKEN } = require("../../constants/bot");
+import * as logUtils from "../../services/logService";
+import { convertDaysToMilliseconds } from "../../utils/time";
+import { OooStatusRequest } from "../../types/oooRequest";
 const userData = userDataFixture();
 chai.use(chaiHttp);
 
@@ -412,12 +421,12 @@ describe("/requests Onboarding Extension", () => {
             putEndpoint = `/requests/${latestExtension.id}?dev=true`;
             authToken = generateAuthToken({userId});
         })
-        
+
         afterEach(async () => {
             sinon.restore();
             await cleanDb();
         })
-        
+
         it("should return 401 response when user is not a super user", (done) => {
             chai.request(app)
             .put(putEndpoint)
@@ -597,5 +606,237 @@ describe("/requests Onboarding Extension", () => {
             })
         })
     });
+
+    describe("PATCH /requests", () => {
+        const body = {
+            type: REQUEST_TYPE.ONBOARDING,
+            newEndsOn: Date.now() + convertDaysToMilliseconds(3),
+            reason: "<dummy-reason>"
+        }
+        let latestValidExtension: OnboardingExtension;
+        let userId: string;
+        let invalidUserId: string;
+        let superUserId: string;
+        let patchEndpoint: string;
+        let authToken: string;
+        let latestApprovedExtension: OnboardingExtension;
+        let latestInvalidExtension: OnboardingExtension;
+        let oooRequest: OooStatusRequest;
+
+        beforeEach(async () => {
+            userId = await addUser(userData[6]);
+            invalidUserId = await addUser(userData[0]);
+            superUserId = await addUser(userData[4]);
+            latestInvalidExtension =  await requestsQuery.createRequest({ 
+                state: REQUEST_STATE.PENDING, 
+                type: REQUEST_TYPE.ONBOARDING, 
+                oldEndsOn: Date.now() + convertDaysToMilliseconds(5),
+                userId: userId,
+            });
+            latestValidExtension = await requestsQuery.createRequest({
+                state: REQUEST_STATE.PENDING, 
+                type: REQUEST_TYPE.ONBOARDING, 
+                oldEndsOn: Date.now() - convertDaysToMilliseconds(3),
+                userId: userId
+            });
+            latestApprovedExtension = await requestsQuery.createRequest({
+                state: REQUEST_STATE.APPROVED, 
+                type: REQUEST_TYPE.ONBOARDING, 
+                oldEndsOn: Date.now(),
+                userId: userId
+            });
+            oooRequest = await requestsQuery.createRequest({type: REQUEST_TYPE.OOO, userId: userId});
+            patchEndpoint = `/requests/${latestValidExtension.id}?dev=true`;
+            authToken = generateAuthToken({userId});
+        })
+            
+        afterEach(async () => {
+            sinon.restore();
+            await cleanDb();
+        })
+
+        it("should return 400 response for incorrect type", (done) => {
+            chai.request(app)
+            .patch(patchEndpoint)
+            .set("authorization", `Bearer ${authToken}`)
+            .send({...body, type: "<invalid-type>"})
+            .end((err, res) => {
+                if(err) return done(err);
+                expect(res.statusCode).to.equal(400);
+                expect(res.body.error).to.equal("Bad Request");
+                expect(res.body.message).to.equal("Invalid type");
+                done();
+            })
+        })
+
+        it("should return Feature not implemented when dev is not true", (done) => {
+            chai.request(app)
+            .patch(`/requests/1111?dev=false`)
+            .send(body)
+            .set("authorization", `Bearer ${authToken}`)
+            .end((err, res)=>{
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(501);
+                expect(res.body.message).to.equal("Feature not implemented");
+                done();
+            })
+        })
+
+        it("should return Unauthenticated User when authorization header is missing", (done) => {
+            chai
+            .request(app)
+            .patch(patchEndpoint)
+            .set("authorization", "")
+            .send(body)
+            .end((err, res) => {
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(401);
+                expect(res.body.message).to.equal("Unauthenticated User");
+                done();
+            })
+        })
+
+        it("should return Unauthenticated User for invalid token", (done) => {
+            chai.request(app)
+            .patch(patchEndpoint)
+            .set("authorization", `Bearer ${BAD_TOKEN}`)
+            .send(body)
+            .end((err, res) => {
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(401);
+                expect(res.body.message).to.equal("Unauthenticated User");
+                done();
+            })
+        })
+
+        it("should return 400 response for invalid value of newEndsOn", (done) => {
+            chai.request(app)
+            .patch(patchEndpoint)
+            .set("authorization", `Bearer ${authToken}`)
+            .send({...body, newEndsOn: Date.now()})
+            .end((err, res) => {
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(400);
+                expect(res.body.error).to.equal("Bad Request");
+                expect(res.body.message).contain(`"newEndsOn" must be greater than or equal to`)
+                done();
+            })
+        })
+
+        it("should return 404 response for invalid extension id", (done) => {
+            chai.request(app)
+            .patch(`/requests/1111?dev=true`)
+            .set("authorization", `Bearer ${authToken}`)
+            .send(body)
+            .end((err, res) => {
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(404);
+                expect(res.body.message).to.equal(REQUEST_DOES_NOT_EXIST);
+                expect(res.body.error).to.equal("Not Found");
+                done();
+            })
+        })
+
+        it("should return 403 response when super user and request owner are not updating the request", (done) => {
+            chai.request(app)
+            .patch(patchEndpoint)
+            .set("authorization", `Bearer ${generateAuthToken({userId: invalidUserId})}`)
+            .send(body)
+            .end((err, res)=>{
+                if(err) return done(err);
+                expect(res.statusCode).to.equal(403);
+                expect(res.body.error).to.equal("Forbidden");
+                expect(res.body.message).to.equal(UNAUTHORIZED_TO_UPDATE_REQUEST);
+                done();
+            })
+        })
+
+        it("should return 400 response when request type is not onboarding", (done) => {
+            chai.request(app)
+            .patch(`/requests/${oooRequest.id}?dev=true`)
+            .set("authorization", `Bearer ${authToken}`)
+            .send(body)
+            .end((err, res) => {
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(400);
+                expect(res.body.message).to.equal(INVALID_REQUEST_TYPE);
+                expect(res.body.error).to.equal("Bad Request");
+                done();
+            })
+        })
+
+        it("should return 400 response when extension state is not pending", (done) => {
+            chai.request(app)
+            .patch(`/requests/${latestApprovedExtension.id}?dev=true`)
+            .set("authorization", `Bearer ${authToken}`)
+            .send(body)
+            .end((err, res) => {
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(400);
+                expect(res.body.message).to.equal(PENDING_REQUEST_UPDATED);
+                expect(res.body.error).to.equal("Bad Request");
+                done();
+            })
+        })
+
+        it("should return 400 response when old dealdine is greater than new deadline", (done) => {
+            chai.request(app)
+            .patch(`/requests/${latestInvalidExtension.id}?dev=true`)
+            .set("authorization", `Bearer ${authToken}`)
+            .send(body)
+            .end((err, res) => {
+                if (err) return done(err);
+                expect(res.statusCode).to.equal(400);
+                expect(res.body.message).to.equal(INVALID_REQUEST_DEADLINE);
+                expect(res.body.error).to.equal("Bad Request");
+                done();
+            })
+        })
+
+        it("should return 200 success response when request owner is updating the request", (done) => {
+            chai.request(app)
+            .patch(patchEndpoint)
+            .set("authorization", `Bearer ${authToken}`)
+            .send(body)
+            .end((err, res)=>{
+                if(err) return done(err);
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.message).to.equal(REQUEST_UPDATED_SUCCESSFULLY);
+                expect(res.body.data.id).to.equal(latestValidExtension.id);
+                expect(res.body.data.newEndsOn).to.equal(body.newEndsOn)
+                done();
+            })
+        })
+
+        it("should return 200 success response when super user is updating the request", (done) => {
+            chai.request(app)
+            .patch(patchEndpoint)
+            .set("authorization", `Bearer ${generateAuthToken({userId: superUserId})}`)
+            .send(body)
+            .end((err, res)=>{
+                if(err) return done(err);
+                expect(res.statusCode).to.equal(200);
+                expect(res.body.message).to.equal(REQUEST_UPDATED_SUCCESSFULLY);
+                expect(res.body.data.id).to.equal(latestValidExtension.id);
+                expect(res.body.data.newEndsOn).to.equal(body.newEndsOn)
+                done();
+            })
+        })
+
+
+        it("should return 500 response for unexpected error", (done) => {
+            sinon.stub(logUtils, "addLog").throws("Error")
+            chai.request(app)
+            .patch(patchEndpoint)
+            .send(body)
+            .set("authorization", `Bearer ${authToken}`)
+            .end((err, res)=>{
+                if(err) return done(err);
+                expect(res.statusCode).to.equal(500);
+                expect(res.body.error).to.equal("Internal Server Error");
+                done();
+            })
+        })
+    })
 });
     
