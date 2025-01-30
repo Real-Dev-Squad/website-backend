@@ -18,4 +18,7 @@ module.exports = {
       baseUrl: "https://goals-api.realdevsquad.com",
     },
   },
+  featureFlag: {
+    baseUrl: "https://api-ff.realdevsquad.com",
+  },
 };

@@ -23,6 +23,9 @@ module.exports = {
       baseUrl: "https://staging-goals-api.realdevsquad.com",
       secretKey: "123456789",
     },
+    featureFlag: {
+      baseUrl: "https://staging-feature-flag-api.realdevsquad.com",
+    },
   },
 
   integrations: {
