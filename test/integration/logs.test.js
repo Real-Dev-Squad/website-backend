@@ -204,8 +204,8 @@ describe("/logs", function () {
 
     it("should return logs filtered by username, startDate, and endDate when dev flag is enabled", function (done) {
       const username = "joygupta";
-      const startDate = 1729841400000;
-      const endDate = 1729841500000;
+      const startDate = 1729841400;
+      const endDate = 1729841500;
       chai
         .request(app)
         .get(`/logs?username=${username}&startDate=${startDate}&endDate=${endDate}&dev=true`)
@@ -249,8 +249,8 @@ describe("/logs", function () {
 
     it("should return an empty array if no logs match username and date range", function (done) {
       const username = "nonexistentUser";
-      const startDate = 1729841400000;
-      const endDate = 1729841500000;
+      const startDate = 1729841400;
+      const endDate = 1729841500;
 
       chai
         .request(app)

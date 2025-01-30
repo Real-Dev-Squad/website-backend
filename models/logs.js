@@ -184,8 +184,8 @@ const fetchAllLogs = async (query) => {
     }
 
     if (isDev && (startDate || endDate)) {
-      startDate = startDate ? parseInt(startDate) : null;
-      endDate = endDate ? parseInt(endDate) : null;
+      startDate = startDate ? parseInt(startDate, 10) * 1000 : null;
+      endDate = endDate ? parseInt(endDate, 10) * 1000 : null;
 
       if (startDate && endDate && startDate > endDate) {
         const error = new Error("Start date cannot be greater than end date.");
@@ -193,19 +193,12 @@ const fetchAllLogs = async (query) => {
         throw error;
       }
 
-      const buildTimestamp = (milliseconds) => ({
-        _seconds: Math.floor(milliseconds / 1000),
-        _nanoseconds: (milliseconds % 1000) * 1000000,
-      });
-
       if (startDate) {
-        const startTimestamp = buildTimestamp(startDate);
-        requestQuery = requestQuery.where("timestamp._seconds", ">=", startTimestamp._seconds);
+        requestQuery = requestQuery.where("timestamp", ">=", admin.firestore.Timestamp.fromMillis(startDate));
       }
 
       if (endDate) {
-        const endTimestamp = buildTimestamp(endDate);
-        requestQuery = requestQuery.where("timestamp._seconds", "<=", endTimestamp._seconds);
+        requestQuery = requestQuery.where("timestamp", "<=", admin.firestore.Timestamp.fromMillis(endDate));
       }
     }
 
@@ -255,7 +248,6 @@ const fetchAllLogs = async (query) => {
         page: page ? page + 1 : null,
       };
     }
-
     if (format === "feed") {
       const userList = await getUsersListFromLogs(allLogs);
       const taskIdList = await getTasksFromLogs(allLogs);
