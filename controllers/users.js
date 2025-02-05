@@ -31,7 +31,7 @@ const {
 const { addLog } = require("../models/logs");
 const config = require("config");
 const { generateUniqueUsername } = require("../services/users");
-const { NotFound, BadRequest } = require("http-errors");
+const { NotFound, BadRequest, InternalServerError } = require("http-errors");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 const usersCollection = firestore.collection("users");
 const userService = require("../services/users");
@@ -197,6 +197,9 @@ const getUsers = async (req, res) => {
     }
     if (e instanceof BadRequest) {
       return res.boom.BadRequest(e.message);
+    }
+    if (e instanceof InternalServerError) {
+      return res.boom.internal(e.message);
     }
 
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);

@@ -1488,12 +1488,12 @@ describe("Users", function () {
     });
 
     it("should handle errors gracefully if getUsersWithIncompleteTasks fails", async function () {
-      Sinon.stub(dataAccess, "retrieveUsers").throws(new Error(SOMETHING_WENT_WRONG));
+      Sinon.stub(dataAccess, "retrieveUsers").throws(new Error(INTERNAL_SERVER_ERROR));
 
       const res = await chai.request(app).get("/users?departed=true&dev=true");
 
-      expect(res).to.have.status(503);
-      expect(res.body.message).to.be.equal(SOMETHING_WENT_WRONG);
+      expect(res).to.have.status(500);
+      expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
     });
   });
 

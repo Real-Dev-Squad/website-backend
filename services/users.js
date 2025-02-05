@@ -3,12 +3,13 @@ const { formatUsername } = require("../utils/username");
 const userModel = firestore.collection("users");
 const tasksModel = require("../models/tasks");
 const dataAccess = require("./dataAccessLayer");
-const { NotFound, BadRequest } = require("http-errors");
+const { NotFound, BadRequest, InternalServerError } = require("http-errors");
 const logger = require("../utils/logger");
 const ROLES = require("../constants/roles");
 const { isLastPRMergedWithinDays } = require("./githubService");
 const { getUserStatus } = require("../models/userStatus");
 const { getOverdueTasks } = require("../models/tasks");
+const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 const getUsersWithIncompleteTasks = async (users) => {
   if (users.length === 0) return [];
@@ -149,7 +150,7 @@ const getDepartedUsers = async (queryObject) => {
     return { result, departedUsers };
   } catch (error) {
     logger.error("Error when fetching users who abandoned tasks:", error);
-    throw error;
+    throw new InternalServerError(INTERNAL_SERVER_ERROR);
   }
 };
 
