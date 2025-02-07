@@ -281,6 +281,24 @@ describe("Extension Requests", function () {
         });
     });
 
+    it("should return 5 extension requests by default when size query is not provided", function (done) {
+      chai
+        .request(app)
+        .get(`/extension-requests`)
+        .set("cookie", `${cookieName}=${appOwnerjwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal("Extension Requests returned successfully!");
+          expect(res.body.allExtensionRequests).to.be.a("array");
+          expect(res.body.allExtensionRequests).to.have.lengthOf(5);
+          return done();
+        });
+    });
+
     it("should return success response and all extension requests with query params", function (done) {
       chai
         .request(app)
