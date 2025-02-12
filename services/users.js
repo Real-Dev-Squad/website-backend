@@ -59,9 +59,8 @@ const generateUniqueUsername = async (firstName, lastName) => {
  * @returns Promise<object>
  */
 const findUserById = async (userId) => {
-  let result;
   try {
-    result = await dataAccess.retrieveUsers({ id: userId });
+    const result = await dataAccess.retrieveUsers({ id: userId });
     if (!result.userExists) {
       throw NotFound("User doesn't exist");
     }
@@ -119,10 +118,9 @@ const getUsersByUnmergedPrs = async (days) => {
  * @returns Promise<object>
  */
 const getUserByDiscordId = async (discordId) => {
-  let result, user;
   try {
-    result = await dataAccess.retrieveUsers({ discordId });
-    user = result.user;
+    const result = await dataAccess.retrieveUsers({ discordId });
+    const user = result.user;
     if (!result.userExists) {
       return null;
     }
@@ -131,11 +129,11 @@ const getUserByDiscordId = async (discordId) => {
     if (userStatusResult.userStatusExists) {
       user.state = userStatusResult.data.currentStatus.state;
     }
+    return user;
   } catch (error) {
     logger.error(`Error while fetching user: ${error}`);
     throw error;
   }
-  return user;
 };
 
 /**

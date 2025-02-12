@@ -105,14 +105,15 @@ const getUsers = async (req, res) => {
 
     if (id) {
       const user = await userService.findUserById(id);
-      return res.json({
+      return res.status(200).json({
         message: "User returned successfully!",
         user: user,
       });
     }
 
     if (profile) {
-      return res.send(await userService.getUserByProfileData(userData));
+      const user = await userService.getUserByProfileData(userData);
+      return res.status(200).send(user);
     }
 
     if (!transformedQuery?.days && transformedQuery?.filterBy === "unmerged_prs") {
@@ -121,7 +122,7 @@ const getUsers = async (req, res) => {
 
     if (filterBy === "unmerged_prs" && days) {
       const users = await userService.getUsersByUnmergedPrs(days);
-      return res.json({
+      return res.status(200).json({
         message: "Inactive users returned successfully!",
         count: users.length,
         users: users,
@@ -131,7 +132,7 @@ const getUsers = async (req, res) => {
     if (discordId) {
       if (dev) {
         const user = await userService.getUserByDiscordId(discordId);
-        return res.json({
+        return res.status(200).json({
           message: user ? "User returned successfully!" : "User not found",
           user: user,
         });
@@ -146,7 +147,7 @@ const getUsers = async (req, res) => {
       }
       const { result, departedUsers } = await userService.getDepartedUsers(reqQueryObject);
       if (departedUsers.length === 0) return res.status(204).send();
-      return res.json({
+      return res.status(200).json({
         message: "Users with abandoned tasks fetched successfully",
         users: departedUsers,
         links: {
@@ -159,12 +160,12 @@ const getUsers = async (req, res) => {
     if (filterBy === OVERDUE_TASKS) {
       const users = await userService.getUsersByOverDueTasks(days, dev);
       if (!users || users.length === 0) {
-        return res.json({
+        return res.status(200).json({
           message: "No users found",
           users: [],
         });
       }
-      return res.json({
+      return res.status(200).json({
         message: "Users returned successfully!",
         count: users.length,
         users: users,
@@ -175,7 +176,7 @@ const getUsers = async (req, res) => {
       const allPRs = await getFilteredPRsOrIssues(qualifiers);
       const usernames = getUsernamesFromPRs(allPRs);
       const users = await dataAccess.retrieveUsers({ usernames: usernames });
-      return res.json({
+      return res.status(200).json({
         message: "Users returned successfully!",
         users,
       });
@@ -183,7 +184,7 @@ const getUsers = async (req, res) => {
 
     const data = await dataAccess.retrieveUsers({ query: reqQueryObject });
 
-    return res.json({
+    return res.status(200).json({
       message: "Users returned successfully!",
       users: data.users,
       links: {
@@ -192,17 +193,16 @@ const getUsers = async (req, res) => {
       },
     });
   } catch (e) {
-    if (e instanceof NotFound) {
-      return res.boom.notFound(e.message);
+    switch (true) {
+      case e instanceof NotFound:
+        return res.boom.notFound(e.message);
+      case e instanceof BadRequest:
+        return res.boom.badRequest(e.message);
+      case e instanceof InternalServerError:
+        return res.boom.internal(e.message);
+      default:
+        return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
     }
-    if (e instanceof BadRequest) {
-      return res.boom.BadRequest(e.message);
-    }
-    if (e instanceof InternalServerError) {
-      return res.boom.internal(e.message);
-    }
-
-    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
 
