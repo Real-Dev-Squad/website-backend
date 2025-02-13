@@ -212,61 +212,7 @@ describe("Test Progress Updates API for Tasks", function () {
               "type",
               "completed",
               "planned",
-              "blockers",
-              "userId",
-              "createdAt",
-              "date",
-            ]);
-          });
-          return done();
-        });
-    });
-
-    it("Returns the progress array for the task with userData object", function (done) {
-      chai
-        .request(app)
-        .get(`/progresses?taskId=${taskId1}&dev=true`)
-        .end((err, res) => {
-          if (err) return done(err);
-          expect(res).to.have.status(200);
-          expect(res.body).to.have.keys(["message", "data", "count", "links"]);
-          expect(res.body.data).to.be.an("array");
-          expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
-          res.body.data.forEach((progress) => {
-            expect(progress).to.have.keys([
-              "id",
-              "taskId",
-              "type",
-              "completed",
-              "planned",
-              "blockers",
               "userData",
-              "userId",
-              "createdAt",
-              "date",
-            ]);
-          });
-          return done();
-        });
-    });
-
-    it("Returns the progress array for the task without userData field if dev is false", function (done) {
-      chai
-        .request(app)
-        .get(`/progresses?taskId=${taskId1}&dev=false`)
-        .end((err, res) => {
-          if (err) return done(err);
-          expect(res).to.have.status(200);
-          expect(res.body).to.have.keys(["message", "data", "count"]);
-          expect(res.body.data).to.be.an("array");
-          expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
-          res.body.data.forEach((progress) => {
-            expect(progress).to.have.keys([
-              "id",
-              "taskId",
-              "type",
-              "completed",
-              "planned",
               "blockers",
               "userId",
               "createdAt",
@@ -371,36 +317,8 @@ describe("Test Progress Updates API for Tasks", function () {
               "type",
               "completed",
               "planned",
-              "blockers",
-              "userId",
-              "createdAt",
-              "date",
-            ]);
-          });
-          return done();
-        });
-    });
-
-    it("Returns the progress array for all the tasks with userData object", function (done) {
-      chai
-        .request(app)
-        .get(`/progresses?type=task&dev=true`)
-        .end((err, res) => {
-          if (err) return done(err);
-          expect(res).to.have.status(200);
-          expect(res.body).to.have.keys(["message", "data", "count", "links"]);
-          expect(res.body.data).to.be.an("array");
-          expect(res.body.message).to.be.equal("Progress document retrieved successfully.");
-          expect(res.body.count).to.be.equal(4);
-          res.body.data.forEach((progress) => {
-            expect(progress).to.have.keys([
-              "id",
-              "taskId",
-              "type",
-              "completed",
-              "planned",
-              "blockers",
               "userData",
+              "blockers",
               "userId",
               "createdAt",
               "date",
@@ -681,6 +599,7 @@ describe("Test Progress Updates API for Tasks", function () {
               "planned",
               "blockers",
               "userId",
+              "userData",
               "taskId",
               "createdAt",
               "date",

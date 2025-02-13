@@ -50,15 +50,11 @@ const createProgressDocument = async (progressData) => {
  * @throws {Error} If the userId or taskId is invalid or does not exist.
  **/
 const getProgressDocument = async (queryParams) => {
-  const { dev } = queryParams;
   await assertUserOrTaskExists(queryParams);
   const query = buildQueryToFetchDocs(queryParams);
   const progressDocs = await getProgressDocs(query);
 
-  if (dev === "true") {
-    return await addUserDetailsToProgressDocs(progressDocs);
-  }
-  return progressDocs;
+  return await addUserDetailsToProgressDocs(progressDocs);
 };
 
 /**
