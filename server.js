@@ -76,4 +76,4 @@ function onListening() {
   logger.info(`Express API running on port:${port} with environment:${process.env.NODE_ENV}`);
 }
 
-module.exports = server;
+export default server;
