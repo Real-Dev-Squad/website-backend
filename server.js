@@ -1,11 +1,11 @@
 /**
  * Initialise globals
  */
-const config = require("config");
-global.config = config;
+import { logger } from "./utils/logger";
 
-const logger = require("./utils/logger");
-global.logger = logger;
+const config = require("config");
+globalThis.config = config;
+globalThis.logger = logger;
 
 logger.info(`Initialising newrelic with app name:: ${config.get("integrations.newrelic.appName")}`);
 // Initialise newrelic
