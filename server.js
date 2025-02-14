@@ -4,8 +4,8 @@
 import { logger } from "./utils/logger";
 
 const config = require("config");
-globalThis.config = config;
-globalThis.logger = logger;
+global.config = config;
+global.logger = logger;
 
 logger.info(`Initialising newrelic with app name:: ${config.get("integrations.newrelic.appName")}`);
 // Initialise newrelic

@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import config from "config";
 const externalServicePublicKey: jwt.Secret = config.get("externalServices.EXTERNAL_SERVICE_PUBLIC_KEY");
 
 export const verifyAuthToken = async (token: string) => {

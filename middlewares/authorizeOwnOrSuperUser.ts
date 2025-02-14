@@ -11,6 +11,7 @@
 
 import { NextFunction } from "express";
 import { CustomRequest, CustomResponse } from "../types/global";
+import { logger } from "../utils/logger";
 
 const authorizeOwnOrSuperUser = (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
   try {
