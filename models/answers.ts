@@ -2,6 +2,7 @@ const admin = require("firebase-admin");
 const firestore = require("../utils/firestore");
 const answerModel = firestore.collection("answers");
 import { Answer, AnswerBody, AnswerFieldsToUpdate } from "../typeDefinitions/answers";
+import { logger } from "../utils/logger";
 const { ANSWER_STATUS } = require("../constants/answers");
 
 const createAnswer = async (answerData: AnswerBody) => {

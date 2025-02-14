@@ -7,6 +7,7 @@ import addUser from "../utils/addUser";
 import cleanDb from "../utils/cleanDb";
 const ROLES = require("../../constants/roles");
 const { Services, CLOUDFLARE_WORKER, CRON_JOB_HANDLER } = require("../../constants/bot");
+import config from "config";
 const cookieName = config.get("userToken.cookieName");
 const express = require("express");
 const router = express.Router();

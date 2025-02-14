@@ -8,6 +8,7 @@ import { fetchIssuesById } from "../services/githubService";
 import { CustomResponse } from "../typeDefinitions/global";
 import { userData } from "../types/global";
 import { TaskRequestRequest } from "../types/taskRequests";
+import { logger } from "../utils/logger";
 
 export const createTaskRequestController = async (req: TaskRequestRequest, res: CustomResponse) => {
   const taskRequestData = req.body;

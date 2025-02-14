@@ -1,4 +1,5 @@
 import { application } from "../types/application";
+import { logger } from "../utils/logger";
 const firestore = require("../utils/firestore");
 const ApplicationsModel = firestore.collection("applicants");
 

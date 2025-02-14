@@ -3,6 +3,7 @@ import discordActions from "../models/discordactions";
 import { addLog } from "../models/logs";
 import discordServices from "../services/discordService";
 import { userData } from "../types/global";
+import { logger } from "./logger";
 
 /**
  * Removes a Discord role from a user using Discord Id.

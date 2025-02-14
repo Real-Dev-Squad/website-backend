@@ -1,6 +1,7 @@
 import { addLog } from "../models/logs";
 const { logType } = require("../constants/logs");
 import { CustomRequest, CustomResponse } from "../types/global";
+import { logger } from "../utils/logger";
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const ApplicationModel = require("../models/applications");
 const { API_RESPONSE_MESSAGES } = require("../constants/application");

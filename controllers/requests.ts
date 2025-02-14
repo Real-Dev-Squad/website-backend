@@ -18,6 +18,7 @@ import { createOnboardingExtensionRequestController, updateOnboardingExtensionRe
 import { UpdateOnboardingExtensionRequest } from "../types/onboardingExtension";
 
 import { Request } from "express";
+import { logger } from "../utils/logger";
 
 export const createRequestController = async (
   req: OooRequestCreateRequest | ExtensionRequestRequest | TaskRequestRequest | OnboardingExtensionCreateRequest,

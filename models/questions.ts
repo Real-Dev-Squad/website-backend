@@ -1,6 +1,7 @@
 const admin = require("firebase-admin");
 
 import { Question, QuestionBody } from "../types/questions";
+import { logger } from "../utils/logger";
 
 const firestore = require("../utils/firestore");
 

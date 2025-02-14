@@ -1,5 +1,6 @@
 import { PROFILE_SVC_GITHUB_URL } from "../constants/urls";
 import {addUserToGroup, createUser, fetchAwsUserIdByUsername} from "../utils/awsFunctions";
+import { logger } from "../utils/logger";
 const dataAccess = require("../services/dataAccessLayer");
 const userDataLevels = require('../constants/userDataLevels');
 
