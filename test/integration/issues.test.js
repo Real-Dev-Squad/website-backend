@@ -1,8 +1,8 @@
+import app from "../../server";
 const chai = require("chai");
 const sinon = require("sinon");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
-const app = require("../../server");
 const cleanDb = require("../utils/cleanDb");
 const githubService = require("../../services/githubService");
 const issuesMockData = require("../fixtures/issues/issues");

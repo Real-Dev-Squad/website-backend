@@ -3,7 +3,7 @@ const sinon = require("sinon");
 const config = require("config");
 const chaiHttp = require("chai-http");
 
-const app = require("../../server");
+import app from "../../server";
 const authService = require("../../services/authService");
 const addUser = require("../utils/addUser");
 const cleanDb = require("../utils/cleanDb");

@@ -1,9 +1,9 @@
+import app from "../../server";
 const chai = require("chai");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
 
 const firestore = require("../../utils/firestore");
-const app = require("../../server");
 const authService = require("../../services/authService");
 const addUser = require("../utils/addUser");
 const profileDiffs = require("../../models/profileDiffs");

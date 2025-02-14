@@ -1,7 +1,7 @@
+import app from "../../server";
 const chai = require("chai");
 const sinon = require("sinon");
 const { expect } = chai;
-const app = require("../../server");
 const cleanDb = require("../utils/cleanDb");
 const userData = require("../fixtures/user/user")();
 const { userDeviceInfoDataArray } = require("../fixtures/qrCodeAuth/qrCodeAuth");

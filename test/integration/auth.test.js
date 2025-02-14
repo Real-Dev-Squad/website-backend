@@ -1,9 +1,9 @@
+import app from "../../server";
 const chai = require("chai");
 const sinon = require("sinon");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
 const passport = require("passport");
-const app = require("../../server");
 const cleanDb = require("../utils/cleanDb");
 const { generateGithubAuthRedirectUrl } = require("..//utils/github");
 const { generateGoogleAuthRedirectUrl, stubPassportAuthenticate } = require("..//utils/googleauth");

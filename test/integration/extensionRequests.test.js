@@ -1,9 +1,9 @@
+import app from "../../server";
 const chai = require("chai");
 const sinon = require("sinon");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
 const logsQuery = require("../../models/logs");
-const app = require("../../server");
 const extensionRequests = require("../../models/extensionRequests");
 const tasks = require("../../models/tasks");
 const authService = require("../../services/authService");

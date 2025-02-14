@@ -1,7 +1,7 @@
+import app from "../../server";
 const chai = require("chai");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
-const app = require("../../server");
 const cleanDb = require("../utils/cleanDb");
 const bot = require("../utils/generateBotToken");
 const addUser = require("../utils/addUser");

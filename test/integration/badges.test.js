@@ -1,4 +1,4 @@
-const app = require("../../server");
+import app from "../../server";
 const chai = require("chai");
 const chaiHttp = require("chai-http");
 const sinon = require("sinon");
