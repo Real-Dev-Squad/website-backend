@@ -75,7 +75,7 @@ describe("/requests Onboarding Extension", () => {
 
         it("should not call verifyDiscordBot and return 401 response when extension type is not onboarding", (done)=> {
             chai.request(app)
-            .post(`${postEndpoint}?dev=true`)
+            .post(postEndpoint)
             .send({...body, type: REQUEST_TYPE.OOO})
             .end((err, res)=>{
                 if(err) return done(err);
@@ -86,22 +86,10 @@ describe("/requests Onboarding Extension", () => {
             })
         })
 
-        it("should return Feature not implemented when dev is not true", (done) => {
-            chai.request(app)
-            .post(`${postEndpoint}`)
-            .send(body)
-            .end((err, res)=>{
-                if (err) return done(err);
-                expect(res.statusCode).to.equal(501);
-                expect(res.body.message).to.equal("Feature not implemented");
-                done();
-            })
-        })
-    
         it("should return Invalid Request when authorization header is missing", (done) => {
             chai
             .request(app)
-            .post(`${postEndpoint}?dev=true`)
+            .post(postEndpoint)
             .set("authorization", "")
             .send(body)
             .end((err, res) => {
@@ -114,7 +102,7 @@ describe("/requests Onboarding Extension", () => {
     
         it("should return Unauthorized Bot for invalid token", (done) => {
             chai.request(app)
-            .post(`${postEndpoint}?dev=true`)
+            .post(postEndpoint)
             .set("authorization", `Bearer ${BAD_TOKEN}`)
             .send(body)
             .end((err, res) => {
@@ -127,7 +115,7 @@ describe("/requests Onboarding Extension", () => {
     
         it("should return 400 response for invalid value type of numberOfDays", (done) => {
             chai.request(app)
-            .post(`${postEndpoint}?dev=true`)
+            .post(postEndpoint)
             .set("authorization", `Bearer ${botToken}`)
             .send({...body, numberOfDays:"1"})
             .end((err, res) => {
@@ -141,7 +129,7 @@ describe("/requests Onboarding Extension", () => {
     
         it("should return 400 response for invalid value of numberOfDays", (done) => {
             chai.request(app)
-            .post(`${postEndpoint}?dev=true`)
+            .post(postEndpoint)
             .set("authorization", `Bearer ${botToken}`)
             .send({...body, numberOfDays:1.4})
             .end((err, res) => {
@@ -155,7 +143,7 @@ describe("/requests Onboarding Extension", () => {
     
         it("should return 400 response for invalid userId", (done) => {
             chai.request(app)
-            .post(`${postEndpoint}?dev=true`)
+            .post(postEndpoint)
             .set("authorization", `Bearer ${botToken}`)
             .send({...body, userId: undefined})
             .end((err, res) => {
@@ -172,7 +160,7 @@ describe("/requests Onboarding Extension", () => {
             sinon.stub(requestsQuery, "createRequest")
             .throws("Error while creating extension request");
             chai.request(app)
-            .post(`${postEndpoint}?dev=true`)
+            .post(postEndpoint)
             .set("authorization", `Bearer ${botToken}`)
             .send(body)
             .end((err, res)=>{
@@ -186,7 +174,7 @@ describe("/requests Onboarding Extension", () => {
         it("should return 500 response when discordJoinedAt date string is invalid", (done) => {
             createUserStatusWithState(testUserIdForInvalidDiscordJoinedDate, userStatusModel, userState.ONBOARDING);
             chai.request(app)
-            .post(`${postEndpoint}?dev=true`)
+            .post(postEndpoint)
             .set("authorization", `Bearer ${botToken}`)
             .send({...body, userId: testUserDiscordIdForInvalidDiscordJoinedDate})
             .end((err, res)=>{
@@ -199,7 +187,7 @@ describe("/requests Onboarding Extension", () => {
 
         it("should return 404 response when user does not exist", (done) => {
             chai.request(app)
-            .post(`${postEndpoint}?dev=true`)
+            .post(postEndpoint)
             .set("authorization", `Bearer ${botToken}`)
             .send({...body, userId: "11111"})
             .end((err, res) => {
@@ -214,7 +202,7 @@ describe("/requests Onboarding Extension", () => {
         it("should return 403 response when user's status is not onboarding", (done)=> {
             createUserStatusWithState(testUserId, userStatusModel, userState.ACTIVE);
             chai.request(app)
-            .post(`${postEndpoint}?dev=true`)
+            .post(postEndpoint)
             .set("authorization", `Bearer ${botToken}`)
             .send(body)
             .end((err, res) => {
@@ -231,7 +219,7 @@ describe("/requests Onboarding Extension", () => {
             requestsQuery.createRequest({...extensionRequest, state: REQUEST_STATE.PENDING, userId: testUserId});
     
             chai.request(app)
-            .post(`${postEndpoint}?dev=true`)
+            .post(postEndpoint)
             .set("authorization", `Bearer ${botToken}`)
             .send(body)
             .end((err, res) => {
@@ -246,7 +234,7 @@ describe("/requests Onboarding Extension", () => {
         it("should return 201 for successful response when user has onboarding state", (done)=> {
             createUserStatusWithState(testUserId, userStatusModel, userState.ONBOARDING);
             chai.request(app)
-            .post(`${postEndpoint}?dev=true`)
+            .post(postEndpoint)
             .set("authorization", `Bearer ${botToken}`)
             .send(body)
             .end((err, res) => {
@@ -271,7 +259,7 @@ describe("/requests Onboarding Extension", () => {
             });
 
             const res = await chai.request(app)
-            .post(`${postEndpoint}?dev=true`)
+            .post(postEndpoint)
             .set("authorization", `Bearer ${botToken}`)
             .send(body);
 
@@ -296,7 +284,7 @@ describe("/requests Onboarding Extension", () => {
             });
             
             const res = await chai.request(app)
-            .post(`${postEndpoint}?dev=true`)
+            .post(postEndpoint)
             .set("authorization", `Bearer ${botToken}`)
             .send(body);
 
@@ -418,7 +406,7 @@ describe("/requests Onboarding Extension", () => {
                 type: REQUEST_TYPE.ONBOARDING, 
                 requestNumber: 2
             });
-            putEndpoint = `/requests/${latestExtension.id}?dev=true`;
+            putEndpoint = `/requests/${latestExtension.id}`;
             authToken = generateAuthToken({userId});
         })
 
@@ -443,7 +431,7 @@ describe("/requests Onboarding Extension", () => {
 
         it("should return Invalid request type for incorrect value of type", (done) => {
             chai.request(app)
-            .put("/requests/1111?dev=true")
+            .put("/requests/1111")
             .set("authorization", `Bearer ${authToken}`)
             .send({...body, type: "<InvalidType>"})
             .end((err, res)=>{
@@ -451,19 +439,6 @@ describe("/requests Onboarding Extension", () => {
                 expect(res.statusCode).to.equal(400);
                 expect(res.body.error).to.equal("Bad Request");
                 expect(res.body.message).to.equal('"type" must be one of [OOO, EXTENSION, ONBOARDING]');
-                done();
-            })
-        })
-
-        it("should return Feature not implemented when dev is not true", (done) => {
-            chai.request(app)
-            .put(`/requests/1111?dev=false`)
-            .send(body)
-            .set("authorization", `Bearer ${authToken}`)
-            .end((err, res)=>{
-                if (err) return done(err);
-                expect(res.statusCode).to.equal(501);
-                expect(res.body.message).to.equal("Feature not implemented");
                 done();
             })
         })
@@ -510,7 +485,7 @@ describe("/requests Onboarding Extension", () => {
 
         it("should return 404 response for invalid extension id", (done) => {
             chai.request(app)
-            .put(`/requests/1111?dev=true`)
+            .put(`/requests/1111`)
             .set("authorization", `Bearer ${authToken}`)
             .send(body)
             .end((err, res) => {
@@ -538,7 +513,7 @@ describe("/requests Onboarding Extension", () => {
 
         it("should return 400 response when extension state is approved", (done) => {
             chai.request(app)
-            .put(`/requests/${latestApprovedExtension.id}?dev=true`)
+            .put(`/requests/${latestApprovedExtension.id}`)
             .set("authorization", `Bearer ${authToken}`)
             .send(body)
             .end((err, res) => {
@@ -552,7 +527,7 @@ describe("/requests Onboarding Extension", () => {
 
         it("should return 400 response when extension state is rejected", (done) => {
             chai.request(app)
-            .put(`/requests/${latestRejectedExtension.id}?dev=true`)
+            .put(`/requests/${latestRejectedExtension.id}`)
             .set("authorization", `Bearer ${authToken}`)
             .send(body)
             .end((err, res) => {
@@ -646,7 +621,7 @@ describe("/requests Onboarding Extension", () => {
                 userId: userId
             });
             oooRequest = await requestsQuery.createRequest({type: REQUEST_TYPE.OOO, userId: userId});
-            patchEndpoint = `/requests/${latestValidExtension.id}?dev=true`;
+            patchEndpoint = `/requests/${latestValidExtension.id}`;
             authToken = generateAuthToken({userId});
         })
             
@@ -665,19 +640,6 @@ describe("/requests Onboarding Extension", () => {
                 expect(res.statusCode).to.equal(400);
                 expect(res.body.error).to.equal("Bad Request");
                 expect(res.body.message).to.equal("Invalid type");
-                done();
-            })
-        })
-
-        it("should return Feature not implemented when dev is not true", (done) => {
-            chai.request(app)
-            .patch(`/requests/1111?dev=false`)
-            .send(body)
-            .set("authorization", `Bearer ${authToken}`)
-            .end((err, res)=>{
-                if (err) return done(err);
-                expect(res.statusCode).to.equal(501);
-                expect(res.body.message).to.equal("Feature not implemented");
                 done();
             })
         })
@@ -725,7 +687,7 @@ describe("/requests Onboarding Extension", () => {
 
         it("should return 404 response for invalid extension id", (done) => {
             chai.request(app)
-            .patch(`/requests/1111?dev=true`)
+            .patch(`/requests/1111`)
             .set("authorization", `Bearer ${authToken}`)
             .send(body)
             .end((err, res) => {
@@ -753,7 +715,7 @@ describe("/requests Onboarding Extension", () => {
 
         it("should return 400 response when request type is not onboarding", (done) => {
             chai.request(app)
-            .patch(`/requests/${oooRequest.id}?dev=true`)
+            .patch(`/requests/${oooRequest.id}`)
             .set("authorization", `Bearer ${authToken}`)
             .send(body)
             .end((err, res) => {
@@ -767,7 +729,7 @@ describe("/requests Onboarding Extension", () => {
 
         it("should return 400 response when extension state is not pending", (done) => {
             chai.request(app)
-            .patch(`/requests/${latestApprovedExtension.id}?dev=true`)
+            .patch(`/requests/${latestApprovedExtension.id}`)
             .set("authorization", `Bearer ${authToken}`)
             .send(body)
             .end((err, res) => {
@@ -781,7 +743,7 @@ describe("/requests Onboarding Extension", () => {
 
         it("should return 400 response when old dealdine is greater than new deadline", (done) => {
             chai.request(app)
-            .patch(`/requests/${latestInvalidExtension.id}?dev=true`)
+            .patch(`/requests/${latestInvalidExtension.id}`)
             .set("authorization", `Bearer ${authToken}`)
             .send(body)
             .end((err, res) => {
