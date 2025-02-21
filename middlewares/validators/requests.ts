@@ -1,8 +1,8 @@
 import joi from "joi";
 import { NextFunction } from "express";
 import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/requests";
-import { OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
-import { createOooStatusRequestValidator } from "./oooRequests";
+import { AcknowledgeOOORequest, OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
+import { acknowledgeOOORequestsValidator, createOooStatusRequestValidator } from "./oooRequests";
 import { createExtensionRequestValidator } from "./extensionRequestsv2";
 import {createTaskRequestValidator} from "./taskRequests";
 import { ExtensionRequestRequest, ExtensionRequestResponse } from "../../types/extensionRequests";
@@ -131,11 +131,17 @@ export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: O
  * @returns {Promise<void>} Resolves or sends errors.
  */
 export const updateRequestValidator = async (
-  req: UpdateOnboardingExtensionRequest,
+  req: UpdateOnboardingExtensionRequest | AcknowledgeOOORequest,
   res: CustomResponse,
   next: NextFunction
   ): Promise<void> => {
   const type = req.body.type;
+
+  if (type === undefined) {
+    await acknowledgeOOORequestsValidator(req, res as OooRequestResponse, next);
+    return;
+  }
+
   switch (type) {
       case REQUEST_TYPE.ONBOARDING:
           await updateOnboardingExtensionRequestValidator(

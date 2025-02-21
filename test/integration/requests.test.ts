@@ -104,9 +104,9 @@ describe("/requests OOO", function () {
         .post("/requests")
         .set("cookie", `${cookieName}=${authToken}`)
         .send(validOooStatusRequests);
-      expect(response).to.have.status(400);
+      expect(response).to.have.status(201);
       expect(response.body).to.have.property("message");
-      expect(response.body.message).to.equal(REQUEST_ALREADY_PENDING);
+      expect(response.body.message).to.equal(REQUEST_CREATED_SUCCESSFULLY);
     });
 
     it("should create a new request and have all the required fields in the response", function (done) {

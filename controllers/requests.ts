@@ -5,8 +5,8 @@ import {
 } from "../constants/requests";
 import { getRequests } from "../models/requests";
 import { getPaginatedLink } from "../utils/helper";
-import { createOooRequestController, updateOooRequestController } from "./oooRequests";
-import { OooRequestCreateRequest, OooRequestResponse } from "../types/oooRequest";
+import { acknowledgeOOORequestController, createOooRequestController, updateOooRequestController } from "./oooRequests";
+import { AcknowledgeOOORequest, OooRequestCreateRequest, OooRequestResponse } from "../types/oooRequest";
 import { CustomResponse } from "../typeDefinitions/global";
 import { ExtensionRequestRequest, ExtensionRequestResponse } from "../types/extensionRequests";
 import { createTaskExtensionRequest, updateTaskExtensionRequest } from "./extensionRequestsv2";
@@ -16,8 +16,7 @@ import { createTaskRequestController } from "./taskRequestsv2";
 import { OnboardingExtensionCreateRequest, OnboardingExtensionResponse, UpdateOnboardingExtensionStateRequest } from "../types/onboardingExtension";
 import { createOnboardingExtensionRequestController, updateOnboardingExtensionRequestController, updateOnboardingExtensionRequestState } from "./onboardingExtension";
 import { UpdateOnboardingExtensionRequest } from "../types/onboardingExtension";
-
-import { Request } from "express";
+import { NextFunction, Request } from "express";
 
 export const createRequestController = async (
   req: OooRequestCreateRequest | ExtensionRequestRequest | TaskRequestRequest | OnboardingExtensionCreateRequest,
@@ -121,8 +120,14 @@ export const getRequestsController = async (req: any, res: any) => {
  * @param {CustomResponse} res - The response object.
  * @returns {Promise<void>} Resolves or sends an error for invalid types.
  */
-export const updateRequestBeforeAcknowledgedController = async (req: Request, res: CustomResponse) => {
+export const updateRequestBeforeAcknowledgedController = async (req: Request, res: CustomResponse, next: NextFunction) => {
   const type = req.body.type;
+
+  if (type === undefined) {
+      await acknowledgeOOORequestController(req as AcknowledgeOOORequest, res as OooRequestResponse, next);
+      return;
+    }
+
   switch(type){
     case REQUEST_TYPE.ONBOARDING:
       await updateOnboardingExtensionRequestController(req as UpdateOnboardingExtensionRequest, res as OnboardingExtensionResponse);

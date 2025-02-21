@@ -1,7 +1,7 @@
 import joi from "joi";
 import { NextFunction } from "express";
 import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/requests";
-import { OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
+import { AcknowledgeOOORequest, OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
 
 export const createOooStatusRequestValidator = async (
   req: OooRequestCreateRequest,
@@ -37,4 +37,36 @@ export const createOooStatusRequestValidator = async (
     });
 
   await schema.validateAsync(req.body, { abortEarly: false });
+};
+
+export const acknowledgeOOORequestsValidator = async (
+  req: AcknowledgeOOORequest,
+  res: OooRequestResponse,
+  next: NextFunction
+) => {
+  const schema = joi
+  .object()
+  .strict()
+  .keys({
+    comment: joi.string().optional()
+      .messages({
+        "string.empty": "comment cannot be empty",
+      }),
+    status: joi
+      .string()
+      .valid(REQUEST_STATE.APPROVED, REQUEST_STATE.REJECTED)
+      .required()
+      .messages({
+        "any.only": "status must be APPROVED or REJECTED",
+      })
+  });
+
+  try {
+    await schema.validateAsync(req.body, { abortEarly: false });
+    next();
+  } catch (error) {
+    const errorMessages = error.details.map((detail:any) => detail.message);
+    logger.error(`Error while validating request payload : ${errorMessages}`);
+    res.boom.badRequest(errorMessages);
+  }
 };
