@@ -25,6 +25,8 @@ export const REQUEST_LOG_TYPE = {
   REQUEST_BLOCKED: "REQUEST_BLOCKED",
   REQUEST_CANCELLED: "REQUEST_CANCELLED",
   REQUEST_UPDATED: "REQUEST_UPDATED",
+  REQUEST_ALREADY_APPROVED: "REQUEST_ALREADY_APPROVED",
+  REQUEST_ALREADY_REJECTED: "REQUEST_ALREADY_REJECTED",
 };
 
 export const REQUEST_CREATED_SUCCESSFULLY = "Request created successfully";
@@ -41,6 +43,7 @@ export const ERROR_WHILE_UPDATING_REQUEST = "Error while updating request";
 
 export const REQUEST_DOES_NOT_EXIST = "Request does not exist";
 export const REQUEST_ALREADY_PENDING = "Request already exists please wait for approval or rejection";
+export const UNAUTHORIZED_TO_ACKNOWLEDGE_OOO_REQUEST = "Only super users are allowed to acknowledge OOO requests";
 
 export const TASK_REQUEST_MESSAGES = {
   NOT_AUTHORIZED_TO_CREATE_REQUEST: "Not authorized to create the request",
