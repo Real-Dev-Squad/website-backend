@@ -41,6 +41,10 @@ export const ERROR_WHILE_UPDATING_REQUEST = "Error while updating request";
 
 export const REQUEST_DOES_NOT_EXIST = "Request does not exist";
 export const REQUEST_ALREADY_PENDING = "Request already exists please wait for approval or rejection";
+export const UNAUTHORIZED_TO_CREATE_OOO_REQUEST = "Not authorized to create an OOO request";
+export const ONLY_DISCORD_USER_CREATE_OOO_REQUEST = "Only discord user can create an OOO request";
+export const USER_STATUS_NOT_FOUND = "User status not found";
+export const OOO_STATUS_ALREADY_EXIST = "Your status is already OOO. Please cancel OOO to raise new one";
 
 export const TASK_REQUEST_MESSAGES = {
   NOT_AUTHORIZED_TO_CREATE_REQUEST: "Not authorized to create the request",

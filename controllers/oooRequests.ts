@@ -9,32 +9,67 @@ import {
   ERROR_WHILE_UPDATING_REQUEST,
   REQUEST_APPROVED_SUCCESSFULLY,
   REQUEST_REJECTED_SUCCESSFULLY,
+  OOO_STATUS_ALREADY_EXIST,
+  UNAUTHORIZED_TO_CREATE_OOO_REQUEST,
+  ONLY_DISCORD_USER_CREATE_OOO_REQUEST,
+  USER_STATUS_NOT_FOUND,
 } from "../constants/requests";
-import { statusState } from "../constants/userStatus";
+import { statusState, userState } from "../constants/userStatus";
 import { addLog } from "../models/logs";
 import { createRequest, getRequestByKeyValues, getRequests, updateRequest } from "../models/requests";
 import { createUserFutureStatus } from "../models/userFutureStatus";
-import { addFutureStatus } from "../models/userStatus";
+import { addFutureStatus, getUserStatus } from "../models/userStatus";
 import { CustomResponse } from "../typeDefinitions/global";
-import { OooRequestCreateRequest, OooStatusRequest } from "../types/oooRequest";
+import { OooStatusRequestBody, OooRequestCreateRequest, OooStatusRequest } from "../types/oooRequest";
 import { UpdateRequest } from "../types/requests";
 
 export const createOooRequestController = async (req: OooRequestCreateRequest, res: CustomResponse) => {
-  const requestBody = req.body;
+  const requestBody = req.body as OooStatusRequestBody;
   const userId = req?.userData?.id;
+  const userName = req?.userData?.username;
+  const isUserPartOfDiscord = req?.userData?.roles?.in_discord;
+  const dev = req.query.dev === "true";
+
+  if(!dev) return res.boom.notImplemented("Feature not implemented");
 
   if (!userId) {
-    return res.boom.unauthorized();
+    return res.boom.unauthorized(UNAUTHORIZED_TO_CREATE_OOO_REQUEST);
+  }
+
+  if (!isUserPartOfDiscord) {
+    return res.boom.unauthorized(ONLY_DISCORD_USER_CREATE_OOO_REQUEST);
   }
 
   try {
-    const latestOooRequest:OooStatusRequest = await getRequestByKeyValues({ requestedBy: userId, type: REQUEST_TYPE.OOO , state: REQUEST_STATE.PENDING });
 
-    if (latestOooRequest && latestOooRequest.state === REQUEST_STATE.PENDING) {
-      return res.boom.badRequest(REQUEST_ALREADY_PENDING);
+    const { data: userStatus, userStatusExists } = await getUserStatus(userId);
+
+    if (!userStatusExists) {
+      return res.boom.notFound(USER_STATUS_NOT_FOUND);
     }
 
-    const requestResult = await createRequest({ requestedBy: userId, ...requestBody });
+    if (userStatus.currentStatus.state === userState.OOO) {
+      return res.boom.forbidden(OOO_STATUS_ALREADY_EXIST);
+    }
+
+    const latestOOORequest: OooStatusRequest = await getRequestByKeyValues({
+      userId: userId,
+      type: REQUEST_TYPE.OOO,
+      status: REQUEST_STATE.PENDING,
+    });
+
+    if (latestOOORequest) {
+      return res.boom.conflict(REQUEST_ALREADY_PENDING);
+    }
+
+    const requestResult = await createRequest({
+      requestedBy: userName,
+      userId: userId,
+      status: REQUEST_STATE.PENDING,
+      comment: null,
+      lastModifiedBy: null,
+      ...requestBody,
+    });
 
     const requestLog = {
       type: REQUEST_LOG_TYPE.REQUEST_CREATED,
@@ -50,10 +85,6 @@ export const createOooRequestController = async (req: OooRequestCreateRequest, r
 
     return res.status(201).json({
       message: REQUEST_CREATED_SUCCESSFULLY,
-      data: {
-        id: requestResult.id,
-        ...requestResult,
-      },
     });
   } catch (err) {
     logger.error(ERROR_WHILE_CREATING_REQUEST, err);
