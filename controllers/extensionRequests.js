@@ -105,7 +105,7 @@ const createTaskExtensionRequest = async (req, res) => {
  */
 const fetchExtensionRequests = async (req, res) => {
   try {
-    const { cursor, size, order } = req.query;
+    const { cursor, size = 5, order } = req.query;
     const { status, taskId, assignee } = parseQueryParams(req._parsedUrl.search);
     const { transformedSize, transformedStatus } = transformQuery(size, status);
 
