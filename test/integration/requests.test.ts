@@ -29,6 +29,7 @@ import {
 } from "../../constants/requests";
 import { updateTask } from "../../models/tasks";
 import { validTaskAssignmentRequest, validTaskCreqtionRequest } from "../fixtures/taskRequests/taskRequests";
+import { updateUserStatus } from "../../models/userStatus";
 
 const userData = userDataFixture();
 chai.use(chaiHttp);
@@ -43,6 +44,9 @@ let oooRequestData2: any;
 let testUserId: string;
 
 describe("/requests OOO", function () {
+
+  const postEndpoint = "/requests?dev=true";
+
   beforeEach(async function () {
     const userIdPromises = [addUser(userData[16]), addUser(userData[4])];
     const [userId, superUserId] = await Promise.all(userIdPromises);
@@ -61,6 +65,14 @@ describe("/requests OOO", function () {
 
     authToken = authService.generateAuthToken({ userId });
     superUserToken = authService.generateAuthToken({ userId: superUserId });
+
+    const userStatus = {
+      currentStatus: {
+        state: "ACTIVE"
+      }
+    };
+
+    await updateUserStatus(userId, userStatus);
   });
 
   afterEach(async function () {
@@ -71,7 +83,7 @@ describe("/requests OOO", function () {
     it("should return 401 if user is not logged in", function (done) {
       chai
         .request(app)
-        .post("/requests")
+        .post(postEndpoint)
         .send(validOooStatusRequests)
         .end(function (err, res) {
           expect(res).to.have.status(401);
@@ -82,7 +94,7 @@ describe("/requests OOO", function () {
     it("should create a new request", function (done) {
       chai
         .request(app)
-        .post("/requests")
+        .post(postEndpoint)
         .set("cookie", `${cookieName}=${authToken}`)
         .send(validOooStatusRequests)
         .end(function (err, res) {
@@ -93,18 +105,18 @@ describe("/requests OOO", function () {
         });
     });
 
-    it("should return 400, if already created request is created again", async function () {
+    it("should return 409, if already created request is created again", async function () {
       await chai
         .request(app)
-        .post("/requests")
+        .post(postEndpoint)
         .set("cookie", `${cookieName}=${authToken}`)
         .send(validOooStatusRequests);
       const response = await chai
         .request(app)
-        .post("/requests")
+        .post(postEndpoint)
         .set("cookie", `${cookieName}=${authToken}`)
         .send(validOooStatusRequests);
-      expect(response).to.have.status(400);
+      expect(response).to.have.status(409);
       expect(response.body).to.have.property("message");
       expect(response.body.message).to.equal(REQUEST_ALREADY_PENDING);
     });
@@ -112,17 +124,13 @@ describe("/requests OOO", function () {
     it("should create a new request and have all the required fields in the response", function (done) {
       chai
         .request(app)
-        .post("/requests")
+        .post(postEndpoint)
         .set("cookie", `${cookieName}=${authToken}`)
         .send(validOooStatusRequests)
         .end(function (err, res) {
           expect(res).to.have.status(201);
           expect(res.body).to.have.property("message");
-          expect(Object.keys(res.body.data)).to.have.lengthOf(9);
-          expect(res.body.data.until).to.be.above(res.body.data.from);
-          expect(res.body.data).to.have.property("requestedBy");
-          expect(res.body.data.type).to.equal(REQUEST_TYPE.OOO);
-          expect(res.body.data.state).to.equal(REQUEST_STATE.PENDING);
+          expect(Object.keys(res.body)).to.have.lengthOf(1);
           expect(res.body.message).to.equal(REQUEST_CREATED_SUCCESSFULLY);
           done();
         });
@@ -131,7 +139,7 @@ describe("/requests OOO", function () {
     it("should create a new request", function (done) {
       chai
         .request(app)
-        .post("/requests")
+        .post(postEndpoint)
         .set("cookie", `${cookieName}=${authToken}`)
         .send(validOooStatusRequests)
         .end(function (err, res) {
@@ -146,7 +154,7 @@ describe("/requests OOO", function () {
       const type = "ACTIVE";
       chai
         .request(app)
-        .post("/requests")
+        .post(postEndpoint)
         .set("cookie", `${cookieName}=${authToken}`)
         .send({ ...validOooStatusRequests, type })
         .end(function (err, res) {
@@ -157,30 +165,30 @@ describe("/requests OOO", function () {
         });
     });
 
-    it("should return error if message is not present in body", function (done) {
+    it("should return error if reason is not present in body", function (done) {
       chai
         .request(app)
-        .post("/requests")
+        .post(postEndpoint)
         .set("cookie", `${cookieName}=${authToken}`)
-        .send(_.omit(validOooStatusRequests, "message"))
+        .send(_.omit(validOooStatusRequests, "reason"))
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal("message is required");
+          expect(res.body.message).to.equal("reason is required");
           done();
         });
     });
 
-    it("should return error if state in the body is not PENDING", function (done) {
+    it("should return error if status is passed in request body", function (done) {
       chai
         .request(app)
-        .post("/requests")
+        .post(postEndpoint)
         .set("cookie", `${cookieName}=${authToken}`)
-        .send({ ...validOooStatusRequests, state: REQUEST_STATE.APPROVED })
+        .send({ ...validOooStatusRequests, status: REQUEST_STATE.APPROVED })
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal("state must be PENDING");
+          expect(res.body.message).to.equal(`"status" is not allowed`);
           done();
         });
     });
