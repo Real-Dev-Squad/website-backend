@@ -1,40 +1,33 @@
+import { NextFunction } from "express";
 import {
   REQUEST_LOG_TYPE,
   LOG_ACTION,
   REQUEST_CREATED_SUCCESSFULLY,
   ERROR_WHILE_CREATING_REQUEST,
-  REQUEST_ALREADY_PENDING,
   REQUEST_STATE,
   REQUEST_TYPE,
   ERROR_WHILE_UPDATING_REQUEST,
   REQUEST_APPROVED_SUCCESSFULLY,
   REQUEST_REJECTED_SUCCESSFULLY,
-  OOO_STATUS_ALREADY_EXIST,
-  UNAUTHORIZED_TO_CREATE_OOO_REQUEST,
   ONLY_DISCORD_USER_CREATE_OOO_REQUEST,
-  USER_STATUS_NOT_FOUND,
 } from "../constants/requests";
-import { statusState, userState } from "../constants/userStatus";
+import { statusState } from "../constants/userStatus";
 import { addLog } from "../models/logs";
-import { createRequest, getRequestByKeyValues, getRequests, updateRequest } from "../models/requests";
+import { getRequests, updateRequest } from "../models/requests";
 import { createUserFutureStatus } from "../models/userFutureStatus";
-import { addFutureStatus, getUserStatus } from "../models/userStatus";
+import { addFutureStatus } from "../models/userStatus";
+import { createOOORequest } from "../services/oooRequest";
 import { CustomResponse } from "../typeDefinitions/global";
-import { OooStatusRequestBody, OooRequestCreateRequest, OooStatusRequest } from "../types/oooRequest";
+import { OooStatusRequestBody, OooRequestCreateRequest } from "../types/oooRequest";
 import { UpdateRequest } from "../types/requests";
 
-export const createOooRequestController = async (req: OooRequestCreateRequest, res: CustomResponse) => {
+export const createOooRequestController = async (req: OooRequestCreateRequest, res: CustomResponse, next: NextFunction) => {
   const requestBody = req.body as OooStatusRequestBody;
-  const userId = req?.userData?.id;
-  const userName = req?.userData?.username;
-  const isUserPartOfDiscord = req?.userData?.roles?.in_discord;
+  const { id: userId, username } = req.userData;
+  const isUserPartOfDiscord = req.userData.roles.in_discord;
   const dev = req.query.dev === "true";
 
-  if(!dev) return res.boom.notImplemented("Feature not implemented");
-
-  if (!userId) {
-    return res.boom.unauthorized(UNAUTHORIZED_TO_CREATE_OOO_REQUEST);
-  }
+  if (!dev) return res.boom.notImplemented("Feature not implemented");
 
   if (!isUserPartOfDiscord) {
     return res.boom.unauthorized(ONLY_DISCORD_USER_CREATE_OOO_REQUEST);
@@ -42,53 +35,14 @@ export const createOooRequestController = async (req: OooRequestCreateRequest, r
 
   try {
 
-    const { data: userStatus, userStatusExists } = await getUserStatus(userId);
-
-    if (!userStatusExists) {
-      return res.boom.notFound(USER_STATUS_NOT_FOUND);
-    }
-
-    if (userStatus.currentStatus.state === userState.OOO) {
-      return res.boom.forbidden(OOO_STATUS_ALREADY_EXIST);
-    }
-
-    const latestOOORequest: OooStatusRequest = await getRequestByKeyValues({
-      userId: userId,
-      type: REQUEST_TYPE.OOO,
-      status: REQUEST_STATE.PENDING,
-    });
-
-    if (latestOOORequest) {
-      return res.boom.conflict(REQUEST_ALREADY_PENDING);
-    }
-
-    const requestResult = await createRequest({
-      requestedBy: userName,
-      userId: userId,
-      status: REQUEST_STATE.PENDING,
-      comment: null,
-      lastModifiedBy: null,
-      ...requestBody,
-    });
-
-    const requestLog = {
-      type: REQUEST_LOG_TYPE.REQUEST_CREATED,
-      meta: {
-        requestId: requestResult.id,
-        action: LOG_ACTION.CREATE,
-        userId: userId,
-        createdAt: Date.now(),
-      },
-      body: requestResult,
-    };
-    await addLog(requestLog.type, requestLog.meta, requestLog.body);
+    await createOOORequest(requestBody, username, userId);
 
     return res.status(201).json({
       message: REQUEST_CREATED_SUCCESSFULLY,
     });
   } catch (err) {
     logger.error(ERROR_WHILE_CREATING_REQUEST, err);
-    return res.boom.badImplementation(ERROR_WHILE_CREATING_REQUEST);
+    next(err);
   }
 };
 
