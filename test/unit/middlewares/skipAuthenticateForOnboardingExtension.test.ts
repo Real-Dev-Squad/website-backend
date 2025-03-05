@@ -25,18 +25,7 @@ describe("skipAuthenticateForOnboardingExtensionRequest Middleware", () => {
         assert.isTrue(verifyDiscordBot.notCalled, "verifyDiscordBot should not be called");
     });
 
-    it("should not call verifyDicordBot and authenticate when dev is not true and type is onboarding", async () => {
-        req.query.dev = "false";
-        req.body.type = REQUEST_TYPE.ONBOARDING;
-
-        middleware(req, res, next);
-
-        assert.isTrue(verifyDiscordBot.notCalled, "verifyDiscordBot should not be called");
-        assert.isTrue(authenticate.notCalled, "authenticate should not be called");
-    });
-
-    it("should call verifyDiscordBot when dev is true and type is onboarding", () => {
-        req.query.dev = "true";
+    it("should call verifyDiscordBot when type is onboarding", async () => {
         req.body.type = REQUEST_TYPE.ONBOARDING;
 
         middleware(req, res, next);
