@@ -5,7 +5,7 @@ const { expect } = chai;
 import {
   createOooStatusRequestValidator,
 } from "./../../../middlewares/validators/oooRequests";
-import { validOooStatusRequests, validOooStatusUpdate } from "../../fixtures/oooRequest/oooRequest";
+import { validOooStatusRequests } from "../../fixtures/oooRequest/oooRequest";
 
 describe("OOO Status Request Validators", function () {
   let req: any;
@@ -42,15 +42,15 @@ describe("OOO Status Request Validators", function () {
       }
     });
 
-    it("should not validate for an invalid request on empty msg", async function () {
+    it("should not validate for an invalid request on empty reason", async function () {
       req = {
-        body: { ...validOooStatusRequests, message: "", type: "ACTIVE" },
+        body: { ...validOooStatusRequests, reason: "", type: "ACTIVE" },
       };
       try {
         await createOooStatusRequestValidator(req as any, res as any, nextSpy);
       } catch (error) {
         expect(error).to.be.an.instanceOf(Error);
-        expect(error.details[0].message).to.equal(`message cannot be empty`);
+        expect(error.details[0].message).to.equal(`reason cannot be empty`);
         expect(error.details[1].message).to.equal(`"type" must be [OOO]`);
       }
     });
@@ -61,19 +61,17 @@ describe("OOO Status Request Validators", function () {
           type: "OOO",
           from: null,
           until: null,
-          message: "",
-          state: "APPROVED",
+          reason: "",
         },
       };
       try {
         await createOooStatusRequestValidator(req as any, res as any, nextSpy);
       } catch (error) {
         expect(error).to.be.an.instanceOf(Error);
-        expect(error.details.length).to.equal(4);
+        expect(error.details.length).to.equal(3);
         expect(error.details[0].message).to.equal(`"from" must be a number`);
         expect(error.details[1].message).to.equal(`"until" must be a number`);
-        expect(error.details[2].message).to.equal("message cannot be empty");
-        expect(error.details[3].message).to.equal("state must be PENDING");
+        expect(error.details[2].message).to.equal("reason cannot be empty");
       }
     });
 
