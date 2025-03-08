@@ -9,7 +9,7 @@ import {
   ERROR_WHILE_UPDATING_REQUEST,
   REQUEST_APPROVED_SUCCESSFULLY,
   REQUEST_REJECTED_SUCCESSFULLY,
-  ONLY_DISCORD_USER_CREATE_OOO_REQUEST,
+  UNAUTHORIZED_TO_CREATE_OOO_REQUEST,
 } from "../constants/requests";
 import { statusState } from "../constants/userStatus";
 import { addLog } from "../models/logs";
@@ -22,7 +22,7 @@ import { OooStatusRequestBody, OooRequestCreateRequest } from "../types/oooReque
 import { UpdateRequest } from "../types/requests";
 
 export const createOooRequestController = async (req: OooRequestCreateRequest, res: CustomResponse, next: NextFunction) => {
-  const requestBody = req.body as OooStatusRequestBody;
+  const requestBody = req.body;
   const { id: userId, username } = req.userData;
   const isUserPartOfDiscord = req.userData.roles.in_discord;
   const dev = req.query.dev === "true";
@@ -30,7 +30,7 @@ export const createOooRequestController = async (req: OooRequestCreateRequest, r
   if (!dev) return res.boom.notImplemented("Feature not implemented");
 
   if (!isUserPartOfDiscord) {
-    return res.boom.unauthorized(ONLY_DISCORD_USER_CREATE_OOO_REQUEST);
+    return res.boom.unauthorized(UNAUTHORIZED_TO_CREATE_OOO_REQUEST);
   }
 
   try {

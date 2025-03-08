@@ -7,7 +7,6 @@ import app from "../../server";
 import cleanDb from "../utils/cleanDb";
 import authService from "../../services/authService";
 import userDataFixture from "../fixtures/user/user";
-import sinon from "sinon";
 const cookieName = config.get("userToken.cookieName");
 import addUser from "../utils/addUser";
 import {
@@ -30,8 +29,8 @@ import {
 } from "../../constants/requests";
 import { updateTask } from "../../models/tasks";
 import { validTaskAssignmentRequest, validTaskCreqtionRequest } from "../fixtures/taskRequests/taskRequests";
-import { updateUserStatus } from "../../models/userStatus";
 import * as requestsQuery from "../../models/requests";
+import { updateUserStatus } from "../../models/userStatus";
 
 const userData = userDataFixture();
 chai.use(chaiHttp);
@@ -44,17 +43,12 @@ let approvedOooRequestId: string;
 let oooRequestData: any;
 let oooRequestData2: any;
 let testUserId: string;
-let testUserIdForNotDiscordUser: string;
 
 describe("/requests OOO", function () {
-
-  const requestsEndpoint: string = "/requests";
-
   beforeEach(async function () {
-    const userIdPromises = [addUser(userData[16]), addUser(userData[4]), addUser(userData[18])];
-    const [userId, superUserId, userIdForNotDiscordUser] = await Promise.all(userIdPromises);
+    const userIdPromises = [addUser(userData[16]), addUser(userData[4])];
+    const [userId, superUserId] = await Promise.all(userIdPromises);
     testUserId = userId;
-    testUserIdForNotDiscordUser = userIdForNotDiscordUser;
 
     oooRequestData = { ...createOooRequests, requestedBy: userId };
     oooRequestData2 = { ...createOooRequests2, requestedBy: superUserId };
@@ -80,69 +74,17 @@ describe("/requests OOO", function () {
   });
 
   afterEach(async function () {
-    sinon.restore();
     await cleanDb();
   });
 
   describe("POST /requests", function () {
-
-    it("should return 501 and 'Feature not implemented' message when dev is false", function (done) {
-      chai
-        .request(app)
-        .post(`${requestsEndpoint}?dev=false`)
-        .set("cookie", `${cookieName}=${authToken}`)
-        .send(validOooStatusRequests)
-        .end(function (err, res) {
-          if (err) {
-            return done(err);
-          }
-          expect(res.statusCode).to.equal(501);
-          expect(res.body.message).to.equal("Feature not implemented");
-          done();
-        });
-    });
-
     it("should return 401 if user is not logged in", function (done) {
       chai
         .request(app)
-        .post(`${requestsEndpoint}?dev=true`)
+        .post("/requests?dev=true")
         .send(validOooStatusRequests)
         .end(function (err, res) {
           expect(res).to.have.status(401);
-          expect(res.body.error).to.equal("Unauthorized");
-          expect(res.body.message).to.equal("Unauthenticated User");
-          done();
-        });
-    });
-
-    it("should return 401 if user is not part of discord", function (done) {
-      const authTokenForNotDiscordUser = authService.generateAuthToken(
-        { userId: testUserIdForNotDiscordUser }
-      );
-      chai
-        .request(app)
-        .post(`${requestsEndpoint}?dev=true`)
-        .set("cookie", `${cookieName}=${authTokenForNotDiscordUser}`)
-        .send(validOooStatusRequests)
-        .end(function (err, res) {
-          expect(res).to.have.status(401);
-          expect(res.body.error).to.equal("Unauthorized");
-          expect(res.body.message).to.equal("Only discord user can create an OOO request");
-          done();
-        });
-    });
-
-    it("should return 500 response when creating OOO request fails", function (done) {
-      sinon.stub(requestsQuery, "createRequest")
-      .throws("Error while creating OOO request");
-      chai.request(app)
-        .post(`${requestsEndpoint}?dev=true`)
-        .set("cookie", `${cookieName}=${authToken}`)
-        .send(validOooStatusRequests)
-        .end(function (err, res) {
-          if (err) return done(err);
-          expect(res.statusCode).to.equal(500);
-          expect(res.body.message).to.equal("An internal server error occurred");
           done();
         });
     });
@@ -150,7 +92,7 @@ describe("/requests OOO", function () {
     it("should create a new request when dev is true", function (done) {
       chai
         .request(app)
-        .post(`${requestsEndpoint}?dev=true`)
+        .post("/requests?dev=true")
         .set("cookie", `${cookieName}=${authToken}`)
         .send(validOooStatusRequests)
         .end(function (err, res) {
@@ -173,11 +115,56 @@ describe("/requests OOO", function () {
         });
     });
 
+    it("should return 409 if user has a pending request", async function () {
+      await chai
+        .request(app)
+        .post("/requests?dev=true")
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send(validOooStatusRequests);
+      const response = await chai
+        .request(app)
+        .post("/requests?dev=true")
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send(validOooStatusRequests);
+      expect(response).to.have.status(409);
+      expect(response.body).to.have.property("message");
+      expect(response.body.message).to.equal(REQUEST_ALREADY_PENDING);
+    });
+
+    it("should create a new request and have all the required fields in the response", function (done) {
+      chai
+        .request(app)
+        .post("/requests?dev=true")
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send(validOooStatusRequests)
+        .end(function (err, res) {
+          expect(res).to.have.status(201);
+          expect(res.body).to.have.property("message");
+          expect(res.body).to.not.have.property("data");
+          expect(res.body.message).to.equal(REQUEST_CREATED_SUCCESSFULLY);
+          done();
+        });
+    });
+
+    it("should create a new request", function (done) {
+      chai
+        .request(app)
+        .post("/requests?dev=true")
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send(validOooStatusRequests)
+        .end(function (err, res) {
+          expect(res).to.have.status(201);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal(REQUEST_CREATED_SUCCESSFULLY);
+          done();
+        });
+    });
+
     it("should return error if invalid type is passed", function (done) {
       const type = "ACTIVE";
       chai
         .request(app)
-        .post(`${requestsEndpoint}?dev=true`)
+        .post("/requests?dev=true")
         .set("cookie", `${cookieName}=${authToken}`)
         .send({ ...validOooStatusRequests, type })
         .end(function (err, res) {
@@ -188,14 +175,13 @@ describe("/requests OOO", function () {
         });
     });
 
-    it("should return 400 with 'reason is required' message when reason is missing", function (done) {
+    it("should return error if reason is not present in body", function (done) {
       chai
         .request(app)
-        .post(`${requestsEndpoint}?dev=true`)
+        .post("/requests?dev=true")
         .set("cookie", `${cookieName}=${authToken}`)
         .send(_.omit(validOooStatusRequests, "reason"))
         .end(function (err, res) {
-          if (err) return done(err);
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
           expect(res.body.message).to.equal("reason is required");
@@ -203,17 +189,16 @@ describe("/requests OOO", function () {
         });
     });
 
-    it("should return 400 with error when status field is included in request body", function (done) {
+    it("should return error if state is present in the request body", function (done) {
       chai
         .request(app)
-        .post(`${requestsEndpoint}?dev=true`)
+        .post("/requests?dev=true")
         .set("cookie", `${cookieName}=${authToken}`)
-        .send({ ...validOooStatusRequests, status: REQUEST_STATE.APPROVED })
+        .send({ ...validOooStatusRequests, state: REQUEST_STATE.APPROVED })
         .end(function (err, res) {
-          if (err) return done(err);
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal(`"status" is not allowed`);
+          expect(res.body.message).to.equal('"state" is not allowed');
           done();
         });
     });

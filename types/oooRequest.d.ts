@@ -11,12 +11,12 @@ export type OooStatusRequest = {
   until: number;
   reason: string;
   status: REQUEST_STATE;
-  lastModifiedBy?: string | null;
+  lastModifiedBy: string | null;
   requestedBy: string;
   userId: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
-  comment?: string | null;
+  comment: string | null;
 };
 export type OooStatusRequestBody = {
   from: number;

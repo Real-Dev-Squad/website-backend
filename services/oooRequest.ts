@@ -12,36 +12,27 @@ import { userState } from "../constants/userStatus";
 import { createRequest, getRequestByKeyValues } from "../models/requests";
 import { getUserStatus } from "../models/userStatus";
 import { OooStatusRequest, OooStatusRequestBody } from "../types/oooRequest";
+import { UserStatus } from "../types/userCurrentStatus";
 import { addLog } from "./logService";
 import { NotFound, Forbidden, Conflict } from "http-errors";
 
-export const validateOOOCreateRequest = async (
+export const validateUserStatus = async (
     userId: string,
-    userStatusExists: boolean,
-    userStatus: any,
-    latestOOORequest: OooStatusRequest,
+    userStatus: UserStatus
 ) => {
     try {
 
-        if (!userStatusExists) {
-            await addLog(logType.USER_STATUS_NOT_FOUND, { userId }, {message: USER_STATUS_NOT_FOUND});
+        if (!userStatus.userStatusExists) {
+            await addLog(logType.USER_STATUS_NOT_FOUND, { userId }, { message: USER_STATUS_NOT_FOUND });
             throw NotFound(USER_STATUS_NOT_FOUND);
         }
 
-        if (userStatus.currentStatus.state === userState.OOO) {
-            await addLog(logType.STATUS_ALREADY_EXIST,
+        if (userStatus.data.currentStatus.state === userState.OOO) {
+            await addLog(logType.OOO_STATUS_FOUND,
                 { userId, userStatus: userState.OOO },
                 { message: OOO_STATUS_ALREADY_EXIST }
             );
             throw Forbidden(OOO_STATUS_ALREADY_EXIST);
-        }
-
-        if (latestOOORequest) {
-            await addLog(logType.REQUEST_ALREADY_PENDING,
-                { userId, oooRequestId: latestOOORequest.id },
-                { message: REQUEST_ALREADY_PENDING }
-            );
-            throw Conflict(REQUEST_ALREADY_PENDING);
         }
     } catch (error) {
         logger.error("Error while validating OOO create request", error);
@@ -56,22 +47,30 @@ export const createOOORequest = async (
 ) => {
     try {
 
-        const { data: userStatus, userStatusExists } = await getUserStatus(userId);
+        const userStatus = await getUserStatus(userId);
+
+        await validateUserStatus(userId, userStatus);
 
         const latestOOORequest: OooStatusRequest = await getRequestByKeyValues({
-            userId: userId,
+            userId,
             type: REQUEST_TYPE.OOO,
             status: REQUEST_STATE.PENDING,
         });
 
-        await validateOOOCreateRequest(userId, userStatusExists, userStatus, latestOOORequest);
+        if (latestOOORequest) {
+            await addLog(logType.PENDING_REQUEST_FOUND,
+                { userId, oooRequestId: latestOOORequest.id },
+                { message: REQUEST_ALREADY_PENDING }
+            );
+            throw Conflict(REQUEST_ALREADY_PENDING);
+        }
 
-        const requestResult: OooStatusRequest = await createRequest({
+        const request: OooStatusRequest = await createRequest({
             from: body.from,
             until: body.until,
             type: body.type,
             requestedBy: username,
-            userId: userId,
+            userId,
             reason: body.reason,
             comment: null,
             status: REQUEST_STATE.PENDING,
@@ -81,17 +80,17 @@ export const createOOORequest = async (
         const requestLog = {
             type: REQUEST_LOG_TYPE.REQUEST_CREATED,
             meta: {
-                requestId: requestResult.id,
+                requestId: request.id,
                 action: LOG_ACTION.CREATE,
-                userId: userId,
+                userId,
                 createdAt: Date.now(),
             },
-            body: requestResult,
+            body: request,
         };
 
         await addLog(requestLog.type, requestLog.meta, requestLog.body);
 
-        return requestResult;
+        return request;
     } catch (error) {
         logger.error("Error while creating OOO request", error);
         throw error;
