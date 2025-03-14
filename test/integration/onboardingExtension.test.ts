@@ -47,15 +47,17 @@ describe("/requests Onboarding Extension", () => {
             requestNumber: 1
         };
         const postEndpoint = "/requests";
-        const botToken = generateToken({name: CLOUDFLARE_WORKER})
         const body: CreateOnboardingExtensionBody = {
             type: REQUEST_TYPE.ONBOARDING,
             numberOfDays: 5,
             reason: "This is the reason",
             userId: testUserDiscordId,
         };
-
+        let botToken;
+        
         beforeEach(async () => {
+          botToken = generateToken({name: CLOUDFLARE_WORKER});
+
             testUserId = await addUser({
                 ...userData[6], 
                 discordId: testUserDiscordId, 
