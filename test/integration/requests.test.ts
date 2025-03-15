@@ -795,7 +795,7 @@ describe("/requests Task", function () {
     });
 
     it("should not create a new task request if issue does not exist", function (done) {
-      let taskRequestObj = validTaskCreqtionRequest;
+      const taskRequestObj = validTaskCreqtionRequest;
       taskRequestObj.externalIssueUrl = "https://api.github.com/repos/Real-Dev-Squad/website-my/issues/1245";
       taskRequestObj.userId = userId1;
       chai
@@ -812,7 +812,7 @@ describe("/requests Task", function () {
     });
 
     it("should not create a new task request if task id is not present in the request body", function (done) {
-      let taskRequestObj = validTaskAssignmentRequest;
+      const taskRequestObj = validTaskAssignmentRequest;
       delete taskRequestObj.taskId;
       chai
         .request(app)
