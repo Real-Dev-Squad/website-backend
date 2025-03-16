@@ -39,6 +39,7 @@ describe("/requests Onboarding Extension", () => {
         let testUserId: string;
         let testUserIdForInvalidDiscordJoinedDate: string;
         let testUserDiscordIdForInvalidDiscordJoinedDate: string = "54321";
+        let botToken: string;
 
         const testUserDiscordId: string = "654321";
         const extensionRequest = {
@@ -53,7 +54,6 @@ describe("/requests Onboarding Extension", () => {
             reason: "This is the reason",
             userId: testUserDiscordId,
         };
-        let botToken;
         
         beforeEach(async () => {
           botToken = generateToken({name: CLOUDFLARE_WORKER});
