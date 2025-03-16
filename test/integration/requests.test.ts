@@ -56,7 +56,7 @@ describe("/requests OOO", function () {
     const { id: pendingOooId }: any = await createRequest(oooRequestData2);
     pendingOooRequestId = pendingOooId;
 
-    const { id: approveOooId }: { id?: string } = await updateRequest(
+    const { id: approveOooId }: any = await updateRequest(
       oooRequestId,
       { state: REQUEST_STATE.APPROVED },
       superUserId,
