@@ -56,13 +56,13 @@ describe("/requests OOO", function () {
     const { id: pendingOooId }: any = await createRequest(oooRequestData2);
     pendingOooRequestId = pendingOooId;
 
-    const { id: approveOooId }: { id? : string } = await updateRequest(
+    const response = await updateRequest(
       oooRequestId,
       { state: REQUEST_STATE.APPROVED },
       superUserId,
       REQUEST_TYPE.OOO
     );
-    approvedOooRequestId = approveOooId;
+    approvedOooRequestId = response?.id;
 
     authToken = authService.generateAuthToken({ userId });
     superUserToken = authService.generateAuthToken({ userId: superUserId });
