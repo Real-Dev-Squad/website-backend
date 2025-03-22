@@ -4,8 +4,9 @@ const { expect } = chai;
 
 import {
   createOooStatusRequestValidator,
+  acknowledgeOOORequestsValidator,
 } from "./../../../middlewares/validators/oooRequests";
-import { validOooStatusRequests, validOooStatusUpdate } from "../../fixtures/oooRequest/oooRequest";
+import { acknowledgeOooRequest, validOooStatusRequests, validOooStatusUpdate } from "../../fixtures/oooRequest/oooRequest";
 
 describe("OOO Status Request Validators", function () {
   let req: any;
@@ -87,6 +88,35 @@ describe("OOO Status Request Validators", function () {
         expect(error).to.be.an.instanceOf(Error);
         expect(error.details[0].message).to.equal("until date must be greater than or equal to from date");
       }
+    });
+  });
+
+  describe("acknowledgeOOORequestsValidator", function () {
+    it("should not validate for an invalid request if request type is passed", async function () {
+      req = {
+        body: { ...acknowledgeOooRequest, type: "OOO"}
+      };
+
+      await acknowledgeOOORequestsValidator(req, res, nextSpy);
+      expect(nextSpy.notCalled).to.be.true;
+    });
+
+    it("should not validate for an invalid request if status is incorrect", async function () {
+      req = {
+        body: { ...acknowledgeOooRequest, status: "PENDING"}
+      };
+
+      await acknowledgeOOORequestsValidator(req, res, nextSpy);
+      expect(nextSpy.notCalled).to.be.true;
+    });
+
+    it("should validate for a valid acknowledge OOO request", async function() {
+      req = {
+        body: acknowledgeOooRequest
+      };
+      res = {};
+      await acknowledgeOOORequestsValidator(req, res, nextSpy);
+      expect(nextSpy.calledOnce).to.be.true;
     });
   });
 });
