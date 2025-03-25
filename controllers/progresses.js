@@ -5,6 +5,7 @@ const {
   INTERNAL_SERVER_ERROR_MESSAGE,
   PROGRESSES_SIZE,
   PROGRESSES_PAGE_SIZE,
+  UNAUTHORIZED_WRITE,
 } = require("../constants/progresses");
 const { sendTaskUpdate } = require("../utils/sendTaskUpdate");
 const { PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED, PROGRESS_DOCUMENT_CREATED_SUCCEEDED } = PROGRESSES_RESPONSE_MESSAGES;
@@ -45,6 +46,10 @@ const { PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED, PROGRESS_DOCUMENT_CREATED_SUCCEED
  */
 
 const createProgress = async (req, res) => {
+  if (req.userData.roles.archived) {
+    return res.boom.forbidden(UNAUTHORIZED_WRITE);
+  }
+
   const {
     body: { type, completed, planned, blockers, taskId },
   } = req;
