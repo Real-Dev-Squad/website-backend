@@ -13,8 +13,8 @@ export const createOooStatusRequests = {
 
 export const validOooStatusRequests = {
   type: "OOO",
-  from: Date.now() + 100000,
-  until: Date.now() + 200000,
+  from: Date.now() + 1 * 24 * 60 * 60 * 1000,
+  until: Date.now() + 5 * 24 * 60 * 60 * 1000,
   message: "Out of office for personal reasons.",
   state: REQUEST_STATE.PENDING,
 };
