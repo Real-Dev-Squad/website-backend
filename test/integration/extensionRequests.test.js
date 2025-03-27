@@ -1046,7 +1046,7 @@ describe("Extension Requests", function () {
     it("User should be able to update the extensionRequest for the given extensionRequestId", function (done) {
       chai
         .request(app)
-        .patch(`/extension-requests/${extensionRequestId4}?dev=true`)
+        .patch(`/extension-requests/${extensionRequestId4}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           title: "new-title",
@@ -1063,7 +1063,7 @@ describe("Extension Requests", function () {
     it("User should not be able to update the extensionRequest if already approved", function (done) {
       chai
         .request(app)
-        .patch(`/extension-requests/${extensionRequestId1}?dev=true`)
+        .patch(`/extension-requests/${extensionRequestId1}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           title: "new-title",
@@ -1080,7 +1080,7 @@ describe("Extension Requests", function () {
     it("Super user should be able to update the extensionRequest if already approved", function (done) {
       chai
         .request(app)
-        .patch(`/extension-requests/${extensionRequestId1}?dev=true`)
+        .patch(`/extension-requests/${extensionRequestId1}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
           title: "new-title",

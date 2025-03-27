@@ -10,7 +10,6 @@ const {
   updateExtensionRequestStatus,
   getExtensionRequestsValidator,
 } = require("../middlewares/validators/extensionRequests");
-const skipAuthorizeRolesUnderFF = require("../middlewares/skipAuthorizeRolesWrapper");
 const { userAuthorization } = require("../middlewares/userAuthorization");
 const { devFlagMiddleware } = require("../middlewares/devFlag");
 
@@ -25,14 +24,7 @@ router.get(
   extensionRequests.getSelfExtensionRequests
 );
 router.get("/:id", authenticate, authorizeRoles([SUPERUSER, APPOWNER]), extensionRequests.getExtensionRequest);
-//  remove the skipAuthorizeRolesUnderFF & authorizeRoles middleware when removing the feature flag
-router.patch(
-  "/:id",
-  authenticate,
-  skipAuthorizeRolesUnderFF(authorizeRoles([SUPERUSER, APPOWNER])),
-  updateExtensionRequest,
-  extensionRequests.updateExtensionRequest
-);
+router.patch("/:id", authenticate, updateExtensionRequest, extensionRequests.updateExtensionRequest);
 router.patch(
   "/:id/status",
   authenticate,
