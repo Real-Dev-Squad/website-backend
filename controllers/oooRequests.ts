@@ -18,10 +18,26 @@ import { createUserFutureStatus } from "../models/userFutureStatus";
 import { addFutureStatus } from "../models/userStatus";
 import { createOOORequest } from "../services/oooRequest";
 import { CustomResponse } from "../typeDefinitions/global";
-import { OooStatusRequestBody, OooRequestCreateRequest } from "../types/oooRequest";
+import { OooStatusRequestBody, OooRequestCreateRequest, OooRequestResponse } from "../types/oooRequest";
 import { UpdateRequest } from "../types/requests";
 
-export const createOooRequestController = async (req: OooRequestCreateRequest, res: CustomResponse, next: NextFunction) => {
+/**
+ * Controller to handle the creation of OOO requests.
+ * 
+ * This function processes the request to create an OOO request,
+ * validates the user status, checks existing requests,
+ * and stores the new request in the database with logging.
+ * 
+ * @param {OooRequestCreateRequest} req - The Express request object containing the body with OOO details.
+ * @param {CustomResponse} res - The Express response object used to send back the response.
+ * @returns {Promise<OooRequestResponse>} Resolves to a response with the success or an error message.
+ */
+export const createOooRequestController = async (
+  req: OooRequestCreateRequest,
+  res: OooRequestResponse,
+  next: NextFunction
+): Promise<OooRequestResponse> => {
+
   const requestBody = req.body;
   const { id: userId, username } = req.userData;
   const isUserPartOfDiscord = req.userData.roles.in_discord;
@@ -30,7 +46,7 @@ export const createOooRequestController = async (req: OooRequestCreateRequest, r
   if (!dev) return res.boom.notImplemented("Feature not implemented");
 
   if (!isUserPartOfDiscord) {
-    return res.boom.unauthorized(UNAUTHORIZED_TO_CREATE_OOO_REQUEST);
+    return res.boom.forbidden(UNAUTHORIZED_TO_CREATE_OOO_REQUEST);
   }
 
   try {

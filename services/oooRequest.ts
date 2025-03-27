@@ -16,6 +16,13 @@ import { UserStatus } from "../types/userCurrentStatus";
 import { addLog } from "./logService";
 import { NotFound, Forbidden, Conflict } from "http-errors";
 
+/**
+ * Validates the user status.
+ * 
+ * @param {string} userId - The unique identifier of the user.
+ * @param {UserStatus} userStatus - The status object of the user.
+ * @throws {Error} Throws an error if an issue occurs during validation.
+ */
 export const validateUserStatus = async (
     userId: string,
     userStatus: UserStatus
@@ -40,6 +47,15 @@ export const validateUserStatus = async (
     }
 }
 
+/**
+ * Create an OOO request for a user.
+ * 
+ * @param {OooStatusRequestBody} body - The request body containing OOO details.
+ * @param {string} username - The username of the person creating the request.
+ * @param {string} userId - The unique identifier of the user.
+ * @returns {Promise<object>} The created OOO request.
+ * @throws {Error} Throws an error if an issue occurs during validation.
+ */
 export const createOOORequest = async (
     body: OooStatusRequestBody,
     username: string,
