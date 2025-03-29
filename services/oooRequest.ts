@@ -76,7 +76,7 @@ export const acknowledgeOOORequest = async (
 
         const requestData = request.data();
 
-        await validateOOOAcknowledgeRequest(requestId, requestData.type,  requestData.status);
+        await validateOOOAcknowledgeRequest(requestId, requestData.type, requestData.status);
 
         const requestResult = await updateRequest(requestId, body, userId, REQUEST_TYPE.OOO);
 

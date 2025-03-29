@@ -39,6 +39,7 @@ describe("/requests Onboarding Extension", () => {
         let testUserId: string;
         let testUserIdForInvalidDiscordJoinedDate: string;
         let testUserDiscordIdForInvalidDiscordJoinedDate: string = "54321";
+        let botToken: string;
 
         const testUserDiscordId: string = "654321";
         const extensionRequest = {
@@ -47,15 +48,16 @@ describe("/requests Onboarding Extension", () => {
             requestNumber: 1
         };
         const postEndpoint = "/requests";
-        const botToken = generateToken({name: CLOUDFLARE_WORKER})
         const body: CreateOnboardingExtensionBody = {
             type: REQUEST_TYPE.ONBOARDING,
             numberOfDays: 5,
             reason: "This is the reason",
             userId: testUserDiscordId,
         };
-
+        
         beforeEach(async () => {
+          botToken = generateToken({name: CLOUDFLARE_WORKER});
+
             testUserId = await addUser({
                 ...userData[6], 
                 discordId: testUserDiscordId, 

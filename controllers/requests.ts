@@ -123,12 +123,10 @@ export const getRequestsController = async (req: any, res: any) => {
 export const updateRequestBeforeAcknowledgedController = async (req: Request, res: CustomResponse, next: NextFunction) => {
   const type = req.body.type;
 
-  if (type === undefined) {
-      await acknowledgeOOORequestController(req as AcknowledgeOOORequest, res as OooRequestResponse, next);
-      return;
-    }
-
   switch(type){
+    case REQUEST_TYPE.OOO:
+      await acknowledgeOOORequestController(req as AcknowledgeOOORequest, res as OooRequestResponse, next);
+      break;
     case REQUEST_TYPE.ONBOARDING:
       await updateOnboardingExtensionRequestController(req as UpdateOnboardingExtensionRequest, res as OnboardingExtensionResponse);
       break;

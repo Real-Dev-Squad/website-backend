@@ -125,7 +125,7 @@ export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: O
 /**
  * Validates update requests based on their type.
  * 
- * @param {UpdateOnboardingExtensionRequest} req - Request object.
+ * @param {UpdateOnboardingExtensionRequest | AcknowledgeOOORequest} req - Request object.
  * @param {CustomResponse} res - Response object.
  * @param {NextFunction} next - Next middleware if valid.
  * @returns {Promise<void>} Resolves or sends errors.
@@ -137,12 +137,12 @@ export const updateRequestValidator = async (
   ): Promise<void> => {
   const type = req.body.type;
 
-  if (type === undefined) {
-    await acknowledgeOOORequestsValidator(req, res as OooRequestResponse, next);
-    return;
-  }
-
   switch (type) {
+      case REQUEST_TYPE.OOO:
+          await acknowledgeOOORequestsValidator(
+            req,
+            res as OooRequestResponse, next);
+          break;
       case REQUEST_TYPE.ONBOARDING:
           await updateOnboardingExtensionRequestValidator(
             req, 

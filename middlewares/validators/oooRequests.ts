@@ -58,7 +58,10 @@ export const acknowledgeOOORequestsValidator = async (
       .required()
       .messages({
         "any.only": "status must be APPROVED or REJECTED",
-      })
+      }),
+    type: joi.string().equal(REQUEST_TYPE.OOO).required().messages({
+      "type.any": "type is required",
+    })
   });
 
   try {
@@ -67,6 +70,6 @@ export const acknowledgeOOORequestsValidator = async (
   } catch (error) {
     const errorMessages = error.details.map((detail:any) => detail.message);
     logger.error(`Error while validating request payload : ${errorMessages}`);
-    res.boom.badRequest(errorMessages);
+    return res.boom.badRequest(errorMessages);
   }
 };
