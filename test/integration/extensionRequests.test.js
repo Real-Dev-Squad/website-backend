@@ -19,10 +19,11 @@ const { LOGS_FETCHED_SUCCESSFULLY } = require("../../constants/logs");
 chai.use(chaiHttp);
 
 const user = userData[6];
+const user2 = userData[5];
 const appOwner = userData[3];
 const superUser = userData[4];
 
-let appOwnerjwt, superUserJwt, jwt, superUserId, extensionRequestId5;
+let appOwnerjwt, superUserJwt, jwt, jwt2, superUserId, extensionRequestId5;
 
 describe("Extension Requests", function () {
   let taskId0,
@@ -40,6 +41,7 @@ describe("Extension Requests", function () {
 
   before(async function () {
     const userId = await addUser(user);
+    const userId2 = await addUser(user2);
     user.id = userId;
     const appOwnerUserId = await addUser(appOwner);
     appOwner.id = appOwnerUserId;
@@ -47,6 +49,7 @@ describe("Extension Requests", function () {
     appOwnerjwt = authService.generateAuthToken({ userId: appOwnerUserId });
     superUserJwt = authService.generateAuthToken({ userId: superUserId });
     jwt = authService.generateAuthToken({ userId: userId });
+    jwt2 = authService.generateAuthToken({ userId: userId2 });
 
     const taskData = [
       {
@@ -1090,6 +1093,26 @@ describe("Extension Requests", function () {
             return done(err);
           }
           expect(res).to.have.status(204);
+          return done();
+        });
+    });
+
+    it("Should return a 403 error if a non-superuser and non-owner try to update the request with the dev flag enabled.", function (done) {
+      chai
+        .request(app)
+        .patch(`/extension-requests/${extensionRequestId4}?dev=true`)
+        .set("cookie", `${cookieName}=${jwt2}`)
+        .send({
+          title: "new-title",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(403);
+          expect(res.body)
+            .to.have.property("message")
+            .that.equals("You don't have permission to update the extension request");
           return done();
         });
     });

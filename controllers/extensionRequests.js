@@ -218,6 +218,14 @@ const updateExtensionRequest = async (req, res) => {
       return res.boom.badRequest("Only pending extension request can be updated");
     }
 
+    if (
+      isDev &&
+      !req.userData?.roles.super_user &&
+      extensionRequest.extensionRequestData.assigneeId !== req.userData.id
+    ) {
+      return res.boom.forbidden("You don't have permission to update the extension request");
+    }
+
     if (req.body.assignee) {
       const { taskData: task } = await tasks.fetchTask(extensionRequest.extensionRequestData.taskId);
       if (task.assignee !== (await getUsername(req.body.assignee))) {
