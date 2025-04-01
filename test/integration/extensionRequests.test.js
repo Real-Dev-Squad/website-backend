@@ -19,7 +19,6 @@ const { LOGS_FETCHED_SUCCESSFULLY } = require("../../constants/logs");
 chai.use(chaiHttp);
 
 const user = userData[6];
-const user2 = userData[5];
 const appOwner = userData[3];
 const superUser = userData[4];
 
@@ -41,7 +40,7 @@ describe("Extension Requests", function () {
 
   before(async function () {
     const userId = await addUser(user);
-    const userId2 = await addUser(user2);
+    const userId2 = await addUser(userData[5]);
     user.id = userId;
     const appOwnerUserId = await addUser(appOwner);
     appOwner.id = appOwnerUserId;
@@ -1097,7 +1096,7 @@ describe("Extension Requests", function () {
         });
     });
 
-    it("Should return a 403 error if a non-superuser and non-owner try to update the request with the dev flag enabled.", function (done) {
+    it("should return forbidden response if superuser or request owner does not update the request when dev is enabled", function (done) {
       chai
         .request(app)
         .patch(`/extension-requests/${extensionRequestId4}?dev=true`)
