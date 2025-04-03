@@ -1065,7 +1065,7 @@ describe("Extension Requests", function () {
     it("User should not be able to update the extensionRequest if already approved", function (done) {
       chai
         .request(app)
-        .patch(`/extension-requests/${extensionRequestId5}?dev=true`)
+        .patch(`/extension-requests/${extensionRequestId1}?dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           title: "new-title",
