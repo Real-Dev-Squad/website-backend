@@ -22,7 +22,7 @@ const user = userData[6];
 const appOwner = userData[3];
 const superUser = userData[4];
 
-let appOwnerjwt, superUserJwt, jwt, jwt2, superUserId, extensionRequestId5;
+let appOwnerjwt, superUserJwt, jwt, user2Jwt, superUserId, extensionRequestId5;
 
 describe("Extension Requests", function () {
   let taskId0,
@@ -48,7 +48,7 @@ describe("Extension Requests", function () {
     appOwnerjwt = authService.generateAuthToken({ userId: appOwnerUserId });
     superUserJwt = authService.generateAuthToken({ userId: superUserId });
     jwt = authService.generateAuthToken({ userId: userId });
-    jwt2 = authService.generateAuthToken({ userId: userId2 });
+    user2Jwt = authService.generateAuthToken({ userId: userId2 });
 
     const taskData = [
       {
@@ -1065,7 +1065,7 @@ describe("Extension Requests", function () {
     it("User should not be able to update the extensionRequest if already approved", function (done) {
       chai
         .request(app)
-        .patch(`/extension-requests/${extensionRequestId1}?dev=true`)
+        .patch(`/extension-requests/${extensionRequestId5}?dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           title: "new-title",
@@ -1100,7 +1100,7 @@ describe("Extension Requests", function () {
       chai
         .request(app)
         .patch(`/extension-requests/${extensionRequestId4}?dev=true`)
-        .set("cookie", `${cookieName}=${jwt2}`)
+        .set("cookie", `${cookieName}=${user2Jwt}`)
         .send({
           title: "new-title",
         })
