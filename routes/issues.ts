@@ -1,8 +1,9 @@
 import express from "express";
-import issues from "../controllers/issues";
+import { getIssues, issueUpdates } from "../controllers/issues";
+
 const router = express.Router();
 
-router.get("/", issues.getIssues);
-router.post("/updates", issues.issueUpdates);
+router.get("/", getIssues);
+router.post("/updates", issueUpdates);
 
-module.exports = router;
+export default router;

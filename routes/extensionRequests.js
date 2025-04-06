@@ -1,18 +1,19 @@
-const express = require("express");
-const router = express.Router();
-const extensionRequests = require("../controllers/extensionRequests");
-const authenticate = require("../middlewares/authenticate");
-const authorizeRoles = require("../middlewares/authorizeRoles");
-const { SUPERUSER, APPOWNER } = require("../constants/roles");
-const {
+import express from "express";
+import * as extensionRequests from "../controllers/extensionRequests.js";
+import authenticate from "../middlewares/authenticate.js";
+import authorizeRoles from "../middlewares/authorizeRoles.js";
+import { SUPERUSER, APPOWNER } from "../constants/roles.js";
+import {
   createExtensionRequest,
   updateExtensionRequest,
   updateExtensionRequestStatus,
   getExtensionRequestsValidator,
-} = require("../middlewares/validators/extensionRequests");
-const skipAuthorizeRolesUnderFF = require("../middlewares/skipAuthorizeRolesWrapper");
-const { userAuthorization } = require("../middlewares/userAuthorization");
-const { devFlagMiddleware } = require("../middlewares/devFlag");
+} from "../middlewares/validators/extensionRequests.js";
+import skipAuthorizeRolesUnderFF from "../middlewares/skipAuthorizeRolesWrapper.js";
+import { userAuthorization } from "../middlewares/userAuthorization.js";
+import { devFlagMiddleware } from "../middlewares/devFlag.js";
+
+const router = express.Router();
 
 router.post("/", authenticate, createExtensionRequest, extensionRequests.createTaskExtensionRequest);
 router.get("/", authenticate, getExtensionRequestsValidator, extensionRequests.fetchExtensionRequests);
@@ -41,4 +42,4 @@ router.patch(
   extensionRequests.updateExtensionRequestStatus
 );
 
-module.exports = router;
+export default router;

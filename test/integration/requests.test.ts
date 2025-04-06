@@ -3,19 +3,19 @@ const { expect } = chai;
 import chaiHttp from "chai-http";
 import _ from "lodash";
 import config from "config";
-import app from "../../server";
-import cleanDb from "../utils/cleanDb";
-import authService from "../../services/authService";
-import userDataFixture from "../fixtures/user/user";
+import app from "../../server.js";
+import cleanDb from "../utils/cleanDb.js";
+import { generateAuthToken } from "../../services/authService.js";
+import userDataFixture from "../fixtures/user/user.js";
 const cookieName = config.get("userToken.cookieName");
-import addUser from "../utils/addUser";
+import addUser from "../utils/addUser.js";
 import {
   createOooRequests,
   validOooStatusRequests,
   validOooStatusUpdate,
   createOooRequests2,
-} from "../fixtures/oooRequest/oooRequest";
-import { createRequest, updateRequest } from "../../models/requests";
+} from "../fixtures/oooRequest/oooRequest.js";
+import { createRequest, updateRequest } from "../../models/requests.js";
 import {
   REQUEST_ALREADY_APPROVED,
   REQUEST_STATE,
@@ -26,9 +26,9 @@ import {
   REQUEST_ALREADY_PENDING,
   REQUEST_REJECTED_SUCCESSFULLY,
   REQUEST_ALREADY_REJECTED,
-} from "../../constants/requests";
-import { updateTask } from "../../models/tasks";
-import { validTaskAssignmentRequest, validTaskCreqtionRequest } from "../fixtures/taskRequests/taskRequests";
+} from "../../constants/requests.js";
+import { updateTask } from "../../models/tasks.js";
+import { validTaskAssignmentRequest, validTaskCreqtionRequest } from "../fixtures/taskRequests/taskRequests.js";
 
 const userData = userDataFixture();
 chai.use(chaiHttp);
@@ -64,8 +64,8 @@ describe("/requests OOO", function () {
     );
     approvedOooRequestId = response?.id;
 
-    authToken = authService.generateAuthToken({ userId });
-    superUserToken = authService.generateAuthToken({ userId: superUserId });
+    authToken = generateAuthToken({ userId });
+    superUserToken = generateAuthToken({ userId: superUserId });
   });
 
   afterEach(async function () {
@@ -77,7 +77,7 @@ describe("/requests OOO", function () {
       const userIdPromises = [addUser(userData[16])];
       const [userId] = await Promise.all(userIdPromises);
 
-      authToken = authService.generateAuthToken({ userId });
+      authToken = generateAuthToken({ userId });
     });
 
     afterEach(async function () {
@@ -437,9 +437,9 @@ describe("/requests Extension", function () {
     userId2 = await addUser(userData[17]);
     superUserId = await addUser(userData[4]);
 
-    userJwtToken1 = authService.generateAuthToken({ userId: userId1 });
-    userJwtToken2 = authService.generateAuthToken({ userId: userId2 });
-    superUserJwtToken = authService.generateAuthToken({ userId: superUserId });
+    userJwtToken1 = generateAuthToken({ userId: userId1 });
+    userJwtToken2 = generateAuthToken({ userId: userId2 });
+    superUserJwtToken = generateAuthToken({ userId: superUserId });
 
     taskId1 = (await updateTask({ ...taskData[0], assigneeId: userId1 })).taskId;
     taskId2 = (await updateTask({ ...taskData[1] })).taskId;
@@ -775,7 +775,7 @@ describe("/requests Task", function () {
 
   beforeEach(async function () {
     userId1 = await addUser(userData[16]);
-    userJwtToken1 = authService.generateAuthToken({ userId: userId1 });
+    userJwtToken1 = generateAuthToken({ userId: userId1 });
   });
 
   afterEach(async function () {

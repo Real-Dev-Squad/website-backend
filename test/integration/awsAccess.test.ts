@@ -1,16 +1,15 @@
-import chai, {expect} from "chai";
-import sinon from 'sinon';
+import chai, { expect } from "chai";
 import chaiHttp from 'chai-http';
-import * as awsFunctions from '../../utils/awsFunctions';
-import bot from "../utils/generateBotToken";
-import { PROFILE_SVC_GITHUB_URL } from '../../constants/urls';
+import sinon from 'sinon';
+import { PROFILE_SVC_GITHUB_URL } from '../../constants/urls.js';
+import * as awsFunctions from '../../utils/awsFunctions.js';
+import { generateToken } from "../utils/generateBotToken.js";
 
-const app = require("../../server");
-const userData = require("../fixtures/user/user")();
-const authorizeBot = require("../../middlewares/authorizeBot");
-const addUser = require("../utils/addUser");
-const cleanDb = require("../utils/cleanDb");
-const { CLOUDFLARE_WORKER } = require("../../constants/bot")
+import { CLOUDFLARE_WORKER } from "../../constants/bot.js";
+import app from "../../server.js";
+import userData from "../fixtures/user/user.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
 
 chai.use(chaiHttp);
 
@@ -25,7 +24,7 @@ describe('addUserToAWSGroup', function(){
     req = {
       headers: {},
     };
-    const jwtToken = bot.generateToken({ name: CLOUDFLARE_WORKER });
+    const jwtToken = generateToken({ name: CLOUDFLARE_WORKER });
     req.headers.authorization = `Bearer ${jwtToken}`;
   })
   

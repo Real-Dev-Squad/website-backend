@@ -1,22 +1,18 @@
-const chai = require("chai");
-const sinon = require("sinon");
-const { expect } = chai;
+import { expect } from "chai";
+import sinon from "sinon";
 
-const cleanDb = require("../../utils/cleanDb");
-const firestore = require("../../../utils/firestore");
-const addUser = require("../../utils/addUser");
+import cleanDb from "../../utils/cleanDb.js";
+import firestore from "../../../utils/firestore.js";
+import addUser from "../../utils/addUser.js";
+import * as auctions from "../../../models/auctions.js";
+import * as walletsQuery from "../../../models/wallets.js";
+import { auctionData } from "../../fixtures/auctions/auctions.js";
+import user from "../../fixtures/user/user.js";
+import currencyDataArray from "../../fixtures/currencies/currencies.js";
 
-// Import models
-const auctions = require("../../../models/auctions");
-const walletsQuery = require("../../../models/wallets");
+const currencies = currencyDataArray.default;
 const auctionModel = firestore.collection("auctions");
 const bidModel = firestore.collection("bids");
-
-// Import fixtures
-const { auctionData } = require("../../fixtures/auctions/auctions");
-const user = require("../../fixtures/user/user")();
-const currencyDataArray = require("../../fixtures/currencies/currencies");
-const currencies = currencyDataArray.default;
 
 const { initial_price: initialPrice, item_type: itemType, end_time: endTime, quantity } = auctionData;
 

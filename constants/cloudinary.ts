@@ -1,4 +1,4 @@
-module.exports = {
+export default  {
   PROFILE: {
     FOLDER: "/profile/",
     TAGS: ["profile", "user"],

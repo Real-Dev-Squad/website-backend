@@ -5,6 +5,7 @@ import {
   Queries,
   QueryTypes,
 } from "../typeDefinitions/rqlParser";
+import logger from "./logger.js";
 
 const KEY_VALUE_PAIR_DELIMITER_PATTERN = /\s+/;
 const KEY_VALUE_DELIMITER = ":";

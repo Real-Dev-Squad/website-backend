@@ -1,11 +1,12 @@
-const express = require("express");
+import express from "express";
+import wallet from "../controllers/wallets.js";
+import authenticate from "../middlewares/authenticate.js";
+import authorizeRoles from "../middlewares/authorizeRoles.js";
+import { SUPERUSER } from "../constants/roles.js";
+
 const router = express.Router();
-const wallet = require("../controllers/wallets");
-const authenticate = require("../middlewares/authenticate");
-const authorizeRoles = require("../middlewares/authorizeRoles");
-const { SUPERUSER } = require("../constants/roles");
 
 router.get("/", authenticate, wallet.getOwnWallet);
 router.get("/:username", authenticate, authorizeRoles([SUPERUSER]), wallet.getUserWallet);
 
-module.exports = router;
+export default router;

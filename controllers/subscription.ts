@@ -1,4 +1,5 @@
 import { CustomRequest, CustomResponse } from "../types/global";
+import logger from "../utils/logger.js";
 const { addOrUpdate } = require("../models/users");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const nodemailer = require("nodemailer");

@@ -1,4 +1,5 @@
 import firestore from "../utils/firestore";
+import logger from "../utils/logger.js";
 const requestModel = firestore.collection("requests");
 import { REQUEST_ALREADY_APPROVED, REQUEST_ALREADY_REJECTED, REQUEST_STATE } from "../constants/requests";
 import {

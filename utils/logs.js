@@ -1,9 +1,11 @@
-const admin = require("firebase-admin");
-const { logType } = require("../constants/logs");
-const usersService = require("../services/dataAccessLayer");
-const firestore = require("./firestore");
+import admin from "firebase-admin";
+import { logType } from "../constants/logs.js";
+import * as usersService from "../services/dataAccessLayer.js";
+import firestore from "./firestore.js";
+import { _ } from "lodash";
+
 const tasksModel = firestore.collection("tasks");
-const { _ } = require("lodash");
+
 async function getUsersListFromLogs(allLogs) {
   const userIds = new Set();
   for (const log of allLogs) {
@@ -151,10 +153,4 @@ function convertTimestamp(timestamp) {
   return seconds + Math.floor(nanoseconds / 10000000);
 }
 
-module.exports = {
-  mapify,
-  convertTimestamp,
-  getTasksFromLogs,
-  formatLogsForFeed,
-  getUsersListFromLogs,
-};
+export { mapify, convertTimestamp, getTasksFromLogs, formatLogsForFeed, getUsersListFromLogs };

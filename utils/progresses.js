@@ -1,17 +1,17 @@
-const { NotFound } = require("http-errors");
-const { fetchTask } = require("../models/tasks");
-const { fetchUser } = require("../models/users");
-const fireStore = require("../utils/firestore");
-const progressesModel = fireStore.collection("progresses");
-
-const {
-  PROGRESSES_RESPONSE_MESSAGES: { PROGRESS_DOCUMENT_NOT_FOUND },
+import { NotFound } from "http-errors";
+import { fetchTask } from "../models/tasks.js";
+import { fetchUser } from "../models/users.js";
+import fireStore from "../utils/firestore.js";
+import {
+  PROGRESSES_RESPONSE_MESSAGES,
   MILLISECONDS_IN_DAY,
   PROGRESS_VALID_SORT_FIELDS,
   PROGRESSES_PAGE_SIZE,
   PROGRESSES_SIZE,
-} = require("../constants/progresses");
-const { convertTimestampToUTCStartOrEndOfDay } = require("./time");
+} from "../constants/progresses.js";
+import { convertTimestampToUTCStartOrEndOfDay } from "./time.js";
+
+const { PROGRESS_DOCUMENT_NOT_FOUND } = PROGRESSES_RESPONSE_MESSAGES;
 const progressesCollection = fireStore.collection("progresses");
 
 /**
@@ -279,25 +279,26 @@ const buildQueryToSearchProgressByDay = (pathParams) => {
 };
 
 const buildProgressQueryForMissedUpdates = (taskId, startTimestamp, endTimestamp) => {
-  return progressesModel
+  return progressesCollection
     .where("type", "==", "task")
     .where("taskId", "==", taskId)
     .where("date", ">=", convertTimestampToUTCStartOrEndOfDay(startTimestamp))
     .where("date", "<=", convertTimestampToUTCStartOrEndOfDay(endTimestamp, true))
     .count();
 };
-module.exports = {
+
+export {
   getProgressDateTimestamp,
   buildQueryForPostingProgress,
   assertUserExists,
   assertTaskExists,
   assertUserOrTaskExists,
   buildQueryToFetchDocs,
+  buildQueryToFetchPaginatedDocs,
   getProgressDocs,
   getPaginatedProgressDocs,
   buildRangeProgressQuery,
   getProgressRecords,
   buildQueryToSearchProgressByDay,
   buildProgressQueryForMissedUpdates,
-  buildQueryToFetchPaginatedDocs,
 };

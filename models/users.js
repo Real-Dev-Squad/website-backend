@@ -2,34 +2,34 @@
  * This file contains wrapper functions to interact with the DB.
  * This will contain the DB schema if we start consuming an ORM for managing the DB operations
  */
-const walletConstants = require("../constants/wallets");
-
-const firestore = require("../utils/firestore");
-const { fetchWallet, createWallet } = require("../models/wallets");
-const { updateUserStatus } = require("../models/userStatus");
-const { arraysHaveCommonItem, chunks } = require("../utils/array");
-const {
+import { walletConstants } from "../constants/wallets.js";
+import firestore from "../utils/firestore.js";
+import { fetchWallet, createWallet } from "../models/wallets.js";
+import { updateUserStatus } from "../models/userStatus.js";
+import { arraysHaveCommonItem, chunks } from "../utils/array.js";
+import {
   ALLOWED_FILTER_PARAMS,
   FIRESTORE_IN_CLAUSE_SIZE,
   USERS_PATCH_HANDLER_SUCCESS_MESSAGES,
   USERS_PATCH_HANDLER_ERROR_MESSAGES,
-} = require("../constants/users");
-const { DOCUMENT_WRITE_SIZE } = require("../constants/constants");
-const { userState } = require("../constants/userStatus");
-const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
-const ROLES = require("../constants/roles");
+} from "../constants/users.js";
+import { DOCUMENT_WRITE_SIZE } from "../constants/constants.js";
+import { userState } from "../constants/userStatus.js";
+import { BATCH_SIZE_IN_CLAUSE } from "../constants/firebase.js";
+import { ROLES } from "../constants/roles.js";
+import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
+import { AUTHORITIES } from "../constants/authorities.js";
+import { formatUsername } from "../utils/username.js";
+import { logType } from "../constants/logs.js";
+import { addLog } from "../services/logService.js";
+import admin from "firebase-admin";
+
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
 const itemModel = firestore.collection("itemTags");
 const userStatusModel = firestore.collection("usersStatus");
 const photoVerificationModel = firestore.collection("photo-verification");
 const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
-const admin = require("firebase-admin");
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const { AUTHORITIES } = require("../constants/authorities");
-const { formatUsername } = require("../utils/username");
-const { logType } = require("../constants/logs");
-const { addLog } = require("../services/logService");
 
 /**
  * Archive users by setting the roles.archived field to true.
@@ -1129,35 +1129,37 @@ const fetchUsersNotInDiscordServer = async () => {
   }
 };
 
-module.exports = {
+export {
   archiveUsers,
   addOrUpdate,
-  fetchPaginatedUsers,
-  fetchUser,
-  setIncompleteUserDetails,
-  initializeUser,
-  updateUserPicture,
-  fetchUserImage,
   addJoinData,
   getJoinData,
   getSuggestedUsers,
+  fetchPaginatedUsers,
+  fetchUsers,
+  fetchUser,
+  setIncompleteUserDetails,
+  initializeUser,
+  addForVerification,
+  markAsVerified,
+  getUserImageForVerification,
+  updateUserPicture,
+  fetchUserImage,
   fetchUserSkills,
   getRdsUserInfoByGitHubUsername,
-  fetchUsers,
   getUsersBasedOnFilter,
-  markAsVerified,
-  addForVerification,
-  getUserImageForVerification,
+  getUsersWithOnboardingStateInRange,
   getDiscordUsers,
   fetchAllUsers,
   archiveUserIfNotInDiscord,
+  fetchUserByIds,
   removeGitHubToken,
   getUsersByRole,
-  fetchUserByIds,
   updateUsersInBatch,
-  fetchUsersListForMultipleValues,
   fetchUserForKeyValue,
+  fetchUsersListForMultipleValues,
   getNonNickNameSyncedUsers,
+  updateUsernamesInBatch,
   updateUsersWithNewUsernames,
   fetchUsersNotInDiscordServer,
 };

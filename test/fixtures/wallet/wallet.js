@@ -11,4 +11,4 @@ const walletBodyKeys = ["message", "wallet"];
 
 const walletDataKeys = ["userId", "isActive", "currencies"];
 
-module.exports = { walletBodyKeys, walletKeys, walletDataKeys };
+export default { walletBodyKeys, walletKeys, walletDataKeys };

@@ -3,6 +3,4 @@ const TOO_MANY_REQUESTS = {
   STATUS_CODE: 429,
 };
 
-module.exports = {
-  TOO_MANY_REQUESTS,
-};
+export { TOO_MANY_REQUESTS };

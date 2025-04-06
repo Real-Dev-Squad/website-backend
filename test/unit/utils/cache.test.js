@@ -1,5 +1,5 @@
-const { expect } = require("chai");
-const { cachedKeysStore } = require("../../../utils/cache");
+import { expect } from "chai";
+import { cachedKeysStore } from "../../../utils/cache.js";
 
 describe("cachedKeysStore", function () {
   let keyStore;

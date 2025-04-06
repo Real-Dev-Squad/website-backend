@@ -1,6 +1,8 @@
-const passport = require("passport");
-const GitHubStrategy = require("passport-github2").Strategy;
-const GoogleStrategy = require("passport-google-oauth20").Strategy;
+import passport from "passport";
+import { Strategy as GitHubStrategy } from "passport-github2";
+import { Strategy as GoogleStrategy } from "passport-google-oauth20";
+import config from "config";
+import logger from "../utils/logger.js";
 
 try {
   passport.use(

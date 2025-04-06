@@ -1,8 +1,7 @@
-const chai = require("chai");
-const expect = chai.expect;
-const cleanDb = require("../../utils/cleanDb");
-const { addGroupRoleToMember } = require("../../../models/discordactions");
-const { getUserIdsFromRoleId } = require("../../../services/getUserIdsFromRoleId");
+import { expect } from "chai";
+import cleanDb from "../../utils/cleanDb.js";
+import { addGroupRoleToMember } from "../../../models/discordactions.js";
+import { getUserIdsFromRoleId } from "../../../services/getUserIdsFromRoleId.js";
 
 describe("FCM token services", function () {
   describe("get user id from role id", function () {

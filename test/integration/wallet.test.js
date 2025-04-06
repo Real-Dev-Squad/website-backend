@@ -1,22 +1,20 @@
-const chai = require("chai");
+import chai from "chai";
+import chaiHttp from "chai-http";
+
+import app from "../../server.js";
+import authService from "../../services/authService.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
+import usersUtils from "../../utils/users.js";
+import userData from "../fixtures/user/user.js";
+import { walletBodyKeys, walletKeys, walletDataKeys } from "../fixtures/wallet/wallet.js";
+import config from "config";
+
 const { expect } = chai;
-const chaiHttp = require("chai-http");
-
-const app = require("../../server");
-const authService = require("../../services/authService");
-
-const addUser = require("../utils/addUser");
-const cleanDb = require("../utils/cleanDb");
-const usersUtils = require("../../utils/users");
-
-const userData = require("../fixtures/user/user")();
-const { walletBodyKeys, walletKeys, walletDataKeys } = require("../fixtures/wallet/wallet");
-
 const defaultUser = userData[0];
 const newUser = userData[3];
 const superUser = userData[4];
 
-const config = require("config");
 const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);

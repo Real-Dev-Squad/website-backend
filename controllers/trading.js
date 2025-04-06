@@ -1,5 +1,7 @@
-const tradeService = require("../services/tradingService");
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+import tradeService from "../services/tradingService.js";
+import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
+import logger from "../utils/logger.js";
+
 /**
  * New Trading Request
  *
@@ -26,6 +28,4 @@ const trade = async (req, res) => {
   }
 };
 
-module.exports = {
-  trade,
-};
+export { trade };

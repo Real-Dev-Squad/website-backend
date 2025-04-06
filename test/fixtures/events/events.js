@@ -1,4 +1,4 @@
-module.exports = () => {
+export default () => {
   return [
     {
       template: "Video-Conferencing-Testing",

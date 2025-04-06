@@ -1,5 +1,5 @@
-const joi = require("joi");
-const { VALID_PROGRESS_TYPES, TYPE_MAP } = require("../../constants/progresses");
+import joi from "joi";
+import { VALID_PROGRESS_TYPES, TYPE_MAP } from "../../constants/progresses.js";
 
 const baseSchema = joi
   .object()
@@ -113,7 +113,7 @@ const validateGetTrackedProgressQueryParams = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   validateCreateTrackedProgressRecord,
   validateUpdateTrackedProgress,
   validateGetTrackedProgressQueryParams,

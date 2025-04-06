@@ -1,6 +1,7 @@
-const { expect } = require("chai");
-const { devFlagMiddleware } = require("../../../middlewares/devFlag");
-const sinon = require("sinon");
+import { expect } from "chai";
+import sinon from "sinon";
+
+import { devFlagMiddleware } from "../../../middlewares/devFlag.js";
 
 describe("devFlagMiddleware", function () {
   let req;

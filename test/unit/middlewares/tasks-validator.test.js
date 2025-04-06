@@ -1,19 +1,20 @@
-const Sinon = require("sinon");
-const {
+import { expect } from "chai";
+import sinon from "sinon";
+
+import {
   getTasksValidator,
   createTask,
   updateSelfTask,
   getUsersValidator,
-  updateTask: updateTaskValidator,
-} = require("../../../middlewares/validators/tasks");
-const { expect } = require("chai");
-const { TASK_STATUS, tasksUsersStatus } = require("../../../constants/tasks");
+  updateTask,
+} from "../../../middlewares/validators/tasks.js";
+import { TASK_STATUS, tasksUsersStatus } from "../../../constants/tasks.js";
 
 describe("getTasks validator", function () {
   it("should pass the request when no values for query params status is passed", async function () {
     const req = {};
     const res = {};
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
@@ -25,7 +26,7 @@ describe("getTasks validator", function () {
       },
     };
     const res = {};
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
@@ -37,7 +38,7 @@ describe("getTasks validator", function () {
       },
     };
     const res = {};
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
@@ -50,10 +51,10 @@ describe("getTasks validator", function () {
     };
     const res = {
       boom: {
-        badRequest: Sinon.spy(),
+        badRequest: sinon.spy(),
       },
     };
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
@@ -65,7 +66,7 @@ describe("getTasks validator", function () {
       },
     };
     const res = {};
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
@@ -78,10 +79,10 @@ describe("getTasks validator", function () {
     };
     const res = {
       boom: {
-        badRequest: Sinon.spy(),
+        badRequest: sinon.spy(),
       },
     };
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
@@ -94,10 +95,10 @@ describe("getTasks validator", function () {
     };
     const res = {
       boom: {
-        badRequest: Sinon.spy(),
+        badRequest: sinon.spy(),
       },
     };
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
@@ -109,7 +110,7 @@ describe("getTasks validator", function () {
       },
     };
     const res = {};
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
@@ -122,10 +123,10 @@ describe("getTasks validator", function () {
     };
     const res = {
       boom: {
-        badRequest: Sinon.spy(),
+        badRequest: sinon.spy(),
       },
     };
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
@@ -138,10 +139,10 @@ describe("getTasks validator", function () {
     };
     const res = {
       boom: {
-        badRequest: Sinon.spy(),
+        badRequest: sinon.spy(),
       },
     };
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
@@ -153,7 +154,7 @@ describe("getTasks validator", function () {
       },
     };
     const res = {};
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
@@ -167,10 +168,10 @@ describe("getTasks validator", function () {
     };
     const res = {
       boom: {
-        badRequest: Sinon.spy(),
+        badRequest: sinon.spy(),
       },
     };
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
@@ -184,10 +185,10 @@ describe("getTasks validator", function () {
     };
     const res = {
       boom: {
-        badRequest: Sinon.spy(),
+        badRequest: sinon.spy(),
       },
     };
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
@@ -201,10 +202,10 @@ describe("getTasks validator", function () {
     };
     const res = {
       boom: {
-        badRequest: Sinon.spy(),
+        badRequest: sinon.spy(),
       },
     };
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
@@ -218,7 +219,7 @@ describe("getTasks validator", function () {
       },
     };
     const res = {};
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
@@ -232,7 +233,7 @@ describe("getTasks validator", function () {
       },
     };
     const res = {};
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
@@ -246,7 +247,7 @@ describe("getTasks validator", function () {
       },
     };
     const res = {};
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
@@ -261,7 +262,7 @@ describe("getTasks validator", function () {
       },
     };
     const res = {};
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
@@ -282,7 +283,7 @@ describe("getTasks validator", function () {
         },
       },
     };
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
@@ -296,7 +297,7 @@ describe("getTasks validator", function () {
       },
     };
     const res = {};
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
     await getTasksValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
@@ -321,7 +322,7 @@ describe("getTasks validator", function () {
       },
     };
 
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
 
     try {
       await createTask(req, res, nextMiddlewareSpy);
@@ -345,7 +346,7 @@ describe("getTasks validator", function () {
       },
     };
 
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
 
     try {
       await createTask(req, res, nextMiddlewareSpy);
@@ -382,7 +383,7 @@ describe("getTasks validator", function () {
       },
     };
 
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
 
     try {
       await createTask(req, res, nextMiddlewareSpy);
@@ -415,7 +416,7 @@ describe("getTasks validator", function () {
         },
       },
     };
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
     try {
       await createTask(req, res, nextMiddlewareSpy);
       expect.fail("Should have thrown a bad request error");
@@ -425,94 +426,94 @@ describe("getTasks validator", function () {
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
 
-  it("should call nextMiddlewareSpy for updateTaskValidator if startedOn is null", async function () {
+  it("should call nextMiddlewareSpy for updateTask if startedOn is null", async function () {
     const req = {
       body: {
         startedOn: null,
         endsOn: new Date().getTime(),
       },
     };
-    const res = { boom: { badRequest: Sinon.spy() } };
-    const nextMiddlewareSpy = Sinon.spy();
-    await updateTaskValidator(req, res, nextMiddlewareSpy);
+    const res = { boom: { badRequest: sinon.spy() } };
+    const nextMiddlewareSpy = sinon.spy();
+    await updateTask(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
 
-  it("should call nextMiddlewareSpy for updateTaskValidator if endsOn is null", async function () {
+  it("should call nextMiddlewareSpy for updateTask if endsOn is null", async function () {
     const req = {
       body: {
         startedOn: new Date().getTime(),
         endsOn: null,
       },
     };
-    const res = { boom: { badRequest: Sinon.spy() } };
-    const nextMiddlewareSpy = Sinon.spy();
-    await updateTaskValidator(req, res, nextMiddlewareSpy);
+    const res = { boom: { badRequest: sinon.spy() } };
+    const nextMiddlewareSpy = sinon.spy();
+    await updateTask(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
 
-  it("should call nextMiddlewareSpy for updateTaskValidator if both startedOn and endsOn are null", async function () {
+  it("should call nextMiddlewareSpy for updateTask if both startedOn and endsOn are null", async function () {
     const req = {
       body: {
         startedOn: null,
         endsOn: null,
       },
     };
-    const res = { boom: { badRequest: Sinon.spy() } };
-    const nextMiddlewareSpy = Sinon.spy();
-    await updateTaskValidator(req, res, nextMiddlewareSpy);
+    const res = { boom: { badRequest: sinon.spy() } };
+    const nextMiddlewareSpy = sinon.spy();
+    await updateTask(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
 
-  it("should call nextMiddlewareSpy for updateTaskValidator if both startedOn and endsOn are valid number", async function () {
+  it("should call nextMiddlewareSpy for updateTask if both startedOn and endsOn are valid number", async function () {
     const req = {
       body: {
         startedOn: new Date("2023-11-15").getTime(),
         endsOn: new Date("2023-11-18").getTime(),
       },
     };
-    const res = { boom: { badRequest: Sinon.spy() } };
-    const nextMiddlewareSpy = Sinon.spy();
-    await updateTaskValidator(req, res, nextMiddlewareSpy);
+    const res = { boom: { badRequest: sinon.spy() } };
+    const nextMiddlewareSpy = sinon.spy();
+    await updateTask(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
 
-  it("should not call nextMiddlewareSpy for updateTaskValidator if startedOn is not null or a number", async function () {
+  it("should not call nextMiddlewareSpy for updateTask if startedOn is not null or a number", async function () {
     const req = {
       body: {
         startedOn: "December 6 2023",
         endsOn: new Date().getTime(),
       },
     };
-    const res = { boom: { badRequest: Sinon.spy() } };
-    const nextMiddlewareSpy = Sinon.spy();
-    await updateTaskValidator(req, res, nextMiddlewareSpy);
+    const res = { boom: { badRequest: sinon.spy() } };
+    const nextMiddlewareSpy = sinon.spy();
+    await updateTask(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
 
-  it("should not call nextMiddlewareSpy for updateTaskValidator if endsOn is not null or a number", async function () {
+  it("should not call nextMiddlewareSpy for updateTask if endsOn is not null or a number", async function () {
     const req = {
       body: {
         startedOn: new Date().getTime(),
         endsOn: true,
       },
     };
-    const res = { boom: { badRequest: Sinon.spy() } };
-    const nextMiddlewareSpy = Sinon.spy();
-    await updateTaskValidator(req, res, nextMiddlewareSpy);
+    const res = { boom: { badRequest: sinon.spy() } };
+    const nextMiddlewareSpy = sinon.spy();
+    await updateTask(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
 
-  it("should not call nextMiddlewareSpy for updateTaskValidator if both startedOn and endsOn is not null or a number", async function () {
+  it("should not call nextMiddlewareSpy for updateTask if both startedOn and endsOn is not null or a number", async function () {
     const req = {
       body: {
         startedOn: "December 6 2023",
         endsOn: true,
       },
     };
-    const res = { boom: { badRequest: Sinon.spy() } };
-    const nextMiddlewareSpy = Sinon.spy();
-    await updateTaskValidator(req, res, nextMiddlewareSpy);
+    const res = { boom: { badRequest: sinon.spy() } };
+    const nextMiddlewareSpy = sinon.spy();
+    await updateTask(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(0);
   });
 
@@ -526,7 +527,7 @@ describe("getTasks validator", function () {
         },
       };
       const res = {};
-      const nextMiddlewareSpy = Sinon.spy();
+      const nextMiddlewareSpy = sinon.spy();
       await getUsersValidator(req, res, nextMiddlewareSpy);
       expect(nextMiddlewareSpy.callCount).to.be.equal(1);
     });
@@ -540,7 +541,7 @@ describe("getTasks validator", function () {
         },
       };
       const res = {};
-      const nextMiddlewareSpy = Sinon.spy();
+      const nextMiddlewareSpy = sinon.spy();
       await getUsersValidator(req, res, nextMiddlewareSpy);
       expect(nextMiddlewareSpy.callCount).to.be.equal(1);
     });
@@ -552,7 +553,7 @@ describe("getTasks validator", function () {
         },
       };
       const res = {};
-      const nextMiddlewareSpy = Sinon.spy();
+      const nextMiddlewareSpy = sinon.spy();
       await getUsersValidator(req, res, nextMiddlewareSpy);
       expect(nextMiddlewareSpy.callCount).to.be.equal(1);
     });
@@ -565,10 +566,10 @@ describe("getTasks validator", function () {
       };
       const res = {
         boom: {
-          badRequest: Sinon.spy(),
+          badRequest: sinon.spy(),
         },
       };
-      const nextMiddlewareSpy = Sinon.spy();
+      const nextMiddlewareSpy = sinon.spy();
       await getUsersValidator(req, res, nextMiddlewareSpy);
       expect(nextMiddlewareSpy.callCount).to.be.equal(0);
       expect(res.boom.badRequest.callCount).to.be.equal(1);
@@ -582,10 +583,10 @@ describe("getTasks validator", function () {
       };
       const res = {
         boom: {
-          badRequest: Sinon.spy(),
+          badRequest: sinon.spy(),
         },
       };
-      const nextMiddlewareSpy = Sinon.spy();
+      const nextMiddlewareSpy = sinon.spy();
       await getUsersValidator(req, res, nextMiddlewareSpy);
       expect(nextMiddlewareSpy.callCount).to.be.equal(0);
       expect(res.boom.badRequest.callCount).to.be.equal(1);
@@ -599,10 +600,10 @@ describe("getTasks validator", function () {
       };
       const res = {
         boom: {
-          badRequest: Sinon.spy(),
+          badRequest: sinon.spy(),
         },
       };
-      const nextMiddlewareSpy = Sinon.spy();
+      const nextMiddlewareSpy = sinon.spy();
       await getUsersValidator(req, res, nextMiddlewareSpy);
       expect(nextMiddlewareSpy.callCount).to.be.equal(0);
       expect(res.boom.badRequest.callCount).to.be.equal(1);
@@ -618,10 +619,10 @@ describe("getTasks validator", function () {
       };
       const res = {
         boom: {
-          badRequest: Sinon.spy(),
+          badRequest: sinon.spy(),
         },
       };
-      const nextMiddlewareSpy = Sinon.spy();
+      const nextMiddlewareSpy = sinon.spy();
       await updateSelfTask(req, res, nextMiddlewareSpy);
       expect(nextMiddlewareSpy.callCount).to.be.equal(0);
     });

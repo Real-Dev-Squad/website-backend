@@ -1,18 +1,19 @@
-const express = require("express");
-const router = express.Router();
-const authenticate = require("../middlewares/authenticate");
-const authorizeRoles = require("../middlewares/authorizeRoles");
-const { SUPERUSER } = require("../constants/roles");
-const {
+import express from "express";
+import { SUPERUSER } from "../constants/roles.js";
+import {
   createTrackedProgressController,
-  updateTrackedProgressController,
   getTrackedProgressController,
-} = require("../controllers/monitor");
-const {
+  updateTrackedProgressController,
+} from "../controllers/monitor.js";
+import authenticate from "../middlewares/authenticate.js";
+import authorizeRoles from "../middlewares/authorizeRoles.js";
+import {
   validateCreateTrackedProgressRecord,
-  validateUpdateTrackedProgress,
   validateGetTrackedProgressQueryParams,
-} = require("../middlewares/validators/monitor");
+  validateUpdateTrackedProgress,
+} from "../middlewares/validators/monitor.js";
+
+const router = express.Router();
 
 router.post(
   "/",
@@ -32,4 +33,4 @@ router.patch(
 
 router.get("/", validateGetTrackedProgressQueryParams, getTrackedProgressController);
 
-module.exports = router;
+export default router;

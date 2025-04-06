@@ -1,17 +1,13 @@
-const firestore = require("../utils/firestore");
-const { getBeforeHourTime } = require("../utils/time");
+import firestore from "../utils/firestore.js";
+import { getBeforeHourTime } from "../utils/time.js";
+import admin from "firebase-admin";
+import { logType, ERROR_WHILE_FETCHING_LOGS } from "../constants/logs.js";
+import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
+import { getFullName, getUserId } from "../utils/users.js";
+import { getUsersListFromLogs, formatLogsForFeed, mapify, convertTimestamp, getTasksFromLogs } from "../utils/logs.js";
+import logger from "../utils/logger.js";
+
 const logsModel = firestore.collection("logs");
-const admin = require("firebase-admin");
-const { logType, ERROR_WHILE_FETCHING_LOGS } = require("../constants/logs");
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const { getFullName, getUserId } = require("../utils/users");
-const {
-  getUsersListFromLogs,
-  formatLogsForFeed,
-  mapify,
-  convertTimestamp,
-  getTasksFromLogs,
-} = require("../utils/logs");
 const SIZE = 25;
 
 /**
@@ -345,11 +341,4 @@ const updateLogs = async () => {
   }
 };
 
-module.exports = {
-  addLog,
-  fetchLogs,
-  fetchCacheLogs,
-  fetchLastAddedCacheLog,
-  fetchAllLogs,
-  updateLogs,
-};
+export { addLog, fetchLogs, fetchCacheLogs, fetchLastAddedCacheLog, fetchAllLogs, updateLogs };

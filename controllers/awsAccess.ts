@@ -1,7 +1,9 @@
 import { PROFILE_SVC_GITHUB_URL } from "../constants/urls";
+import logger from "../utils/logger.js";
 import {addUserToGroup, createUser, fetchAwsUserIdByUsername} from "../utils/awsFunctions";
-const dataAccess = require("../services/dataAccessLayer");
-const userDataLevels = require('../constants/userDataLevels');
+
+import * as dataAccess from "../services/dataAccessLayer";
+import * as userDataLevels from '../constants/userDataLevels';
 
 export const addUserToAWSGroup = async (req, res) => {
     const { groupId, userId } = req.body;

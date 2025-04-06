@@ -1,12 +1,14 @@
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const admin = require("firebase-admin");
-const config = require("config");
-const jwt = require("jsonwebtoken");
-const discordRolesModel = require("../models/discordactions");
-const discordServices = require("../services/discordService");
-const { fetchAllUsers, fetchUser } = require("../models/users");
-const { generateCloudFlareHeaders } = require("../utils/discord-actions");
-const { addLog } = require("../models/logs");
+import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
+import admin from "firebase-admin";
+import config from "config";
+import jwt from "jsonwebtoken";
+import discordRolesModel from "../models/discordactions.js";
+import discordServices from "../services/discordService.js";
+import { fetchAllUsers, fetchUser } from "../models/users.js";
+import { generateCloudFlareHeaders } from "../utils/discord-actions.js";
+import { addLog } from "../models/logs.js";
+import logger from "../utils/logger.js";
+
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 const discordMavenRoleId = config.get("discordMavenRoleId");
 
@@ -557,10 +559,11 @@ const getUserDiscordInvite = async (req, res) => {
   }
 };
 
-module.exports = {
-  getGroupsRoleId,
+export {
   createGroupRole,
+  deleteGroupRole,
   getPaginatedAllGroupRoles,
+  getGroupsRoleId,
   addGroupRoleToMember,
   deleteRole,
   updateDiscordImageForVerification,
@@ -570,7 +573,6 @@ module.exports = {
   updateUsersNicknameStatus,
   syncDiscordGroupRolesInFirestore,
   setRoleToUsersWith31DaysPlusOnboarding,
-  getUserDiscordInvite,
   generateInviteForUser,
-  deleteGroupRole,
+  getUserDiscordInvite,
 };

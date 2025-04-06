@@ -1,7 +1,7 @@
-const { expect } = require("chai");
-const sinon = require("sinon");
-const { dataAccessMiddleware } = require("../../../utils/data-access");
-const { SUPERUSER } = require("../../../constants/roles");
+import { expect } from "chai";
+import sinon from "sinon";
+import { dataAccessMiddleware } from "../../../utils/data-access.js";
+import { SUPERUSER } from "../../../constants/roles.js";
 
 describe("dataAccessMiddleware", function () {
   it("should remove sensitive fields from the response body based if the user does not have access", function () {

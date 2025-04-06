@@ -9,4 +9,4 @@ const { SUPERUSER } = require("../constants/roles");
 router.post("/", authenticate,  validateSubscribe, subscribe);
 router.patch("/", authenticate, unsubscribe);
 router.get("/notify", authenticate, authorizeRoles([SUPERUSER]), sendEmail);
-module.exports = router;
+export default  router;

@@ -1,12 +1,11 @@
-const chai = require("chai");
-const {
+import { expect } from "chai";
+import {
   getDateTimeRangeForPRs,
   getQualifiers,
   getPaginatedLink,
   findSubscribedGroupIds,
-} = require("../../../utils/helper");
-const { TASK_STATUS, TASK_SIZE } = require("../../../constants/tasks");
-const { expect } = chai;
+} from "../../../utils/helper.js";
+import { TASK_STATUS, TASK_SIZE } from "../../../constants/tasks.js";
 
 describe("helper", function () {
   describe("getDateTimeRangeForPRs", function () {

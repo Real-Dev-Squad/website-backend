@@ -9,4 +9,4 @@ router.get("/", auction.fetchAvailableAuctions);
 router.post("/bid/:id", authenticate, auctionValidator.placeBid, auction.makeNewBid);
 router.post("/", authenticate, auctionValidator.createAuction, auction.createNewAuction);
 
-module.exports = router;
+export default  router;

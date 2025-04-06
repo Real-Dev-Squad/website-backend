@@ -1,18 +1,13 @@
-const Sinon = require("sinon");
-const { expect } = require("chai");
-
-const firestore = require("../../../utils/firestore");
+import { expect } from "chai";
+import Sinon from "sinon";
+import firestore from "../../../utils/firestore.js";
+import cleanDb from "../../utils/cleanDb.js";
+import taskDataArray from "../../fixtures/tasks/tasks.js";
+import { fetchOrphanedTasks } from "../../../services/tasks.js";
+import { usersData, tasksData } from "../../fixtures/abandoned-tasks/departed-users.js";
+import * as tasks from "../../../models/tasks.js";
 const tasksModel = firestore.collection("tasks");
 const userModel = firestore.collection("users");
-const cleanDb = require("../../utils/cleanDb");
-const taskDataArray = require("../../fixtures/tasks/tasks")();
-const { fetchOrphanedTasks } = require("../../../services/tasks");
-const {
-  usersData: abandonedUsersData,
-  tasksData: abandonedTasksData,
-} = require("../../fixtures/abandoned-tasks/departed-users");
-const { updateTaskStatusToDone } = require("../../../models/tasks");
-const tasksQuery = require("../../../models/tasks");
 
 describe("Tasks services", function () {
   describe("task status COMPLETED to DONE in bulk", function () {
@@ -50,7 +45,7 @@ describe("Tasks services", function () {
     });
 
     it("successfully updated task status COMPLETED To DONE", async function () {
-      const res = await updateTaskStatusToDone(tasks);
+      const res = await tasks.updateTaskStatusToDone(tasks);
 
       expect(res).to.deep.equal({
         totalUpdatedStatus: 9,
@@ -69,7 +64,7 @@ describe("Tasks services", function () {
         },
       });
 
-      const res = await updateTaskStatusToDone(tasks);
+      const res = await tasks.updateTaskStatusToDone(tasks);
 
       expect(res).to.deep.equal({
         totalUpdatedStatus: 0,
@@ -84,10 +79,10 @@ describe("Tasks services", function () {
     beforeEach(async function () {
       await cleanDb();
 
-      const userPromises = abandonedUsersData.map((user) => userModel.doc(user.id).set(user));
+      const userPromises = usersData.map((user) => userModel.doc(user.id).set(user));
       await Promise.all(userPromises);
 
-      const taskPromises = abandonedTasksData.map((task) => tasksModel.add(task));
+      const taskPromises = tasksData.map((task) => tasksModel.add(task));
       await Promise.all(taskPromises);
     });
 
@@ -120,10 +115,10 @@ describe("Tasks services", function () {
     it("should handle case when no users are archived", async function () {
       await cleanDb();
 
-      const activeUser = abandonedUsersData[2];
+      const activeUser = usersData[2];
       await userModel.add(activeUser);
 
-      const activeTask = abandonedTasksData[3];
+      const activeTask = tasksData[3];
       await tasksModel.add(activeTask);
 
       const orphanedTasks = await fetchOrphanedTasks();
@@ -132,7 +127,7 @@ describe("Tasks services", function () {
     });
 
     it("should handle errors gracefully if getUsersWithIncompleteTasks fails", async function () {
-      Sinon.stub(tasksQuery, "fetchIncompleteTasksByUserIds").throws(new Error("Database query failed"));
+      Sinon.stub(tasks, "fetchIncompleteTasksByUserIds").throws(new Error("Database query failed"));
 
       try {
         await fetchOrphanedTasks();

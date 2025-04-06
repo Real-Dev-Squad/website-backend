@@ -10,4 +10,4 @@ const skipAuthorizeRolesUnderFF = (authorizeMiddleware) => {
   };
 };
 
-module.exports = skipAuthorizeRolesUnderFF;
+export default skipAuthorizeRolesUnderFF;

@@ -1,5 +1,5 @@
-const firestore = require("../utils/firestore");
-const { Conflict } = require("http-errors");
+import firestore from "../utils/firestore.js";
+import { Conflict } from "http-errors";
 
 const fcmTokenModel = firestore.collection("fcmToken");
 
@@ -37,4 +37,4 @@ const saveFcmToken = async (fcmTokenData) => {
   }
 };
 
-module.exports = { saveFcmToken };
+export { saveFcmToken };

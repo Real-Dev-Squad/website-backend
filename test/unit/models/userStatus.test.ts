@@ -1,16 +1,16 @@
-import { userFutureStatusData } from "../../fixtures/userFutureStatus/userFutureStatusData";
-const chai = require("chai");
-const sinon = require("sinon");
-const { NotFound, Forbidden } = require("http-errors");
-const { expect } = chai;
-const firestore = require("../../../utils/firestore");
+import { userFutureStatusData } from "../../fixtures/userFutureStatus/userFutureStatusData.js";
+import { expect } from "chai";
+import sinon from "sinon";
+import { NotFound, Forbidden } from "http-errors";
+import firestore from "../../../utils/firestore.js";
+import { cancelOooStatus, addFutureStatus } from "../../../models/userStatus.js";
+import cleanDb from "../../utils/cleanDb.js";
+import addUser from "../../utils/addUser.js";
+import { userState } from "../../../constants/userStatus.js";
+import { generateStatusDataForCancelOOO, generateDefaultFutureStatus } from "../../fixtures/userStatus/userStatus.js";
+
 const userStatusModel = firestore.collection("usersStatus");
 const tasksModel = firestore.collection("tasks");
-const { cancelOooStatus, addFutureStatus } = require("../../../models/userStatus");
-const cleanDb = require("../../utils/cleanDb");
-const addUser = require("../../utils/addUser");
-const { userState } = require("../../../constants/userStatus");
-const { generateStatusDataForCancelOOO, generateDefaultFutureStatus } = require("../../fixtures/userStatus/userStatus");
 
 describe("tasks", function () {
   let userId;

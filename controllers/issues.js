@@ -1,7 +1,9 @@
-const issuesService = require("../services/issuesService");
-const tasks = require("../models/tasks");
-const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
-const githubService = require("../services/githubService");
+import issuesService from "../services/issuesService.js";
+import tasks from "../models/tasks.js";
+import { SOMETHING_WENT_WRONG } from "../constants/errorMessages.js";
+import githubService from "../services/githubService.js";
+import config from "config";
+import logger from "../utils/logger.js";
 
 /**
  * Get the issues of the repo
@@ -9,7 +11,7 @@ const githubService = require("../services/githubService");
  * @param {Object} res - Express response object
  */
 
-const getIssues = async (req, res) => {
+export const getIssues = async (req, res) => {
   try {
     const { q: queryString } = req.query;
     let issues = {};
@@ -56,7 +58,7 @@ const getIssues = async (req, res) => {
  * @param {Object} req - Express request object
  * @param {Object} res - Express response object
  */
-const issueUpdates = async (req, res) => {
+export const issueUpdates = async (req, res) => {
   try {
     const response = req.body;
     if ("issue" in response) {
@@ -107,9 +109,4 @@ const issueUpdates = async (req, res) => {
     logger.error(`Error while retriving issues ${err}`);
     return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
-};
-
-module.exports = {
-  getIssues,
-  issueUpdates,
 };

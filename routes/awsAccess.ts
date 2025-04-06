@@ -5,4 +5,4 @@ const { verifyDiscordBot } = require("../middlewares/authorizeBot");
 
 router.post("/access", verifyDiscordBot, addUserToAWSGroup);
 
-module.exports = router;
+export default  router;

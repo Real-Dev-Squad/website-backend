@@ -1,4 +1,4 @@
-const { EventAPIService } = require("../services/EventAPIService");
-const { EventTokenService } = require("../services/EventTokenService");
+import { EventAPIService } from "./EventAPIService.js";
+import { EventTokenService } from "./EventTokenService.js";
 
-module.exports = { EventAPIService, EventTokenService };
+export { EventAPIService, EventTokenService };

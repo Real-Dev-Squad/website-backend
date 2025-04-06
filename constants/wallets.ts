@@ -1,7 +1,5 @@
-module.exports = {
-  DINERO: "dinero",
-  NEELAM: "neelam",
-  INITIAL_WALLET: {
-    dinero: 1000,
-  },
+export const DINERO = "dinero";
+export const NEELAM = "neelam";
+export const INITIAL_WALLET = {
+  dinero: 1000,
 };

@@ -1,20 +1,20 @@
-const chai = require("chai");
-const sinon = require("sinon");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
-const passport = require("passport");
-const app = require("../../server");
-const cleanDb = require("../utils/cleanDb");
-const { generateGithubAuthRedirectUrl } = require("..//utils/github");
-const { generateGoogleAuthRedirectUrl, stubPassportAuthenticate } = require("..//utils/googleauth");
-const { addUserToDBForTest } = require("../../utils/users");
-const userData = require("../fixtures/user/user")();
-
-chai.use(chaiHttp);
+import chai from "chai";
+import sinon from "sinon";
+import chaiHttp from "chai-http";
+import passport from "passport";
+import app from "../../server.js";
+import cleanDb from "../utils/cleanDb.js";
+import { generateGithubAuthRedirectUrl } from "../utils/github.js";
+import { generateGoogleAuthRedirectUrl, stubPassportAuthenticate } from "../utils/googleauth.js";
+import { addUserToDBForTest } from "../../utils/users.js";
+import userData from "../fixtures/user/user.js";
 
 // Import fixtures
-const githubUserInfo = require("../fixtures/auth/githubUserInfo")();
-const googleUserInfo = require("../fixtures/auth/googleUserInfo")();
+import githubUserInfo from "../fixtures/auth/githubUserInfo.js";
+import googleUserInfo from "../fixtures/auth/googleUserInfo.js";
+const { expect } = chai;
+
+chai.use(chaiHttp);
 
 describe("auth", function () {
   afterEach(async function () {

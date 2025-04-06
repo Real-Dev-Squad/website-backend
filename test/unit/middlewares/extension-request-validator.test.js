@@ -1,12 +1,14 @@
-const Sinon = require("sinon");
-const { getExtensionRequestsValidator } = require("../../../middlewares/validators/extensionRequests");
-const { expect } = require("chai");
+import { expect } from "chai";
+import sinon from "sinon";
+
+import { getExtensionRequestsValidator } from "../../../middlewares/validators/extensionRequests.js";
+
 describe("getExtensionRequestsValidator", function () {
   it("should pass the request when no values for query params is passed", async function () {
     const req = { query: {} };
 
     const res = {};
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
     await getExtensionRequestsValidator(req, res, nextMiddlewareSpy);
     expect(nextMiddlewareSpy.callCount).to.be.equal(1);
   });
@@ -18,7 +20,7 @@ describe("getExtensionRequestsValidator", function () {
       },
     };
     const res = {};
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
 
     await getExtensionRequestsValidator(req, res, nextMiddlewareSpy);
 
@@ -35,7 +37,7 @@ describe("getExtensionRequestsValidator", function () {
       },
     };
     const res = {};
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
 
     await getExtensionRequestsValidator(req, res, nextMiddlewareSpy);
 
@@ -49,7 +51,7 @@ describe("getExtensionRequestsValidator", function () {
       },
     };
     const res = {};
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
 
     await getExtensionRequestsValidator(req, res, nextMiddlewareSpy);
 
@@ -64,10 +66,10 @@ describe("getExtensionRequestsValidator", function () {
     };
     const res = {
       boom: {
-        badRequest: Sinon.spy(),
+        badRequest: sinon.spy(),
       },
     };
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
 
     await getExtensionRequestsValidator(req, res, nextMiddlewareSpy);
 
@@ -83,10 +85,10 @@ describe("getExtensionRequestsValidator", function () {
     };
     const res = {
       boom: {
-        badRequest: Sinon.spy(),
+        badRequest: sinon.spy(),
       },
     };
-    const nextMiddlewareSpy = Sinon.spy();
+    const nextMiddlewareSpy = sinon.spy();
 
     await getExtensionRequestsValidator(req, res, nextMiddlewareSpy);
 

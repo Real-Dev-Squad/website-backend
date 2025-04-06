@@ -1,21 +1,27 @@
-const express = require("express");
-const { SUPERUSER } = require("../constants/roles");
+import express from "express";
+import { SUPERUSER } from "../constants/roles.js";
+import taskRequests from "../controllers/tasksRequests.js";
+import authenticate from "../middlewares/authenticate.js";
+import authorizeRoles from "../middlewares/authorizeRoles.js";
+import validators from "../middlewares/validators/task-requests.js";
+
 const router = express.Router();
-const authenticate = require("../middlewares/authenticate");
-const authorizeRoles = require("../middlewares/authorizeRoles");
-const taskRequests = require("../controllers/tasksRequests");
-const { validateUser } = require("../middlewares/taskRequests");
-const validators = require("../middlewares/validators/task-requests");
 
-router.get("/", authenticate, taskRequests.fetchTaskRequests);
-router.get("/:id", authenticate, taskRequests.fetchTaskRequestById);
-router.patch("/", authenticate, authorizeRoles([SUPERUSER]), validateUser, taskRequests.updateTaskRequests);
-router.post("/", authenticate, validators.postTaskRequests, taskRequests.addTaskRequests);
+router.get("/", authenticate, authorizeRoles([SUPERUSER]), taskRequests.getTaskRequests);
+router.post(
+  "/",
+  authenticate,
+  authorizeRoles([SUPERUSER]),
+  validators.validateTaskRequest,
+  taskRequests.createTaskRequest
+);
+router.put(
+  "/:id",
+  authenticate,
+  authorizeRoles([SUPERUSER]),
+  validators.validateTaskRequest,
+  taskRequests.updateTaskRequest
+);
+router.delete("/:id", authenticate, authorizeRoles([SUPERUSER]), taskRequests.deleteTaskRequest);
 
-router.post("/migrations", authenticate, authorizeRoles([SUPERUSER]), taskRequests.migrateTaskRequests);
-
-// Deprecated | @Ajeyakrishna-k | https://github.com/Real-Dev-Squad/website-backend/issues/1597
-router.post("/addOrUpdate", authenticate, validateUser, taskRequests.addOrUpdate);
-router.patch("/approve", authenticate, authorizeRoles([SUPERUSER]), validateUser, taskRequests.updateTaskRequests);
-
-module.exports = router;
+export default router;

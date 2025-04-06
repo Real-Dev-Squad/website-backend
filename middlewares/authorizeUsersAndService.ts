@@ -3,10 +3,11 @@ import { verifyCronJob, verifyDiscordBot } from "./authorizeBot";
 import { CustomRequest, CustomResponse } from "../types/global";
 import { NextFunction } from "express";
 import authenticate from "./authenticate";
-import authorizeRoles from "./authorizeRoles";
-const { Services } = require("../constants/bot");
-const ROLES = require("../constants/roles");
-const { INTERNAL_SERVER_ERROR_MESSAGE } = require("../constants/progresses");
+import { authorizeRoles } from "./authorizeRoles";
+import logger from "../utils/logger.js";
+import { Services } from "../constants/bot";
+import { ROLES } from "../constants/roles";
+import { INTERNAL_SERVER_ERROR_MESSAGE } from "../constants/progresses";
 
 export const authorizeAndAuthenticate = (allowedRoles: string[], allowedServices: string[]) => {
   const isRolesValid = allowedRoles.every((role) => Object.values(ROLES).includes(role));

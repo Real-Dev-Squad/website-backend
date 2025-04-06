@@ -7,4 +7,4 @@ import authinticateServiceRequest from "../middlewares/authinticateServiceReques
 router.post("/",authinticateServiceRequest, createInviteValidator, createInviteLink);
 router.get("/:userId" ,authinticateServiceRequest, getInviteLink);
 
-module.exports = router;
+export default  router;

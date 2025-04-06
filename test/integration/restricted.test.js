@@ -1,15 +1,16 @@
-const chai = require("chai");
+import chai from "chai";
+import chaiHttp from "chai-http";
+import config from "config";
+import sinon from "sinon";
+
+import app from "../../server.js";
+import { generateAuthToken } from "../../services/authService.js";
+import cleanDb from "../utils/cleanDb.js";
+import userData from "../fixtures/user/user.js";
+import addUser from "../utils/addUser.js";
+import { getDiscordMembers } from "../fixtures/discordResponse/discord-response.js";
+
 const { expect } = chai;
-const chaiHttp = require("chai-http");
-
-const app = require("../../server");
-const authService = require("../../services/authService");
-const cleanDb = require("../utils/cleanDb");
-const userData = require("../fixtures/user/user")();
-const addUser = require("../utils/addUser");
-const sinon = require("sinon");
-const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
-
 const cookieName = config.get("userToken.cookieName");
 const unrestrictedUser = userData[0];
 const restrictedUser = userData[2];
@@ -24,8 +25,8 @@ describe("checkRestrictedUser", function () {
   before(async function () {
     const restrictedUserId = await addUser(restrictedUser);
     const unrestrictedUserId = await addUser(unrestrictedUser);
-    restrictedJwt = authService.generateAuthToken({ userId: restrictedUserId });
-    unrestrictedJwt = authService.generateAuthToken({ userId: unrestrictedUserId });
+    restrictedJwt = generateAuthToken({ userId: restrictedUserId });
+    unrestrictedJwt = generateAuthToken({ userId: unrestrictedUserId });
 
     fetchStub = sinon.stub(global, "fetch");
     fetchStub.returns(

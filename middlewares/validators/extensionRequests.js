@@ -1,7 +1,7 @@
-const joi = require("joi");
-const { EXTENSION_REQUEST_STATUS } = require("../../constants/extensionRequests");
-const { parseQueryParams } = require("../../utils/queryParser");
-const { URLSearchParams } = require("url");
+import joi from "joi";
+import { EXTENSION_REQUEST_STATUS } from "../../constants/extensionRequests.js";
+import { parseQueryParams } from "../../utils/queryParser.js";
+import { URLSearchParams } from "url";
 
 const ER_STATUS_ENUM = Object.values(EXTENSION_REQUEST_STATUS);
 
@@ -106,7 +106,7 @@ const getExtensionRequestsValidator = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   createExtensionRequest,
   updateExtensionRequest,
   updateExtensionRequestStatus,

@@ -6,7 +6,7 @@
 const port = 3000;
 const localUrl = `http://localhost:${port}`;
 
-module.exports = {
+export default {
   port: port,
   enableFileLogs: false,
   enableConsoleLogs: true,

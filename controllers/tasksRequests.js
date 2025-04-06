@@ -1,11 +1,12 @@
-const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
-const { TASK_REQUEST_TYPE, MIGRATION_TYPE, TASK_REQUEST_ACTIONS } = require("../constants/taskRequests");
-const { addLog } = require("../models/logs");
-const taskRequestsModel = require("../models/taskRequests");
-const tasksModel = require("../models/tasks.js");
-const { updateUserStatusOnTaskUpdate } = require("../models/userStatus");
-const githubService = require("../services/githubService");
-const usersUtils = require("../utils/users");
+import { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } from "../constants/errorMessages.js";
+import { TASK_REQUEST_TYPE, MIGRATION_TYPE, TASK_REQUEST_ACTIONS } from "../constants/taskRequests.js";
+import { addLog } from "../models/logs.js";
+import taskRequestsModel from "../models/taskRequests.js";
+import tasksModel from "../models/tasks.js";
+import { updateUserStatusOnTaskUpdate } from "../models/userStatus.js";
+import githubService from "../services/githubService.js";
+import usersUtils from "../utils/users.js";
+import logger from "../utils/logger.js";
 
 const fetchTaskRequests = async (_, res) => {
   try {
@@ -248,15 +249,16 @@ const migrateTaskRequests = async (req, res) => {
     }
     return res.json({ message: "Task requests migration successful", ...responseData });
   } catch (err) {
-    logger.error("Error in migration scripts", err);
+    logger.error("Error while migrating task requests", err);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
-module.exports = {
-  updateTaskRequests,
-  addOrUpdate,
+
+export {
   fetchTaskRequests,
   fetchTaskRequestById,
   addTaskRequests,
+  addOrUpdate,
+  updateTaskRequests,
   migrateTaskRequests,
 };

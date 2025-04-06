@@ -1,8 +1,9 @@
-const { NotFound } = require("http-errors");
-const fireStore = require("./firestore");
-const trackedProgressesCollection = fireStore.collection("trackedProgresses");
-const { RESPONSE_MESSAGES } = require("../constants/monitor");
+import { NotFound } from "http-errors";
+import fireStore from "./firestore.js";
+import { RESPONSE_MESSAGES } from "../constants/monitor.js";
+
 const { RESOURCE_NOT_FOUND } = RESPONSE_MESSAGES;
+const trackedProgressesCollection = fireStore.collection("trackedProgresses");
 
 /**
  * Builds a Firestore query based on the provided query parameters.
@@ -56,7 +57,7 @@ const getTrackedProgressDocs = async (query) => {
   return docsData;
 };
 
-module.exports = {
+export default {
   buildQueryByTypeId,
   buildQueryForFetchingDocsOfType,
   getTrackedProgressDocs,

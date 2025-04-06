@@ -1,19 +1,19 @@
-const express = require("express");
+import express from "express";
+import authorizeBot from "../middlewares/authorizeBot.js";
+import validator from "../middlewares/validators/external-accounts.js";
+import externalAccount from "../controllers/external-accounts.js";
+import authenticate from "../middlewares/authenticate.js";
+import authorizeRoles from "../middlewares/authorizeRoles.js";
+import { ROLES } from "../constants/roles.js";
+import { Services } from "../constants/bot.js";
+import { authorizeAndAuthenticate } from "../middlewares/authorizeUsersAndService.js";
+
 const router = express.Router();
-const authorizeBot = require("../middlewares/authorizeBot");
-const validator = require("../middlewares/validators/external-accounts");
-const externalAccount = require("../controllers/external-accounts");
-const authenticate = require("../middlewares/authenticate");
-const authorizeRoles = require("../middlewares/authorizeRoles");
-const { SUPERUSER } = require("../constants/roles");
-const ROLES = require("../constants/roles");
-const { Services } = require("../constants/bot");
-const { authorizeAndAuthenticate } = require("../middlewares/authorizeUsersAndService");
 
 router.post("/", validator.externalAccountData, authorizeBot.verifyDiscordBot, externalAccount.addExternalAccountData);
 router.get("/:token", authenticate, externalAccount.getExternalAccountData);
 router.patch("/link/:token", authenticate, validator.linkDiscord, externalAccount.linkExternalAccount);
-router.patch("/discord-sync", authenticate, authorizeRoles([SUPERUSER]), externalAccount.syncExternalAccountData);
+router.patch("/discord-sync", authenticate, authorizeRoles([ROLES.SUPERUSER]), externalAccount.syncExternalAccountData);
 router.post(
   "/users",
   authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]),
@@ -21,4 +21,4 @@ router.post(
   externalAccount.externalAccountsUsersPostHandler
 );
 
-module.exports = router;
+export default router;

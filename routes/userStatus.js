@@ -1,5 +1,5 @@
-const express = require("express");
-const {
+import express from "express";
+import {
   deleteUserStatus,
   getUserStatus,
   updateUserStatuses,
@@ -7,19 +7,19 @@ const {
   batchUpdateUsersStatus,
   getUserStatusControllers,
   updateUserStatusController,
-} = require("../controllers/userStatus");
-const router = express.Router();
-const authenticate = require("../middlewares/authenticate");
-const authorizeRoles = require("../middlewares/authorizeRoles");
-const { SUPERUSER } = require("../constants/roles");
-const {
+} from "../controllers/userStatus.js";
+import authenticate from "../middlewares/authenticate.js";
+import authorizeRoles from "../middlewares/authorizeRoles.js";
+import {
   validateUserStatus,
   validateMassUpdate,
   validateGetQueryParams,
-} = require("../middlewares/validators/userStatus");
-const { authorizeAndAuthenticate } = require("../middlewares/authorizeUsersAndService");
-const ROLES = require("../constants/roles");
-const { Services } = require("../constants/bot");
+} from "../middlewares/validators/userStatus.js";
+import { authorizeAndAuthenticate } from "../middlewares/authorizeUsersAndService.js";
+import { ROLES } from "../constants/roles.js";
+import { Services } from "../constants/bot.js";
+
+const router = express.Router();
 
 router.get("/", validateGetQueryParams, getUserStatusControllers);
 router.get("/self", authenticate, getUserStatus);
@@ -33,6 +33,6 @@ router.patch(
   batchUpdateUsersStatus
 );
 router.patch("/:userId", authenticate, validateUserStatus, updateUserStatuses);
-router.delete("/:userId", authenticate, authorizeRoles([SUPERUSER]), deleteUserStatus);
+router.delete("/:userId", authenticate, authorizeRoles([ROLES.SUPERUSER]), deleteUserStatus);
 
-module.exports = router;
+export default router;

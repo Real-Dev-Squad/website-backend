@@ -1,6 +1,9 @@
-const firestore = require("../utils/firestore");
-const { fetchAllUsers } = require("../models/users");
-const { generateAuthTokenForCloudflare, generateCloudFlareHeaders } = require("../utils/discord-actions");
+import firestore from "../utils/firestore.js";
+import { fetchAllUsers } from "../models/users.js";
+import { generateAuthTokenForCloudflare, generateCloudFlareHeaders } from "../utils/discord-actions.js";
+import config from "config";
+import logger from "../utils/logger.js";
+
 const userModel = firestore.collection("users");
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 
@@ -117,7 +120,6 @@ const setUserDiscordNickname = async (userName, discordId) => {
  * @returns {Promise<Object>} The response from the Discord API
  * @throws {Error} If the deletion fails or there's a network error
  */
-
 const deleteGroupRoleFromDiscord = async (roleId) => {
   try {
     const authToken = generateAuthTokenForCloudflare();
@@ -140,7 +142,7 @@ const deleteGroupRoleFromDiscord = async (roleId) => {
   }
 };
 
-module.exports = {
+export {
   getDiscordMembers,
   getDiscordRoles,
   setInDiscordFalseScript,

@@ -4,4 +4,4 @@ const profileDiffStatus = {
   PENDING: "PENDING",
 };
 
-module.exports = { profileDiffStatus };
+export { profileDiffStatus };

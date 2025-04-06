@@ -1,9 +1,10 @@
-const Sinon = require("sinon");
-const { expect } = require("chai");
-const authMiddleware = require("../../../middlewares/authenticate");
-const authService = require("../../../services/authService");
-const dataAccess = require("../../../services/dataAccessLayer");
-const config = require("config");
+import { expect } from "chai";
+import sinon from "sinon";
+
+import config from "config";
+import authService from "../../../services/authService.js";
+import dataAccess from "../../../services/dataAccessLayer.js";
+import authMiddleware from "../../../middlewares/authenticate.js";
 
 describe("Authentication Middleware", function () {
   let req, res, nextSpy;
@@ -16,24 +17,24 @@ describe("Authentication Middleware", function () {
       headers: {},
     };
     res = {
-      cookie: Sinon.spy(),
+      cookie: sinon.spy(),
       boom: {
-        unauthorized: Sinon.spy(),
-        forbidden: Sinon.spy(),
+        unauthorized: sinon.spy(),
+        forbidden: sinon.spy(),
       },
     };
-    nextSpy = Sinon.spy();
+    nextSpy = sinon.spy();
   });
 
   afterEach(function () {
-    Sinon.restore();
+    sinon.restore();
   });
 
   describe("Token Verification", function () {
     it("should allow unrestricted user with valid token", async function () {
       const user = { id: "user123", roles: { restricted: false } };
-      const verifyAuthTokenStub = Sinon.stub(authService, "verifyAuthToken").returns({ userId: user.id });
-      const retrieveUsersStub = Sinon.stub(dataAccess, "retrieveUsers").resolves({ user });
+      const verifyAuthTokenStub = sinon.stub(authService, "verifyAuthToken").returns({ userId: user.id });
+      const retrieveUsersStub = sinon.stub(dataAccess, "retrieveUsers").resolves({ user });
 
       await authMiddleware(req, res, nextSpy);
 
@@ -53,8 +54,8 @@ describe("Authentication Middleware", function () {
     it("should deny restricted user access for non-GET requests", async function () {
       req.method = "POST";
       const user = { id: "user123", roles: { restricted: true } };
-      const verifyAuthTokenStub = Sinon.stub(authService, "verifyAuthToken").returns({ userId: user.id });
-      const retrieveUsersStub = Sinon.stub(dataAccess, "retrieveUsers").resolves({ user });
+      const verifyAuthTokenStub = sinon.stub(authService, "verifyAuthToken").returns({ userId: user.id });
+      const retrieveUsersStub = sinon.stub(dataAccess, "retrieveUsers").resolves({ user });
 
       await authMiddleware(req, res, nextSpy);
 
@@ -73,7 +74,7 @@ describe("Authentication Middleware", function () {
 
     it("should deny access with invalid token", async function () {
       req.cookies[config.get("userToken.cookieName")] = "invalidToken";
-      const verifyAuthTokenStub = Sinon.stub(authService, "verifyAuthToken").throws(new Error("Invalid token"));
+      const verifyAuthTokenStub = sinon.stub(authService, "verifyAuthToken").throws(new Error("Invalid token"));
 
       await authMiddleware(req, res, nextSpy);
 
@@ -100,7 +101,7 @@ describe("Authentication Middleware", function () {
     });
 
     it("should handle unexpected errors gracefully", async function () {
-      const verifyAuthTokenStub = Sinon.stub(authService, "verifyAuthToken").throws(new Error("Unexpected error"));
+      const verifyAuthTokenStub = sinon.stub(authService, "verifyAuthToken").throws(new Error("Unexpected error"));
 
       await authMiddleware(req, res, nextSpy);
 

@@ -1,4 +1,4 @@
-const { addOrUpdate, getUsersByRole } = require("../models/users");
+import * as usersModel from "../models/users.js";
 
 const updateRoles = async (req, res) => {
   try {
@@ -9,7 +9,7 @@ const updateRoles = async (req, res) => {
       });
     }
     const userId = req.userData.id;
-    await addOrUpdate(
+    await usersModel.addOrUpdate(
       {
         roles: {
           ...userData.roles,
@@ -38,12 +38,12 @@ const removePrivileges = async (req, res) => {
   }
   try {
     const updateUserPromises = [];
-    const members = await getUsersByRole("member");
-    const superUsers = await getUsersByRole("super_user");
+    const members = await usersModel.getUsersByRole("member");
+    const superUsers = await usersModel.getUsersByRole("super_user");
 
     members.forEach((member) => {
       updateUserPromises.push(
-        addOrUpdate(
+        usersModel.addOrUpdate(
           {
             roles: {
               ...member.roles,
@@ -57,7 +57,7 @@ const removePrivileges = async (req, res) => {
     });
     superUsers.forEach((superUser) => {
       updateUserPromises.push(
-        addOrUpdate(
+        usersModel.addOrUpdate(
           {
             roles: {
               ...superUser.roles,
@@ -83,7 +83,4 @@ const removePrivileges = async (req, res) => {
   }
 };
 
-module.exports = {
-  updateRoles,
-  removePrivileges,
-};
+export { updateRoles, removePrivileges };

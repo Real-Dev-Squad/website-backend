@@ -1,8 +1,7 @@
-const { Conflict, NotFound } = require("http-errors");
-const fireStore = require("../utils/firestore");
-const progressesCollection = fireStore.collection("progresses");
-const { PROGRESSES_RESPONSE_MESSAGES, TYPE_MAP } = require("../constants/progresses");
-const {
+import { Conflict, NotFound } from "http-errors";
+import fireStore from "../utils/firestore.js";
+import { PROGRESSES_RESPONSE_MESSAGES, TYPE_MAP } from "../constants/progresses.js";
+import {
   buildQueryToFetchDocs,
   getProgressDocs,
   buildRangeProgressQuery,
@@ -14,8 +13,10 @@ const {
   buildQueryToSearchProgressByDay,
   buildQueryToFetchPaginatedDocs,
   getPaginatedProgressDocs,
-} = require("../utils/progresses");
-const { retrieveUsers } = require("../services/dataAccessLayer");
+} from "../utils/progresses.js";
+import { retrieveUsers } from "../services/dataAccessLayer.js";
+
+const progressesCollection = fireStore.collection("progresses");
 const { PROGRESS_ALREADY_CREATED, PROGRESS_DOCUMENT_NOT_FOUND } = PROGRESSES_RESPONSE_MESSAGES;
 
 /**
@@ -146,7 +147,7 @@ const addUserDetailsToProgressDocs = async (progressDocs) => {
   }
 };
 
-module.exports = {
+export {
   createProgressDocument,
   getProgressDocument,
   getPaginatedProgressDocument,

@@ -1,5 +1,5 @@
-const joi = require("joi");
-const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../../constants/external-accounts");
+import joi from "joi";
+import { EXTERNAL_ACCOUNTS_POST_ACTIONS } from "../../constants/external-accounts.js";
 
 const externalAccountData = async (req, res, next) => {
   const schema = joi
@@ -64,4 +64,4 @@ const linkDiscord = async (req, res, next) => {
   }
 };
 
-module.exports = { externalAccountData, postExternalAccountsUsers, linkDiscord };
+export default { externalAccountData, postExternalAccountsUsers, linkDiscord };

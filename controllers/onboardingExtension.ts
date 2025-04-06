@@ -34,6 +34,7 @@ import { convertDateStringToMilliseconds, getNewDeadline } from "../utils/reques
 import { convertDaysToMilliseconds } from "../utils/time";
 import firestore from "../utils/firestore";
 import { updateOnboardingExtensionRequest, validateOnboardingExtensionUpdateRequest } from "../services/onboardingExtension";
+import logger from "../utils/logger.js";
 const requestModel = firestore.collection("requests");
 
 /**

@@ -1,6 +1,6 @@
-const auctions = require("../models/auctions");
-const wallet = require("../models/wallets");
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+import auctions from "../models/auctions.js";
+import wallet from "../models/wallets.js";
+import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
 
 /**
  * Fetches all the active (ongoing) auctions
@@ -89,7 +89,7 @@ const makeNewBid = async (req, res) => {
   }
 };
 
-module.exports = {
+export default {
   fetchAuctionById,
   fetchAvailableAuctions,
   createNewAuction,

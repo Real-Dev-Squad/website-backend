@@ -6,4 +6,4 @@ function assertUserIds(users: any, ids: any) {
     expect(users.some((user: { id: any }) => user.id === id)).to.be.true;
   });
 }
-module.exports = { assertUserIds };
+export default { assertUserIds };

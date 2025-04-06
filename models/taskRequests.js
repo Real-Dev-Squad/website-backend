@@ -1,4 +1,4 @@
-const {
+import {
   TASK_REQUEST_STATUS,
   TASK_REQUEST_TYPE,
   TASK_REQUEST_FILTER_KEYS,
@@ -6,17 +6,18 @@ const {
   TASK_REQUEST_SORT_KEYS,
   TASK_REQUEST_SORT_VALUES,
   TASK_REQUEST_ERROR_MESSAGE,
-} = require("../constants/taskRequests");
-const { TASK_TYPE, TASK_STATUS, DEFAULT_TASK_PRIORITY } = require("../constants/tasks");
-const { Operators } = require("../typeDefinitions/rqlParser");
-const { RQLQueryParser } = require("../utils/RQLParser");
-const firestore = require("../utils/firestore");
-const { buildTaskRequests, generateLink, transformTaskRequests } = require("../utils/task-requests");
-const { getCurrentEpochTime } = require("../utils/time");
-const { convertMillisToSeconds } = require("../utils/time");
+} from "../constants/taskRequests.js";
+import { TASK_TYPE, TASK_STATUS, DEFAULT_TASK_PRIORITY } from "../constants/tasks.js";
+import { Operators } from "../typeDefinitions/rqlParser.js";
+import { RQLQueryParser } from "../utils/RQLParser.js";
+import firestore from "../utils/firestore.js";
+import { buildTaskRequests, generateLink, transformTaskRequests } from "../utils/task-requests.js";
+import { getCurrentEpochTime, convertMillisToSeconds } from "../utils/time.js";
+import * as tasksModel from "./tasks.js";
+import * as userModel from "./users.js";
+import config from "config";
+
 const taskRequestsCollection = firestore.collection("taskRequests");
-const tasksModel = require("./tasks");
-const userModel = require("./users");
 const tasksCollection = firestore.collection("tasks");
 
 /**
@@ -580,15 +581,15 @@ const removeOldField = async () => {
   return { documentsModified, totalDocuments };
 };
 
-module.exports = {
-  createRequest,
+export {
   fetchTaskRequests,
+  fetchPaginatedTaskRequests,
   fetchTaskRequestById,
+  createRequest,
   addOrUpdate,
   approveTaskRequest,
-  fetchPaginatedTaskRequests,
-  addNewFields,
-  removeOldField,
-  addUsersCountAndCreatedAt,
   rejectTaskRequest,
+  addNewFields,
+  addUsersCountAndCreatedAt,
+  removeOldField,
 };

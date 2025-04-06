@@ -1,13 +1,15 @@
-const sinon = require("sinon");
-const {
+import { expect } from "chai";
+import sinon from "sinon";
+
+import {
+  getUsers,
+  updateUser,
   validateJoinData,
   validateUsersPatchHandler,
   validateGenerateUsernameQuery,
-} = require("./../../../middlewares/validators/user");
-const joinData = require("./../../fixtures/user/join");
-const userData = require("./../../fixtures/user/user");
-const { expect } = require("chai");
-const { updateUser, getUsers } = require("./../../../middlewares/validators/user");
+} from "./../../../middlewares/validators/user.js";
+import joinData from "./../../fixtures/user/join.js";
+import userData from "./../../fixtures/user/user.js";
 
 describe("Middleware | Validators | User", function () {
   describe("Create user validator for validateJoinData", function () {

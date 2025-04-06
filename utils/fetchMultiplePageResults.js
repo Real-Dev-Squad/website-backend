@@ -1,4 +1,4 @@
-const githubService = require("../services/githubService");
+import { extractPRdetails } from "../services/githubService.js";
 
 const fetchMultiplePageResults = async (callbackFn, params) => {
   let page = 1;
@@ -6,7 +6,7 @@ const fetchMultiplePageResults = async (callbackFn, params) => {
 
   do {
     const { data } = await callbackFn({ page, ...params });
-    const currentPRs = githubService.extractPRdetails(data);
+    const currentPRs = extractPRdetails(data);
     allPRs.push(...currentPRs);
     page++;
   } while (allPRs.length === 100 && allPRs.length > 0);
@@ -14,6 +14,4 @@ const fetchMultiplePageResults = async (callbackFn, params) => {
   return allPRs;
 };
 
-module.exports = {
-  fetchMultiplePageResults,
-};
+export { fetchMultiplePageResults };

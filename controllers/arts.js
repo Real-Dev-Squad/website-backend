@@ -1,5 +1,5 @@
-const artsQuery = require("../models/arts");
-const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+import { SOMETHING_WENT_WRONG } from "../constants/errorMessages.js";
+import artsQuery from "../models/arts.js";
 /**
  * Adds art
  *
@@ -7,17 +7,14 @@ const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/er
  * @param res {Object} - Express response object
  */
 
-const addArt = async (req, res) => {
+export const addArt = async (req, res, next) => {
   try {
-    const artId = await artsQuery.addArt(req.body, req.userData.id);
-
-    return res.json({
-      message: "Art successfully added!",
-      id: artId,
-    });
+    const artData = req.body;
+    const art = await artsQuery.addArt(artData);
+    return res.json(art);
   } catch (error) {
-    logger.error(`Error adding art: ${error}`);
-    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+    logger.error("Error in addArt: ", error);
+    return next(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -27,16 +24,13 @@ const addArt = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const fetchArts = async (req, res) => {
+export const getArts = async (req, res, next) => {
   try {
-    const allArt = await artsQuery.fetchArts();
-    return res.json({
-      message: allArt.length > 0 ? "Arts returned successfully!" : "No arts found",
-      arts: allArt.length > 0 ? allArt : [],
-    });
-  } catch (err) {
-    logger.error(`Error while fetching arts ${err}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    const arts = await artsQuery.fetchArts();
+    return res.json(arts);
+  } catch (error) {
+    logger.error("Error in getArts: ", error);
+    return next(SOMETHING_WENT_WRONG);
   }
 };
 
@@ -46,46 +40,12 @@ const fetchArts = async (req, res) => {
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-const getSelfArts = async (req, res) => {
+export const getUserArts = async (req, res, next) => {
   try {
-    const { id } = req.userData;
-    const arts = await artsQuery.fetchUserArts(id);
-    res.set(
-      "X-Deprecation-Warning",
-      "WARNING: This endpoint is deprecated and will be removed in the future. Please use /arts/:userId to get the art details."
-    );
-    return res.json({
-      message: "User arts returned successfully!",
-      arts,
-    });
-  } catch (err) {
-    logger.error(`Error while getting user arts ${err}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    const arts = await artsQuery.fetchUserArts(req.userData.id);
+    return res.json(arts);
+  } catch (error) {
+    logger.error("Error in getUserArts: ", error);
+    return next(SOMETHING_WENT_WRONG);
   }
-};
-
-const getUserArts = async (req, res) => {
-  try {
-    const userId = req.params.userId;
-    const arts = await artsQuery.fetchUserArts(userId);
-
-    if (!arts || arts.length === 0) {
-      return res.status(204).send();
-    }
-
-    return res.json({
-      message: `User Arts of userId ${userId} returned successfully`,
-      arts,
-    });
-  } catch (err) {
-    logger.error(`Error while getting user arts ${err}`);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
-  }
-};
-
-module.exports = {
-  addArt,
-  fetchArts,
-  getSelfArts,
-  getUserArts,
 };

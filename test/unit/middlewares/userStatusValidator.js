@@ -1,6 +1,7 @@
-const Sinon = require("sinon");
-const { expect } = require("chai");
-const { validateGetQueryParams } = require("../../../middlewares/validators/userStatus");
+import { expect } from "chai";
+import sinon from "sinon";
+
+import { validateGetQueryParams } from "../../../middlewares/validators/userStatus.js";
 
 describe("Middleware | Validators | userStatus", function () {
   describe("validateRequestQuery", function () {
@@ -11,7 +12,7 @@ describe("Middleware | Validators | userStatus", function () {
           state: "IDLE",
         },
       };
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       await validateGetQueryParams(req, res, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(true);
 
@@ -27,7 +28,7 @@ describe("Middleware | Validators | userStatus", function () {
           badRequest: () => {},
         },
       };
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       const req = {
         query: {
           taskStatus: "invalidKey",

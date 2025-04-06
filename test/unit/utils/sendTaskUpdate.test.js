@@ -1,7 +1,6 @@
-import chai from "chai";
+import { expect } from "chai";
 import sinon from "sinon";
-import { sendTaskUpdate } from "../../../utils/sendTaskUpdate";
-const { expect } = chai;
+import { sendTaskUpdate } from "../../../utils/sendTaskUpdate.js";
 
 describe("sendTaskUpdate function", function () {
   let fetchMock;

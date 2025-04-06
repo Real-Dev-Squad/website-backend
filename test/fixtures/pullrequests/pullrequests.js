@@ -128,7 +128,7 @@ const prDates = [
     },
   },
 ];
-module.exports = {
+export default {
   filteredPRs,
   prDates,
 };

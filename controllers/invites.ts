@@ -3,7 +3,8 @@ import { InviteBodyRequest } from "../types/invites";
 import {CustomResponse} from "../types/global";
 import { addLog } from "../models/logs";
 import { generateDiscordInviteLink } from "../utils/discord-actions";
-const { logType } = require("../constants/logs");
+import { logType } from "../constants/logs";
+import logger from "../utils/logger.js";
 
 export const createInviteLink = async (req: InviteBodyRequest, res: CustomResponse) => {
   try {

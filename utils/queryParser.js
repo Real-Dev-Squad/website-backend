@@ -1,3 +1,5 @@
+import logger from "./logger.js";
+
 /**
  * Parses the query params and returns a key value object
  *
@@ -48,4 +50,4 @@ const parseQueryParams = (queryString) => {
   return {};
 };
 
-module.exports = { parseQueryParams };
+export { parseQueryParams };

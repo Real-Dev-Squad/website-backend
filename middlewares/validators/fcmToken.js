@@ -1,4 +1,5 @@
-const joi = require("joi");
+import joi from "joi";
+import logger from "../../utils/logger.js";
 
 export const fcmTokenValidator = async (req, res, next) => {
   const schema = joi.object().strict().keys({

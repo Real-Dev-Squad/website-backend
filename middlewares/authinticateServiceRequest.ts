@@ -2,6 +2,7 @@ import { verifyAuthToken } from "../utils/verifyAuthToken";
 import { CustomResponse } from "../types/global";
 import { NextFunction } from "express";
 import { InviteBodyRequest } from "../types/invites";
+import logger from "../utils/logger.js";
 
 const authinticateServiceRequest = async (req: InviteBodyRequest, res: CustomResponse, next: NextFunction) => {
   try {

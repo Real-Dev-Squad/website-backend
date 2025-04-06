@@ -1,4 +1,4 @@
-const firestore = require("../utils/firestore");
+import firestore from "../utils/firestore.js";
 
 const fcmTokenModel = firestore.collection("fcmToken");
 

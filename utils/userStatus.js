@@ -1,6 +1,7 @@
-const { NotFound } = require("http-errors");
-const { userState } = require("../constants/userStatus");
-const { convertTimestampToUTCStartOrEndOfDay } = require("./time");
+import { NotFound } from "http-errors";
+import { userState } from "../constants/userStatus.js";
+import { convertTimestampToUTCStartOrEndOfDay } from "./time.js";
+import logger from "./logger.js";
 
 /* returns the User Id based on the route path
  *  @param req {Object} : Express request object
@@ -352,11 +353,12 @@ const convertTimestampsToUTC = (obj) => {
   return obj;
 };
 
-module.exports = {
+export {
   getUserIdBasedOnRoute,
   getTomorrowTimeStamp,
   getTodayTimeStamp,
   filterStatusData,
+  generateNewStatus,
   generateAlreadyExistingStatusResponse,
   updateCurrentStatusToState,
   updateFutureStatusToState,
@@ -364,7 +366,6 @@ module.exports = {
   getUserIdFromUserName,
   checkIfUserHasLiveTasks,
   generateErrorResponse,
-  generateNewStatus,
   getNextDayTimeStamp,
   getFilteredPaginationLink,
   convertTimestampsToUTC,

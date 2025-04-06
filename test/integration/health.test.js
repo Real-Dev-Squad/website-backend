@@ -1,13 +1,14 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
-chai.use(chaiHttp);
+import chai from "chai";
+import chaiHttp from "chai-http";
 
-const app = require("../../server");
-const authService = require("../../services/authService");
-const addUser = require("../utils/addUser");
-const config = require("config");
+import app from "../../server.js";
+import { generateAuthToken } from "../../services/authService.js";
+import addUser from "../utils/addUser.js";
+import config from "config";
+const { expect } = chai;
+chai.use(chaiHttp);
 const cookieName = config.get("userToken.cookieName");
+
 describe("health", function () {
   it("should return uptime from the healthcheck API", function (done) {
     chai
@@ -49,7 +50,7 @@ describe("health", function () {
 
   it("should return 200 from the authenticated healthcheck API when token is passed", async function () {
     const userId = await addUser();
-    const jwt = authService.generateAuthToken({ userId });
+    const jwt = generateAuthToken({ userId });
 
     chai
       .request(app)

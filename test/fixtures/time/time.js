@@ -1,4 +1,4 @@
-const admin = require("firebase-admin");
+import admin from "firebase-admin";
 
 const minutesToMilliseconds = [
   {
@@ -65,7 +65,7 @@ const timeBeforeHour = [
   },
 ];
 
-module.exports = {
+export default {
   minutesToMilliseconds,
   hoursToMilliseconds,
   daysToMilliseconds,

@@ -6,4 +6,4 @@ import { notifyController } from "../controllers/notify";
 import { notifyValidator } from "../middlewares/validators/notify";
 
 router.post("/", authenticate, notifyValidator, notifyController);
-module.exports = router;
+export default  router;

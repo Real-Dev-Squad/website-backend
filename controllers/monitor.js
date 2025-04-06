@@ -1,11 +1,12 @@
-const { Conflict, NotFound } = require("http-errors");
-const { INTERNAL_SERVER_ERROR_MESSAGE } = require("../constants/progresses");
-const {
+import { Conflict, NotFound } from "http-errors";
+import { INTERNAL_SERVER_ERROR_MESSAGE } from "../constants/progresses.js";
+import {
   createTrackedProgressDocument,
   updateTrackedProgressDocument,
   getTrackedProgressDocuments,
-} = require("../models/monitor");
-const { RESPONSE_MESSAGES } = require("../constants/monitor");
+} from "../models/monitor.js";
+import { RESPONSE_MESSAGES } from "../constants/monitor.js";
+
 const { RESOURCE_CREATED_SUCCESSFULLY, RESOURCE_UPDATED_SUCCESSFULLY, RESOURCE_RETRIEVED_SUCCESSFULLY } =
   RESPONSE_MESSAGES;
 /**
@@ -181,7 +182,7 @@ const getTrackedProgressController = async (req, res) => {
   }
 };
 
-module.exports = {
+export default {
   createTrackedProgressController,
   updateTrackedProgressController,
   getTrackedProgressController,

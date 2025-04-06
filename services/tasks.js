@@ -1,9 +1,11 @@
-const firestore = require("../utils/firestore");
+import firestore from "../utils/firestore.js";
+import { chunks } from "../utils/array.js";
+import { DOCUMENT_WRITE_SIZE as FIRESTORE_BATCH_OPERATIONS_LIMIT } from "../constants/constants.js";
+import { fetchUsersNotInDiscordServer } from "../models/users.js";
+import { fetchIncompleteTasksByUserIds } from "../models/tasks.js";
+import logger from "../utils/logger.js";
+
 const tasksModel = firestore.collection("tasks");
-const { chunks } = require("../utils/array");
-const { DOCUMENT_WRITE_SIZE: FIRESTORE_BATCH_OPERATIONS_LIMIT } = require("../constants/constants");
-const usersQuery = require("../models/users");
-const tasksQuery = require("../models/tasks");
 
 const addTaskCreatedAtAndUpdatedAtFields = async () => {
   const operationStats = {
@@ -60,13 +62,13 @@ const addTaskCreatedAtAndUpdatedAtFields = async () => {
 
 const fetchOrphanedTasks = async () => {
   try {
-    const userSnapshot = await usersQuery.fetchUsersNotInDiscordServer();
+    const userSnapshot = await fetchUsersNotInDiscordServer();
 
     if (userSnapshot.empty) return [];
 
     const userIds = userSnapshot.docs.map((doc) => doc.id);
 
-    const orphanedTasksData = await tasksQuery.fetchIncompleteTasksByUserIds(userIds);
+    const orphanedTasksData = await fetchIncompleteTasksByUserIds(userIds);
 
     if (orphanedTasksData.empty) {
       return [];
@@ -81,7 +83,4 @@ const fetchOrphanedTasks = async () => {
   }
 };
 
-module.exports = {
-  addTaskCreatedAtAndUpdatedAtFields,
-  fetchOrphanedTasks,
-};
+export { addTaskCreatedAtAndUpdatedAtFields, fetchOrphanedTasks };

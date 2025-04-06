@@ -1,14 +1,12 @@
-const chai = require("chai");
-const { expect } = chai;
-const sinon = require("sinon");
-const cleanDb = require("../../utils/cleanDb");
-const { buildQueryToFetchPaginatedDocs, getPaginatedProgressDocs } = require("../../../utils/progresses");
-const fireStore = require("../../../utils/firestore");
+import { expect } from "chai";
+import sinon from "sinon";
+import fireStore from "../../../utils/firestore.js";
+import { buildQueryToFetchPaginatedDocs, getPaginatedProgressDocs } from "../../../utils/progresses.js";
+import { stubbedModelProgressData, stubbedModelTaskProgressData } from "../../fixtures/progress/progresses.js";
+import cleanDb from "../../utils/cleanDb.js";
+import { PROGRESSES_RESPONSE_MESSAGES } from "../../../constants/progresses.js";
+
 const progressesCollection = fireStore.collection("progresses");
-const { stubbedModelTaskProgressData, stubbedModelProgressData } = require("../../fixtures/progress/progresses");
-const {
-  PROGRESSES_RESPONSE_MESSAGES: { PROGRESS_DOCUMENT_NOT_FOUND },
-} = require("../../../constants/progresses");
 
 describe("Utils | Progresses", function () {
   afterEach(async function () {
@@ -131,7 +129,7 @@ describe("Utils | Progresses", function () {
         await getPaginatedProgressDocs(query);
         throw new Error("Test failed: expected a NotFound error to be thrown.");
       } catch (err) {
-        expect(err.message).to.equal(PROGRESS_DOCUMENT_NOT_FOUND);
+        expect(err.message).to.equal(PROGRESSES_RESPONSE_MESSAGES.PROGRESS_DOCUMENT_NOT_FOUND);
       }
     });
 

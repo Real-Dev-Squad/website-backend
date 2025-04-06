@@ -13,6 +13,7 @@ import {
 import { OnboardingExtension, UpdateOnboardingExtensionRequestBody } from "../types/onboardingExtension";
 import { addLog } from "./logService";
 import firestore from "../utils/firestore";
+import logger from "../utils/logger.js";
 const requestModel = firestore.collection("requests");
 
 /**

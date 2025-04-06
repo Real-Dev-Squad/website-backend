@@ -1,12 +1,12 @@
-const express = require("express");
+import express from "express";
+import logs from "../controllers/logs.js";
+import authenticate from "../middlewares/authenticate.js";
+import authorizeRoles from "../middlewares/authorizeRoles.js";
+import { SUPERUSER } from "../constants/roles.js";
+
 const router = express.Router();
-const logs = require("../controllers/logs");
-const authenticate = require("../middlewares/authenticate");
-const authorizeRoles = require("../middlewares/authorizeRoles");
-const { SUPERUSER } = require("../constants/roles");
 
-router.get("/:type", authenticate, authorizeRoles([SUPERUSER]), logs.fetchLogs);
-router.get("/", authenticate, authorizeRoles([SUPERUSER]), logs.fetchAllLogs);
-router.post("/migrate", authenticate, authorizeRoles([SUPERUSER]), logs.updateLogs);
+router.get("/", authenticate, authorizeRoles([SUPERUSER]), logs.getLogs);
+router.post("/", authenticate, authorizeRoles([SUPERUSER]), logs.addLog);
 
-module.exports = router;
+export default router;

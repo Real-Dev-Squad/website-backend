@@ -1,5 +1,5 @@
-const { expect } = require("chai");
-const { removeObjectField } = require("../../../utils/data-access");
+import { expect } from "chai";
+import { removeObjectField } from "../../../utils/data-access.js";
 
 describe("removeObjectField", function () {
   it("should remove a field from a nested object", function () {

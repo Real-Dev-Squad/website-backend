@@ -1,7 +1,7 @@
-const chai = require("chai");
-const chaiHttp = require("chai-http");
-const sinon = require("sinon");
-const { getDiscordMemberDetails } = require("../../../services/discordMembersService");
+import * as chai from "chai";
+import chaiHttp from "chai-http";
+import sinon from "sinon";
+import { getDiscordMemberDetails } from "../../../services/discordMembersService.js";
 
 chai.use(chaiHttp);
 const expect = chai.expect;

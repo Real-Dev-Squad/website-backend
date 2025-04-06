@@ -1,18 +1,18 @@
-const chai = require("chai");
+import chai from "chai";
+import chaiHttp from "chai-http";
+import config from "config";
+
+import app from "../../server.js";
+import { generateAuthToken } from "../../services/authService.js";
+import users from "../../models/users.js";
+import recruiters from "../../models/recruiters.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
+import userData from "../fixtures/user/user.js";
+import { recruiterDataArray, recruiterWithIdKeys } from "../fixtures/recruiter/recruiter.js";
+
 const { expect } = chai;
-const chaiHttp = require("chai-http");
-
-const app = require("../../server");
-const authService = require("../../services/authService");
-const users = require("../../models/users");
-const recruiters = require("../../models/recruiters");
-const addUser = require("../utils/addUser");
-const cleanDb = require("../utils/cleanDb");
 const cookieName = config.get("userToken.cookieName");
-// Import fixtures
-const userData = require("../fixtures/user/user")();
-const { recruiterDataArray, recruiterWithIdKeys } = require("../fixtures/recruiter/recruiter");
-
 const superUser = userData[4];
 const nonSuperUser = userData[2];
 
@@ -25,7 +25,7 @@ describe("Recruiters", function () {
 
   beforeEach(async function () {
     const superUserId = await addUser(superUser);
-    jwt = authService.generateAuthToken({ userId: superUserId });
+    jwt = generateAuthToken({ userId: superUserId });
 
     const userId = await addUser();
     const { user } = await users.fetchUser({ userId });
@@ -126,25 +126,24 @@ describe("Recruiters", function () {
       });
     });
 
-    it("Should return 401 if user is not a super_user", function (done) {
-      addUser(nonSuperUser).then((nonSuperUserId) => {
-        const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
-        chai
-          .request(app)
-          .get("/members/intro")
-          .set("cookie", `${cookieName}=${nonSuperUserJwt}`)
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
+    it("Should return 401 if user is not a super_user", async function (done) {
+      const nonSuperUserId = await addUser(nonSuperUser);
+      const nonSuperUserJwt = generateAuthToken({ userId: nonSuperUserId });
+      chai
+        .request(app)
+        .get("/members/intro")
+        .set("cookie", `${cookieName}=${nonSuperUserJwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
 
-            expect(res).to.have.status(401);
-            expect(res.body).to.be.a("object");
-            expect(res.body.message).to.equal("You are not authorized for this action.");
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("You are not authorized for this action.");
 
-            return done();
-          });
-      });
+          return done();
+        });
     });
   });
 });

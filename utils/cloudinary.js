@@ -1,5 +1,5 @@
-const cloudinary = require("cloudinary").v2;
-const config = require("config");
+import { v2 as cloudinary } from "cloudinary";
+import config from "config";
 
 cloudinary.config(config.get("cloudinary"));
 
@@ -8,6 +8,4 @@ const upload = async (file, options = {}) => {
   return response;
 };
 
-module.exports = {
-  upload,
-};
+export { upload };

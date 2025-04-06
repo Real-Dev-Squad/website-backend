@@ -36,7 +36,7 @@ const purgeCacheResponse = [
   },
 ];
 
-module.exports = {
+export default {
   cacheLogs,
   cacheModelData,
   purgeCacheResponse,

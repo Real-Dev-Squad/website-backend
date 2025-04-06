@@ -18,4 +18,4 @@ router.get("/", validateGetProgressRecordsQuery, getProgress);
 router.get("/:type/:typeId/date/:date", validateGetDayProgressParams, getProgressBydDateController);
 router.get("/range", validateGetRangeProgressRecordsParams, getProgressRangeData);
 
-module.exports = router;
+export default  router;

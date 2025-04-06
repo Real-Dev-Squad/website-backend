@@ -7,4 +7,4 @@ const authenticateProfile = (authenticate) => {
   };
 };
 
-module.exports = authenticateProfile;
+export default authenticateProfile;

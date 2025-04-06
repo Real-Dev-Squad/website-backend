@@ -1,7 +1,7 @@
-const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
-const goals = require("../services/goalService");
+import { SOMETHING_WENT_WRONG } from "../constants/errorMessages.js";
+import goals from "../services/goalService.js";
 
-const getGoalSiteToken = async (req, res) => {
+export const getGoalSiteToken = async (req, res) => {
   try {
     const { roles, id: userId } = req.userData;
 
@@ -17,8 +17,4 @@ const getGoalSiteToken = async (req, res) => {
   } catch {
     return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
-};
-
-module.exports = {
-  getGoalSiteToken,
 };

@@ -1,4 +1,5 @@
-const joi = require("joi");
+import joi from "joi";
+import logger from "../../utils/logger.js";
 
 const storeUserDeviceInfo = async (req, res, next) => {
   const schema = joi.object().strict().keys({
@@ -47,7 +48,7 @@ const validateFetchingUserDocument = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   storeUserDeviceInfo,
   validateAuthStatus,
   validateFetchingUserDocument,

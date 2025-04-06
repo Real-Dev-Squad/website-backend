@@ -1,5 +1,7 @@
 import { application } from "../types/application";
-const firestore = require("../utils/firestore");
+import firestore from "../utils/firestore.js";
+import logger from "../utils/logger.js";
+
 const ApplicationsModel = firestore.collection("applicants");
 
 const getAllApplications = async (limit: number, lastDocId?: string) => {
@@ -134,7 +136,7 @@ const updateApplication = async (dataToUpdate: object, applicationId: string) =>
   }
 };
 
-module.exports = {
+export {
   getAllApplications,
   getUserApplications,
   addApplication,

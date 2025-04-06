@@ -1,5 +1,7 @@
-const stocks = require("../models/stocks");
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+import stocks from "../models/stocks.js";
+import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
+import logger from "../utils/logger.js";
+
 /**
  * Creates new stock
  *
@@ -20,6 +22,7 @@ const addNewStock = async (req, res) => {
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
+
 /**
  * Fetches all the stocks
  *
@@ -38,6 +41,7 @@ const fetchStocks = async (req, res) => {
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
+
 /**
  * Fetches all the stocks of the user
  *
@@ -90,9 +94,4 @@ const getUserStocks = async (req, res) => {
   }
 };
 
-module.exports = {
-  addNewStock,
-  fetchStocks,
-  getSelfStocks,
-  getUserStocks,
-};
+export { addNewStock, fetchStocks, getSelfStocks, getUserStocks };

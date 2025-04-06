@@ -2,7 +2,7 @@ import { NextFunction } from "express";
 import { CustomRequest, CustomResponse } from "../types/global";
 const ApplicationModel = require("../models/applications");
 
-const checkCanGenerateDiscordLink = async (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
+export const checkCanGenerateDiscordLink = async (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
   const { id: userId, roles } = req.userData;
   const isSuperUser = roles.super_user;
   const userIdInQuery = req.query.userId;
@@ -34,7 +34,6 @@ const checkCanGenerateDiscordLink = async (req: CustomRequest, res: CustomRespon
   }
 };
 
-export default checkCanGenerateDiscordLink;
 
 // <------ We have to revisit this later ------->
 // <--- https://github.com/Real-Dev-Squad/website-backend/issues/2078 --->
@@ -64,4 +63,4 @@ export default checkCanGenerateDiscordLink;
 //   return next();
 // };
 
-module.exports = checkCanGenerateDiscordLink;
+export default  checkCanGenerateDiscordLink;

@@ -9,4 +9,4 @@ const router = express.Router();
 router.patch("/user", validateUserRoles, authenticate, updateRoles);
 router.post("/users/privileges", validateRevokePrivileges, removePrivileges);
 
-module.exports = router;
+export default  router;

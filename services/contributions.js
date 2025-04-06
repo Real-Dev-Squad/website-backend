@@ -1,16 +1,16 @@
-const githubService = require("../services/githubService");
-const tasks = require("../models/tasks");
-const { fetchUser } = require("../models/users");
-const userUtils = require("../utils/users");
+import { fetchPRsByUser } from "../services/githubService.js";
+import { fetchUserTasks } from "../models/tasks.js";
+import { fetchUser } from "../models/users.js";
+import { getUsername } from "../utils/users.js";
+
 /**
  * Get the contributions of the user
  * @param {string} username
  */
-
 const getUserContributions = async (username) => {
   const contributions = {};
-  const { data } = await githubService.fetchPRsByUser(username);
-  const allUserTasks = await tasks.fetchUserTasks(username);
+  const { data } = await fetchPRsByUser(username);
+  const allUserTasks = await fetchUserTasks(username);
   const noteworthy = [];
   const all = [];
 
@@ -32,7 +32,7 @@ const getUserContributions = async (username) => {
 
       if (Array.isArray(task.participants)) {
         for (const userId of task.participants) {
-          const username = await userUtils.getUsername(userId);
+          const username = await getUsername(userId);
           const userDetails = participantsDetailsMap.get(username);
           if (userDetails) {
             participantsDetails.push(userDetails);
@@ -81,7 +81,6 @@ const getUserContributions = async (username) => {
  * Extracts only the necessary details required from the object returned by Github API
  * @param data {Object} - Object returned by Github API
  */
-
 const extractPRdetails = (data) => {
   const allPRs = [];
   data.items.forEach(({ title, user, html_url: url, state, created_at: createdAt, updated_at: updatedAt }) => {
@@ -101,7 +100,6 @@ const extractPRdetails = (data) => {
  * Extracts only the necessary details required from the object returned by Task API
  * @param data {Object} - Object returned by Task API
  */
-
 const extractTaskdetails = (data) => {
   const {
     id,
@@ -135,7 +133,6 @@ const extractTaskdetails = (data) => {
  * Get the user details
  * @param username {string}
  */
-
 const getUserDetails = async (username) => {
   const { user } = await fetchUser({ username });
   const userDetails = extractUserDetails(user);
@@ -146,7 +143,6 @@ const getUserDetails = async (username) => {
  * Extracts only the necessary details required from the object returned by user API
  * @param data {Object} - Object returned by User api
  */
-
 const extractUserDetails = (data) => {
   const { username, firstname, lastname, img } = data;
   if (!data.incompleteUserDetails) {
@@ -161,6 +157,4 @@ const extractUserDetails = (data) => {
   }
 };
 
-module.exports = {
-  getUserContributions,
-};
+export { getUserContributions };

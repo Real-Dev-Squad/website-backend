@@ -1,4 +1,4 @@
-const usersData = [
+export const usersData = [
   {
     id: "user1_id",
     discordId: "123456789",
@@ -64,7 +64,7 @@ const usersData = [
   },
 ];
 
-const tasksData = [
+export const tasksData = [
   {
     id: "task1_id",
     title: "Abandoned Task 1",
@@ -146,5 +146,3 @@ const tasksData = [
     dependsOn: [],
   },
 ];
-
-module.exports = { usersData, tasksData };

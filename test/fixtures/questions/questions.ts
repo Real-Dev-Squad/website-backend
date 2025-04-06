@@ -1,4 +1,4 @@
-const questionDataArray = [
+export const SAMPLE_QUESTION_DATA = [
   {
     id: "demo-question-id-1",
     question: "This is the question",
@@ -70,5 +70,3 @@ const questionDataArray = [
     updated_at: new Date().toString(),
   },
 ];
-
-module.exports = questionDataArray;

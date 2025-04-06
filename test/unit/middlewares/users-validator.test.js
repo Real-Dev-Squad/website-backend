@@ -1,6 +1,7 @@
-const Sinon = require("sinon");
-const { validateUpdateRoles, validateUserQueryParams } = require("../../../middlewares/validators/user");
-const { expect } = require("chai");
+import { expect } from "chai";
+import sinon from "sinon";
+
+import { validateUpdateRoles, validateUserQueryParams } from "../../../middlewares/validators/user.js";
 
 describe("Test the roles update validator", function () {
   it("Allows the request to pass with member property", async function () {
@@ -10,7 +11,7 @@ describe("Test the roles update validator", function () {
       },
     };
     const res = {};
-    const nextSpy = Sinon.spy();
+    const nextSpy = sinon.spy();
     await validateUpdateRoles(req, res, nextSpy);
     expect(nextSpy.callCount).to.be.equal(1);
   });
@@ -23,7 +24,7 @@ describe("Test the roles update validator", function () {
       },
     };
     const res = {};
-    const nextSpy = Sinon.spy();
+    const nextSpy = sinon.spy();
     await validateUserQueryParams(req, res, nextSpy);
     expect(nextSpy.callCount).to.be.equal(1);
   });
@@ -35,7 +36,7 @@ describe("Test the roles update validator", function () {
       },
     };
     const res = {};
-    const nextSpy = Sinon.spy();
+    const nextSpy = sinon.spy();
     await validateUpdateRoles(req, res, nextSpy);
     expect(nextSpy.callCount).to.be.equal(1);
   });
@@ -50,10 +51,10 @@ describe("Test the roles update validator", function () {
     };
     const res = {
       boom: {
-        badRequest: Sinon.stub().returns("Bad Request"),
+        badRequest: sinon.stub().returns("Bad Request"),
       },
     };
-    const nextSpy = Sinon.spy();
+    const nextSpy = sinon.spy();
     await validateUpdateRoles(req, res, nextSpy);
     expect(nextSpy.callCount).to.be.equal(0);
   });
@@ -64,10 +65,10 @@ describe("Test the roles update validator", function () {
     };
     const res = {
       boom: {
-        badRequest: Sinon.stub().returns("Bad Request"),
+        badRequest: sinon.stub().returns("Bad Request"),
       },
     };
-    const nextSpy = Sinon.spy();
+    const nextSpy = sinon.spy();
     await validateUpdateRoles(req, res, nextSpy);
     expect(nextSpy.callCount).to.be.equal(0);
   });

@@ -1,8 +1,7 @@
-const chai = require("chai");
-const expect = chai.expect;
-const { saveFcmToken } = require("../../../models/fcmToken");
-const cleanDb = require("../../utils/cleanDb");
-const { getFcmTokenFromUserId } = require("../../../services/getFcmTokenFromUserId");
+import { expect } from "chai";
+import { saveFcmToken } from "../../../models/fcmToken.js";
+import cleanDb from "../../utils/cleanDb.js";
+import { getFcmTokenFromUserId } from "../../../services/getFcmTokenFromUserId.js";
 
 describe("FCM token services", function () {
   describe("Get FCM token from user id", function () {

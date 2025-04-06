@@ -6,7 +6,7 @@
  * See lib/config/default.js in the agent distribution for a more complete
  * description of configuration variables and their potential values.
  */
-exports.config = {
+export default {
   /**
    * Array of application names.
    */

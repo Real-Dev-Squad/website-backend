@@ -1,22 +1,18 @@
-const tasks = require("../models/tasks");
-const { TASK_STATUS, TASK_STATUS_OLD, tasksUsersStatus } = require("../constants/tasks");
-const { addLog } = require("../models/logs");
-const { USER_STATUS } = require("../constants/users");
-const { addOrUpdate, getRdsUserInfoByGitHubUsername } = require("../models/users");
-const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING } = TASK_STATUS_OLD;
-const { IN_PROGRESS, BLOCKED, SMOKE_TESTING, ASSIGNED } = TASK_STATUS;
-const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
-const dependencyModel = require("../models/tasks");
-const { transformQuery, transformTasksUsersQuery } = require("../utils/tasks");
-const { getPaginatedLink } = require("../utils/helper");
-const { updateUserStatusOnTaskUpdate, updateStatusOnTaskCompletion } = require("../models/userStatus");
-const dataAccess = require("../services/dataAccessLayer");
-const { parseSearchQuery } = require("../utils/tasks");
-const { addTaskCreatedAtAndUpdatedAtFields } = require("../services/tasks");
-const tasksService = require("../services/tasks");
-const { RQLQueryParser } = require("../utils/RQLParser");
-const { getMissedProgressUpdatesUsers } = require("../models/discordactions");
-const { logType } = require("../constants/logs");
+import { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } from "../constants/errorMessages.js";
+import { logType } from "../constants/logs.js";
+import { TASK_STATUS, tasksUsersStatus } from "../constants/tasks.js";
+import { USER_STATUS } from "../constants/users.js";
+import { getMissedProgressUpdatesUsers } from "../models/discordactions.js";
+import { addLog } from "../models/logs.js";
+import * as tasksModel from "../models/tasks.js";
+import { addOrUpdate, getRdsUserInfoByGitHubUsername } from "../models/users.js";
+import { updateStatusOnTaskCompletion, updateUserStatusOnTaskUpdate } from "../models/userStatus.js";
+import dataAccess from "../services/dataAccessLayer.js";
+import tasksService, { addTaskCreatedAtAndUpdatedAtFields } from "../services/tasks.js";
+import { getPaginatedLink } from "../utils/helper.js";
+import logger from "../utils/logger.js";
+import { RQLQueryParser } from "../utils/RQLParser.js";
+import { parseSearchQuery, transformQuery, transformTasksUsersQuery } from "../utils/tasks.js";
 
 /**
  * Creates new task
@@ -38,12 +34,12 @@ const addNewTask = async (req, res) => {
       updatedAt: timeStamp,
     };
     delete body.dependsOn;
-    const { taskId, taskDetails } = await tasks.updateTask(body);
+    const { taskId, taskDetails } = await tasksModel.updateTask(body);
     const data = {
       taskId,
       dependsOn,
     };
-    const taskDependency = dependsOn && (await dependencyModel.addDependency(data));
+    const taskDependency = dependsOn && (await tasksModel.addDependency(data));
     if (req.body.assignee) {
       userStatusUpdate = await updateUserStatusOnTaskUpdate(req.body.assignee);
     }
@@ -61,6 +57,7 @@ const addNewTask = async (req, res) => {
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
+
 /**
  * Fetches all the tasks
  *
@@ -96,7 +93,7 @@ const fetchTasksWithRdsAssigneeInfo = async (allTasks) => {
 
 const fetchPaginatedTasks = async (query) => {
   try {
-    const tasksData = await tasks.fetchPaginatedTasks(query);
+    const tasksData = await tasksModel.fetchPaginatedTasks(query);
     const { allTasks, next, prev } = tasksData;
     const tasksWithRdsAssigneeInfo = await fetchTasksWithRdsAssigneeInfo(allTasks);
 
@@ -158,7 +155,7 @@ const fetchTasks = async (req, res) => {
           tasks: [],
         });
       }
-      const filterTasks = await tasks.fetchTasks(searchParams.searchTerm);
+      const filterTasks = await tasksModel.fetchTasks(searchParams.searchTerm);
       const tasksWithRdsAssigneeInfo = await fetchTasksWithRdsAssigneeInfo(filterTasks);
       if (tasksWithRdsAssigneeInfo.length === 0) {
         return res.status(404).json({
@@ -222,13 +219,20 @@ const getUserTasks = async (req, res) => {
     }
 
     if (status) {
-      if (status === OLD_ACTIVE) {
-        status = [OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, IN_PROGRESS, BLOCKED, SMOKE_TESTING];
+      if (status === TASK_STATUS.ACTIVE) {
+        status = [
+          TASK_STATUS.ACTIVE,
+          TASK_STATUS.BLOCKED,
+          TASK_STATUS.PENDING,
+          TASK_STATUS.IN_PROGRESS,
+          TASK_STATUS.BLOCKED,
+          TASK_STATUS.SMOKE_TESTING,
+        ];
       } else {
         status = [status];
       }
     }
-    allTasks = await tasks.fetchUserTasks(username, status || []);
+    allTasks = await tasksModel.fetchUserTasks(username, status || []);
 
     if (allTasks.userNotFound) {
       return res.boom.notFound("User doesn't exist");
@@ -269,8 +273,8 @@ const getSelfTasks = async (req, res) => {
     }
 
     const tasksData = req.query.completed
-      ? await tasks.fetchUserCompletedTasks(username)
-      : await tasks.fetchSelfTasks(username);
+      ? await tasksModel.fetchUserCompletedTasks(username)
+      : await tasksModel.fetchSelfTasks(username);
 
     res.set(
       "X-Deprecation-Warning",
@@ -286,7 +290,7 @@ const getSelfTasks = async (req, res) => {
 const getTask = async (req, res) => {
   try {
     const taskId = req.params.id;
-    const { taskData, dependencyDocReference } = await tasks.fetchTask(taskId);
+    const { taskData, dependencyDocReference } = await tasksModel.fetchTask(taskId);
     if (!taskData) {
       return res.boom.notFound("Task not found");
     }
@@ -306,7 +310,7 @@ const getTask = async (req, res) => {
  */
 const updateTask = async (req, res) => {
   try {
-    const task = await tasks.fetchTask(req.params.id);
+    const task = await tasksModel.fetchTask(req.params.id);
     if (!task.taskData) {
       return res.boom.notFound("Task not found");
     }
@@ -321,7 +325,7 @@ const updateTask = async (req, res) => {
       }
     }
 
-    await tasks.updateTask(requestData, req.params.id);
+    await tasksModel.updateTask(requestData, req.params.id);
     if (requestData.assignee) {
       // New Assignee Status Update
       await updateUserStatusOnTaskUpdate(requestData.assignee);
@@ -356,7 +360,7 @@ const updateTaskStatus = async (req, res, next) => {
     const { userStatusFlag } = req.query;
     const status = req.body?.status;
     const { id: userId, username } = req.userData;
-    const task = await tasks.fetchSelfTask(taskId, userId);
+    const task = await tasksModel.fetchSelfTask(taskId, userId);
 
     if (task.taskNotFound) return res.boom.notFound("Task doesn't exist");
     if (task.notAssignedToYou) return res.boom.forbidden("This task is not assigned to you");
@@ -441,7 +445,7 @@ const updateTaskStatus = async (req, res, next) => {
     }
 
     const [, taskLogResult] = await Promise.all([
-      tasks.updateTask(req.body, taskId),
+      tasksModel.updateTask(req.body, taskId),
       addLog(taskLog.type, taskLog.meta, taskLog.body),
     ]);
     taskLog.id = taskLogResult.id;
@@ -468,12 +472,12 @@ const updateTaskStatus = async (req, res, next) => {
  */
 const overdueTasks = async (req, res) => {
   try {
-    const allTasks = await tasks.fetchTasks();
+    const allTasks = await tasksModel.fetchTasks();
     const now = Math.floor(Date.now() / 1000);
     const overDueTasks = allTasks.filter(
-      (task) => (task.status === ASSIGNED || task.status === IN_PROGRESS) && task.endsOn < now
+      (task) => (task.status === TASK_STATUS.ASSIGNED || task.status === TASK_STATUS.IN_PROGRESS) && task.endsOn < now
     );
-    const newAvailableTasks = await tasks.overdueTasks(overDueTasks);
+    const newAvailableTasks = await tasksModel.overdueTasks(overDueTasks);
     return res.json({
       message: newAvailableTasks.length ? "Overdue Tasks returned successfully!" : "No overdue tasks found",
       newAvailableTasks,
@@ -492,10 +496,10 @@ const assignTask = async (req, res) => {
       return res.json({ message: "Task cannot be assigned to users with active or OOO status" });
     }
 
-    const { task } = await tasks.fetchSkillLevelTask(userId);
+    const { task } = await tasksModel.fetchSkillLevelTask(userId);
     if (!task) return res.json({ message: "Task not found" });
 
-    const { taskId } = await tasks.updateTask({ assignee: username, status: TASK_STATUS.ASSIGNED }, task.itemId);
+    const { taskId } = await tasksModel.updateTask({ assignee: username, status: TASK_STATUS.ASSIGNED }, task.itemId);
     if (taskId) {
       // this will change once we start storing status in different collection
       await addOrUpdate({ status: "active" }, userId);
@@ -513,7 +517,7 @@ const updateStatus = async (req, res) => {
       const updateStats = await addTaskCreatedAtAndUpdatedAtFields();
       return res.json(updateStats);
     }
-    const response = await tasks.updateTaskStatus();
+    const response = await tasksModel.updateTaskStatus();
     return res.status(200).json(response);
   } catch (error) {
     logger.error("Error in migration scripts", error);
@@ -523,7 +527,7 @@ const updateStatus = async (req, res) => {
 
 const orphanTasks = async (req, res) => {
   try {
-    const updatedTasksData = await tasks.updateOrphanTasksStatus();
+    const updatedTasksData = await tasksModel.updateOrphanTasksStatus();
 
     return res.status(200).json({ message: "Orphan tasks filtered successfully", updatedTasksData });
   } catch (error) {
@@ -579,17 +583,17 @@ const getUsersHandler = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   addNewTask,
-  fetchTasks,
-  updateTask,
-  getSelfTasks,
-  getUserTasks,
-  getTask,
-  updateTaskStatus,
-  overdueTasks,
   assignTask,
-  updateStatus,
+  fetchTasks,
+  getSelfTasks,
+  getTask,
   getUsersHandler,
+  getUserTasks,
   orphanTasks,
+  overdueTasks,
+  updateStatus,
+  updateTask,
+  updateTaskStatus,
 };

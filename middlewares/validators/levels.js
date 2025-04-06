@@ -1,4 +1,5 @@
-const Joi = require("joi");
+import Joi from "joi";
+import logger from "../../utils/logger.js";
 
 const validateLevelBody = async (req, res, next) => {
   const schema = Joi.object({
@@ -15,6 +16,6 @@ const validateLevelBody = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   validateLevelBody,
 };

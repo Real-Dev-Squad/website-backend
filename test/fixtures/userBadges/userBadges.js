@@ -20,4 +20,4 @@ const badgesEmpty = {
   userBadges: [],
 };
 
-module.exports = { userFound, userNotFound, badgesEmpty };
+export default { userFound, userNotFound, badgesEmpty };

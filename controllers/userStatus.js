@@ -1,11 +1,12 @@
-const { Forbidden, NotFound } = require("http-errors");
-const { getUserIdBasedOnRoute } = require("../utils/userStatus");
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const dataAccess = require("../services/dataAccessLayer");
-const userStatusModel = require("../models/userStatus");
-const { userState, CANCEL_OOO } = require("../constants/userStatus");
-const ROLES = require("../constants/roles");
-const firestore = require("../utils/firestore");
+import { Forbidden, NotFound } from "http-errors";
+import { getUserIdBasedOnRoute } from "../utils/userStatus.js";
+import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
+import dataAccess from "../services/dataAccessLayer.js";
+import userStatusModel from "../models/userStatus.js";
+import { userState, CANCEL_OOO } from "../constants/userStatus.js";
+import ROLES from "../constants/roles.js";
+import firestore from "../utils/firestore.js";
+
 const usersCollection = firestore.collection("users");
 
 /**
@@ -268,7 +269,7 @@ const updateUserStatuses = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   deleteUserStatus,
   getUserStatus,
   getAllUserStatus,

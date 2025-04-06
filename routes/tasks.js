@@ -1,24 +1,25 @@
-const express = require("express");
-const router = express.Router();
-const authenticate = require("../middlewares/authenticate");
-const tasks = require("../controllers/tasks");
-const {
+import express from "express";
+import authenticate from "../middlewares/authenticate.js";
+import * as tasks from "../controllers/tasks.js";
+import {
   createTask,
   updateTask,
   updateSelfTask,
   getTasksValidator,
   getUsersValidator,
-} = require("../middlewares/validators/tasks");
-const authorizeRoles = require("../middlewares/authorizeRoles");
-const { authorizeAndAuthenticate } = require("../middlewares/authorizeUsersAndService");
-const { APPOWNER, SUPERUSER } = require("../constants/roles");
-const assignTask = require("../middlewares/assignTask");
-const { cacheResponse, invalidateCache } = require("../utils/cache");
-const { ALL_TASKS } = require("../constants/cacheKeys");
-const { verifyCronJob } = require("../middlewares/authorizeBot");
-const { CLOUDFLARE_WORKER, CRON_JOB_HANDLER } = require("../constants/bot");
-const { devFlagMiddleware } = require("../middlewares/devFlag");
-const { userAuthorization } = require("../middlewares/userAuthorization");
+} from "../middlewares/validators/tasks.js";
+import authorizeRoles from "../middlewares/authorizeRoles.js";
+import { authorizeAndAuthenticate } from "../middlewares/authorizeUsersAndService.js";
+import { APPOWNER, SUPERUSER } from "../constants/roles.js";
+import assignTask from "../middlewares/assignTask.js";
+import { cacheResponse, invalidateCache } from "../utils/cache.js";
+import { ALL_TASKS } from "../constants/cacheKeys.js";
+import { verifyCronJob } from "../middlewares/authorizeBot.js";
+import { CLOUDFLARE_WORKER, CRON_JOB_HANDLER } from "../constants/bot.js";
+import { devFlagMiddleware } from "../middlewares/devFlag.js";
+import { userAuthorization } from "../middlewares/userAuthorization.js";
+
+const router = express.Router();
 
 const oldAuthorizationMiddleware = authorizeRoles([APPOWNER, SUPERUSER]);
 const newAuthorizationMiddleware = authorizeAndAuthenticate(
@@ -91,4 +92,4 @@ router.get("/users/discord", verifyCronJob, getUsersValidator, tasks.getUsersHan
 router.post("/migration", authenticate, authorizeRoles([SUPERUSER]), tasks.updateStatus);
 router.post("/orphanTasks", authenticate, authorizeRoles([SUPERUSER]), tasks.orphanTasks);
 
-module.exports = router;
+export default router;

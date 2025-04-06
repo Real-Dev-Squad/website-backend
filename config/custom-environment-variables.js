@@ -5,7 +5,7 @@
  *
  * Documentation: https://github.com/lorenwest/node-config/wiki/Environment-Variables
  */
-module.exports = {
+export default {
   port: {
     __name: "PORT",
     __format: "number",

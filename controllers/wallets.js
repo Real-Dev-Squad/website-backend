@@ -1,7 +1,7 @@
-const { fetchWallet, createWallet } = require("../models/wallets");
-const userUtils = require("../utils/users");
-const walletConstants = require("../constants/wallets");
-const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+import { fetchWallet, createWallet } from "../models/wallets.js";
+import userUtils from "../utils/users.js";
+import walletConstants from "../constants/wallets.js";
+import { SOMETHING_WENT_WRONG } from "../constants/errorMessages.js";
 
 /**
  * Get the wallet for userId, or create default one for
@@ -67,7 +67,7 @@ const getUserWallet = async (req, res) => {
   }
 };
 
-module.exports = {
+export default {
   getOwnWallet,
   getUserWallet,
 };

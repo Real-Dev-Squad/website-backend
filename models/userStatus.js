@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
-const { Forbidden, NotFound } = require("http-errors");
-const admin = require("firebase-admin");
-const firestore = require("../utils/firestore");
-const {
+import { Forbidden, NotFound } from "http-errors";
+import admin from "firebase-admin";
+import firestore from "../utils/firestore.js";
+import {
   getTomorrowTimeStamp,
   filterStatusData,
   generateAlreadyExistingStatusResponse,
@@ -15,17 +15,18 @@ const {
   generateNewStatus,
   getNextDayTimeStamp,
   convertTimestampsToUTC,
-} = require("../utils/userStatus");
-const { TASK_STATUS } = require("../constants/tasks");
+} from "../utils/userStatus.js";
+import { TASK_STATUS } from "../constants/tasks.js";
+import { userState } from "../constants/userStatus.js";
+import { generateAuthTokenForCloudflare } from "../utils/discord-actions.js";
+import config from "config";
+
 const userStatusModel = firestore.collection("usersStatus");
 const tasksModel = firestore.collection("tasks");
-const { userState } = require("../constants/userStatus");
 const discordRoleModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
 const usersCollection = firestore.collection("users");
-const config = require("config");
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
-const { generateAuthTokenForCloudflare } = require("../utils/discord-actions");
 
 // added this function here to avoid circular dependency
 /**
@@ -705,7 +706,10 @@ const addFutureStatus = async (futureStatusData) => {
   }
 };
 
-module.exports = {
+export {
+  getGroupRole,
+  removeGroupIdleRoleFromDiscordUser,
+  addGroupIdleRoleToDiscordUser,
   deleteUserStatus,
   getUserStatus,
   getAllUserStatus,
@@ -717,6 +721,5 @@ module.exports = {
   batchUpdateUsersStatus,
   getTaskBasedUsersStatus,
   cancelOooStatus,
-  getGroupRole,
   addFutureStatus,
 };

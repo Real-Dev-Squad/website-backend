@@ -1,6 +1,7 @@
-const joi = require("joi");
+import joi from "joi";
+import logger from "../../utils/logger.js";
 
-const createArt = async (req, res, next) => {
+export const createArt = async (req, res, next) => {
   const schema = joi
     .object()
     .strict()
@@ -16,8 +17,4 @@ const createArt = async (req, res, next) => {
     logger.error(`Error creating art : ${error}`);
     res.boom.badRequest(error.details[0].message);
   }
-};
-
-module.exports = {
-  createArt,
 };

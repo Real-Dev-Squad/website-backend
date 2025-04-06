@@ -1,7 +1,12 @@
-import { getPaginatedLink } from "../utils/helper";
-import { ALL_LOGS_FETCHED_SUCCESSFULLY, ERROR_WHILE_FETCHING_LOGS, LOGS_FETCHED_SUCCESSFULLY } from "../constants/logs";
-const logsQuery = require("../models/logs");
-const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+import { getPaginatedLink } from "../utils/helper.js";
+import {
+  ALL_LOGS_FETCHED_SUCCESSFULLY,
+  ERROR_WHILE_FETCHING_LOGS,
+  LOGS_FETCHED_SUCCESSFULLY,
+} from "../constants/logs.js";
+import logsQuery from "../models/logs.js";
+import { SOMETHING_WENT_WRONG } from "../constants/errorMessages.js";
+import logger from "../utils/logger.js";
 
 /**
  * Fetches logs
@@ -86,8 +91,4 @@ const updateLogs = async (req, res) => {
   }
 };
 
-module.exports = {
-  fetchLogs,
-  fetchAllLogs,
-  updateLogs,
-};
+export { fetchLogs, fetchAllLogs, updateLogs };

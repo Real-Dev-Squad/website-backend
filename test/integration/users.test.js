@@ -1,32 +1,40 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
+import chai from "chai";
+import chaiHttp from "chai-http";
+import Sinon from "sinon";
 
-const firestore = require("../../utils/firestore");
-const app = require("../../server");
-const authService = require("../../services/authService");
-const addUser = require("../utils/addUser");
-const profileDiffs = require("../../models/profileDiffs");
-const cleanDb = require("../utils/cleanDb");
+import firestore from "../../utils/firestore.js";
+import app from "../../server.js";
+import authService from "../../services/authService.js";
+import addUser from "../utils/addUser.js";
+import profileDiffs from "../../models/profileDiffs.js";
+import cleanDb from "../utils/cleanDb.js";
 // Import fixtures
-const userData = require("../fixtures/user/user")();
-const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
-const superUser = userData[4];
-const searchParamValues = require("../fixtures/user/search")();
-
-const config = require("config");
-const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
-const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
-const joinData = require("../fixtures/user/join");
-const {
+import userData from "../fixtures/user/user.js";
+import profileDiffData from "../fixtures/profileDiffs/profileDiffs.js";
+import searchParamValues from "../fixtures/user/search.js";
+import config from "config";
+import { getDiscordMembers } from "../fixtures/discordResponse/discord-response.js";
+import joinData from "../fixtures/user/join.js";
+import {
   userStatusDataForNewUser,
   userStatusDataAfterSignup,
   userStatusDataAfterFillingJoinSection,
-} = require("../fixtures/userStatus/userStatus");
-const { addJoinData, addOrUpdate } = require("../../models/users");
-const userStatusModel = require("../../models/userStatus");
-const { MAX_USERNAME_LENGTH } = require("../../constants/users.ts");
+} from "../fixtures/userStatus/userStatus.js";
+import { addJoinData, addOrUpdate } from "../../models/users.js";
+import userStatusModel from "../../models/userStatus.js";
+import { MAX_USERNAME_LENGTH } from "../../constants/users.js";
+import { userPhotoVerificationData } from "../fixtures/user/photo-verification.js";
+import { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } from "../../constants/errorMessages.js";
+import {
+  usersData as abandonedUsersData,
+  tasksData as abandonedTasksData,
+} from "../fixtures/abandoned-tasks/departed-users.js";
+import userService from "../../services/users.js";
 
+const { expect } = chai;
+const cookieName = config.get("userToken.cookieName");
+const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
+const superUser = userData[4];
 const userRoleUpdate = userData[4];
 const userRoleUnArchived = userData[13];
 const userAlreadyMember = userData[0];
@@ -36,18 +44,10 @@ const userAlreadyUnArchived = userData[4];
 const nonSuperUser = userData[0];
 const newUser = userData[18];
 
-const cookieName = config.get("userToken.cookieName");
-const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
-const Sinon = require("sinon");
-const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../../constants/errorMessages");
 const photoVerificationModel = firestore.collection("photo-verification");
 const userModel = firestore.collection("users");
 const taskModel = firestore.collection("tasks");
-const {
-  usersData: abandonedUsersData,
-  tasksData: abandonedTasksData,
-} = require("../fixtures/abandoned-tasks/departed-users");
-const userService = require("../../services/users");
+
 chai.use(chaiHttp);
 
 describe("Users", function () {

@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
-const Firestore = require("../utils/firestore.js");
-const config = require("config");
+import Firestore from "../utils/firestore.js";
+import config from "config";
 
 // check whether github credentials are not falsy
 if (config.githubOauth.clientId === "<clientId>" || config.githubOauth.clientSecret === "<clientSecret>") {

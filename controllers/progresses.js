@@ -1,14 +1,13 @@
-const { Conflict, NotFound } = require("http-errors");
-const progressesModel = require("../models/progresses");
-const {
-  PROGRESSES_RESPONSE_MESSAGES,
+import { Conflict, NotFound } from "http-errors";
+import * as progressesModel from "../models/progresses.js";
+
+import {
   INTERNAL_SERVER_ERROR_MESSAGE,
-  PROGRESSES_SIZE,
   PROGRESSES_PAGE_SIZE,
+  PROGRESSES_SIZE,
   UNAUTHORIZED_WRITE,
-} = require("../constants/progresses");
-const { sendTaskUpdate } = require("../utils/sendTaskUpdate");
-const { PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED, PROGRESS_DOCUMENT_CREATED_SUCCEEDED } = PROGRESSES_RESPONSE_MESSAGES;
+} from "../constants/progresses.js";
+import { sendTaskUpdate } from "../utils/sendTaskUpdate.js";
 
 /**
  * @typedef {Object} ProgressRequestBody
@@ -45,7 +44,7 @@ const { PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED, PROGRESS_DOCUMENT_CREATED_SUCCEED
  * @returns {Promise<void>} A Promise that resolves when the response is sent.
  */
 
-const createProgress = async (req, res) => {
+export const createProgress = async (req, res) => {
   if (req.userData.roles.archived) {
     return res.boom.forbidden(UNAUTHORIZED_WRITE);
   }
@@ -58,7 +57,7 @@ const createProgress = async (req, res) => {
     await sendTaskUpdate(completed, blockers, planned, req.userData.username, taskId, taskTitle);
     return res.status(201).json({
       data,
-      message: `${type.charAt(0).toUpperCase() + type.slice(1)} ${PROGRESS_DOCUMENT_CREATED_SUCCEEDED}`,
+      message: `${type.charAt(0).toUpperCase() + type.slice(1)} ${progressesModel.PROGRESS_DOCUMENT_CREATED_SUCCEEDED}`,
     });
   } catch (error) {
     if (error instanceof Conflict) {
@@ -111,7 +110,7 @@ const createProgress = async (req, res) => {
  * @returns {Promise<void>} A Promise that resolves when the response is sent.
  */
 
-const getProgress = async (req, res) => {
+export const getProgress = async (req, res) => {
   const { dev, page = PROGRESSES_PAGE_SIZE, size = PROGRESSES_SIZE, type, userId, taskId } = req.query;
   try {
     if (dev === "true") {
@@ -131,7 +130,7 @@ const getProgress = async (req, res) => {
       const nextLink = nextPage !== null ? `${baseUrl}&page=${nextPage}&size=${size}&dev=${dev}` : null;
       const prevLink = prevPage !== null ? `${baseUrl}&page=${prevPage}&size=${size}&dev=${dev}` : null;
       return res.json({
-        message: PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
+        message: progressesModel.PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
         count: progressDocs.length,
         data: progressDocs,
         links: {
@@ -142,7 +141,7 @@ const getProgress = async (req, res) => {
     }
     const data = await progressesModel.getProgressDocument(req.query);
     return res.json({
-      message: PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
+      message: progressesModel.PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
       count: data.length,
       data,
     });
@@ -193,11 +192,11 @@ const getProgress = async (req, res) => {
  * @returns {Promise<void>} A Promise that resolves when the response is sent.
  */
 
-const getProgressRangeData = async (req, res) => {
+export const getProgressRangeData = async (req, res) => {
   try {
     const data = await progressesModel.getRangeProgressData(req.query);
     return res.json({
-      message: PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
+      message: progressesModel.PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
       data,
     });
   } catch (error) {
@@ -247,11 +246,11 @@ const getProgressRangeData = async (req, res) => {
  * @returns {Promise<void>} A Promise that resolves when the response is sent.
  */
 
-const getProgressBydDateController = async (req, res) => {
+export const getProgressBydDateController = async (req, res) => {
   try {
     const data = await progressesModel.getProgressByDate(req.params, req.query);
     return res.json({
-      message: PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
+      message: progressesModel.PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED,
       data,
     });
   } catch (error) {
@@ -266,5 +265,3 @@ const getProgressBydDateController = async (req, res) => {
     });
   }
 };
-
-module.exports = { createProgress, getProgress, getProgressRangeData, getProgressBydDateController };

@@ -32,4 +32,4 @@ const recruiterWithIdKeys = [
   "username",
 ];
 
-module.exports = { recruiterDataArray, recruiterWithIdKeys };
+export default { recruiterDataArray, recruiterWithIdKeys };

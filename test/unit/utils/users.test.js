@@ -1,16 +1,16 @@
-const chai = require("chai");
-const { expect } = chai;
+import { expect } from "chai";
 
-const usersUtils = require("../../../utils/users");
-const cleanDb = require("../../utils/cleanDb");
-const addUser = require("../../utils/addUser");
-const { filteredPRs } = require("../../fixtures/pullrequests/pullrequests");
-const { months, discordNicknameLength } = require("../../../constants/users");
-const userData = require("../../fixtures/user/user")()[0];
-const sinon = require("sinon");
-const firestore = require("../../../utils/firestore");
+import sinon from "sinon";
+import { discordNicknameLength, months } from "../../../constants/users.js";
+import dataAccessLayer from "../../../services/dataAccessLayer.js";
+import firestore from "../../../utils/firestore.js";
+import usersUtils from "../../../utils/users.js";
+import { filteredPRs } from "../../fixtures/pullrequests/pullrequests.js";
+import userData from "../../fixtures/user/user.js";
+import addUser from "../../utils/addUser.js";
+import cleanDb from "../../utils/cleanDb.js";
+
 const userModel = firestore.collection("users");
-const dataAccessLayer = require("../../../services/dataAccessLayer");
 
 /**
  * Test the utils functions and validate the data returned

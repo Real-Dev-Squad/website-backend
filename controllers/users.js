@@ -1,40 +1,41 @@
-const chaincodeQuery = require("../models/chaincodes");
-const userQuery = require("../models/users");
-const profileDiffsQuery = require("../models/profileDiffs");
-const firestore = require("../utils/firestore");
-const memberRoleModel = firestore.collection("member-group-roles");
-const logsModel = firestore.collection("logs");
-const admin = require("firebase-admin");
-const logsQuery = require("../models/logs");
-const imageService = require("../services/imageService");
-const { profileDiffStatus } = require("../constants/profileDiff");
-const { logType } = require("../constants/logs");
-const ROLES = require("../constants/roles");
-const dataAccess = require("../services/dataAccessLayer");
-const { isLastPRMergedWithinDays } = require("../services/githubService");
-const logger = require("../utils/logger");
-const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const { OVERDUE_TASKS } = require("../constants/users");
-const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../utils/users");
-const { setInDiscordFalseScript, setUserDiscordNickname } = require("../services/discordService");
-const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
-const { addRoleToUser, getDiscordMembers } = require("../services/discordService");
-const { fetchAllUsers } = require("../models/users");
-const { getOverdueTasks } = require("../models/tasks");
-const { getQualifiers } = require("../utils/helper");
-const { parseSearchQuery } = require("../utils/users");
-const { getFilteredPRsOrIssues } = require("../utils/pullRequests");
-const { getFilteredPaginationLink } = require("../utils/userStatus");
-const {
+import config from "config";
+import {
   USERS_PATCH_HANDLER_ACTIONS,
   USERS_PATCH_HANDLER_ERROR_MESSAGES,
   USERS_PATCH_HANDLER_SUCCESS_MESSAGES,
-} = require("../constants/users");
-const { addLog } = require("../models/logs");
-const { getUserStatus } = require("../models/userStatus");
-const config = require("config");
-const { generateUniqueUsername } = require("../services/users");
-const userService = require("../services/users");
+  OVERDUE_TASKS,
+} from "../constants/users.js";
+import logger from "../utils/logger.js";
+import chaincodeQuery from "../models/chaincodes.js";
+import userQuery, { fetchAllUsers } from "../models/users.js";
+import profileDiffsQuery from "../models/profileDiffs.js";
+import firestore from "../utils/firestore.js";
+import admin from "firebase-admin";
+import logsQuery, { addLog } from "../models/logs.js";
+import imageService from "../services/imageService.js";
+import { profileDiffStatus } from "../constants/profileDiff.js";
+import { logType } from "../constants/logs.js";
+import ROLES from "../constants/roles.js";
+import dataAccess from "../services/dataAccessLayer.js";
+import { isLastPRMergedWithinDays } from "../services/githubService.js";
+import { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
+import { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate, parseSearchQuery } from "../utils/users.js";
+import {
+  setInDiscordFalseScript,
+  setUserDiscordNickname,
+  addRoleToUser,
+  getDiscordMembers,
+} from "../services/discordService.js";
+import { generateDiscordProfileImageUrl } from "../utils/discord-actions.js";
+import { getOverdueTasks } from "../models/tasks.js";
+import { getQualifiers } from "../utils/helper.js";
+import { getFilteredPRsOrIssues } from "../utils/pullRequests.js";
+import { getFilteredPaginationLink } from "../utils/userStatus.js";
+import { getUserStatus } from "../models/userStatus.js";
+import userService, { generateUniqueUsername } from "../services/users.js";
+
+const memberRoleModel = firestore.collection("member-group-roles");
+const logsModel = firestore.collection("logs");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 const usersCollection = firestore.collection("users");
 
@@ -1123,7 +1124,7 @@ const updateProfile = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   verifyUser,
   generateChaincode,
   updateSelf,

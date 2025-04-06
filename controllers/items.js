@@ -1,5 +1,6 @@
-const ItemTagsModel = require("../models/items");
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+import ItemTagsModel from "../models/items.js";
+import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
+import logger from "../utils/logger.js";
 
 /**
  * Adds a tag to an item with its corresponding a level
@@ -65,8 +66,4 @@ const getItemBasedOnFilter = async (req, res) => {
   }
 };
 
-module.exports = {
-  addTagsToItem,
-  removeTagsFromItem,
-  getItemBasedOnFilter,
-};
+export { addTagsToItem, removeTagsFromItem, getItemBasedOnFilter };

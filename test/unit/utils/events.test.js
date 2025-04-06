@@ -1,5 +1,5 @@
-const { expect } = require("chai");
-const { removeUnwantedProperties } = require("../../../utils/events");
+import { expect } from "chai";
+import { removeUnwantedProperties } from "../../../utils/events.js";
 
 describe("removeUnwantedProperties", function () {
   it("should remove unwanted properties from an object", function () {

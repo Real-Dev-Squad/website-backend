@@ -9,4 +9,4 @@ import { userAuthorization } from "../middlewares/userAuthorization";
 router.post("/stock/new/self", authenticate, newTrade, trade); // this route is being deprecated, please use new available route `/stock/new/:userId`
 router.post("/stock/new/:userId", devFlagMiddleware, authenticate, userAuthorization, newTrade, trade);
 
-module.exports = router;
+export default  router;

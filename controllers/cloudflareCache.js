@@ -1,9 +1,9 @@
-const logsQuery = require("../models/logs");
-const cloudflare = require("../services/cloudflareService");
-const { logType } = require("../constants/logs");
-const { MAX_CACHE_PURGE_COUNT } = require("../constants/cloudflareCache");
-const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
-const dataAccess = require("../services/dataAccessLayer");
+import logsQuery from "../models/logs.js";
+import cloudflare from "../services/cloudflareService.js";
+import { logType } from "../constants/logs.js";
+import { MAX_CACHE_PURGE_COUNT } from "../constants/cloudflareCache.js";
+import { SOMETHING_WENT_WRONG } from "../constants/errorMessages.js";
+import dataAccess from "../services/dataAccessLayer.js";
 
 /**
  * Purges the Cache of Members Profile Page
@@ -104,7 +104,7 @@ const fetchPurgedCacheMetadata = async (req, res) => {
   }
 };
 
-module.exports = {
+export default {
   purgeCache,
   fetchPurgedCacheMetadata,
 };

@@ -1,15 +1,13 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
-const { getDiscordMembers } = require("../../fixtures/discordResponse/discord-response");
-const sinon = require("sinon");
+import chai, { expect } from "chai";
+import chaiHttp from "chai-http";
+import sinon from "sinon";
 
-const app = require("../../../server");
-const authService = require("../../../services/authService");
-const addUser = require("../../utils/addUser");
-const cleanDb = require("../../utils/cleanDb");
-const config = require("config");
-const cookieName = config.get("userToken.cookieName");
+import cookieName from "config";
+import app from "../../../server.js";
+import authService from "../../../services/authService.js";
+import { getDiscordMembers } from "../../fixtures/discordResponse/discord-response.js";
+import addUser from "../../utils/addUser.js";
+import cleanDb from "../../utils/cleanDb.js";
 
 chai.use(chaiHttp);
 

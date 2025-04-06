@@ -1,14 +1,12 @@
-const chai = require("chai");
-const sinon = require("sinon");
-const { expect } = chai;
+import { expect } from "chai";
+import sinon from "sinon";
+import axios from "../../../utils/fetch.js";
+import githubService from "../../../services/githubService.js";
+import githubUserInfo from "../../fixtures/auth/githubUserInfo.js";
+import { prDates } from "../../fixtures/pullrequests/pullrequests.js";
+import cleanDb from "../../utils/cleanDb.js";
+import addUser from "../../utils/addUser.js";
 
-const cleanDb = require("../../utils/cleanDb");
-const addUser = require("../../utils/addUser");
-const axios = require("../../../utils/fetch");
-
-const githubService = require("../../../services/githubService");
-const githubUserInfo = require("../../fixtures/auth/githubUserInfo")();
-const { prDates } = require("../../fixtures/pullrequests/pullrequests");
 describe("githubService", function () {
   beforeEach(async function () {
     sinon.stub(axios, "fetch").returnsArg(0);

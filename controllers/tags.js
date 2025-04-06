@@ -1,6 +1,7 @@
-const TagModel = require("../models/tags");
-const admin = require("firebase-admin");
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+import * as TagModel from "../models/tags.js";
+import admin from "firebase-admin";
+
+import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
 
 /**
  * Creates a new tag
@@ -86,7 +87,7 @@ const getTagsByType = async (req, res) => {
   }
 };
 
-module.exports = {
+export default {
   addTag,
   deleteTag,
   getAllTags,

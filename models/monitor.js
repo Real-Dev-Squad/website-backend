@@ -1,9 +1,10 @@
-const { Conflict, NotFound } = require("http-errors");
-const fireStore = require("../utils/firestore");
+import { Conflict, NotFound } from "http-errors";
+import fireStore from "../utils/firestore.js";
+import { assertUserOrTaskExists } from "../utils/progresses.js";
+import { buildQueryByTypeId, buildQueryForFetchingDocsOfType, getTrackedProgressDocs } from "../utils/monitor.js";
+import { RESPONSE_MESSAGES } from "../constants/monitor.js";
+
 const trackedProgressesCollection = fireStore.collection("trackedProgresses");
-const { assertUserOrTaskExists } = require("../utils/progresses");
-const { buildQueryByTypeId, buildQueryForFetchingDocsOfType, getTrackedProgressDocs } = require("../utils/monitor");
-const { RESPONSE_MESSAGES } = require("../constants/monitor");
 const { RESOURCE_NOT_FOUND, RESOURCE_ALREADY_TRACKED } = RESPONSE_MESSAGES;
 
 /**
@@ -89,8 +90,4 @@ const getTrackedProgressDocuments = async (reqQuery) => {
   return docsData;
 };
 
-module.exports = {
-  createTrackedProgressDocument,
-  updateTrackedProgressDocument,
-  getTrackedProgressDocuments,
-};
+export { createTrackedProgressDocument, updateTrackedProgressDocument, getTrackedProgressDocuments };

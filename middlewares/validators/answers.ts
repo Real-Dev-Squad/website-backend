@@ -1,6 +1,7 @@
 const joi = require("joi");
 import { Request, NextFunction } from "express";
 import { CustomResponse } from "../../typeDefinitions/global";
+import logger from "../../utils/logger.js";
 
 const createAnswer = async (req: Request, res: CustomResponse, next: NextFunction) => {
   const schema = joi.object({
@@ -33,4 +34,4 @@ const updateAnswer = async (req: Request, res: CustomResponse, next: NextFunctio
   }
 };
 
-module.exports = { createAnswer, updateAnswer };
+export default  { createAnswer, updateAnswer };

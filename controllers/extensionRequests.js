@@ -1,13 +1,12 @@
-const extensionRequestsQuery = require("../models/extensionRequests");
-const { addLog } = require("../models/logs");
-const tasks = require("../models/tasks");
-const { getUsername, getUsernameElseUndefined, getUserIdElseUndefined } = require("../utils/users");
-const { EXTENSION_REQUEST_STATUS } = require("../constants/extensionRequests");
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const { transformQuery } = require("../utils/extensionRequests");
-const { parseQueryParams } = require("../utils/queryParser");
-const logsQuery = require("../models/logs");
-const { getFullName } = require("../utils/users");
+import extensionRequestsQuery from "../models/extensionRequests.js";
+import logsQuery, { addLog } from "../models/logs.js";
+import tasks from "../models/tasks.js";
+import { getUsername, getUsernameElseUndefined, getUserIdElseUndefined, getFullName } from "../utils/users.js";
+import { EXTENSION_REQUEST_STATUS } from "../constants/extensionRequests.js";
+import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
+import { transformQuery } from "../utils/extensionRequests.js";
+import { parseQueryParams } from "../utils/queryParser.js";
+import logger from "../utils/logger.js";
 
 /**
  * Create ETA extension Request
@@ -330,7 +329,7 @@ const updateExtensionRequestStatus = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   createTaskExtensionRequest,
   fetchExtensionRequests,
   getExtensionRequest,

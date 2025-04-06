@@ -1,10 +1,10 @@
 import chai from "chai";
 import chaiHttp from "chai-http";
-import app from "../../server";
-import authService from "../../services/authService";
-import addUser from "../utils/addUser";
-import cleanDb from "../utils/cleanDb";
-import stocks from "../../models/stocks";
+import app from "../../server.js";
+import { generateAuthToken } from "../../services/authService.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
+import * as stocksModel from "../../models/stocks.js";
 import sinon from "sinon";
 import config from "config";
 
@@ -20,8 +20,8 @@ describe("GET /stocks/:userId", function () {
 
   beforeEach(async function () {
     userId = await addUser();
-    jwt = authService.generateAuthToken({ userId });
-    const { id } = await stocks.addStock(stockData);
+    jwt = generateAuthToken({ userId });
+    const { id } = await stocksModel.addStock(stockData);
     userStock = { stockId: id, stockName: "EURO", quantity: 1, orderValue: 10, initialStockValue: 2 };
   });
 
@@ -31,7 +31,7 @@ describe("GET /stocks/:userId", function () {
   });
 
   it("Should return user stocks when stocks are available", async function () {
-    await stocks.updateUserStocks(userId, userStock);
+    await stocksModel.updateUserStocks(userId, userStock);
 
     const res = await chai.request(app).get(`/stocks/${userId}?dev=true`).set("cookie", `${cookieName}=${jwt}`);
 
@@ -78,7 +78,7 @@ describe("GET /stocks/:userId", function () {
   });
 
   it("Should return 500 when an internal server error occurs", function (done) {
-    sinon.stub(stocks, "fetchUserStocks").throws(new Error("Database error"));
+    sinon.stub(stocksModel, "fetchUserStocks").throws(new Error("Database error"));
 
     chai
       .request(app)

@@ -1,6 +1,7 @@
-const Sinon = require("sinon");
-const { createArt } = require("../../../middlewares/validators/arts");
-const { expect } = require("chai");
+import { expect } from "chai";
+import sinon from "sinon";
+
+import { createArt } from "../../../middlewares/validators/arts.js";
 
 describe("Test the arts validator", function () {
   it("Allows the request to pass", async function () {
@@ -12,7 +13,7 @@ describe("Test the arts validator", function () {
       },
     };
     const res = {};
-    const nextSpy = Sinon.spy();
+    const nextSpy = sinon.spy();
     await createArt(req, res, nextSpy);
     expect(nextSpy.callCount).to.be.equal(1);
   });
@@ -28,7 +29,7 @@ describe("Test the arts validator", function () {
         badRequest: () => {},
       },
     };
-    const nextSpy = Sinon.spy();
+    const nextSpy = sinon.spy();
     await createArt(req, res, nextSpy);
     expect(nextSpy.callCount).to.be.equal(0);
   });

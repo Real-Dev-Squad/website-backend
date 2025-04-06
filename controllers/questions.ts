@@ -3,6 +3,7 @@ import { Request } from "express";
 
 import { Client, Question } from "../types/questions";
 import { CustomRequest, CustomResponse } from "../types/global";
+import logger from "../utils/logger.js";
 
 const { HEADERS_FOR_SSE } = require("../constants/constants");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
@@ -60,4 +61,4 @@ const getQuestions = async (req: Request, res: CustomResponse) => {
   }
 };
 
-module.exports = { createQuestion, getQuestions };
+export default  { createQuestion, getQuestions };

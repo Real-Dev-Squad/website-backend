@@ -1,4 +1,4 @@
-const { TASK_SIZE } = require("../constants/tasks");
+import { TASK_SIZE } from "../constants/tasks.js";
 
 /**
  * Returns an object containing key value pairs of qualifiers with their values
@@ -88,9 +88,4 @@ function findSubscribedGroupIds(discordId, groupToUserMappings = []) {
   return subscribedGroupIds;
 }
 
-module.exports = {
-  getQualifiers,
-  getDateTimeRangeForPRs,
-  getPaginatedLink,
-  findSubscribedGroupIds,
-};
+export { getQualifiers, getDateTimeRangeForPRs, getPaginatedLink, findSubscribedGroupIds };

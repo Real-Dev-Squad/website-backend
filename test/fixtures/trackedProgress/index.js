@@ -40,7 +40,7 @@ const isISOString = (value) => {
   return new Date(value).toISOString() === value;
 };
 
-module.exports = {
+export default {
   predefinedTrackedProgressDataForUser,
   predefinedTrackedProgressDataForTask,
   trackedProgressUserDataForPost,

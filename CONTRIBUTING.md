@@ -74,7 +74,7 @@ The following project structure should be followed:
     |   |   |-- services
     |   |-- utils // Utility functions to be used while testing
     |-- utils // Files containing utility functions
-    |    |-- logger.js
+    |    |-- logger
     |-- .github
     |   |-- workflows
     |       |-- // Github actions files

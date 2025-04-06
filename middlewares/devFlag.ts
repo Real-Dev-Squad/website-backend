@@ -1,5 +1,6 @@
 import { NextFunction } from "express";
 import { CustomRequest, CustomResponse } from "../types/global";
+import logger from "../utils/logger.js";
 
 export const devFlagMiddleware = (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
   try {

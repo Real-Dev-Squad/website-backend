@@ -1,11 +1,11 @@
-import addUser from "../utils/addUser";
+import addUser from "../utils/addUser.js";
 import chai from "chai";
 const { expect } = chai;
-import userDataFixture from "../fixtures/user/user";
+import userDataFixture from "../fixtures/user/user.js";
 import sinon from "sinon";
 import chaiHttp from "chai-http";
-import cleanDb from "../utils/cleanDb";
-import { CreateOnboardingExtensionBody, OnboardingExtension } from "../../types/onboardingExtension";
+import cleanDb from "../utils/cleanDb.js";
+import { CreateOnboardingExtensionBody, OnboardingExtension } from "../../types/onboardingExtension.js";
 import { 
     REQUEST_ALREADY_PENDING, 
     REQUEST_STATE, REQUEST_TYPE, 
@@ -18,19 +18,19 @@ import {
     INVALID_REQUEST_TYPE,
     REQUEST_DOES_NOT_EXIST,
     UNAUTHORIZED_TO_UPDATE_REQUEST
-} from "../../constants/requests";
-const { generateToken } = require("../../test/utils/generateBotToken");
-import app from "../../server";
-import { createUserStatusWithState } from "../../utils/userStatus";
-const firestore = require("../../utils/firestore");
+} from "../../constants/requests.js";
+import { generateToken } from "../../test/utils/generateBotToken.js";
+import app from "../../server.js";
+import { createUserStatusWithState } from "../../utils/userStatus.js";
+import firestore from "../../utils/firestore.js";
 const userStatusModel = firestore.collection("usersStatus");
-import * as requestsQuery from "../../models/requests"
-import { userState } from "../../constants/userStatus";
-import { generateAuthToken } from "../../services/authService";
-const { CLOUDFLARE_WORKER, BAD_TOKEN } = require("../../constants/bot");
-import * as logUtils from "../../services/logService";
-import { convertDaysToMilliseconds } from "../../utils/time";
-import { OooStatusRequest } from "../../types/oooRequest";
+import * as requestsQuery from "../../models/requests.js";
+import { userState } from "../../constants/userStatus.js";
+import { generateAuthToken } from "../../services/authService.js";
+import { CLOUDFLARE_WORKER, BAD_TOKEN } from "../../constants/bot.js";
+import * as logUtils from "../../services/logService.js";
+import { convertDaysToMilliseconds } from "../../utils/time.js";
+import { OooStatusRequest } from "../../types/oooRequest.js";
 const userData = userDataFixture();
 chai.use(chaiHttp);
 

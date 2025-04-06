@@ -2,6 +2,7 @@ import joi from "joi";
 import { NextFunction } from "express";
 import { REQUEST_TYPE } from "../../constants/requests";
 import { OnboardingExtensionCreateRequest, OnboardingExtensionResponse, UpdateOnboardingExtensionRequest } from "../../types/onboardingExtension";
+import logger from "../../utils/logger.js";
 
 export const createOnboardingExtensionRequestValidator = async (
   req: OnboardingExtensionCreateRequest,

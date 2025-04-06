@@ -3,6 +3,6 @@
  * @return  {object}
  */
 
-module.exports = () => {
+export default () => {
   return { an: "an", AN: "AN", null: "", mu: "mu", number23: 23 };
 };

@@ -1,6 +1,6 @@
-const { RateLimiterMemory } = require("rate-limiter-flexible");
-const { TOO_MANY_REQUESTS } = require("../constants/rateLimiting");
-const { getRetrySeconds } = require("../utils/rateLimiting");
+import { RateLimiterMemory } from "rate-limiter-flexible";
+import { TOO_MANY_REQUESTS } from "../constants/rateLimiting.js";
+import { getRetrySeconds } from "../utils/rateLimiting.js";
 
 // INFO: temporarily added here, will be take from env-var/config
 const opts = {
@@ -47,6 +47,6 @@ async function commonRateLimiter(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   commonRateLimiter,
 };

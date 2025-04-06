@@ -1,5 +1,5 @@
-const authService = require("../services/authService");
-const dataAccess = require("../services/dataAccessLayer");
+import authService from "../services/authService.js";
+import dataAccess from "../services/dataAccessLayer.js";
 
 /**
  * Middleware to check if the user has been restricted. If user is restricted,
@@ -39,7 +39,7 @@ const checkRestricted = async (req, res, next) => {
  * @param next {Function} - Express middleware function
  * @return {Object} - Returns unauthenticated object if token is invalid
  */
-module.exports = async (req, res, next) => {
+export default async (req, res, next) => {
   try {
     let token = req.cookies[config.get("userToken.cookieName")];
 

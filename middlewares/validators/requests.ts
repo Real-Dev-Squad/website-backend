@@ -11,6 +11,7 @@ import { UpdateRequest } from "../../types/requests";
 import { TaskRequestRequest, TaskRequestResponse } from "../../types/taskRequests";
 import { createOnboardingExtensionRequestValidator, updateOnboardingExtensionRequestValidator } from "./onboardingExtensionRequest";
 import { OnboardingExtensionCreateRequest, OnboardingExtensionResponse, UpdateOnboardingExtensionRequest } from "../../types/onboardingExtension";
+import logger from "../../utils/logger.js";
 
 export const createRequestsMiddleware = async (
   req: OooRequestCreateRequest|ExtensionRequestRequest | TaskRequestRequest | OnboardingExtensionCreateRequest,

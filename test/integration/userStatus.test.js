@@ -1,29 +1,28 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
-const sinon = require("sinon");
+import chai from "chai";
+import chaiHttp from "chai-http";
+import sinon from "sinon";
 
-const firestore = require("../../utils/firestore");
-const app = require("../../server");
-const authService = require("../../services/authService");
-const addUser = require("../utils/addUser");
-const cleanDb = require("../utils/cleanDb");
+import firestore from "../../utils/firestore.js";
+import app from "../../server.js";
+import authService from "../../services/authService.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
 // Import fixtures
-const userData = require("../fixtures/user/user")();
-const superUser = userData[4];
-const {
+import userData from "../fixtures/user/user.js";
+import {
   userStatusDataForNewUser,
   userStatusDataForOooState,
   oooStatusDataForShortDuration,
   generateUserStatusData,
-} = require("../fixtures/userStatus/userStatus");
+} from "../fixtures/userStatus/userStatus.js";
+import config from "config";
+import userStatusModel, { updateUserStatus } from "../../models/userStatus.js";
+import { userState } from "../../constants/userStatus.js";
+import { convertTimestampToUTCStartOrEndOfDay } from "../../utils/time.js";
 
-const config = require("config");
-const { updateUserStatus } = require("../../models/userStatus");
-const { userState } = require("../../constants/userStatus");
+const { expect } = chai;
+const superUser = userData[4];
 const cookieName = config.get("userToken.cookieName");
-const userStatusModel = require("../../models/userStatus");
-const { convertTimestampToUTCStartOrEndOfDay } = require("../../utils/time");
 
 chai.use(chaiHttp);
 

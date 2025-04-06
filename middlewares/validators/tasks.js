@@ -1,13 +1,15 @@
-const joi = require("joi");
-const { BadRequest } = require("http-errors");
-const { DINERO, NEELAM } = require("../../constants/wallets");
-const { TASK_STATUS, TASK_STATUS_OLD, MAPPED_TASK_STATUS, tasksUsersStatus } = require("../../constants/tasks");
-const { RQLQueryParser } = require("../../utils/RQLParser");
-const { Operators } = require("../../typeDefinitions/rqlParser");
-const { daysOfWeek } = require("../../constants/constants");
+import joi from "joi";
+import { BadRequest } from "http-errors";
+
+import { DINERO, NEELAM } from "../../constants/wallets.js";
+import { RQLQueryParser } from "../../utils/RQLParser.js";
+import { Operators } from "../../typeDefinitions/rqlParser.js";
+import { daysOfWeek } from "../../constants/constants.js";
+import { validateMillisecondsTimestamp } from "./utils.js";
+import { TASK_STATUS, TASK_STATUS_OLD, MAPPED_TASK_STATUS, tasksUsersStatus } from "../../constants/tasks.js";
+
 const TASK_STATUS_ENUM = Object.values(TASK_STATUS);
 const MAPPED_TASK_STATUS_ENUM = Object.keys(MAPPED_TASK_STATUS);
-const { validateMillisecondsTimestamp } = require("./utils");
 
 const createTask = async (req, res, next) => {
   const schema = joi
@@ -275,7 +277,7 @@ const filterOrphanTasksValidator = async (req, res, next) => {
     res.boom.badRequest(error);
   }
 };
-module.exports = {
+export default {
   createTask,
   updateTask,
   updateSelfTask,

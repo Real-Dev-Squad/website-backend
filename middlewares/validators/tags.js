@@ -1,5 +1,5 @@
-const Joi = require("joi");
-const { TYPES } = require("../../constants/tags");
+import Joi from "joi";
+import { TYPES } from "../../constants/tags.js";
 
 const validTagBody = async (req, res, next) => {
   const schema = Joi.object({
@@ -24,6 +24,6 @@ const validTagBody = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   validTagBody,
 };

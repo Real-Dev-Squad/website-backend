@@ -1,16 +1,15 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
-
-const authService = require("../../../services/authService");
+import * as chai from "chai";
+import chaiHttp from "chai-http";
+import { expect } from "chai";
+import { generateAuthToken, verifyAuthToken, decodeAuthToken } from "../../../services/authService.js";
 
 chai.use(chaiHttp);
 
 describe("authService", function () {
   it("should validate the generated JWT", function (done) {
     const payload = { userId: 1 };
-    const jwt = authService.generateAuthToken(payload);
-    const decodedValue = authService.verifyAuthToken(jwt);
+    const jwt = generateAuthToken(payload);
+    const decodedValue = verifyAuthToken(jwt);
 
     expect(decodedValue).to.have.all.keys("userId", "iat", "exp");
     expect(decodedValue.userId).to.equal(payload.userId);
@@ -20,8 +19,8 @@ describe("authService", function () {
 
   it("should decode the generated JWT", function (done) {
     const payload = { userId: 1 };
-    const jwt = authService.generateAuthToken(payload);
-    const decodedValue = authService.decodeAuthToken(jwt);
+    const jwt = generateAuthToken(payload);
+    const decodedValue = decodeAuthToken(jwt);
 
     expect(decodedValue).to.have.all.keys("userId", "iat", "exp");
     expect(decodedValue.userId).to.equal(payload.userId);

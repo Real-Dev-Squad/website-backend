@@ -4,4 +4,4 @@ const ANSWER_STATUS = {
   REJECTED: "REJECTED",
 }
 
-module.exports = { ANSWER_STATUS }
+export { ANSWER_STATUS };

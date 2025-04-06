@@ -1,9 +1,9 @@
-const express = require("express");
-const { addTagsToItem, removeTagsFromItem, getItemBasedOnFilter } = require("../controllers/items");
-const { validateItemsPayload, validateItemQuery } = require("../middlewares/validators/items");
-const authenticate = require("../middlewares/authenticate");
-const authorizeRoles = require("../middlewares/authorizeRoles");
-const { SUPERUSER } = require("../constants/roles");
+import express from "express";
+import { addTagsToItem, removeTagsFromItem, getItemBasedOnFilter } from "../controllers/items.js";
+import { validateItemsPayload, validateItemQuery } from "../middlewares/validators/items.js";
+import authenticate from "../middlewares/authenticate.js";
+import authorizeRoles from "../middlewares/authorizeRoles.js";
+import { SUPERUSER } from "../constants/roles.js";
 
 const router = express.Router();
 
@@ -11,4 +11,4 @@ router.post("/", authenticate, authorizeRoles([SUPERUSER]), validateItemsPayload
 router.delete("/", authenticate, authorizeRoles([SUPERUSER]), removeTagsFromItem);
 router.get("/filter", authenticate, validateItemQuery, getItemBasedOnFilter);
 
-module.exports = router;
+export default router;

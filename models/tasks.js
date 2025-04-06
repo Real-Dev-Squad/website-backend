@@ -1,13 +1,17 @@
-const firestore = require("../utils/firestore");
+import firestore from "../utils/firestore.js";
+import { chunks } from "../utils/array.js";
+import { DOCUMENT_WRITE_SIZE } from "../constants/constants.js";
+import { fromFirestoreData, toFirestoreData, buildTasks } from "../utils/tasks.js";
+import { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, TASK_SIZE } from "../constants/tasks.js";
+import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
+import { BATCH_SIZE_IN_CLAUSE } from "../constants/firebase.js";
+import * as userUtils from "../utils/users.js";
+
 const tasksModel = firestore.collection("tasks");
 const userModel = firestore.collection("users");
 const ItemModel = firestore.collection("itemTags");
 const dependencyModel = firestore.collection("taskDependencies");
-const userUtils = require("../utils/users");
-const { chunks } = require("../utils/array");
-const { DOCUMENT_WRITE_SIZE } = require("../constants/constants");
-const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
-const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, TASK_SIZE } = require("../constants/tasks");
+
 const {
   IN_PROGRESS,
   NEEDS_REVIEW,
@@ -20,9 +24,8 @@ const {
   BACKLOG,
   DONE,
 } = TASK_STATUS;
+
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 
 /**
  * Update multiple tasks' status to DONE in one batch operation.
@@ -775,25 +778,26 @@ const fetchIncompleteTasksByUserIds = async (userIds) => {
   }
 };
 
-module.exports = {
+export {
+  updateTaskStatusToDone,
   updateTask,
+  addDependency,
+  getBuiltTasks,
+  fetchPaginatedTasks,
   fetchTasks,
+  fetchActiveTaskMembers,
   fetchTask,
+  fetchTaskByIssueId,
+  fetchSelfTask,
   fetchUserTasks,
+  getNewTask,
+  fetchSkillLevelTask,
   fetchSelfTasks,
   fetchUserCompletedTasks,
-  fetchActiveTaskMembers,
-  fetchSelfTask,
-  fetchSkillLevelTask,
   overdueTasks,
-  addDependency,
-  fetchTaskByIssueId,
-  fetchPaginatedTasks,
-  getBuiltTasks,
   getOverdueTasks,
   updateTaskStatus,
   updateOrphanTasksStatus,
   markUnDoneTasksOfArchivedUsersBacklog,
-  updateTaskStatusToDone,
   fetchIncompleteTasksByUserIds,
 };

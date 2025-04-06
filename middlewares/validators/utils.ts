@@ -7,6 +7,6 @@ const validateMillisecondsTimestamp = async (reqBody, timestampProperty) => {
   return schema.validateAsync(reqBody);
 };
 
-module.exports = {
+export default  {
   validateMillisecondsTimestamp
 }

@@ -1,7 +1,7 @@
-const Sinon = require("sinon");
+import { expect } from "chai";
+import sinon from "sinon";
 
-const { expect } = require("chai");
-const { fcmTokenValidator } = require("../../../middlewares/validators/fcmToken");
+import { fcmTokenValidator } from "../../../middlewares/validators/fcmToken.js";
 
 describe("Test the fcmToken validator", function () {
   it("Allows the request to pass", async function () {
@@ -11,7 +11,7 @@ describe("Test the fcmToken validator", function () {
       },
     };
     const res = {};
-    const nextSpy = Sinon.spy();
+    const nextSpy = sinon.spy();
     await fcmTokenValidator(req, res, nextSpy);
     expect(nextSpy.callCount).to.be.equal(1);
   });
@@ -27,7 +27,7 @@ describe("Test the fcmToken validator", function () {
         badRequest: () => {},
       },
     };
-    const nextSpy = Sinon.spy();
+    const nextSpy = sinon.spy();
     await fcmTokenValidator(req, res, nextSpy);
     expect(nextSpy.callCount).to.be.equal(0);
   });

@@ -1,5 +1,6 @@
-const { fetchSkillLevelTask } = require("../models/tasks");
-const firestore = require("../utils/firestore");
+import { fetchSkillLevelTask } from "../models/tasks.js";
+import firestore from "../utils/firestore.js";
+
 const tasks = firestore.collection("tasks");
 
 const assignTask = async function (req, res) {
@@ -17,4 +18,4 @@ const assignTask = async function (req, res) {
   }
 };
 
-module.exports = assignTask;
+export default assignTask;

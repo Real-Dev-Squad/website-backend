@@ -1,6 +1,6 @@
-const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
-const dataAccess = require("../services/dataAccessLayer");
-const { TASK_REQUEST_ACTIONS } = require("../constants/taskRequests");
+import { SOMETHING_WENT_WRONG } from "../constants/errorMessages.js";
+import dataAccess from "../services/dataAccessLayer.js";
+import { TASK_REQUEST_ACTIONS } from "../constants/taskRequests.js";
 /**
  * Validates user id for task request
  *
@@ -32,6 +32,6 @@ async function validateUser(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   validateUser,
 };

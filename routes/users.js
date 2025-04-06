@@ -1,20 +1,20 @@
-const express = require("express");
+import express from "express";
+import authenticate from "../middlewares/authenticate.js";
+import authorizeRoles from "../middlewares/authorizeRoles.js";
+import users from "../controllers/users.js";
+import ROLES, { SUPERUSER } from "../constants/roles.js";
+import userValidator from "../middlewares/validators/user.js";
+import { upload } from "../utils/multer.js";
+import { getUserBadges } from "../controllers/badges.js";
+import checkIsVerifiedDiscord from "../middlewares/verifydiscord.js";
+import { authorizeAndAuthenticate } from "../middlewares/authorizeUsersAndService.js";
+import { Services } from "../constants/bot.js";
+import authenticateProfile from "../middlewares/authenticateProfile.js";
+import { devFlagMiddleware } from "../middlewares/devFlag.js";
+import { userAuthorization } from "../middlewares/userAuthorization.js";
+import conditionalMiddleware from "../middlewares/conditionalMiddleware.js";
+
 const router = express.Router();
-const authenticate = require("../middlewares/authenticate");
-const authorizeRoles = require("../middlewares/authorizeRoles");
-const users = require("../controllers/users");
-const { SUPERUSER } = require("../constants/roles");
-const userValidator = require("../middlewares/validators/user");
-const { upload } = require("../utils/multer");
-const { getUserBadges } = require("../controllers/badges");
-const checkIsVerifiedDiscord = require("../middlewares/verifydiscord");
-const { authorizeAndAuthenticate } = require("../middlewares/authorizeUsersAndService");
-const ROLES = require("../constants/roles");
-const { Services } = require("../constants/bot");
-const authenticateProfile = require("../middlewares/authenticateProfile");
-const { devFlagMiddleware } = require("../middlewares/devFlag");
-const { userAuthorization } = require("../middlewares/userAuthorization");
-const conditionalMiddleware = require("../middlewares/conditionalMiddleware");
 
 router.post("/", authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]), users.markUnverified);
 router.post("/update-in-discord", authenticate, authorizeRoles([SUPERUSER]), users.setInDiscordScript);
@@ -78,6 +78,6 @@ router.patch("/profileURL", authenticate, userValidator.updateProfileURL, users.
 router.patch("/rejectDiff", authenticate, authorizeRoles([SUPERUSER]), users.rejectProfileDiff);
 router.patch("/:userId", authenticate, conditionalMiddleware(userValidator.updateUser), users.updateProfile);
 router.get("/suggestedUsers/:skillId", authenticate, authorizeRoles([SUPERUSER]), users.getSuggestedUsers);
-module.exports = router;
 router.post("/batch-username-update", authenticate, authorizeRoles([SUPERUSER]), users.updateUsernames);
-module.exports = router;
+
+export default router;

@@ -1,4 +1,6 @@
-const firestore = require("../utils/firestore");
+import firestore from "../utils/firestore.js";
+import logger from "../utils/logger.js";
+
 const levelModel = firestore.collection("levels");
 
 /**
@@ -56,8 +58,4 @@ const getAllLevels = async () => {
   }
 };
 
-module.exports = {
-  addLevel,
-  deleteLevel,
-  getAllLevels,
-};
+export { addLevel, deleteLevel, getAllLevels };

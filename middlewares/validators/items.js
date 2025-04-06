@@ -1,6 +1,5 @@
-const Joi = require("joi");
-
-const { TYPES } = require("../../constants/items");
+import Joi from "joi";
+import { TYPES } from "../../constants/items.js";
 
 const validateItemsPayload = async (req, res, next) => {
   const schema = Joi.object({
@@ -49,7 +48,7 @@ const validateItemQuery = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   validateItemsPayload,
   validateItemQuery,
 };

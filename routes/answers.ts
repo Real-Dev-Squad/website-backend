@@ -18,4 +18,4 @@ router.patch(
 
 router.get("/", answers.getAnswers);
 
-module.exports = router;
+export default  router;

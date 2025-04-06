@@ -7,7 +7,7 @@
  */
 
 const NODE_ENV = process.env.NODE_ENV;
-module.exports = {
+export default {
   port: 3000,
   enableFileLogs: true,
   enableConsoleLogs: false,

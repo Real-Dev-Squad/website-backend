@@ -1,7 +1,9 @@
-const firestore = require("../utils/firestore");
-const { formatUsername } = require("../utils/username");
+import firestore from "../utils/firestore.js";
+import { formatUsername } from "../utils/username.js";
+import { fetchIncompleteTasksByUserIds } from "../models/tasks.js";
+import logger from "../utils/logger.js";
+
 const userModel = firestore.collection("users");
-const tasksModel = require("../models/tasks");
 
 const getUsersWithIncompleteTasks = async (users) => {
   if (users.length === 0) return [];
@@ -9,7 +11,7 @@ const getUsersWithIncompleteTasks = async (users) => {
   try {
     const userIds = users.map((user) => user.id);
 
-    const abandonedTasksQuerySnapshot = await tasksModel.fetchIncompleteTasksByUserIds(userIds);
+    const abandonedTasksQuerySnapshot = await fetchIncompleteTasksByUserIds(userIds);
 
     if (abandonedTasksQuerySnapshot.empty) {
       return [];
@@ -46,7 +48,4 @@ const generateUniqueUsername = async (firstName, lastName) => {
   }
 };
 
-module.exports = {
-  generateUniqueUsername,
-  getUsersWithIncompleteTasks,
-};
+export { generateUniqueUsername, getUsersWithIncompleteTasks };

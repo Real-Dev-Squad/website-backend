@@ -1,13 +1,10 @@
-const passport = require("passport");
-const users = require("../models/users");
-const QrCodeAuthModel = require("../models/qrCodeAuth");
-const authService = require("../services/authService");
-const dataAccess = require("../services/dataAccessLayer");
-const {
-  SOMETHING_WENT_WRONG,
-  DATA_ADDED_SUCCESSFULLY,
-  USER_DOES_NOT_EXIST_ERROR,
-} = require("../constants/errorMessages");
+import config from "config";
+import passport from "passport";
+import { DATA_ADDED_SUCCESSFULLY, SOMETHING_WENT_WRONG } from "../constants/errorMessages.js";
+import QrCodeAuthModel from "../models/qrCodeAuth.js";
+import users from "../models/users.js";
+import authService from "../services/authService.js";
+import logger from "../utils/logger.js";
 
 const googleAuthLogin = (req, res, next) => {
   const { redirectURL } = req.query;
@@ -248,23 +245,15 @@ const storeUserDeviceInfo = async (req, res) => {
     const userJson = {
       user_id: req.body.user_id,
       device_info: req.body.device_info,
-      device_id: req.body.device_id,
-      authorization_status: "NOT_INIT",
     };
 
-    const userInfoData = await dataAccess.retrieveUsers({ id: userJson.user_id });
-
-    if (!userInfoData.userExists) {
-      return res.boom.notFound(USER_DOES_NOT_EXIST_ERROR);
-    }
-    const userInfo = await QrCodeAuthModel.storeUserDeviceInfo(userJson);
-
-    return res.status(201).json({
-      ...userInfo,
+    const { id } = await QrCodeAuthModel.addUserDeviceInfo(userJson);
+    return res.json({
       message: DATA_ADDED_SUCCESSFULLY,
+      id,
     });
   } catch (err) {
-    logger.error(`Error while storing user device info : ${err}`);
+    logger.error(`Error while storing user device info: ${err}`);
     return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
 };
@@ -327,14 +316,14 @@ const fetchDeviceDetails = async (req, res) => {
   }
 };
 
-module.exports = {
-  githubAuthLogin,
+export {
+  fetchDeviceDetails,
+  fetchUserDeviceInfo,
   githubAuthCallback,
-  googleAuthLogin,
+  githubAuthLogin,
   googleAuthCallback,
+  googleAuthLogin,
   signout,
   storeUserDeviceInfo,
   updateAuthStatus,
-  fetchUserDeviceInfo,
-  fetchDeviceDetails,
 };

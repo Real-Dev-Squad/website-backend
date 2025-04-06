@@ -1,6 +1,6 @@
-const { getMessaging } = require("firebase-admin/messaging");
-const { getFcmTokenFromUserId } = require("../services/getFcmTokenFromUserId");
-const { getUserIdsFromRoleId } = require("../services/getUserIdsFromRoleId");
+import { getMessaging } from "firebase-admin";
+import { getFcmTokenFromUserId } from "../services/getFcmTokenFromUserId.js";
+import { getUserIdsFromRoleId } from "../services/getUserIdsFromRoleId.js";
 
 /**
  * Route used to get the health status of teh server
@@ -79,6 +79,4 @@ const notifyController = async (req, res) => {
     });
 };
 
-module.exports = {
-  notifyController,
-};
+export { notifyController };

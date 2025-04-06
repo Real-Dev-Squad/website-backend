@@ -1,4 +1,5 @@
-const joi = require("joi");
+import joi from "joi";
+import logger from "../../utils/logger.js";
 
 const newTrade = async (req, res, next) => {
   const schema = joi.object().strict().keys({
@@ -19,6 +20,4 @@ const newTrade = async (req, res, next) => {
   }
 };
 
-module.exports = {
-  newTrade,
-};
+export { newTrade };

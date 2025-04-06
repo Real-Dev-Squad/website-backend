@@ -6,4 +6,4 @@ import authenticate from "../middlewares/authenticate";
 router.get("/", authenticate, cloudflareCache.fetchPurgedCacheMetadata);
 router.post("/", authenticate, cloudflareCache.purgeCache);
 
-module.exports = router;
+export default  router;

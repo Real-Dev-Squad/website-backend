@@ -1,8 +1,8 @@
-const chai = require("chai");
-const sinon = require("sinon");
-const { expect } = chai;
-const assert = require("chai").assert;
-const {
+import { expect } from "chai";
+import sinon from "sinon";
+import assert from "chai.assert";
+
+import {
   createRequest,
   fetchTaskRequests,
   approveTaskRequest,
@@ -12,25 +12,27 @@ const {
   removeOldField,
   addUsersCountAndCreatedAt,
   rejectTaskRequest,
-} = require("./../../../models/taskRequests");
-const {
+} from "./../../../models/taskRequests.js";
+import {
   TASK_REQUEST_TYPE,
   TASK_REQUEST_STATUS,
   TASK_REQUEST_ERROR_MESSAGE,
-} = require("./../../../constants/taskRequests");
+} from "./../../../constants/taskRequests.js";
 
-const mockData = require("../../fixtures/task-requests/task-requests");
-const firestore = require("../../../utils/firestore");
-const taskRequestsCollection = firestore.collection("taskRequests");
-const cleanDb = require("../../utils/cleanDb");
-const userModel = require("../../../models/users");
-const tasksModel = require("../../../models/tasks");
-const usersService = require("../../../services/dataAccessLayer");
+import mockData from "../../fixtures/task-requests/task-requests.js";
+import firestore from "../../../utils/firestore.js";
+
+import cleanDb from "../../utils/cleanDb.js";
+import userModel from "../../../models/users.js";
+import tasksModel from "../../../models/tasks.js";
+import usersService from "../../../services/dataAccessLayer.js";
+
+import { TASK_STATUS, DEFAULT_TASK_PRIORITY } from "../../../constants/tasks.js";
+import tasksData from "../../fixtures/tasks/tasks.js";
+import userData from "../../fixtures/user/user.js";
 
 const tasksCollection = firestore.collection("tasks");
-const { TASK_STATUS, DEFAULT_TASK_PRIORITY } = require("../../../constants/tasks");
-const tasksData = require("../../fixtures/tasks/tasks")();
-const userData = require("../../fixtures/user/user")();
+const taskRequestsCollection = firestore.collection("taskRequests");
 
 describe("Task requests | models", function () {
   afterEach(async function () {

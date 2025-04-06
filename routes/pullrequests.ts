@@ -1,9 +1,10 @@
 import express from "express";
-import pullRequest from "../controllers/pullRequests";
+import { getOpenPRs, getStalePRs, getUserPRs } from "../controllers/pullRequests";
+
 const router = express.Router();
 
-router.get("/open", pullRequest.getOpenPRs);
-router.get("/stale", pullRequest.getStalePRs);
-router.get("/user/:username", pullRequest.getUserPRs);
+router.get("/open", getOpenPRs);
+router.get("/stale", getStalePRs);
+router.get("/user/:username", getUserPRs);
 
-module.exports = router;
+export default router;

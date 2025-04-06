@@ -1,7 +1,7 @@
 import chai from "chai";
 import Sinon from "sinon";
 import { logType } from "../../../constants/logs";
-import discordActions from "../../../models/discordactions";
+import * as discordActions from "../../../models/discordactions";
 import { addLog } from "../../../models/logs";
 import firestore from "../../../utils/firestore";
 import { removeDiscordRoleFromUser } from "../../../utils/removeDiscordRoleFromUser";

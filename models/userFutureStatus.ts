@@ -1,4 +1,5 @@
 import firestore from "../utils/firestore";
+import logger from "../utils/logger.js";
 const userFutureStatusModel = firestore.collection("userFutureStatus");
 import { UserFutureStatusType } from "../types/userFutureStatus";
 import * as admin from "firebase-admin";

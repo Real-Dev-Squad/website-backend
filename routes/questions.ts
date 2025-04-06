@@ -16,4 +16,4 @@ router.post(
 
 router.get("/", questions.getQuestions);
 
-module.exports = router;
+export default  router;

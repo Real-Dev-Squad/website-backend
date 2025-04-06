@@ -1,18 +1,18 @@
-const chai = require("chai");
-const sinon = require("sinon");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
-const nock = require("nock");
+import chai from "chai";
+import sinon from "sinon";
+import chaiHttp from "chai-http";
+import nock from "nock";
 
-const app = require("../../server");
-const authService = require("../../services/authService");
-const addUser = require("../utils/addUser");
-const config = require("config");
+import app from "../../server.js";
+import { generateAuthToken } from "../../services/authService.js";
+import addUser from "../utils/addUser.js";
+import config from "config";
+import userData from "../fixtures/user/user.js";
+import cleanDb from "../utils/cleanDb.js";
+import goals from "../../services/goalService.js";
+import { GET_OR_CREATE_GOAL_USER } from "../fixtures/goals/Token.js";
+const { expect } = chai;
 const cookieName = config.get("userToken.cookieName");
-const userData = require("../fixtures/user/user")();
-const cleanDb = require("../utils/cleanDb");
-const goals = require("../../services/goalService");
-const { GET_OR_CREATE_GOAL_USER } = require("../fixtures/goals/Token");
 
 chai.use(chaiHttp);
 
@@ -25,7 +25,7 @@ describe("Goals Site", function () {
     const userId = await addUser(user);
     user.id = userId;
     const goalsBackendUserId = "test_1";
-    jwt = authService.generateAuthToken({ userId: userId });
+    jwt = generateAuthToken({ userId: userId });
     goalSiteConfig = config.services.goalAPI;
 
     nock(goalSiteConfig.baseUrl)

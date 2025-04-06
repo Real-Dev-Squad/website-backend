@@ -1,9 +1,9 @@
-const ROLES = require("../constants/roles");
-const members = require("../models/members");
-const tasks = require("../models/tasks");
-const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const dataAccess = require("../services/dataAccessLayer");
-const { addLog } = require("../models/logs");
+import ROLES from "../constants/roles.js";
+import * as members from "../models/members.js";
+import * as tasks from "../models/tasks.js";
+import { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
+import dataAccess from "../services/dataAccessLayer.js";
+import { addLog } from "../models/logs.js";
 /**
  * Fetches the data about our members
  *
@@ -114,7 +114,7 @@ const archiveMembers = async (req, res) => {
   }
 };
 
-module.exports = {
+export default {
   archiveMembers,
   getMembers,
   getIdleMembers,
