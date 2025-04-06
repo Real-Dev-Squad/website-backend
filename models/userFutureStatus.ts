@@ -2,6 +2,7 @@ import firestore from "../utils/firestore";
 const userFutureStatusModel = firestore.collection("userFutureStatus");
 import { UserFutureStatusType } from "../types/userFutureStatus";
 import * as admin from "firebase-admin";
+import { logger } from "../utils/logger";
 
 /**
  * Function to create user future status

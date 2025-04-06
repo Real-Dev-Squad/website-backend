@@ -1,3 +1,4 @@
+import app from "../../../server";
 const chai = require("chai");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
@@ -6,7 +7,6 @@ const logsQuery = require("../../../models/logs");
 const cacheData = require("../../fixtures/cloudflareCache/data");
 const logsData = require("../../fixtures/logs/archievedUsers");
 const { requestsLogs } = require("../../fixtures/logs/requests");
-const app = require("../../../server");
 const Sinon = require("sinon");
 const { INTERNAL_SERVER_ERROR } = require("../../../constants/errorMessages");
 const userData = require("../../fixtures/user/user")();

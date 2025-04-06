@@ -1,6 +1,6 @@
+import app from "../../server";
 const chai = require("chai");
 const sinon = require("sinon");
-const app = require("../../server");
 const cookieName = config.get("userToken.cookieName");
 const { subscribedMessage, unSubscribedMessage, subscriptionData } = require("../fixtures/subscription/subscription");
 const addUser = require("../utils/addUser");

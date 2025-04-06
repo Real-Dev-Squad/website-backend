@@ -1,3 +1,4 @@
+import app from "../../server";
 const chai = require("chai");
 const sinon = require("sinon");
 const { expect } = chai;
@@ -6,7 +7,6 @@ const userStatusModel = firestore.collection("usersStatus");
 const addUser = require("../utils/addUser");
 const authService = require("../../services/authService");
 const userData = require("../fixtures/user/user")();
-const app = require("../../server");
 const cleanDb = require("../utils/cleanDb");
 const { generateStatusDataForState } = require("../fixtures/userStatus/userStatus");
 const allTasks = require("../fixtures/tasks/tasks");

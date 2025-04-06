@@ -8,6 +8,7 @@ import {
   REQUEST_DOES_NOT_EXIST,
 } from "../constants/requests";
 import { getUserId } from "../utils/users";
+import { logger } from "../utils/logger";
 const SIZE = 5;
 
 export const createRequest = async (body: any) => {

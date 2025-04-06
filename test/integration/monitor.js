@@ -1,7 +1,7 @@
+import app from "../../server";
 const chai = require("chai");
 
 const firestore = require("../../utils/firestore");
-const app = require("../../server");
 const authService = require("../../services/authService");
 
 const addUser = require("../utils/addUser");

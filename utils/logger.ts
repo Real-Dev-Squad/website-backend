@@ -47,4 +47,4 @@ logger.stream = {
   },
 };
 
-module.exports = logger;
+export { logger };

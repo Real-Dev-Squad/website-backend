@@ -15,6 +15,7 @@ import { fetchTask } from "../models/tasks";
 import { CustomResponse } from "../typeDefinitions/global";
 import { ExtensionRequest, ExtensionRequestCreateBody, ExtensionRequestRequest } from "../types/extensionRequests";
 import { getUsernameElseUndefined } from "../utils/users";
+import { logger } from "../utils/logger";
 
 export const createTaskExtensionRequest = async (req: ExtensionRequestRequest, res: CustomResponse) => {
   try {

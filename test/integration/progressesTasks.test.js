@@ -1,8 +1,8 @@
+import app from "../../server";
 const chai = require("chai");
 const sinon = require("sinon");
 
 const firestore = require("../../utils/firestore");
-const app = require("../../server");
 const authService = require("../../services/authService");
 const tasks = require("../../models/tasks");
 const progressesModel = require("../../models/progresses");

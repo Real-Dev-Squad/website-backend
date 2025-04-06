@@ -3,7 +3,7 @@ import chaiHttp from "chai-http";
 const sinon = require("sinon");
 const config = require("config");
 
-const app = require("../../server");
+import app from "../../server";
 import addUser from "../utils/addUser";
 const cleanDb = require("../utils/cleanDb");
 const answerQuery = require("../../models/answers");

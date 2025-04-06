@@ -4,6 +4,7 @@ import { CustomRequest, CustomResponse } from "../types/global";
 import { NextFunction } from "express";
 import authenticate from "./authenticate";
 import authorizeRoles from "./authorizeRoles";
+import { logger } from "../utils/logger";
 const { Services } = require("../constants/bot");
 const ROLES = require("../constants/roles");
 const { INTERNAL_SERVER_ERROR_MESSAGE } = require("../constants/progresses");

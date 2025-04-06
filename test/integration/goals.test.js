@@ -1,10 +1,10 @@
+import app from "../../server";
+
 const chai = require("chai");
 const sinon = require("sinon");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
 const nock = require("nock");
-
-const app = require("../../server");
 const authService = require("../../services/authService");
 const addUser = require("../utils/addUser");
 const config = require("config");

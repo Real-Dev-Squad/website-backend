@@ -1,9 +1,9 @@
+import app from "../../server";
+
 const chai = require("chai");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
 const sinon = require("sinon");
-
-const app = require("../../server");
 const addUser = require("../utils/addUser");
 const authService = require("../../services/authService");
 const cleanDb = require("../utils/cleanDb");

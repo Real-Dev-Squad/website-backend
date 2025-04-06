@@ -1,9 +1,9 @@
+import { logger } from "../../utils/logger";
 const joi = require("joi");
 const { ERROR_MESSAGES } = require("../../constants/badges");
 const {
   VALIDATORS: { CREATE_BADGE, ASSIGN_OR_REMOVE_BADGES, API_PAYLOAD_VALIDATION_FAILED },
 } = ERROR_MESSAGES;
-const logger = require("../../utils/logger");
 
 /**
  * Validates badge payload

@@ -3,6 +3,7 @@ const crypto = require("crypto");
 
 import { Answer, AnswerClient, AnswerFieldsToUpdate, AnswerStatus } from "../typeDefinitions/answers";
 import { CustomRequest, CustomResponse } from "../typeDefinitions/global";
+import { logger } from "../utils/logger";
 
 const answerQuery = require("../models/answers");
 

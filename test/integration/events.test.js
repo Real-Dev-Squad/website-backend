@@ -1,8 +1,8 @@
+import app from "../../server";
+
 const chai = require("chai");
 const { expect } = chai;
 const chaiHttp = require("chai-http");
-
-const app = require("../../server");
 const authService = require("../../services/authService");
 const { EVENT_ROLES } = require("../../constants/events");
 const addUser = require("../utils/addUser");

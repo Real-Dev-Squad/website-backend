@@ -18,6 +18,7 @@ import { addFutureStatus } from "../models/userStatus";
 import { CustomResponse } from "../typeDefinitions/global";
 import { OooRequestCreateRequest, OooStatusRequest } from "../types/oooRequest";
 import { UpdateRequest } from "../types/requests";
+import { logger } from "../utils/logger";
 
 export const createOooRequestController = async (req: OooRequestCreateRequest, res: CustomResponse) => {
   const requestBody = req.body;

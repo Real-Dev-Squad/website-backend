@@ -1,11 +1,11 @@
-import chai, {expect} from "chai";
-import sinon from 'sinon';
+import chai, { expect } from "chai";
 import chaiHttp from 'chai-http';
+import sinon from 'sinon';
+import { PROFILE_SVC_GITHUB_URL } from '../../constants/urls';
 import * as awsFunctions from '../../utils/awsFunctions';
 import bot from "../utils/generateBotToken";
-import { PROFILE_SVC_GITHUB_URL } from '../../constants/urls';
 
-const app = require("../../server");
+import app from "../../server";
 const userData = require("../fixtures/user/user")();
 const authorizeBot = require("../../middlewares/authorizeBot");
 const addUser = require("../utils/addUser");

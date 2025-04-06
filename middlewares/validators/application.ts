@@ -1,9 +1,9 @@
 import { NextFunction } from "express";
 import { CustomRequest, CustomResponse } from "../../types/global";
 import { customWordCountValidator } from "../../utils/customWordCountValidator";
+import { logger } from "../../utils/logger";
 const joi = require("joi");
 const { APPLICATION_STATUS_TYPES } = require("../../constants/application");
-const logger = require("../../utils/logger");
 
 const validateApplicationData = async (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
   const schema = joi

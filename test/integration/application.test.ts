@@ -1,8 +1,8 @@
 import chai from "chai";
 import chaiHttp from "chai-http";
-const { expect } = chai;
 import config from "config";
-const app = require("../../server");
+import app from "../../server";
+const { expect } = chai;
 const addUser = require("../utils/addUser");
 const cleanDb = require("../utils/cleanDb");
 const authService = require("../../services/authService");
