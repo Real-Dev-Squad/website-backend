@@ -158,5 +158,18 @@ module.exports = () => {
       createdAt: 1644753600,
       updatedAt: 1644753600,
     },
+    {
+      title: "Approved task that can be overdue",
+      purpose: "testing for approved overdue tasks",
+      type: "feature",
+      assignee: "alex",
+      createdBy: "ankush",
+      createdAt: 1644753600,
+      updatedAt: 1644753600,
+      status: "APPROVED",
+      percentCompleted: 90,
+      endsOn: 1647172800, // 13 march
+      startedOn: 1644753600, //  13 feb
+    },
   ];
 };

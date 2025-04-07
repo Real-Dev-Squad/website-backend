@@ -19,6 +19,7 @@ const {
   SANITY_CHECK,
   BACKLOG,
   DONE,
+  APPROVED,
 } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
@@ -605,6 +606,7 @@ const getOverdueTasks = async (days = 0) => {
       SMOKE_TESTING,
       BLOCKED,
       SANITY_CHECK,
+      APPROVED,
     ];
 
     const query = tasksModel.where("endsOn", "<", targetTime).where("status", "in", OVERDUE_TASK_STATUSES);
