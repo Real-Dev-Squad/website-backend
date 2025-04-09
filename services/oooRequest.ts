@@ -12,7 +12,7 @@ import { userState } from "../constants/userStatus";
 import { createRequest, getRequestByKeyValues } from "../models/requests";
 import { getUserStatus } from "../models/userStatus";
 import { OooStatusRequest, OooStatusRequestBody } from "../types/oooRequest";
-import { UserStatus } from "../types/userCurrentStatus";
+import { UserStatus } from "../types/userStatus";
 import { addLog } from "./logService";
 import { NotFound, Forbidden, Conflict } from "http-errors";
 

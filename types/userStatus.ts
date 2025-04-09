@@ -1,9 +1,7 @@
-import { userState } from "../constants/userStatus";
-
 export type CurrentStatus = {
     from: number,
     until: number,
-    state: userState,
+    state: string,
     message: string,
     updatedAt: number,
 };

@@ -35,10 +35,6 @@ export const createOooStatusRequestValidator = async (
         "any.required": "type is required",
       }),
     });
-  try {
+
     await schema.validateAsync(req.body, { abortEarly: false });
-  } catch (error) {
-    logger.error(`Error while validating request payload`, error);
-    throw error;
-  }
 };
