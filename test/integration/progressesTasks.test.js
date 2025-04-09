@@ -16,7 +16,7 @@ const {
 
 const userData = require("../fixtures/user/user")();
 const taskData = require("../fixtures/tasks/tasks")();
-const { INTERNAL_SERVER_ERROR_MESSAGE } = require("../../constants/progresses");
+const { INTERNAL_SERVER_ERROR_MESSAGE, UNAUTHORIZED_WRITE } = require("../../constants/progresses");
 const cookieName = config.get("userToken.cookieName");
 const { expect } = chai;
 
@@ -32,6 +32,8 @@ describe("Test Progress Updates API for Tasks", function () {
     let taskId1;
     let taskId2;
     let fetchMock;
+    let archivedUserId;
+    let archivedUserToken;
 
     beforeEach(async function () {
       fetchMock = sinon.stub(global, "fetch");
@@ -40,6 +42,8 @@ describe("Test Progress Updates API for Tasks", function () {
         toFake: ["Date"],
       });
       userId = await addUser(userData[1]);
+      archivedUserId = await addUser(userData[5]);
+      archivedUserToken = authService.generateAuthToken({ userId: archivedUserId });
       userToken = authService.generateAuthToken({ userId: userId });
       const taskObject1 = await tasks.updateTask(taskData[0]);
       taskId1 = taskObject1.taskId;
@@ -162,6 +166,22 @@ describe("Test Progress Updates API for Tasks", function () {
           if (err) return done(err);
           expect(res).to.have.status(401);
           expect(res.body.message).to.be.equal("Unauthenticated User");
+          return done();
+        });
+    });
+
+    it("should return forbidden response when user is not in discord", function (done) {
+      chai
+        .request(app)
+        .post("/progresses")
+        .set("Cookie", `${cookieName}=${archivedUserToken}`)
+        .send(taskProgressDay1("1111"))
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res.statusCode).to.equal(403);
+          expect(res.body.message).to.equal(UNAUTHORIZED_WRITE);
           return done();
         });
     });
