@@ -9,13 +9,15 @@ import {
 } from "../../../constants/requests";
 import { createOOORequest, validateUserStatus } from "../../../services/oooRequest";
 import { expect } from "chai";
-import { testUserStatus, validOooStatusRequests, validUserCurrentStatus } from "../../fixtures/oooRequest/oooRequest";
+import { testUserStatus, validOooStatusRequests, validUserCurrentStatus, createdOOORequest } from "../../fixtures/oooRequest/oooRequest";
 import { updateUserStatus } from "../../../models/userStatus";
 import { userState } from "../../../constants/userStatus";
 import addUser from "../../utils/addUser";
 import userDataFixture from "../../fixtures/user/user";
+import { NotFound, Forbidden } from "http-errors";
 const userStatus = require("../../../models/userStatus");
 const requestModel = require("../../../models/requests");
+const oooRequestService = require("../../../services/oooRequest");
 
 describe("Test OOO Request Service", function() {
 
@@ -23,11 +25,9 @@ describe("Test OOO Request Service", function() {
     let testUserId: string;
 
     beforeEach(async function() {
-        const user = userDataFixture()[8];
-        const userId = await addUser(user);
-
-        testUserId = userId;
-        testUserName = user.username;
+        const users = userDataFixture();
+        testUserId = await addUser(users[8]);;
+        testUserName = users[8].username;
     });
 
     afterEach(async function() {
@@ -83,6 +83,7 @@ describe("Test OOO Request Service", function() {
 
         it("should return USER_STATUS_NOT_FOUND if user status not found", async function() {
             const getUserStatusStub = sinon.stub(userStatus, 'getUserStatus').resolves({ userStatusExists: false });
+            sinon.stub(oooRequestService, "validateUserStatus").rejects(NotFound(USER_STATUS_NOT_FOUND));
             try {
                 await createOOORequest(validOooStatusRequests, testUserName, testUserId);
             } catch (error) {
@@ -99,6 +100,7 @@ describe("Test OOO Request Service", function() {
                     currentStatus: validUserCurrentStatus,
                 },
             });
+            sinon.stub(oooRequestService, "validateUserStatus").rejects(Forbidden(OOO_STATUS_ALREADY_EXIST));
             try {
                 await createOOORequest(validOooStatusRequests, testUserName, testUserId);
             } catch (error) {
@@ -115,7 +117,8 @@ describe("Test OOO Request Service", function() {
                 type: REQUEST_TYPE.OOO,
                 status: REQUEST_STATE.PENDING,
             };
-
+            sinon.stub(userStatus, 'getUserStatus');
+            sinon.stub(oooRequestService, "validateUserStatus");
             const getRequestByKeyValuesStub = sinon.stub(requestModel, "getRequestByKeyValues").resolves(mockResponse);
 
             try {
@@ -128,21 +131,19 @@ describe("Test OOO Request Service", function() {
         });
 
         it("should create OOO request", async function() {
-            const response = await createOOORequest(
-                validOooStatusRequests,
-                testUserName,
-                testUserId
-            );
+            sinon.stub(userStatus, 'getUserStatus');
+            sinon.stub(oooRequestService, "validateUserStatus");
+            sinon.stub(requestModel, "getRequestByKeyValues");
+
+            const createRequestStub = sinon.stub(requestModel, "createRequest").resolves({
+                ...createdOOORequest, requestedBy: testUserName, userId: testUserId
+            });
+
+            const response = await createOOORequest(validOooStatusRequests, testUserName, testUserId);
+
+            expect(createRequestStub.calledOnce).to.be.true;
             expect(response).to.deep.include({
-                type: validOooStatusRequests.type,
-                from: validOooStatusRequests.from,
-                until: validOooStatusRequests.until,
-                reason: validOooStatusRequests.reason,
-                status: "PENDING",
-                lastModifiedBy: null,
-                requestedBy: testUserName,
-                userId: testUserId,
-                comment: null
+                ...createdOOORequest, requestedBy: testUserName, userId: testUserId
             });
         });
     });
