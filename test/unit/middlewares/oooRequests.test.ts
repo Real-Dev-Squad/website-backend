@@ -7,6 +7,7 @@ import {
   acknowledgeOOORequestsValidator,
 } from "./../../../middlewares/validators/oooRequests";
 import { acknowledgeOooRequest, validOooStatusRequests, validOooStatusUpdate } from "../../fixtures/oooRequest/oooRequest";
+import _ from "lodash";
 
 describe("OOO Status Request Validators", function () {
   let req: any;
@@ -92,9 +93,9 @@ describe("OOO Status Request Validators", function () {
   });
 
   describe("acknowledgeOOORequestsValidator", function () {
-    it("should not validate for an invalid request if request type is passed", async function () {
+    it("should not validate for an invalid request for invalid request type", async function () {
       req = {
-        body: { ...acknowledgeOooRequest, type: "OOO"}
+        body: { ...acknowledgeOooRequest, type: "XYZ"}
       };
 
       await acknowledgeOOORequestsValidator(req, res, nextSpy);
@@ -108,6 +109,15 @@ describe("OOO Status Request Validators", function () {
 
       await acknowledgeOOORequestsValidator(req, res, nextSpy);
       expect(nextSpy.notCalled).to.be.true;
+    });
+
+    it("should validate for a valid acknowledge OOO request if comment not provided by superusers", async function() {
+      req = {
+        body: _.omit(acknowledgeOooRequest, "comment")
+      };
+      res = {};
+      await acknowledgeOOORequestsValidator(req, res, nextSpy);
+      expect(nextSpy.calledOnce).to.be.true;
     });
 
     it("should validate for a valid acknowledge OOO request", async function() {

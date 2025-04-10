@@ -63,8 +63,13 @@ describe("/requests OOO", function () {
     const { id: pendingOooId }: any = await createRequest(oooRequestData2);
     pendingOooRequestId = pendingOooId;
 
-    const { id: approveOooId }: any = await updateRequest(oooRequestId, { state: REQUEST_STATE.APPROVED }, superUserId, REQUEST_TYPE.OOO);
-    approvedOooRequestId = approveOooId;
+    const response = await updateRequest(
+      oooRequestId,
+      { state: REQUEST_STATE.APPROVED },
+      superUserId,
+      REQUEST_TYPE.OOO
+    );
+    approvedOooRequestId = response?.id;
 
     authToken = authService.generateAuthToken({ userId });
     superUserToken = authService.generateAuthToken({ userId: superUserId });
@@ -75,6 +80,17 @@ describe("/requests OOO", function () {
   });
 
   describe("POST /requests", function () {
+    beforeEach(async function () {
+      const userIdPromises = [addUser(userData[16])];
+      const [userId] = await Promise.all(userIdPromises);
+
+      authToken = authService.generateAuthToken({ userId });
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
     it("should return 401 if user is not logged in", function (done) {
       chai
         .request(app)
@@ -465,16 +481,16 @@ describe("/requests OOO", function () {
         });
     });
 
-       it("should return the request by Id query", function (done) {
-         chai
-           .request(app)
-           .get(`/requests?id=${oooRequestId}`)
-           .end(function (err, res) {
-             expect(res).to.have.status(200);
-             expect(res.body.data.id === oooRequestId);
-             done();
-           });
-       });
+    it("should return the request by Id query", function (done) {
+      chai
+        .request(app)
+        .get(`/requests?id=${oooRequestId}`)
+        .end(function (err, res) {
+          expect(res).to.have.status(200);
+          expect(res.body.data.id === oooRequestId);
+          done();
+        });
+    });
 
     it("should return all requests by specific user", function (done) {
       chai
@@ -582,7 +598,7 @@ describe("/requests Extension", function () {
     oldEndsOn: 1694736000,
     newEndsOn: 1709674980000,
     message: "Due to some reasons",
-    state: "PENDING"
+    state: "PENDING",
   };
 
   const taskData = [
@@ -619,7 +635,6 @@ describe("/requests Extension", function () {
 
     taskId1 = (await updateTask({ ...taskData[0], assigneeId: userId1 })).taskId;
     taskId2 = (await updateTask({ ...taskData[1] })).taskId;
-
   });
 
   afterEach(async function () {
@@ -640,7 +655,7 @@ describe("/requests Extension", function () {
     it("should create a new extension request", function (done) {
       const extensionRequestObj = {
         taskId: taskId1,
-        ...extensionRequest
+        ...extensionRequest,
       };
       chai
         .request(app)
@@ -650,7 +665,7 @@ describe("/requests Extension", function () {
         .end(function (err, res) {
           expect(res).to.have.status(201);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal('Extension Request created successfully!');
+          expect(res.body.message).to.equal("Extension Request created successfully!");
           done();
         });
     });
@@ -658,7 +673,7 @@ describe("/requests Extension", function () {
     it("should create a new extension request by super user", function (done) {
       const extensionRequestObj = {
         taskId: taskId1,
-        ...extensionRequest
+        ...extensionRequest,
       };
       chai
         .request(app)
@@ -668,7 +683,7 @@ describe("/requests Extension", function () {
         .end(function (err, res) {
           expect(res).to.have.status(201);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal('Extension Request created successfully!');
+          expect(res.body.message).to.equal("Extension Request created successfully!");
           done();
         });
     });
@@ -676,7 +691,7 @@ describe("/requests Extension", function () {
     it("should not create a new extension request by another user", function (done) {
       const extensionRequestObj = {
         taskId: taskId1,
-        ...extensionRequest
+        ...extensionRequest,
       };
       chai
         .request(app)
@@ -686,7 +701,9 @@ describe("/requests Extension", function () {
         .end(function (err, res) {
           expect(res).to.have.status(403);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal('Only assigned user and super user can create an extension request for this task.');
+          expect(res.body.message).to.equal(
+            "Only assigned user and super user can create an extension request for this task."
+          );
           done();
         });
     });
@@ -694,7 +711,7 @@ describe("/requests Extension", function () {
     it("should not create a new extension request if task is not exist", function (done) {
       const extensionRequestObj = {
         taskId: "randomId",
-        ...extensionRequest
+        ...extensionRequest,
       };
       chai
         .request(app)
@@ -704,7 +721,7 @@ describe("/requests Extension", function () {
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal('Task Not Found');
+          expect(res.body.message).to.equal("Task Not Found");
           done();
         });
     });
@@ -712,7 +729,7 @@ describe("/requests Extension", function () {
     it("should not create a new extension request if assignee is not present", function (done) {
       const extensionRequestObj = {
         taskId: taskId2,
-        ...extensionRequest
+        ...extensionRequest,
       };
       chai
         .request(app)
@@ -722,7 +739,7 @@ describe("/requests Extension", function () {
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal('Assignee is not present for this task');
+          expect(res.body.message).to.equal("Assignee is not present for this task");
           done();
         });
     });
@@ -731,7 +748,7 @@ describe("/requests Extension", function () {
       const extensionRequestObj = {
         taskId: taskId1,
         ...extensionRequest,
-        oldEndsOn: 1234
+        oldEndsOn: 1234,
       };
       chai
         .request(app)
@@ -741,7 +758,7 @@ describe("/requests Extension", function () {
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal('Old ETA does not match the task\'s ETA');
+          expect(res.body.message).to.equal("Old ETA does not match the task's ETA");
           done();
         });
     });
@@ -749,7 +766,7 @@ describe("/requests Extension", function () {
     it("should not create a new extension request if an extension request for this task already exists", function (done) {
       const extensionRequestObj = {
         taskId: taskId1,
-        ...extensionRequest
+        ...extensionRequest,
       };
       chai
         .request(app)
@@ -759,11 +776,11 @@ describe("/requests Extension", function () {
         .end(async function (err, res) {
           expect(res).to.have.status(201);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal('Extension Request created successfully!');
+          expect(res.body.message).to.equal("Extension Request created successfully!");
 
           const extensionRequestObj2 = {
             taskId: taskId1,
-            ...extensionRequest
+            ...extensionRequest,
           };
           const response = await chai
             .request(app)
@@ -772,7 +789,7 @@ describe("/requests Extension", function () {
             .send(extensionRequestObj2);
           expect(response).to.have.status(400);
           expect(response.body).to.have.property("message");
-          expect(response.body.message).to.equal('An extension request for this task already exists.');
+          expect(response.body.message).to.equal("An extension request for this task already exists.");
           done();
         });
     });
@@ -801,17 +818,26 @@ describe("/requests Extension", function () {
     beforeEach(async function () {
       const extensionRequestObj = {
         taskId: taskId1,
-        ...extensionRequest
+        ...extensionRequest,
       };
       const { id: approvedId } = await createRequest({ ...extensionRequestObj, requestedBy: userId1 });
-      approvedExtensionRequestId = await updateRequest(approvedId, approvedExtensionRequest, superUserId, REQUEST_TYPE.EXTENSION);
+      approvedExtensionRequestId = await updateRequest(
+        approvedId,
+        approvedExtensionRequest,
+        superUserId,
+        REQUEST_TYPE.EXTENSION
+      );
 
       const { id: rejectedId } = await createRequest({ ...extensionRequestObj, requestedBy: userId1 });
-      rejectedExtensionRequestId = await updateRequest(rejectedId, rejectedExtensionRequest, superUserId, REQUEST_TYPE.EXTENSION);
+      rejectedExtensionRequestId = await updateRequest(
+        rejectedId,
+        rejectedExtensionRequest,
+        superUserId,
+        REQUEST_TYPE.EXTENSION
+      );
 
       const { id: pendingId } = await createRequest({ ...extensionRequestObj, requestedBy: userId1 });
       pendingExtensionRequestId = pendingId;
-
     });
 
     it("should return 401(Unauthorized) if user is not logged in", function (done) {
@@ -914,7 +940,7 @@ describe("/requests Extension", function () {
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal('state must be APPROVED or REJECTED');
+          expect(res.body.message).to.equal("state must be APPROVED or REJECTED");
           done();
         });
     });
@@ -933,9 +959,7 @@ describe("/requests Extension", function () {
         });
     });
   });
-
 });
-
 
 describe("/requests Task", function () {
   let userId1: string;
@@ -963,7 +987,7 @@ describe("/requests Task", function () {
     });
 
     it("should not create a new task request if issue does not exist", function (done) {
-      let taskRequestObj = validTaskCreqtionRequest
+      const taskRequestObj = validTaskCreqtionRequest;
       taskRequestObj.externalIssueUrl = "https://api.github.com/repos/Real-Dev-Squad/website-my/issues/1245";
       taskRequestObj.userId = userId1;
       chai
@@ -980,7 +1004,7 @@ describe("/requests Task", function () {
     });
 
     it("should not create a new task request if task id is not present in the request body", function (done) {
-      let taskRequestObj = validTaskAssignmentRequest
+      const taskRequestObj = validTaskAssignmentRequest;
       delete taskRequestObj.taskId;
       chai
         .request(app)
@@ -990,7 +1014,7 @@ describe("/requests Task", function () {
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal('taskId is required when requestType is ASSIGNMENT');
+          expect(res.body.message).to.equal("taskId is required when requestType is ASSIGNMENT");
           done();
         });
     });
