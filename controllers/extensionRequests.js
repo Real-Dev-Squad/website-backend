@@ -202,17 +202,27 @@ const getSelfExtensionRequests = async (req, res) => {
  * @param res {Object} - Express response object
  */
 const updateExtensionRequest = async (req, res) => {
+  const { dev } = req.query;
+  const isDev = dev === "true";
+  const isSuperUser = req.userData?.roles.super_user;
+
   try {
     const extensionRequest = await extensionRequestsQuery.fetchExtensionRequest(req.params.id);
     if (!extensionRequest.extensionRequestData) {
       return res.boom.notFound("Extension Request not found");
     }
-
     if (
       !req.userData?.roles.super_user &&
       extensionRequest.extensionRequestData.status !== EXTENSION_REQUEST_STATUS.PENDING
     ) {
+
+    if (isDev && !isSuperUser && extensionRequest.extensionRequestData.status !== EXTENSION_REQUEST_STATUS.PENDING) {
+
       return res.boom.badRequest("Only pending extension request can be updated");
+    }
+
+    if (isDev && !isSuperUser && extensionRequest.extensionRequestData.assigneeId !== req.userData.id) {
+      return res.boom.forbidden("You don't have permission to update the extension request");
     }
 
     if (req.body.assignee) {
