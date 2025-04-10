@@ -9,15 +9,15 @@ export type OooStatusRequest = {
   id: string;
   type: REQUEST_TYPE.OOO;
   from: number;
-  until?: number;
-  message?: string;
-  status: userState;
-  state?: REQUEST_STATE;
-  lastModifiedBy?: string;
-  requestedBy?: string;
-  createdAt?: Timestamp;
-  updatedAt?: Timestamp;
-  reason?: string;
+  until: number;
+  reason: string;
+  status: REQUEST_STATE;
+  lastModifiedBy?: string | null;
+  requestedBy: string;
+  userId: string;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+  comment?: string | null;
 };
 export type OooStatusRequestBody = {
   type: REQUEST_TYPE.OOO;
@@ -43,3 +43,19 @@ export type OooRequestResponse = Response & { boom: Boom };
 export type OooRequestCreateRequest = Request & { OooStatusRequestBody , userData: userData , query: RequestQuery };
 
 export type OooRequestUpdateRequest = Request & { oooRequestUpdateBody , userData: userData , query: RequestQuery , params: RequestParams };
+
+export type AcknowledgeOOORequestQuery = RequestQuery & {
+  dev?: string
+};
+
+export type AcknowledgeOOORequestBody = {
+  comment?: string;
+  status: REQUEST_STATE.APPROVED | REQUEST_STATE.REJECTED;
+}
+
+export type AcknowledgeOOORequest = Request & {
+  body: AcknowledgeOOORequestBody;
+  userData: userData;
+  query: AcknowledgeOOORequestQuery;
+  params: RequestParams;
+}
