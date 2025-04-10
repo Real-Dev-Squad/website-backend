@@ -49,6 +49,7 @@ export type AcknowledgeOOORequestQuery = RequestQuery & {
 };
 
 export type AcknowledgeOOORequestBody = {
+  type: REQUEST_TYPE.OOO;
   comment?: string;
   status: REQUEST_STATE.APPROVED | REQUEST_STATE.REJECTED;
 }

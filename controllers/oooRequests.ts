@@ -124,6 +124,13 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
   }
 };
 
+/**
+ * Acknowledges an Out-of-Office (OOO) request
+ * 
+ * @param {AcknowledgeOOORequest} req - The request object.
+ * @param {OooRequestResponse} res - The response object.
+ * @returns {Promise<OooRequestResponse>} Resolves with success or failure.
+ */
 export const acknowledgeOOORequestController = async (
   req: AcknowledgeOOORequest,
   res: OooRequestResponse,
@@ -136,17 +143,17 @@ export const acknowledgeOOORequestController = async (
     if(!dev) return res.boom.notImplemented("Feature not implemented");
 
     const requestBody = req.body;
-    const userId = req.userData.id;
+    const superUserId = req.userData.id;
     const requestId = req.params.id;
-    const isSuperuser = req.userData.roles.super_user;
+    const isSuperuser = req.userData.roles?.super_user;
 
     if (!isSuperuser) {
-      return res.boom.unauthorized(UNAUTHORIZED_TO_ACKNOWLEDGE_OOO_REQUEST);
+      return res.boom.forbidden(UNAUTHORIZED_TO_ACKNOWLEDGE_OOO_REQUEST);
     }
 
     try {
 
-      const response = await acknowledgeOOORequest(requestId, requestBody, userId);
+      const response = await acknowledgeOOORequest(requestId, requestBody, superUserId);
 
       return res.status(200).json({
         message: response.message,

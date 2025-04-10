@@ -15,12 +15,18 @@ import {
     INVALID_REQUEST_TYPE,
 } from "../constants/requests";
 import { getRequests, updateRequest } from "../models/requests";
-import { AcknowledgeOOORequestBody } from "../types/oooRequest";
-import { statusState } from "../constants/userStatus";
-import { createUserFutureStatus } from "../models/userFutureStatus";
+import { AcknowledgeOOORequestBody, OooStatusRequest } from "../types/oooRequest";
 import { addFutureStatus } from "../models/userStatus";
 const requestModel = firestore.collection("requests");
 
+/**
+ * Validates an Out-Of-Office (OOO) acknowledge request
+ * 
+ * @param {string} requestId - The unique identifier of the request.
+ * @param {string} requestType - The type of the request (expected to be 'OOO').
+ * @param {string} requestStatus - The current status of the request.
+ * @throws {Error} Throws an error if an issue occurs during validation.
+ */
 export const validateOOOAcknowledgeRequest = async (
     requestId: string,
     requestType: string,
@@ -58,10 +64,19 @@ export const validateOOOAcknowledgeRequest = async (
     }
 }
 
+/**
+ * Acknowledges an Out-of-Office (OOO) request
+ * 
+ * @param {string} requestId - The ID of the OOO request to acknowledge.
+ * @param {AcknowledgeOOORequestBody} body - The acknowledgement body containing acknowledging details.
+ * @param {string} userId - The unique identifier of the superuser user.
+ * @returns {Promise<object>} The acknowledged OOO request.
+ * @throws {Error} Throws an error if an issue occurs during acknowledgment process.
+ */
 export const acknowledgeOOORequest = async (
     requestId: string,
     body: AcknowledgeOOORequestBody,
-    userId: string,
+    superUserId: string,
 ) => {
     try {
         const request = await requestModel.doc(requestId).get();
@@ -78,7 +93,7 @@ export const acknowledgeOOORequest = async (
 
         await validateOOOAcknowledgeRequest(requestId, requestData.type, requestData.status);
 
-        const requestResult = await updateRequest(requestId, body, userId, REQUEST_TYPE.OOO);
+        const requestResult = await updateRequest(requestId, body, superUserId, REQUEST_TYPE.OOO);
 
         if ("error" in requestResult) {
             throw BadRequest(requestResult.error);
@@ -94,7 +109,7 @@ export const acknowledgeOOORequest = async (
             meta: {
                 requestId: requestId,
                 action: LOG_ACTION.UPDATE,
-                userId: userId,
+                userId: superUserId,
                 createdAt: Date.now(),
             },
             body: requestResult,
@@ -103,20 +118,16 @@ export const acknowledgeOOORequest = async (
         await addLog(requestLog.type, requestLog.meta, requestLog.body);
 
         if (requestResult.status === REQUEST_STATE.APPROVED) {
-            const requestData = await getRequests({ id: requestId });
-
             if (requestData) {
-                const { from, until, requestedBy, comment } = requestData as any;
+                const { from, until, userId } = requestData;
                 const userFutureStatusData = {
                     requestId,
-                    status: REQUEST_TYPE.OOO,
-                    state: statusState.UPCOMING,
+                    state: REQUEST_TYPE.OOO,
                     from,
                     endsOn: until,
-                    userId: requestedBy,
-                    message: comment,
+                    userId,
+                    message: body.comment,
                 };
-                await createUserFutureStatus(userFutureStatusData);
                 await addFutureStatus(userFutureStatusData);
             }
         }
