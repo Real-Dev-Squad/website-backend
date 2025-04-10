@@ -39,11 +39,19 @@ export const createOooStatusRequestValidator = async (
   await schema.validateAsync(req.body, { abortEarly: false });
 };
 
+/**
+ * Middleware to validate the acknowledge Out-Of-Office (OOO) request payload.
+ * 
+ * @param {AcknowledgeOOORequest} req - The request object containing the body to be validated.
+ * @param {OooRequestResponse} res - The response object used to send error responses if validation fails.
+ * @param {NextFunction} next - The next middleware function to call if validation succeeds.
+ * @returns {Promise<void>} Resolves or sends errors.
+ */
 export const acknowledgeOOORequestsValidator = async (
   req: AcknowledgeOOORequest,
   res: OooRequestResponse,
   next: NextFunction
-) => {
+): Promise<void> => {
   const schema = joi
   .object()
   .strict()

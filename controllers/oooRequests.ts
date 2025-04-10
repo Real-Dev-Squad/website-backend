@@ -138,7 +138,7 @@ export const acknowledgeOOORequestController = async (
     const requestBody = req.body;
     const userId = req.userData.id;
     const requestId = req.params.id;
-    const isSuperuser = req.userData.roles.super_user;
+    const isSuperuser = req.userData.roles?.super_user;
 
     if (!isSuperuser) {
       return res.boom.unauthorized(UNAUTHORIZED_TO_ACKNOWLEDGE_OOO_REQUEST);

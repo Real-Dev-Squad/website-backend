@@ -15,12 +15,18 @@ import {
     INVALID_REQUEST_TYPE,
 } from "../constants/requests";
 import { getRequests, updateRequest } from "../models/requests";
-import { AcknowledgeOOORequestBody } from "../types/oooRequest";
-import { statusState } from "../constants/userStatus";
-import { createUserFutureStatus } from "../models/userFutureStatus";
+import { AcknowledgeOOORequestBody, OooStatusRequest } from "../types/oooRequest";
 import { addFutureStatus } from "../models/userStatus";
 const requestModel = firestore.collection("requests");
 
+/**
+ * Validates an Out-Of-Office (OOO) acknowledge request
+ * 
+ * @param {string} requestId - The unique identifier of the request.
+ * @param {string} requestType - The type of the request (expected to be 'OOO').
+ * @param {string} requestStatus - The current status of the request.
+ * @throws {Error} Throws an error if an issue occurs during validation.
+ */
 export const validateOOOAcknowledgeRequest = async (
     requestId: string,
     requestType: string,
@@ -58,6 +64,15 @@ export const validateOOOAcknowledgeRequest = async (
     }
 }
 
+/**
+ * Acknowledges an Out-of-Office (OOO) request
+ * 
+ * @param {string} requestId - The ID of the OOO request to acknowledge.
+ * @param {AcknowledgeOOORequestBody} body - The acknowledgement body containing acknowledging details.
+ * @param {string} userId - The unique identifier of the superuser user.
+ * @returns {Promise<object>} The acknowledged OOO request.
+ * @throws {Error} Throws an error if an issue occurs during acknowledgment process.
+ */
 export const acknowledgeOOORequest = async (
     requestId: string,
     body: AcknowledgeOOORequestBody,
@@ -106,17 +121,15 @@ export const acknowledgeOOORequest = async (
             const requestData = await getRequests({ id: requestId });
 
             if (requestData) {
-                const { from, until, requestedBy, comment } = requestData as any;
+                const { from, until, userId, comment } = requestData as OooStatusRequest;
                 const userFutureStatusData = {
                     requestId,
-                    status: REQUEST_TYPE.OOO,
-                    state: statusState.UPCOMING,
+                    state: REQUEST_TYPE.OOO,
                     from,
                     endsOn: until,
-                    userId: requestedBy,
+                    userId: userId,
                     message: comment,
                 };
-                await createUserFutureStatus(userFutureStatusData);
                 await addFutureStatus(userFutureStatusData);
             }
         }
