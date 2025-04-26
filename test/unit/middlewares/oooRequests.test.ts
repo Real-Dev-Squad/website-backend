@@ -42,15 +42,15 @@ describe("OOO Status Request Validators", function () {
       }
     });
 
-    it.skip("should not validate for an invalid request on empty reason", async function () {
+    it("should not validate for an invalid request on empty msg", async function () {
       req = {
-        body: { ...validOooStatusRequests, reason: "", type: "ACTIVE" },
+        body: { ...validOooStatusRequests, message: "", type: "ACTIVE" },
       };
       try {
         await createOooStatusRequestValidator(req as any, res as any, nextSpy);
       } catch (error) {
         expect(error).to.be.an.instanceOf(Error);
-        expect(error.details[0].message).to.equal(`reason cannot be empty`);
+        expect(error.details[0].message).to.equal(`message cannot be empty`);
         expect(error.details[1].message).to.equal(`"type" must be [OOO]`);
       }
     });
@@ -63,7 +63,6 @@ describe("OOO Status Request Validators", function () {
           until: null,
           message: "",
           state: "APPROVED",
-          // reason: "",
         },
       };
       try {
@@ -71,10 +70,10 @@ describe("OOO Status Request Validators", function () {
       } catch (error) {
         expect(error).to.be.an.instanceOf(Error);
         expect(error.details.length).to.equal(4);
-        // expect(error.details.length).to.equal(3);
         expect(error.details[0].message).to.equal(`"from" must be a number`);
         expect(error.details[1].message).to.equal(`"until" must be a number`);
         expect(error.details[2].message).to.equal("message cannot be empty");
+        expect(error.details[3].message).to.equal("state must be PENDING");
       }
     });
 

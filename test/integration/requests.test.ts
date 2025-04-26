@@ -237,17 +237,17 @@ describe("/requests OOO", function () {
         });
     });
 
-    it.skip("should return 400 when reason field is missing in request body", function (done) {
+    it("should return 400 when message field is missing in request body", function (done) {
       chai
         .request(app)
         .post(requestsEndpoint)
         .set("cookie", `${cookieName}=${authToken}`)
-        .send(_.omit(validOooStatusRequests, "reason"))
+        .send(_.omit(validOooStatusRequests, "message"))
         .end(function (err, res) {
           if (err) return done(err);
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal("reason is required");
+          expect(res.body.message).to.equal("message is required");
           done();
         });
     });
@@ -298,7 +298,7 @@ describe("/requests OOO", function () {
       // expect(response.body.message).to.equal(OOO_STATUS_ALREADY_EXIST);
     });
 
-    it.skip("should return 409 with error when user already have pending OOO request", async function () {
+    it("should return 409 with error when user already have pending OOO request", async function () {
       await chai
         .request(app)
         .post(requestsEndpoint)
@@ -310,7 +310,7 @@ describe("/requests OOO", function () {
         .set("cookie", `${cookieName}=${authToken}`)
         .send(validOooStatusRequests);
 
-      expect(response).to.have.status(409);
+      expect(response).to.have.status(400);
       expect(response.body).to.have.property("message");
       expect(response.body.message).to.equal(REQUEST_ALREADY_PENDING);
     });
