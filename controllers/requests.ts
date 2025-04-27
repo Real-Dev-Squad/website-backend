@@ -16,17 +16,17 @@ import { createTaskRequestController } from "./taskRequestsv2";
 import { OnboardingExtensionCreateRequest, OnboardingExtensionResponse, UpdateOnboardingExtensionStateRequest } from "../types/onboardingExtension";
 import { createOnboardingExtensionRequestController, updateOnboardingExtensionRequestController, updateOnboardingExtensionRequestState } from "./onboardingExtension";
 import { UpdateOnboardingExtensionRequest } from "../types/onboardingExtension";
-import { NextFunction, Request } from "express";
+
+import { Request } from "express";
 
 export const createRequestController = async (
   req: OooRequestCreateRequest | ExtensionRequestRequest | TaskRequestRequest | OnboardingExtensionCreateRequest,
-  res: CustomResponse,
-  next: NextFunction
+  res: CustomResponse
 ) => {
   const type = req.body.type;
   switch (type) {
     case REQUEST_TYPE.OOO:
-      return await createOooRequestController(req as OooRequestCreateRequest, res as OooRequestResponse, next);
+      return await createOooRequestController(req as OooRequestCreateRequest, res as OooRequestResponse);
     case REQUEST_TYPE.EXTENSION:
       return await createTaskExtensionRequest(req as ExtensionRequestRequest, res as ExtensionRequestResponse);
     case REQUEST_TYPE.TASK:

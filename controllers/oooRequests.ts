@@ -10,15 +10,19 @@ import {
   REQUEST_APPROVED_SUCCESSFULLY,
   REQUEST_REJECTED_SUCCESSFULLY,
   UNAUTHORIZED_TO_CREATE_OOO_REQUEST,
+  REQUEST_ALREADY_PENDING,
+  USER_STATUS_NOT_FOUND,
+  OOO_STATUS_ALREADY_EXIST,
 } from "../constants/requests";
 import { statusState } from "../constants/userStatus";
+import { logType } from "../constants/logs";
 import { addLog } from "../models/logs";
-import { getRequests, updateRequest } from "../models/requests";
+import { getRequestByKeyValues, getRequests, updateRequest } from "../models/requests";
 import { createUserFutureStatus } from "../models/userFutureStatus";
-import { addFutureStatus } from "../models/userStatus";
-import { createOOORequest } from "../services/oooRequest";
+import { getUserStatus, addFutureStatus } from "../models/userStatus";
+import { createOOORequest, validateUserStatus } from "../services/oooRequest";
 import { CustomResponse } from "../typeDefinitions/global";
-import { OooStatusRequestBody, OooRequestCreateRequest, OooRequestResponse } from "../types/oooRequest";
+import { OooRequestCreateRequest, OooRequestResponse, OooStatusRequest } from "../types/oooRequest";
 import { UpdateRequest } from "../types/requests";
 
 /**
@@ -34,8 +38,7 @@ import { UpdateRequest } from "../types/requests";
  */
 export const createOooRequestController = async (
   req: OooRequestCreateRequest,
-  res: OooRequestResponse,
-  next: NextFunction
+  res: OooRequestResponse
 ): Promise<OooRequestResponse> => {
 
   const requestBody = req.body;
@@ -50,6 +53,31 @@ export const createOooRequestController = async (
   }
 
   try {
+    const userStatus = await getUserStatus(userId);
+    const validationResponse = await validateUserStatus(userId, userStatus);
+
+    if (validationResponse) {
+      if (validationResponse.error === USER_STATUS_NOT_FOUND) {
+          return res.boom.notFound(validationResponse.error);
+      }
+      if (validationResponse.error === OOO_STATUS_ALREADY_EXIST) {
+          return res.boom.forbidden(validationResponse.error);
+      }
+    }
+
+    const latestOOORequest: OooStatusRequest = await getRequestByKeyValues({
+        userId,
+        type: REQUEST_TYPE.OOO,
+        status: REQUEST_STATE.PENDING,
+    });
+
+    if (latestOOORequest) {
+        await addLog(logType.PENDING_REQUEST_FOUND,
+            { userId, oooRequestId: latestOOORequest.id },
+            { message: REQUEST_ALREADY_PENDING }
+        );
+        return res.boom.conflict(REQUEST_ALREADY_PENDING);
+    }
 
     await createOOORequest(requestBody, username, userId);
 
@@ -58,7 +86,7 @@ export const createOooRequestController = async (
     });
   } catch (err) {
     logger.error(ERROR_WHILE_CREATING_REQUEST, err);
-    next(err);
+    return res.boom.badImplementation(ERROR_WHILE_CREATING_REQUEST);
   }
 };
 

@@ -36,5 +36,5 @@ export const createOooStatusRequestValidator = async (
       }),
     });
 
-    await schema.validateAsync(req.body, { abortEarly: false });
+  await schema.validateAsync(req.body, { abortEarly: false });
 };
