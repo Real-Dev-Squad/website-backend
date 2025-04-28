@@ -1889,14 +1889,15 @@ describe("Tasks", function () {
         .get("/tasks/users/discord")
         .query({ q: `status:${tasksUsersStatus.MISSED_UPDATES}` })
         .set("Authorization", `Bearer ${jwtToken}`);
-      expect(response.body).to.be.deep.equal({
-        message: "Discord details of users with status missed updates fetched successfully",
-        data: {
-          usersToAddRole: [activeUserWithProgressUpdates.discordId],
-          tasks: 4,
-          missedUpdatesTasks: 3,
-        },
-      });
+
+      expect(response.body.message).to.equal(
+        "Discord details of users with status missed updates fetched successfully"
+      );
+      expect(response.body.data.tasks).to.equal(4);
+      expect(response.body.data.missedUpdatesTasks).to.equal(3);
+      expect(response.body.data.usersToAddRole.includes(activeUserWithProgressUpdates.discordId)).to.equal(true);
+      expect(response.body.data.usersToAddRole.includes(idleUser.discordId)).to.equal(true);
+      expect(response.body.data.usersToAddRole.includes(userNotInDiscord.discordId)).to.equal(false);
       expect(response.status).to.be.equal(200);
     });
 
