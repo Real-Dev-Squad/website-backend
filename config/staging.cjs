@@ -2,7 +2,8 @@
  * Set the environment specific config in this file.
  * Defaults set from default.js
  */
-export default {
+// @ts-ignore
+module.exports = {
   discordUnverifiedRoleId: "1120875993771544687",
   discordDeveloperRoleId: "1121445071213056071",
   discordMavenRoleId: "1152361736456896586",

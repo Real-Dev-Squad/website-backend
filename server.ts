@@ -1,13 +1,13 @@
 /**
  * Initialise globals
  */
-import * as http from 'http';
-import app from './app.js';
-import logger from './utils/logger.js';
-import config from './utils/configWrapper.js';
+import * as http from "http";
+import app from "./app.js";
+import logger from "./utils/logger.js";
+import config from "config";
 
 // Initialise newrelic
-import 'newrelic';
+import "newrelic";
 
 logger.info(`Initialising newrelic with app name:: ${config.get("integrations.newrelic.appName")}`);
 
