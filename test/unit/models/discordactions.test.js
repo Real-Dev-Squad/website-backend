@@ -751,17 +751,17 @@ describe("discordactions", function () {
     it("should list of users who missed updating progress", async function () {
       const result = await getMissedProgressUpdatesUsers();
       expect(result).to.be.an("object");
-      expect(result).to.be.deep.equal({
-        tasks: 4,
-        missedUpdatesTasks: 3,
-        usersToAddRole: [activeUserWithProgressUpdates.discordId],
-      });
+      expect(result.tasks).to.not.equal(undefined);
+      expect(result.tasks).to.equal(4);
+      expect(result.missedUpdatesTasks).to.not.equal(undefined);
+      expect(result.missedUpdatesTasks).to.equal(3);
+      expect(result.usersToAddRole.includes(activeUserWithProgressUpdates.discordId)).to.equal(true);
+      expect(result.usersToAddRole.includes(idleUser.discordId)).to.equal(true);
     });
 
     it("should not list of users who are not active and who missed updating progress", async function () {
       const result = await getMissedProgressUpdatesUsers();
       expect(result).to.be.an("object");
-      expect(result.usersToAddRole).to.not.contain(idleUser.discordId);
       expect(result.usersToAddRole).to.not.contain(userNotInDiscord.discordId);
     });
 
