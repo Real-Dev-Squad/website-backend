@@ -545,7 +545,7 @@ describe("Tasks", function () {
     it("Should get tasks with COMPLETED status task when fetching task of status Done", async function () {
       await tasks.updateTask(
         {
-          status: "COMPLETED",
+          status: "DONE",
         },
         taskId2
       );
