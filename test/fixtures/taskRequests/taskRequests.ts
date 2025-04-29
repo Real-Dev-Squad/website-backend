@@ -1,4 +1,4 @@
-import { REQUEST_STATE, REQUEST_TYPE } from "../../../constants/requests";
+import { REQUEST_STATUS, REQUEST_TYPE } from "../../../constants/requests";
 import { TASK_REQUEST_TYPE } from "../../../constants/taskRequests";
 
 export const validTaskCreqtionRequest = {
@@ -10,7 +10,7 @@ export const validTaskCreqtionRequest = {
   proposedDeadline: 1719450351203,
   description: "Task Create Description",
   markdownEnabled: true,
-  state: REQUEST_STATE.PENDING,
+  state: REQUEST_STATUS.PENDING,
   type: REQUEST_TYPE.TASK,
 };
 
@@ -23,6 +23,6 @@ export const validTaskAssignmentRequest = {
   proposedDeadline: 1719450351203,
   description: "Task Create Description",
   markdownEnabled: true,
-  state: REQUEST_STATE.PENDING,
+  state: REQUEST_STATUS.PENDING,
   type: REQUEST_TYPE.TASK,
 };

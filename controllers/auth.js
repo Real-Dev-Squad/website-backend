@@ -172,20 +172,20 @@ const githubAuthCallback = (req, res, next) => {
         updated_at: null,
       };
 
-      if (!userData.email) {
-        const githubBaseUrl = config.get("githubApi.baseUrl");
-        const res = await fetch(`${githubBaseUrl}/user/emails`, {
-          headers: {
-            Authorization: `token ${accessToken}`,
-          },
-        });
-        const emails = await res.json();
-        const primaryEmails = emails.filter((item) => item.primary);
+      // if (!userData.email) {
+      //   const githubBaseUrl = config.get("githubApi.baseUrl");
+      //   const res = await fetch(`${githubBaseUrl}/user/emails`, {
+      //     headers: {
+      //       Authorization: `token ${accessToken}`,
+      //     },
+      //   });
+      //   const emails = await res.json();
+      //   const primaryEmails = emails.filter((item) => item.primary);
 
-        if (primaryEmails.length > 0) {
-          userData.email = primaryEmails[0].email;
-        }
-      }
+      //   if (primaryEmails.length > 0) {
+      //     userData.email = primaryEmails[0].email;
+      //   }
+      // }
 
       const { userId, incompleteUserDetails, role } = await users.addOrUpdate(userData);
 

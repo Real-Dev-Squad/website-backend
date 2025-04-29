@@ -124,5 +124,4 @@ dist
 
 # Local config file
 config/local.js
-
 package-lock.json

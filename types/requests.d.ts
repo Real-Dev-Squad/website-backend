@@ -1,17 +1,17 @@
 import { Request } from "express";
-import { REQUEST_STATE, REQUEST_TYPE } from "./../constants/requests";
+import { REQUEST_STATUS, REQUEST_TYPE } from "./../constants/requests";
 import { userData } from "./global";
 
 export type UpdateRequestBody = {
   type: REQUEST_TYPE.OOO | REQUEST_TYPE.EXTENSION;
   reason: string;
-  state: REQUEST_STATE.APPROVED | REQUEST_STATE.REJECTED;
+  state: REQUEST_STATUS.APPROVED | REQUEST_STATUS.REJECTED;
 };
 
 export type RequestQuery = {
   type?: string;
   requestedBy?: string;
-  state?: REQUEST_STATE.APPROVED | REQUEST_STATE.PENDING | REQUEST_STATE.REJECTED;
+  state?: REQUEST_STATUS.APPROVED | REQUEST_STATUS.PENDING | REQUEST_STATUS.REJECTED;
   id?: string;
   prev?: string;
   next?: string;

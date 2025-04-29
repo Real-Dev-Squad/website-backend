@@ -1,4 +1,4 @@
-import { REQUEST_STATE, REQUEST_TYPE } from "../../../constants/requests";
+import { REQUEST_STATUS, REQUEST_TYPE } from "../../../constants/requests";
 
 export const extensionCreateObject = {
   taskId: "4XlEQ64H8puuLTrwIi93",
@@ -7,5 +7,5 @@ export const extensionCreateObject = {
   newEndsOn: 1709674980000,
   message: "request message",
   type: REQUEST_TYPE.EXTENSION,
-  state: REQUEST_STATE.PENDING,
+  state: REQUEST_STATUS.PENDING,
 };

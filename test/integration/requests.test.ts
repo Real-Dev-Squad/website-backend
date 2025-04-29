@@ -18,7 +18,7 @@ import {
 import { createRequest, updateRequest } from "../../models/requests";
 import {
   REQUEST_ALREADY_APPROVED,
-  REQUEST_STATE,
+  REQUEST_STATUS,
   REQUEST_TYPE,
   REQUEST_APPROVED_SUCCESSFULLY,
   REQUEST_CREATED_SUCCESSFULLY,
@@ -56,7 +56,7 @@ describe("/requests OOO", function () {
     const { id: pendingOooId }: any = await createRequest(oooRequestData2);
     pendingOooRequestId = pendingOooId;
 
-    const { id: approveOooId }: any = await updateRequest(oooRequestId, { state: REQUEST_STATE.APPROVED }, superUserId, REQUEST_TYPE.OOO);
+    const { id: approveOooId }: any = await updateRequest(oooRequestId, { state: REQUEST_STATUS.APPROVED }, superUserId, REQUEST_TYPE.OOO);
     approvedOooRequestId = approveOooId;
 
     authToken = authService.generateAuthToken({ userId });
@@ -122,7 +122,7 @@ describe("/requests OOO", function () {
           expect(res.body.data.until).to.be.above(res.body.data.from);
           expect(res.body.data).to.have.property("requestedBy");
           expect(res.body.data.type).to.equal(REQUEST_TYPE.OOO);
-          expect(res.body.data.state).to.equal(REQUEST_STATE.PENDING);
+          expect(res.body.data.state).to.equal(REQUEST_STATUS.PENDING);
           expect(res.body.message).to.equal(REQUEST_CREATED_SUCCESSFULLY);
           done();
         });
@@ -176,7 +176,7 @@ describe("/requests OOO", function () {
         .request(app)
         .post("/requests")
         .set("cookie", `${cookieName}=${authToken}`)
-        .send({ ...validOooStatusRequests, state: REQUEST_STATE.APPROVED })
+        .send({ ...validOooStatusRequests, state: REQUEST_STATUS.APPROVED })
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
@@ -592,12 +592,12 @@ describe("/requests Extension", function () {
     let pendingExtensionRequestId: string;
 
     const approvedExtensionRequest = {
-      state: REQUEST_STATE.APPROVED,
+      state: REQUEST_STATUS.APPROVED,
       type: REQUEST_TYPE.EXTENSION,
     };
 
     const rejectedExtensionRequest = {
-      state: REQUEST_STATE.REJECTED,
+      state: REQUEST_STATUS.REJECTED,
       type: REQUEST_TYPE.EXTENSION,
     };
 

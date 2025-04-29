@@ -1,7 +1,7 @@
 import joi from "joi";
 import { TaskRequestResponse, TaskRequestRequest } from "../../types/taskRequests";
 import { NextFunction } from "express";
-import { REQUEST_TYPE, REQUEST_STATE } from "../../constants/requests";
+import { REQUEST_TYPE, REQUEST_STATUS } from "../../constants/requests";
 import { GITHUB_URL } from "../../constants/urls";
 
 import config from "config";
@@ -36,7 +36,7 @@ export const createTaskRequestValidator = async (
                 "string.empty": "type cannot be empty",
                 "any.required": "type is required",
             }),
-            state: joi.string().valid(REQUEST_STATE.PENDING).required().messages({
+            state: joi.string().valid(REQUEST_STATUS.PENDING).required().messages({
                 "string.empty": "state cannot be empty",
                 "any.required": "state is required",
             }),

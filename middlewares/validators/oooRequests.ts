@@ -1,6 +1,6 @@
 import joi from "joi";
 import { NextFunction } from "express";
-import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/requests";
+import { REQUEST_STATUS, REQUEST_TYPE } from "../../constants/requests";
 import { OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
 
 export const createOooStatusRequestValidator = async (
@@ -30,7 +30,7 @@ export const createOooStatusRequestValidator = async (
         "any.required": "message is required",
         "string.empty": "message cannot be empty",
       }),
-      state: joi.string().valid(REQUEST_STATE.PENDING).required().messages({
+      state: joi.string().valid(REQUEST_STATUS.PENDING).required().messages({
         "any.only": "state must be PENDING",
       }),
       type: joi.string().valid(REQUEST_TYPE.OOO).required(),

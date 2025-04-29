@@ -8,7 +8,7 @@ import {
     REQUEST_DOES_NOT_EXIST,
     REQUEST_LOG_TYPE,
     REQUEST_REJECTED_SUCCESSFULLY,
-    REQUEST_STATE,
+    REQUEST_STATUS,
     REQUEST_TYPE,
     REQUEST_UPDATED_SUCCESSFULLY,
     UNAUTHORIZED_TO_CREATE_ONBOARDING_EXTENSION_REQUEST,
@@ -73,7 +73,7 @@ export const createOnboardingExtensionRequestController = async (
             type: REQUEST_TYPE.ONBOARDING
         });
 
-        if(latestExtensionRequest && latestExtensionRequest.state === REQUEST_STATE.PENDING){
+        if(latestExtensionRequest && latestExtensionRequest.state === REQUEST_STATUS.PENDING){
             return res.boom.conflict(REQUEST_ALREADY_PENDING);
         }
         
@@ -93,7 +93,7 @@ export const createOnboardingExtensionRequestController = async (
         if(!latestExtensionRequest){
             requestNumber = 1;
             oldEndsOn = discordJoinedDateInMillisecond + millisecondsInThirtyOneDays;
-        }else if(latestExtensionRequest.state === REQUEST_STATE.REJECTED) {
+        }else if(latestExtensionRequest.state === REQUEST_STATUS.REJECTED) {
             requestNumber = latestExtensionRequest.requestNumber + 1;
             oldEndsOn = latestExtensionRequest.oldEndsOn;
         }else{
@@ -105,7 +105,7 @@ export const createOnboardingExtensionRequestController = async (
         
         const onboardingExtension = await createRequest({
             type: REQUEST_TYPE.ONBOARDING,
-            state: REQUEST_STATE.PENDING,
+            state: REQUEST_STATUS.PENDING,
             userId: userId,
             requestedBy: username,
             oldEndsOn: oldEndsOn,
@@ -179,7 +179,7 @@ export const updateOnboardingExtensionRequestState = async (
             return res.boom.badRequest(response.error);
         }
 
-        const [logType, returnMessage] = response.state === REQUEST_STATE.APPROVED 
+        const [logType, returnMessage] = response.state === REQUEST_STATUS.APPROVED 
             ? [REQUEST_LOG_TYPE.REQUEST_APPROVED, REQUEST_APPROVED_SUCCESSFULLY]
             : [REQUEST_LOG_TYPE.REQUEST_REJECTED, REQUEST_REJECTED_SUCCESSFULLY];
 

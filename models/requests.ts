@@ -1,6 +1,6 @@
 import firestore from "../utils/firestore";
 const requestModel = firestore.collection("requests");
-import { REQUEST_ALREADY_APPROVED, REQUEST_ALREADY_REJECTED, REQUEST_STATE } from "../constants/requests";
+import { REQUEST_ALREADY_APPROVED, REQUEST_ALREADY_REJECTED, REQUEST_STATUS } from "../constants/requests";
 import {
   ERROR_WHILE_FETCHING_REQUEST,
   ERROR_WHILE_CREATING_REQUEST,
@@ -37,12 +37,12 @@ export const updateRequest = async (id: string, body: any, lastModifiedBy: strin
         error: REQUEST_DOES_NOT_EXIST,
       };
     }
-    if (existingRequestDoc.data().state === REQUEST_STATE.APPROVED) {
+    if (existingRequestDoc.data().state === REQUEST_STATUS.APPROVED) {
       return {
         error: REQUEST_ALREADY_APPROVED,
       };
     }
-    if (existingRequestDoc.data().state === REQUEST_STATE.REJECTED) {
+    if (existingRequestDoc.data().state === REQUEST_STATUS.REJECTED) {
       return {
         error: REQUEST_ALREADY_REJECTED,
       };

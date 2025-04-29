@@ -1,7 +1,7 @@
 import joi from "joi";
 import { ExtensionRequestRequest, ExtensionRequestResponse } from "../../types/extensionRequests";
 import { NextFunction } from "express";
-import { REQUEST_TYPE,REQUEST_STATE } from "../../constants/requests";
+import { REQUEST_TYPE,REQUEST_STATUS } from "../../constants/requests";
 
 export const createExtensionRequestValidator = async (
   req: ExtensionRequestRequest,
@@ -32,7 +32,7 @@ export const createExtensionRequestValidator = async (
       message: joi.string().required().messages({
         "string.empty": "message cannot be empty",
       }),
-      state: joi.string().valid(REQUEST_STATE.PENDING).required().messages({
+      state: joi.string().valid(REQUEST_STATUS.PENDING).required().messages({
         "string.empty": "state cannot be empty",
         "any.required": "state is required",
       }),

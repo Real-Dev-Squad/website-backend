@@ -4,7 +4,7 @@ import {
   REQUEST_CREATED_SUCCESSFULLY,
   ERROR_WHILE_CREATING_REQUEST,
   REQUEST_ALREADY_PENDING,
-  REQUEST_STATE,
+  REQUEST_STATUS,
   REQUEST_TYPE,
   ERROR_WHILE_UPDATING_REQUEST,
   REQUEST_APPROVED_SUCCESSFULLY,
@@ -28,9 +28,9 @@ export const createOooRequestController = async (req: OooRequestCreateRequest, r
   }
 
   try {
-    const latestOooRequest:OooStatusRequest = await getRequestByKeyValues({ requestedBy: userId, type: REQUEST_TYPE.OOO , state: REQUEST_STATE.PENDING });
+    const latestOooRequest:OooStatusRequest = await getRequestByKeyValues({ requestedBy: userId, type: REQUEST_TYPE.OOO , status: REQUEST_STATUS.PENDING });
 
-    if (latestOooRequest && latestOooRequest.state === REQUEST_STATE.PENDING) {
+    if (latestOooRequest && latestOooRequest.status === REQUEST_STATUS.PENDING) {
       return res.boom.badRequest(REQUEST_ALREADY_PENDING);
     }
 
@@ -75,7 +75,7 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
       return res.boom.badRequest(requestResult.error);
     }
     const [logType, returnMessage] =
-      requestResult.state === REQUEST_STATE.APPROVED
+      requestResult.status === REQUEST_STATUS.APPROVED
         ? [REQUEST_LOG_TYPE.REQUEST_APPROVED, REQUEST_APPROVED_SUCCESSFULLY]
         : [REQUEST_LOG_TYPE.REQUEST_REJECTED, REQUEST_REJECTED_SUCCESSFULLY];
 
@@ -90,7 +90,7 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
       body: requestResult,
     };
     await addLog(requestLog.type, requestLog.meta, requestLog.body);
-    if (requestResult.state === REQUEST_STATE.APPROVED) {
+    if (requestResult.status === REQUEST_STATUS.APPROVED) {
       const requestData = await getRequests({ id: requestId });
 
       if (requestData) {
@@ -98,7 +98,7 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
         const userFutureStatusData = {
           requestId,
           status: REQUEST_TYPE.OOO,
-          state: statusState.UPCOMING,
+          status: statusState.UPCOMING,
           from,
           endsOn: until,
           userId: requestedBy,

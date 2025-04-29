@@ -1,4 +1,4 @@
-import { REQUEST_STATE, TASK_REQUEST_MESSAGES } from "../constants/requests";
+import { REQUEST_STATUS, TASK_REQUEST_MESSAGES } from "../constants/requests";
 import { TASK_REQUEST_TYPE } from "../constants/taskRequests";
 import { addLog } from "../models/logs";
 import { createRequest, getRequestByKeyValues } from "../models/requests";
@@ -64,13 +64,13 @@ export const createTaskRequestController = async (req: TaskRequestRequest, res: 
 
     if (
       existingRequest &&
-      existingRequest.state === REQUEST_STATE.PENDING &&
+      existingRequest.state === REQUEST_STATUS.PENDING &&
       existingRequest.requestors.includes(requestedBy)
     ) {
       return res.boom.badRequest(TASK_REQUEST_MESSAGES.TASK_REQUEST_EXISTS);
     } else if (
       existingRequest &&
-      existingRequest.state === REQUEST_STATE.PENDING &&
+      existingRequest.state === REQUEST_STATUS.PENDING &&
       !existingRequest.requestors.includes(requestedBy)
     ) {
       existingRequest.requestors.push(requestedBy);
@@ -83,7 +83,7 @@ export const createTaskRequestController = async (req: TaskRequestRequest, res: 
         markdownEnabled: taskRequestData.markdownEnabled,
         firstName: userData.first_name,
         lastName: userData.last_name,
-        state: REQUEST_STATE.PENDING,
+        state: REQUEST_STATUS.PENDING,
         requestedAt: Date.now(),
       });
       const updatedRequest = await createRequest(existingRequest);
@@ -116,7 +116,7 @@ export const createTaskRequestController = async (req: TaskRequestRequest, res: 
       externalIssueHtmlUrl: taskRequestData.externalIssueHtmlUrl,
       requestType: taskRequestData.requestType,
       type: taskRequestData.type,
-      state: REQUEST_STATE.PENDING,
+      state: REQUEST_STATUS.PENDING,
       requestedBy: requestedBy,
       taskTitle: taskRequestData.taskTitle,
       users: [
@@ -129,7 +129,7 @@ export const createTaskRequestController = async (req: TaskRequestRequest, res: 
           markdownEnabled: taskRequestData.markdownEnabled,
           firstName: userData.first_name,
           lastName: userData.last_name,
-          state: REQUEST_STATE.PENDING,
+          state: REQUEST_STATUS.PENDING,
           requestedAt: Date.now(),
         },
       ],

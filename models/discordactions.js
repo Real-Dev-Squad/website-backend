@@ -29,7 +29,7 @@ const discordService = require("../services/discordService");
 const { buildTasksQueryForMissedUpdates } = require("../utils/tasks");
 const { buildProgressQueryForMissedUpdates } = require("../utils/progresses");
 const { getRequestByKeyValues } = require("./requests");
-const { REQUEST_TYPE, REQUEST_STATE } = require("../constants/requests");
+const { REQUEST_TYPE, REQUEST_STATUS } = require("../constants/requests");
 const allMavens = [];
 
 /**
@@ -778,7 +778,7 @@ const skipOnboardingUsersHavingApprovedExtensionRequest = async (users = []) => 
       try {
         const latestApprovedExtension = await getRequestByKeyValues({
           type: REQUEST_TYPE.ONBOARDING,
-          state: REQUEST_STATE.APPROVED,
+          state: REQUEST_STATUS.APPROVED,
           userId: user.id,
         });
 

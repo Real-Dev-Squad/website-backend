@@ -6,7 +6,7 @@ import {
   REQUEST_APPROVED_SUCCESSFULLY,
   REQUEST_LOG_TYPE,
   REQUEST_REJECTED_SUCCESSFULLY,
-  REQUEST_STATE,
+  REQUEST_STATUS,
   REQUEST_TYPE,
 } from "../constants/requests";
 import { addLog } from "../models/logs";
@@ -64,7 +64,7 @@ export const createTaskExtensionRequest = async (req: ExtensionRequestRequest, r
       type: REQUEST_TYPE.EXTENSION,
     });
 
-    if (latestExtensionRequest && latestExtensionRequest.state === REQUEST_STATE.PENDING) {
+    if (latestExtensionRequest && latestExtensionRequest.state === REQUEST_STATUS.PENDING) {
       return res.boom.badRequest("An extension request for this task already exists.");
     }
     const requestNumber: number =
@@ -117,7 +117,7 @@ export const updateTaskExtensionRequest = async (req: any, res: any) => {
       return res.boom.badRequest(requestResult.error);
     }
     const [logType, returnMessage] =
-      requestResult.state === REQUEST_STATE.APPROVED
+      requestResult.state === REQUEST_STATUS.APPROVED
         ? [REQUEST_LOG_TYPE.REQUEST_APPROVED, REQUEST_APPROVED_SUCCESSFULLY]
         : [REQUEST_LOG_TYPE.REQUEST_REJECTED, REQUEST_REJECTED_SUCCESSFULLY];
 

@@ -1,6 +1,6 @@
 import joi from "joi";
 import { NextFunction } from "express";
-import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/requests";
+import { REQUEST_STATUS, REQUEST_TYPE } from "../../constants/requests";
 import { OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
 import { createOooStatusRequestValidator } from "./oooRequests";
 import { createExtensionRequestValidator } from "./extensionRequestsv2";
@@ -60,7 +60,7 @@ export const updateRequestsMiddleware = async (
       }),
     state: joi
       .string()
-      .valid(REQUEST_STATE.APPROVED, REQUEST_STATE.REJECTED)
+      .valid(REQUEST_STATUS.APPROVED, REQUEST_STATUS.REJECTED)
       .required()
       .messages({
         "any.only": "state must be APPROVED or REJECTED",
@@ -90,7 +90,7 @@ export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: O
     requestedBy: joi.string().insensitive().optional(),
     state: joi
       .string()
-      .valid(REQUEST_STATE.APPROVED, REQUEST_STATE.PENDING, REQUEST_STATE.REJECTED)
+      .valid(REQUEST_STATUS.APPROVED, REQUEST_STATUS.PENDING, REQUEST_STATUS.REJECTED)
       .optional(),
     page: joi.number().integer().min(0).when("next", {
       is: joi.exist(),

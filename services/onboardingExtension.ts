@@ -6,7 +6,7 @@ import {
     PENDING_REQUEST_UPDATED, 
     REQUEST_DOES_NOT_EXIST,
     REQUEST_LOG_TYPE,
-    REQUEST_STATE, 
+    REQUEST_STATUS, 
     REQUEST_TYPE, 
     UNAUTHORIZED_TO_UPDATE_REQUEST 
 } from "../constants/requests";
@@ -63,7 +63,7 @@ export const validateOnboardingExtensionUpdateRequest = async (
             };
         }
         
-        if(extensionRequest.state !== REQUEST_STATE.PENDING){
+        if(extensionRequest.state !== REQUEST_STATUS.PENDING){
             await addLog(logType.PENDING_REQUEST_CAN_BE_UPDATED,
                 { state: extensionRequest.state },
                 { message:PENDING_REQUEST_UPDATED }

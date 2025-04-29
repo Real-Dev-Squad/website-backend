@@ -1,4 +1,4 @@
-export const REQUEST_STATE = {
+export const REQUEST_STATUS = {
   APPROVED: "APPROVED",
   PENDING: "PENDING",
   REJECTED: "REJECTED",

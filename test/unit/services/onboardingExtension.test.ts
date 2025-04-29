@@ -3,7 +3,7 @@ import {
     INVALID_REQUEST_TYPE, 
     PENDING_REQUEST_UPDATED, 
     REQUEST_DOES_NOT_EXIST, 
-    REQUEST_STATE, 
+    REQUEST_STATUS, 
     REQUEST_TYPE, 
     UNAUTHORIZED_TO_UPDATE_REQUEST 
 } from "../../../constants/requests"
@@ -29,7 +29,7 @@ describe("Test Onboarding Extension Service", () => {
         validExtensionRequest = await requestModel.add({
             type: REQUEST_TYPE.ONBOARDING,
             oldEndsOn: Date.now() - convertDaysToMilliseconds(2),
-            state: REQUEST_STATE.PENDING,
+            state: REQUEST_STATUS.PENDING,
             userId,
         })
         validExtensionRequestDoc = await requestModel.doc(validExtensionRequest.id).get();
@@ -55,14 +55,14 @@ describe("Test Onboarding Extension Service", () => {
             });
             invalidTypeRequestDoc = await requestModel.doc(invalidTypeRequest.id).get();
             invalidStateRequest = await requestModel.add({
-                state: REQUEST_STATE.APPROVED,
+                state: REQUEST_STATUS.APPROVED,
                 userId,
                 type: REQUEST_TYPE.ONBOARDING,
             })
             invalidStateRequestDoc = await requestModel.doc(invalidStateRequest.id).get();
             invalidDeadlineRequest = await requestModel.add({
                 type: REQUEST_TYPE.ONBOARDING,
-                state: REQUEST_STATE.PENDING,
+                state: REQUEST_STATUS.PENDING,
                 oldEndsOn: Date.now() + convertDaysToMilliseconds(2),
                 userId,
             })

@@ -5,7 +5,6 @@
  *
  * Documentation: https://github.com/lorenwest/node-config/wiki/Configuration-Files
  */
-
 const NODE_ENV = process.env.NODE_ENV;
 module.exports = {
   port: 3000,

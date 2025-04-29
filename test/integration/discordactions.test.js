@@ -49,7 +49,7 @@ const { userStatusDataForOooState } = require("../fixtures/userStatus/userStatus
 const { generateCronJobToken } = require("../utils/generateBotToken");
 const { CRON_JOB_HANDLER } = require("../../constants/bot");
 const { createRequest } = require("../../models/requests");
-const { REQUEST_TYPE, REQUEST_STATE } = require("../../constants/requests");
+const { REQUEST_TYPE, REQUEST_STATUS } = require("../../constants/requests");
 const { convertDaysToMilliseconds } = require("../../utils/time");
 
 describe("Discord actions", function () {
@@ -914,7 +914,7 @@ describe("Discord actions", function () {
     it("should filter users who have approved extension request and update groupOnboarding31d+ role", function (done) {
       createRequest({
         type: REQUEST_TYPE.ONBOARDING,
-        state: REQUEST_STATE.APPROVED,
+        state: REQUEST_STATUS.APPROVED,
         userId: userId,
         newEndsOn: Date.now() + convertDaysToMilliseconds(2),
       });

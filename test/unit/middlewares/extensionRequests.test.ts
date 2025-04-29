@@ -4,7 +4,7 @@ const { expect } = chai;
 
 import { createExtensionRequestValidator } from "../../../middlewares/validators/extensionRequestsv2";
 import { extensionCreateObject } from "../../fixtures/extension-requests/extensionRequests";
-import { REQUEST_STATE } from "../../../constants/requests";
+import { REQUEST_STATUS } from "../../../constants/requests";
 import { ExtensionRequestRequest, ExtensionRequestResponse } from "../../../types/extensionRequests";
 
 describe("Extension Request Validators", function () {
@@ -35,7 +35,7 @@ describe("Extension Request Validators", function () {
 
         it("should not validate for an invalid extension request on wrong status", async function () {
             const req = {
-                body: { ...extensionCreateObject, state: REQUEST_STATE.APPROVED },
+                body: { ...extensionCreateObject, state: REQUEST_STATUS.APPROVED },
             };
             const res = {};
             const nextSpy = sinon.spy();

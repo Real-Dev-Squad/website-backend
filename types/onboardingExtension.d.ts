@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { Boom } from "express-boom";
-import { REQUEST_STATE, REQUEST_TYPE } from "../constants/requests";
+import { REQUEST_STATUS, REQUEST_TYPE } from "../constants/requests";
 import { RequestQuery } from "./requests";
 import { userData } from "./global";
 
@@ -12,7 +12,7 @@ export type OnboardingExtension = {
     message?: string;
     reason: string;
     requestedBy: string;
-    state: REQUEST_STATE;
+    status: REQUEST_STATUS;
     lastModifiedBy?: string;
     createdAt: Timestamp;
     updatedAt: Timestamp;
@@ -43,7 +43,7 @@ export type OnboardingExtensionCreateRequest = Request & {
 export type UpdateOnboardingExtensionStateRequestBody = {
     type: REQUEST_TYPE.ONBOARDING;
     message?: string;
-    state: REQUEST_STATE.APPROVED | REQUEST_STATE.REJECTED;
+    state: REQUEST_STATUS.APPROVED | REQUEST_STATUS.REJECTED;
 };
 
 export type RequestParams = {

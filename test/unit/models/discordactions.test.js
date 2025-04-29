@@ -64,7 +64,7 @@ const { stubbedModelTaskProgressData } = require("../../fixtures/progress/progre
 const { convertDaysToMilliseconds } = require("../../../utils/time");
 const { generateUserStatusData } = require("../../fixtures/userStatus/userStatus");
 const { userState } = require("../../../constants/userStatus");
-const { REQUEST_TYPE, REQUEST_STATE } = require("../../../constants/requests");
+const { REQUEST_TYPE, REQUEST_STATUS } = require("../../../constants/requests");
 const { createRequest } = require("../../../models/requests");
 
 chai.should();
@@ -1140,7 +1140,7 @@ describe("discordactions", function () {
     it("should add grouponboarding31D when user has an approved extension request but dealine has been passed", async function () {
       await createRequest({
         type: REQUEST_TYPE.ONBOARDING,
-        state: REQUEST_STATE.APPROVED,
+        state: REQUEST_STATUS.APPROVED,
         newEndsOn: Date.now() - convertDaysToMilliseconds(2),
         userId: userId0,
       });
@@ -1154,7 +1154,7 @@ describe("discordactions", function () {
     it("should add grouponboarding31D when user does not have approved extension request", async function () {
       await createRequest({
         type: REQUEST_TYPE.ONBOARDING,
-        state: REQUEST_STATE.PENDING,
+        state: REQUEST_STATUS.PENDING,
         newEndsOn: Date.now() + convertDaysToMilliseconds(2),
         userId: userId0,
       });
@@ -1168,7 +1168,7 @@ describe("discordactions", function () {
     it("should not add grouponboarding31D when user has approved extension request", async function () {
       await createRequest({
         type: REQUEST_TYPE.ONBOARDING,
-        state: REQUEST_STATE.APPROVED,
+        state: REQUEST_STATUS.APPROVED,
         newEndsOn: Date.now() + convertDaysToMilliseconds(2),
         userId: userId0,
       });
@@ -1401,7 +1401,7 @@ describe("discordactions", function () {
 
     it("should return filtered users", async function () {
       await createRequest({
-        state: REQUEST_STATE.APPROVED,
+        state: REQUEST_STATUS.APPROVED,
         type: REQUEST_TYPE.ONBOARDING,
         newEndsOn: Date.now() + convertDaysToMilliseconds(2),
         userId: userId0,
