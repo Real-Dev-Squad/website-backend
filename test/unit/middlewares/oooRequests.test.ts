@@ -5,7 +5,7 @@ const { expect } = chai;
 import {
   createOooStatusRequestValidator,
 } from "./../../../middlewares/validators/oooRequests";
-import { validOooStatusRequests, validOooStatusUpdate } from "../../fixtures/oooRequest/oooRequest";
+import { validOooStatusRequests } from "../../fixtures/oooRequest/oooRequest";
 
 describe("OOO Status Request Validators", function () {
   let req: any;
