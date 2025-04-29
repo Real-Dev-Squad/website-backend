@@ -2,6 +2,7 @@ const express = require("express");
 const authenticate = require("../middlewares/authenticate");
 const {
   createGroupRole,
+  editGroupRoles,
   getGroupsRoleId,
   addGroupRoleToMember,
   deleteRole,
@@ -34,6 +35,8 @@ const { authorizeAndAuthenticate } = require("../middlewares/authorizeUsersAndSe
 const router = express.Router();
 
 router.post("/groups", authenticate, checkIsVerifiedDiscord, validateGroupRoleBody, createGroupRole);
+router.patch("/groups/:groupId", authenticate, authorizeRoles([SUPERUSER]), editGroupRoles);
+router.patch("/groups/:groupId", editGroupRoles);
 router.get("/groups", authenticate, checkIsVerifiedDiscord, validateLazyLoadingParams, getPaginatedAllGroupRoles);
 router.delete("/groups/:groupId", authenticate, checkIsVerifiedDiscord, authorizeRoles([SUPERUSER]), deleteGroupRole);
 router.post("/roles", authenticate, checkIsVerifiedDiscord, validateMemberRoleBody, addGroupRoleToMember);

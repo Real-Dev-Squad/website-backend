@@ -63,6 +63,75 @@ const createGroupRole = async (req, res) => {
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
+const editGroupRoles = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const { roleName, description } = req.body;
+
+    if (!roleName && !description) {
+      return res.boom.badRequest("At least one field (roleName or description) must be provided");
+    }
+
+    if (roleName && (roleName.length < 3 || roleName.length > 50)) {
+      return res.boom.badRequest("Role name must be between 3 and 50 characters");
+    }
+
+    if (description && description.length > 200) {
+      return res.boom.badRequest("Description must not exceed 200 characters");
+    }
+
+    const { roleExists, existingRoles } = await discordRolesModel.isGroupRoleExists({
+      groupId,
+    });
+    if (!roleExists) {
+      return res.boom.notFound("Group role not found");
+    }
+
+    const roleData = existingRoles.data();
+
+    const updateRequest = {};
+    if (roleName) {
+      updateRequest.roleName = roleName;
+    }
+    if (description) {
+      updateRequest.description = description;
+    }
+
+    let discordUpdateSuccess = true;
+    if (updateRequest.roleName) {
+      const discordUpdateResponse = await discordServices.updateDiscordGroupRole(
+        roleData.roleid,
+        updateRequest.roleName,
+        updateRequest.description
+      );
+      if (!discordUpdateResponse.success) {
+        discordUpdateSuccess = false;
+        logger.error(`Failed to update role name in Discord for groupId: ${groupId}`);
+      }
+    }
+
+    let firestoreUpdateSuccess = true;
+    if (updateRequest.description) {
+      try {
+        await discordRolesModel.updateGroupRole(groupId, {
+          description: updateRequest.description,
+        });
+      } catch (error) {
+        firestoreUpdateSuccess = false;
+        logger.error(`Failed to update description in Firestore for groupId: ${groupId}`);
+      }
+    }
+
+    if (!discordUpdateSuccess || !firestoreUpdateSuccess) {
+      return res.boom.badImplementation("Partial update failed. Check logs for details.");
+    }
+
+    return res.boom.success("updated the roleName and description successfully");
+  } catch (error) {
+    logger.error(`Error while editing group role: ${error}`);
+    return res.boom.badImplementation("Internal server error");
+  }
+};
 
 /**
  * Controller function to handle the soft deletion of a group role.
@@ -559,6 +628,7 @@ const getUserDiscordInvite = async (req, res) => {
 
 module.exports = {
   getGroupsRoleId,
+  editGroupRoles,
   createGroupRole,
   getPaginatedAllGroupRoles,
   addGroupRoleToMember,
