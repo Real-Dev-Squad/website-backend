@@ -198,7 +198,7 @@ const fetchTasks = async (req, res) => {
     const paginatedTasks = await fetchPaginatedTasks({ ...transformedQuery, prev, next, userFeatureFlag });
 
     const updatedData = {
-      ...paginatedTasks, // assuming your original JSON is stored in a variable called 'data'
+      ...paginatedTasks,
       tasks: paginatedTasks.tasks.map((task) => {
         if (task.status === "COMPLETED") {
           return { ...task, status: "DONE" };
