@@ -66,7 +66,12 @@ const createGroupRole = async (req, res) => {
 const editGroupRoles = async (req, res) => {
   try {
     const { groupId } = req.params;
+    const { dev } = req.query;
     const { roleName, description } = req.body;
+
+    if (!dev === "true") {
+      return res.boom.notImplemented("This endpoint is only enabled via feature flag");
+    }
 
     if (!roleName && !description) {
       return res.boom.badRequest("At least one field (roleName or description) must be provided");
