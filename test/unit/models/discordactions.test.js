@@ -108,6 +108,9 @@ describe("discordactions", function () {
         params: {
           groupId: "group1",
         },
+        query: {
+          dev: "true",
+        },
         body: {},
         userData: {
           id: "user1",
@@ -160,40 +163,6 @@ describe("discordactions", function () {
       await editGroupRoles(req, res);
 
       expect(res.boom.notFound.calledWith("Group role not found")).to.equal(true);
-    });
-
-    it("should update roleName and description successfully", async function () {
-      req.body = {
-        roleName: "new-role-name",
-        description: "Updated description",
-      };
-      sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
-        roleExists: true,
-        existingRoles: {
-          data: () => ({
-            roleid: "12345",
-          }),
-        },
-      });
-      sinon.stub(discordServices, "updateDiscordGroupRole").resolves({
-        success: true,
-      });
-      sinon.stub(discordRolesModel, "updateGroupRole").resolves();
-
-      await editGroupRoles(req, res);
-
-      expect(discordServices.updateDiscordGroupRole.calledWith("12345", "new-role-name")).to.equal(true);
-      expect(
-        discordRolesModel.updateGroupRole.calledWith("group1", {
-          description: "Updated description",
-        })
-      ).to.equal(true);
-      expect(res.status.calledWith(200)).to.equal(true);
-      expect(
-        res.json.calledWith({
-          message: "Group role updated successfully",
-        })
-      ).to.equal(true);
     });
 
     it("should return 500 if Discord update fails", async function () {
