@@ -42,7 +42,7 @@ describe("OOO Status Request Validators", function () {
       }
     });
 
-    it("should not validate for an invalid request on empty reason", async function () {
+    it("should not validate when reason is empty and type is invalid", async function () {
       req = {
         body: { ...validOooStatusRequests, reason: "", type: "ACTIVE" },
       };
@@ -58,11 +58,10 @@ describe("OOO Status Request Validators", function () {
     it("should not validate for an invalid request if all invalid values", async function () {
       req = {
         body: {
-          type: "OOO",
+          type: "ABC",
           from: null,
           until: null,
           reason: "",
-          state: "APPROVED",
         },
       };
       try {
@@ -72,7 +71,8 @@ describe("OOO Status Request Validators", function () {
         expect(error.details.length).to.equal(4);
         expect(error.details[0].message).to.equal(`"from" must be a number`);
         expect(error.details[1].message).to.equal(`"until" must be a number`);
-        expect(error.details[2].message).to.equal("reason cannot be empty");
+        expect(error.details[2].message).to.equal('reason cannot be empty');
+        expect(error.details[3].message).to.equal('"type" must be [OOO]');
       }
     });
 

@@ -56,7 +56,7 @@ export const validateUserStatus = async (
  * @returns {Promise<object>} The created OOO request.
  * @throws {Error} Throws an error if an issue occurs during validation.
  */
-export const createOOORequest = async (
+export const createOooRequest = async (
     body: OooStatusRequestBody,
     username: string,
     userId: string

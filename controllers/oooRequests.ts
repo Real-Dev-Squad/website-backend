@@ -1,4 +1,3 @@
-import { NextFunction } from "express";
 import {
   REQUEST_LOG_TYPE,
   LOG_ACTION,
@@ -20,7 +19,7 @@ import { addLog } from "../models/logs";
 import { getRequestByKeyValues, getRequests, updateRequest } from "../models/requests";
 import { createUserFutureStatus } from "../models/userFutureStatus";
 import { getUserStatus, addFutureStatus } from "../models/userStatus";
-import { createOOORequest, validateUserStatus } from "../services/oooRequest";
+import { createOooRequest, validateUserStatus } from "../services/oooRequest";
 import { CustomResponse } from "../typeDefinitions/global";
 import { OooRequestCreateRequest, OooRequestResponse, OooStatusRequest } from "../types/oooRequest";
 import { UpdateRequest } from "../types/requests";
@@ -65,21 +64,21 @@ export const createOooRequestController = async (
       }
     }
 
-    const latestOOORequest: OooStatusRequest = await getRequestByKeyValues({
+    const latestOooRequest: OooStatusRequest = await getRequestByKeyValues({
         userId,
         type: REQUEST_TYPE.OOO,
         status: REQUEST_STATE.PENDING,
     });
 
-    if (latestOOORequest) {
+    if (latestOooRequest) {
         await addLog(logType.PENDING_REQUEST_FOUND,
-            { userId, oooRequestId: latestOOORequest.id },
+            { userId, oooRequestId: latestOooRequest.id },
             { message: REQUEST_ALREADY_PENDING }
         );
         return res.boom.conflict(REQUEST_ALREADY_PENDING);
     }
 
-    await createOOORequest(requestBody, username, userId);
+    await createOooRequest(requestBody, username, userId);
 
     return res.status(201).json({
       message: REQUEST_CREATED_SUCCESSFULLY,
