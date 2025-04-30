@@ -608,7 +608,7 @@ describe("Tasks", function () {
       const { DONE } = TASK_STATUS;
       chai
         .request(app)
-        .get("/tasks/self?done=true")
+        .get("/tasks/self?completed=true")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
