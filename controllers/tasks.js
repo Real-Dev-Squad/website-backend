@@ -242,16 +242,16 @@ const getUserTasks = async (req, res) => {
     }
     allTasks = await tasks.fetchUserTasks(username, status || []);
 
+    if (allTasks.userNotFound) {
+      return res.boom.notFound("User doesn't exist");
+    }
+
     allTasks = allTasks.map((task) => {
       if (task.status === "COMPLETED") {
         return { ...task, status: "DONE" };
       }
       return task;
     });
-
-    if (allTasks.userNotFound) {
-      return res.boom.notFound("User doesn't exist");
-    }
 
     return res.json({
       message: "Tasks returned successfully!",
