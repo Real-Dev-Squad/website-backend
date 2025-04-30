@@ -16,7 +16,7 @@ import { createTaskRequestController } from "./taskRequestsv2";
 import { OnboardingExtensionCreateRequest, OnboardingExtensionResponse, UpdateOnboardingExtensionStateRequest } from "../types/onboardingExtension";
 import { createOnboardingExtensionRequestController, updateOnboardingExtensionRequestController, updateOnboardingExtensionRequestState } from "./onboardingExtension";
 import { UpdateOnboardingExtensionRequest } from "../types/onboardingExtension";
-import { NextFunction, Request } from "express";
+import { Request } from "express";
 
 export const createRequestController = async (
   req: OooRequestCreateRequest | ExtensionRequestRequest | TaskRequestRequest | OnboardingExtensionCreateRequest,
@@ -120,12 +120,12 @@ export const getRequestsController = async (req: any, res: any) => {
  * @param {CustomResponse} res - The response object.
  * @returns {Promise<void>} Resolves or sends an error for invalid types.
  */
-export const updateRequestBeforeAcknowledgedController = async (req: Request, res: CustomResponse, next: NextFunction) => {
+export const updateRequestBeforeAcknowledgedController = async (req: Request, res: CustomResponse) => {
   const type = req.body.type;
 
   switch(type){
     case REQUEST_TYPE.OOO:
-      await acknowledgeOOORequestController(req as AcknowledgeOOORequest, res as OooRequestResponse, next);
+      await acknowledgeOOORequestController(req as AcknowledgeOOORequest, res as OooRequestResponse);
       break;
     case REQUEST_TYPE.ONBOARDING:
       await updateOnboardingExtensionRequestController(req as UpdateOnboardingExtensionRequest, res as OnboardingExtensionResponse);

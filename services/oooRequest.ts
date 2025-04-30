@@ -1,6 +1,6 @@
 import { addLog } from "./logService";
 import firestore from "../utils/firestore";
-import { NotFound, BadRequest } from "http-errors";
+import { BadRequest } from "http-errors";
 import { logType } from "../constants/logs";
 import {
     REQUEST_STATE,
@@ -14,8 +14,8 @@ import {
     LOG_ACTION,
     INVALID_REQUEST_TYPE,
 } from "../constants/requests";
-import { getRequests, updateRequest } from "../models/requests";
-import { AcknowledgeOOORequestBody, OooStatusRequest } from "../types/oooRequest";
+import { updateRequest } from "../models/requests";
+import { AcknowledgeOOORequestBody } from "../types/oooRequest";
 import { addFutureStatus } from "../models/userStatus";
 const requestModel = firestore.collection("requests");
 
@@ -40,7 +40,9 @@ export const validateOOOAcknowledgeRequest = async (
                 { requestId, type: requestType },
                 { message: INVALID_REQUEST_TYPE }
             );
-            throw BadRequest(INVALID_REQUEST_TYPE);
+            return {
+                error: INVALID_REQUEST_TYPE
+            };
         }
 
         if (requestStatus === REQUEST_STATE.APPROVED) {
@@ -48,7 +50,9 @@ export const validateOOOAcknowledgeRequest = async (
                 { oooRequestId: requestId },
                 { message: REQUEST_ALREADY_APPROVED }
             );
-            throw BadRequest(REQUEST_ALREADY_APPROVED);
+            return {
+                error: REQUEST_ALREADY_APPROVED
+            };
         }
 
         if (requestStatus === REQUEST_STATE.REJECTED) {
@@ -56,7 +60,9 @@ export const validateOOOAcknowledgeRequest = async (
                 { oooRequestId: requestId },
                 { message: REQUEST_ALREADY_REJECTED }
             );
-            throw BadRequest(REQUEST_ALREADY_REJECTED);
+            return {
+                error: REQUEST_ALREADY_REJECTED
+            };
         }
     } catch (error) {
         logger.error("Error while validating OOO acknowledge request", error);
@@ -69,7 +75,7 @@ export const validateOOOAcknowledgeRequest = async (
  * 
  * @param {string} requestId - The ID of the OOO request to acknowledge.
  * @param {AcknowledgeOOORequestBody} body - The acknowledgement body containing acknowledging details.
- * @param {string} userId - The unique identifier of the superuser user.
+ * @param {string} superUserId - The unique identifier of the superuser user.
  * @returns {Promise<object>} The acknowledged OOO request.
  * @throws {Error} Throws an error if an issue occurs during acknowledgment process.
  */
@@ -86,12 +92,20 @@ export const acknowledgeOOORequest = async (
                 { oooRequestId: requestId },
                 { message: REQUEST_DOES_NOT_EXIST }
             );
-            throw NotFound(REQUEST_DOES_NOT_EXIST);
+            return {
+                error: REQUEST_DOES_NOT_EXIST
+            };
         }
 
         const requestData = request.data();
 
-        await validateOOOAcknowledgeRequest(requestId, requestData.type, requestData.status);
+        const validationResponse = await validateOOOAcknowledgeRequest(requestId, requestData.type, requestData.status);
+
+        if (validationResponse) {
+            return {
+                error: validationResponse.error
+            };
+        }
 
         const requestResult = await updateRequest(requestId, body, superUserId, REQUEST_TYPE.OOO);
 
@@ -118,18 +132,16 @@ export const acknowledgeOOORequest = async (
         await addLog(requestLog.type, requestLog.meta, requestLog.body);
 
         if (requestResult.status === REQUEST_STATE.APPROVED) {
-            if (requestData) {
-                const { from, until, userId } = requestData;
-                const userFutureStatusData = {
-                    requestId,
-                    state: REQUEST_TYPE.OOO,
-                    from,
-                    endsOn: until,
-                    userId,
-                    message: body.comment,
-                };
-                await addFutureStatus(userFutureStatusData);
-            }
+            const { from, until, userId } = requestData;
+            const userFutureStatusData = {
+                requestId,
+                state: REQUEST_TYPE.OOO,
+                from,
+                endsOn: until,
+                userId,
+                message: body.comment,
+            };
+            await addFutureStatus(userFutureStatusData);
         }
 
         return {

@@ -1,4 +1,3 @@
-import { NextFunction } from "express";
 import {
   REQUEST_LOG_TYPE,
   LOG_ACTION,
@@ -11,6 +10,11 @@ import {
   REQUEST_APPROVED_SUCCESSFULLY,
   REQUEST_REJECTED_SUCCESSFULLY,
   UNAUTHORIZED_TO_ACKNOWLEDGE_OOO_REQUEST,
+  ERROR_WHILE_ACKNOWLEDGING_REQUEST,
+  REQUEST_DOES_NOT_EXIST,
+  INVALID_REQUEST_TYPE,
+  REQUEST_ALREADY_APPROVED,
+  REQUEST_ALREADY_REJECTED,
 } from "../constants/requests";
 import { statusState } from "../constants/userStatus";
 import { addLog } from "../models/logs";
@@ -134,7 +138,6 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
 export const acknowledgeOOORequestController = async (
   req: AcknowledgeOOORequest,
   res: OooRequestResponse,
-  next: NextFunction,
 )
   : Promise<OooRequestResponse> => {
 
@@ -155,12 +158,25 @@ export const acknowledgeOOORequestController = async (
 
       const response = await acknowledgeOOORequest(requestId, requestBody, superUserId);
 
+      if (response.error === REQUEST_DOES_NOT_EXIST) {
+        return res.boom.notFound(REQUEST_DOES_NOT_EXIST);
+      }
+      if (response.error === INVALID_REQUEST_TYPE) {
+        return res.boom.badRequest(INVALID_REQUEST_TYPE);
+      }
+      if (response.error === REQUEST_ALREADY_APPROVED) {
+        return res.boom.conflict(REQUEST_ALREADY_APPROVED);
+      }
+      if (response.error === REQUEST_ALREADY_REJECTED) {
+        return res.boom.conflict(REQUEST_ALREADY_REJECTED);
+      }
+
       return res.status(200).json({
         message: response.message,
       });
     }
     catch(error){
-      logger.error(ERROR_WHILE_UPDATING_REQUEST, error);
-      next(error);
+      logger.error(ERROR_WHILE_ACKNOWLEDGING_REQUEST, error);
+      return res.boom.badImplementation(ERROR_WHILE_ACKNOWLEDGING_REQUEST);
   }
 };
