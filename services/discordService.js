@@ -73,19 +73,17 @@ const addRoleToUser = async (userid, roleid) => {
 const updateDiscordGroupRole = async (roleId, roleName, description, dev) => {
   const authToken = generateAuthTokenForCloudflare();
   try {
-    const response = await (
-      fetch(`${DISCORD_BASE_URL}/roles/${roleId}?dev=${dev}`, {
-        method: "PATCH",
-        body: JSON.stringify({
-          roleName,
-          description,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
-      })
-    )
+    const response = await fetch(`${DISCORD_BASE_URL}/roles/${roleId}?dev=${dev}`, {
+      method: "PATCH",
+      body: JSON.stringify({
+        roleName,
+        description,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${authToken}`,
+      },
+    });
     if (response.status === 204) {
       return {
         success: true,
