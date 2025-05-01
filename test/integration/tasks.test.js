@@ -1813,39 +1813,45 @@ describe("Tasks", function () {
   });
 
   describe("GET /tasks/users", function () {
-    let activeUserWithProgressUpdates;
+    let activeUserWithMissedProgressUpdates;
     let idleUser;
     let userNotInDiscord;
     let jwtToken;
     let getDiscordMembersStub;
+    let oooUserWithMissedUpdates;
+    let activeUserWithProgressUpdates;
 
     beforeEach(async function () {
       await cleanDb();
       idleUser = { ...userData[9], discordId: getDiscordMembers[0].user.id };
-      activeUserWithProgressUpdates = { ...userData[10], discordId: getDiscordMembers[1].user.id };
-      const activeUserWithNoUpdates = { ...userData[0], discordId: getDiscordMembers[2].user.id };
+      activeUserWithMissedProgressUpdates = { ...userData[10], discordId: getDiscordMembers[1].user.id };
+      activeUserWithProgressUpdates = { ...userData[0], discordId: getDiscordMembers[2].user.id };
       userNotInDiscord = { ...userData[4], discordId: "Not in discord" };
+      oooUserWithMissedUpdates = { ...userData[1], discordId: getDiscordMembers[3].user.id };
+
       const {
         idleStatus: idleUserStatus,
         activeStatus: activeUserStatus,
         userStatusDataForOooState: oooUserStatus,
       } = userStatusData;
       const userIdList = await Promise.all([
-        await addUser(idleUser), // idle user with no task progress updates
-        await addUser(activeUserWithProgressUpdates), // active user with task progress updates
-        await addUser(activeUserWithNoUpdates), // active user with no task progress updates
-        await addUser(userNotInDiscord), // OOO user with
+        await addUser(idleUser),
+        await addUser(activeUserWithMissedProgressUpdates),
+        await addUser(activeUserWithProgressUpdates),
+        await addUser(userNotInDiscord),
+        await addUser(oooUserWithMissedUpdates),
       ]);
       await Promise.all([
         await userStatusModel.updateUserStatus(userIdList[0], idleUserStatus),
         await userStatusModel.updateUserStatus(userIdList[1], activeUserStatus),
         await userStatusModel.updateUserStatus(userIdList[2], activeUserStatus),
         await userStatusModel.updateUserStatus(userIdList[3], oooUserStatus),
+        await userStatusModel.updateUserStatus(userIdList[4], oooUserStatus),
       ]);
 
       const tasksPromise = [];
 
-      for (let index = 0; index < 4; index++) {
+      for (let index = 0; index < 5; index++) {
         const task = tasksData[index];
         const validTask = {
           ...task,
@@ -1893,11 +1899,11 @@ describe("Tasks", function () {
       expect(response.body.message).to.equal(
         "Discord details of users with status missed updates fetched successfully"
       );
-      expect(response.body.data.tasks).to.equal(4);
-      expect(response.body.data.missedUpdatesTasks).to.equal(3);
-      expect(response.body.data.usersToAddRole.includes(activeUserWithProgressUpdates.discordId)).to.equal(true);
+      expect(response.body.data.tasks).to.equal(5);
+      expect(response.body.data.missedUpdatesTasks).to.equal(4);
+      expect(response.body.data.usersToAddRole.includes(activeUserWithMissedProgressUpdates.discordId)).to.equal(true);
       expect(response.body.data.usersToAddRole.includes(idleUser.discordId)).to.equal(true);
-      expect(response.body.data.usersToAddRole.includes(userNotInDiscord.discordId)).to.equal(false);
+      expect(response.body.data.usersToAddRole.includes(oooUserWithMissedUpdates.discordId)).to.equal(false);
       expect(response.status).to.be.equal(200);
     });
 
@@ -1906,7 +1912,7 @@ describe("Tasks", function () {
         .request(app)
         .get("/tasks/users/discord")
         .query({
-          size: 5,
+          size: 6,
           q: `status:${tasksUsersStatus.MISSED_UPDATES} -weekday:sun -weekday:mon -weekday:tue -weekday:wed -weekday:thu -weekday:fri -date:231423432 -days-count:4`,
         })
         .set("Authorization", `Bearer ${jwtToken}`);
@@ -1914,7 +1920,7 @@ describe("Tasks", function () {
         message: "Discord details of users with status missed updates fetched successfully",
         data: {
           usersToAddRole: [],
-          tasks: 4,
+          tasks: 5,
           missedUpdatesTasks: 0,
         },
       });
