@@ -1,6 +1,5 @@
 import chai from "chai";
 const { expect } = chai;
-import sinon from "sinon";
 import chaiHttp from "chai-http";
 import _ from "lodash";
 import config from "config";
@@ -30,7 +29,8 @@ import {
   REQUEST_ALREADY_PENDING,
   REQUEST_REJECTED_SUCCESSFULLY,
   REQUEST_ALREADY_REJECTED,
-  // UNAUTHORIZED_TO_ACKNOWLEDGE_OOO_REQUEST,
+  INVALID_REQUEST_TYPE,
+  UNAUTHORIZED_TO_ACKNOWLEDGE_OOO_REQUEST,
   // UNAUTHORIZED_TO_CREATE_OOO_REQUEST,
   // USER_STATUS_NOT_FOUND,
   // OOO_STATUS_ALREADY_EXIST,
@@ -40,6 +40,7 @@ import { validTaskAssignmentRequest, validTaskCreqtionRequest } from "../fixture
 import { deleteUserStatus, updateUserStatus } from "../../models/userStatus";
 import * as requestsQuery from "../../models/requests";
 import { userState } from "../../constants/userStatus";
+import * as logUtils from "../../services/logService";
 
 const userData = userDataFixture();
 chai.use(chaiHttp);
@@ -55,7 +56,7 @@ let testUserId: string;
 let testSuperUserId: string;
 let testArchivedUserId: string;
 
-describe("/requests OOO", function () {
+describe.only("/requests OOO", function () {
 
   const requestsEndpoint: string = "/requests?dev=true";
 
@@ -322,7 +323,7 @@ describe("/requests OOO", function () {
     });
   });
 
-  describe.skip("PATCH /requests/:id", function () {
+  describe("PATCH /requests/:id", function () {
     let pendingOooRequestId1: string;
     let oooRequestData3: any;
     let invalidRequestId: string;
@@ -330,7 +331,7 @@ describe("/requests OOO", function () {
     let rejectedOooRequestId: string;
 
     beforeEach(async function () {
-      oooRequestData3 = { ...createOooRequests3, requestedBy: testUserId };
+      oooRequestData3 = { ...createOooRequests3, userId: testUserId };
 
       const { id: pendingOooId1 }: any = await createRequest(oooRequestData3);
       pendingOooRequestId1 = pendingOooId1;
@@ -394,7 +395,7 @@ describe("/requests OOO", function () {
         });
     });
 
-    it("should return 401 if user does not have super user permission", function (done) {
+    it("should return 403 if user does not have super user permission", function (done) {
       chai
         .request(app)
         .patch(`/requests/${pendingOooRequestId1}?dev=true`)
@@ -404,13 +405,13 @@ describe("/requests OOO", function () {
           if (err) {
             return done(err);
           }
-          expect(res.statusCode).to.equal(401);
-          // expect(res.body.message).to.equal(UNAUTHORIZED_TO_ACKNOWLEDGE_OOO_REQUEST);
+          expect(res.statusCode).to.equal(403);
+          expect(res.body.message).to.equal(UNAUTHORIZED_TO_ACKNOWLEDGE_OOO_REQUEST);
           done();
         });
     });
 
-    it("should return 400 if OOO request is already approved", function (done) {
+    it("should return 409 if OOO request is already approved", function (done) {
       chai
         .request(app)
         .patch(`/requests/${approvedOooRequestId}?dev=true`)
@@ -420,13 +421,13 @@ describe("/requests OOO", function () {
           if (err) {
             return done(err);
           }
-          expect(res.statusCode).to.equal(400);
+          expect(res.statusCode).to.equal(409);
           expect(res.body.message).to.equal(REQUEST_ALREADY_APPROVED);
           done();
         });
     });
 
-    it("should return 400 if OOO request is already rejected", function (done) {
+    it("should return 409 if OOO request is already rejected", function (done) {
       chai
         .request(app)
         .patch(`/requests/${rejectedOooRequestId}?dev=true`)
@@ -436,7 +437,7 @@ describe("/requests OOO", function () {
           if (err) {
             return done(err);
           }
-          expect(res.statusCode).to.equal(400);
+          expect(res.statusCode).to.equal(409);
           expect(res.body.message).to.equal(REQUEST_ALREADY_REJECTED);
           done();
         });

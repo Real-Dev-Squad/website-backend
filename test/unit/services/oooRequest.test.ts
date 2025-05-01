@@ -8,10 +8,15 @@ import {
     REQUEST_ALREADY_REJECTED,
     REQUEST_APPROVED_SUCCESSFULLY,
     REQUEST_DOES_NOT_EXIST,
+    REQUEST_REJECTED_SUCCESSFULLY,
     REQUEST_STATE,
     REQUEST_TYPE
 } from "../../../constants/requests";
-// import { createOOORequest, validateUserStatus, acknowledgeOOORequest, validateOOOAcknowledgeRequest } from "../../../services/oooRequest";
+import { 
+    // createOOORequest, 
+    // validateUserStatus, 
+    acknowledgeOOORequest, 
+    validateOOOAcknowledgeRequest } from "../../../services/oooRequest";
 import { expect } from "chai";
 // import { testUserStatus, validOooStatusRequests, validUserCurrentStatus, createdOOORequest } from "../../fixtures/oooRequest/oooRequest";
 import { updateUserStatus } from "../../../models/userStatus";
@@ -19,12 +24,10 @@ import { userState } from "../../../constants/userStatus";
 import addUser from "../../utils/addUser";
 import userDataFixture from "../../fixtures/user/user";
 import * as logService from "../../../services/logService";
-import firestore from "../../../utils/firestore";
-import { convertDaysToMilliseconds } from "../../../utils/time";
-import { acknowledgeOooRequest } from "../../fixtures/oooRequest/oooRequest";
-const requestModel = firestore.collection("requests");
+import { acknowledgeOooRequest, createOooRequests3 } from "../../fixtures/oooRequest/oooRequest";
+import { createRequest } from "../../../models/requests";
 
-describe.skip("Test OOO Request Service", function() {
+describe("Test OOO Request Service", function() {
 
     let testUserName: string;
     let testUserId: string;
@@ -106,139 +109,121 @@ describe.skip("Test OOO Request Service", function() {
             }
         });
     });
-    
+
     describe("validateOOOAcknowledgeRequest", function() {
 
-        const testRequestId = "11111";
-        let testRequestData;
+        let testOooRequest;
 
         beforeEach(async function () {
-            testRequestData = {
-                requestId: testRequestId,
-                requestType: REQUEST_TYPE.OOO,
-                requestStatus: REQUEST_STATE.PENDING,
-            }
+            testOooRequest = await createRequest({
+                ...createOooRequests3,
+                userId: testUserId,
+                comment: null,
+                lastModifiedBy: null,
+            });
         });
 
         it("should return INVALID_REQUEST_TYPE if request type is not OOO", async function() {
-            testRequestData = {...testRequestData, requestType: "ONBOARDING"};
-            try {
-                // await validateOOOAcknowledgeRequest(
-                //     testRequestData.requestId,
-                //     testRequestData.requestType,
-                //     testRequestData.requestStatus
-                // );
-            } catch (error) {
-                expect(error).to.be.an.instanceOf(Error);
-                expect(error.statusCode).to.equal(400);
-                expect(error.message).to.equal(INVALID_REQUEST_TYPE);
-            }
+            const validationResponse = await validateOOOAcknowledgeRequest(
+                testOooRequest.id,
+                REQUEST_TYPE.ONBOARDING,
+                testOooRequest.status
+            );
+            expect(validationResponse.error).to.be.not.undefined;
+            expect(validationResponse.error).to.equal(INVALID_REQUEST_TYPE);
         });
 
         it("should return REQUEST_ALREADY_APPROVED if request is already approved", async function() {
-            testRequestData = {...testRequestData, requestStatus: REQUEST_STATE.APPROVED};
-            try {
-                // await validateOOOAcknowledgeRequest(
-                //     testRequestData.requestId,
-                //     testRequestData.requestType,
-                //     testRequestData.requestStatus
-                // );
-            } catch (error) {
-                expect(error).to.be.an.instanceOf(Error);
-                expect(error.statusCode).to.equal(400);
-                expect(error.message).to.equal(REQUEST_ALREADY_APPROVED);
-            }
+            const validationResponse = await validateOOOAcknowledgeRequest(
+                testOooRequest.id,
+                testOooRequest.type,
+                REQUEST_STATE.APPROVED
+            );
+            expect(validationResponse.error).to.be.not.undefined;
+            expect(validationResponse.error).to.equal(REQUEST_ALREADY_APPROVED);
         });
 
         it("should return REQUEST_ALREADY_REJECTED if request is already rejected", async function() {
-            testRequestData = {...testRequestData, requestStatus: REQUEST_STATE.REJECTED};
-            try {
-                // await validateOOOAcknowledgeRequest(
-                //     testRequestData.requestId,
-                //     testRequestData.requestType,
-                //     testRequestData.requestStatus
-                // );
-            } catch (error) {
-                expect(error).to.be.an.instanceOf(Error);
-                expect(error.statusCode).to.equal(400);
-                expect(error.message).to.equal(REQUEST_ALREADY_REJECTED);
-            }
+            const validationResponse = await validateOOOAcknowledgeRequest(
+                testOooRequest.id,
+                testOooRequest.type,
+                REQUEST_STATE.REJECTED
+            );
+            expect(validationResponse.error).to.be.not.undefined;
+            expect(validationResponse.error).to.equal(REQUEST_ALREADY_REJECTED);
         });
 
         it("should return undefined when all validation checks passes", async function() {
-            // const response = await validateOOOAcknowledgeRequest(
-            //     testRequestData.requestId,
-            //     testRequestData.requestType,
-            //     testRequestData.requestStatus,
-            // );
-            // expect(response).to.not.exist;
-        });
-
-        it("should throw error", async function() {
-            sinon.stub(logService, "addLog").throws(new Error(errorMessage));
-            const validateSpy = sinon.spy(require("../../../services/oooRequest"), "validateOOOAcknowledgeRequest");
-
-            try {
-                // await validateOOOAcknowledgeRequest(
-                //     testRequestData.requestId,
-                //     testRequestData.requestType,
-                //     testRequestData.requestStatus
-                // );
-            } catch (error) {
-                expect(error.message).to.equal(errorMessage);
-                expect(validateSpy.calledOnce).to.be.true;
-            }
+            const response = await validateOOOAcknowledgeRequest(
+                testOooRequest.id,
+                testOooRequest.type,
+                testOooRequest.status
+            );
+            expect(response).to.not.exist;
         });
     });
 
     describe("acknowledgeOOORequest", function() {
 
-        let validOOORequest;
-        let testUserId;
         let testSuperUserId;
+        let testOooRequest;
 
         beforeEach(async function () {
-            const userData = userDataFixture();
-            const userIdPromises = [addUser(userData[16]), addUser(userData[4])];
-            const [userId, superUserId] = await Promise.all(userIdPromises);
-            testUserId = userId;
+            const users = userDataFixture();
+            const superUserId = await addUser(users[4]);
             testSuperUserId = superUserId;
 
-            validOOORequest = await requestModel.add({
-                from: Date.now(),
-                until: Date.now() + convertDaysToMilliseconds(1),
-                type: REQUEST_TYPE.OOO,
-                reason: "Out of office for personal emergency.",
-                status: REQUEST_STATE.PENDING,
-                requestedBy: "test-username-1",
+            testOooRequest = await createRequest({
+                ...createOooRequests3,
                 userId: testUserId,
                 comment: null,
-                lastModifiedBy: null
+                lastModifiedBy: null,
             });
         });
 
         it("should return REQUEST_DOES_NOT_EXIST if invalid request id is passed", async function () {
-            try {
-                // await acknowledgeOOORequest(
-                //     "11111111111111111111",
-                //     acknowledgeOooRequest,
-                //     testSuperUserId
-                // );
-            } catch (error) {
-                expect(error.statusCode).to.equal(404);
-                expect(error.message).to.equal(REQUEST_DOES_NOT_EXIST);
-            }
+            const invalidOOORequestId = "11111111111111111111";
+            const response = await acknowledgeOOORequest(
+                invalidOOORequestId,
+                acknowledgeOooRequest,
+                testSuperUserId
+            );
+            expect(response.error).to.equal(REQUEST_DOES_NOT_EXIST);
         });
 
-        it("should acknowledge OOO request", async function() {
-            // const response = await acknowledgeOOORequest(
-            //     validOOORequest.id,
-            //     acknowledgeOooRequest,
-            //     testSuperUserId
-            // );
-            // expect(response.message).to.equal(REQUEST_APPROVED_SUCCESSFULLY);
-            // expect(response.data.comment).to.equal(acknowledgeOooRequest.comment);
-            // expect(response.data.status).to.equal(acknowledgeOooRequest.status);
+        it("should approve OOO request", async function() {
+            const response = await acknowledgeOOORequest(
+                testOooRequest.id,
+                acknowledgeOooRequest,
+                testSuperUserId
+            );
+            expect(response).to.deep.include({
+                message: REQUEST_APPROVED_SUCCESSFULLY,
+                data: {
+                    ...acknowledgeOooRequest,
+                    id: testOooRequest.id,
+                    lastModifiedBy: testSuperUserId,
+                    updatedAt: response.data.updatedAt
+                }
+            });
+        });
+
+        it("should reject OOO request", async function() {
+            const response = await acknowledgeOOORequest(
+                testOooRequest.id,
+                { ...acknowledgeOooRequest, status: REQUEST_STATE.REJECTED },
+                testSuperUserId
+            );
+            expect(response).to.deep.include({
+                message: REQUEST_REJECTED_SUCCESSFULLY,
+                data: {
+                    ...acknowledgeOooRequest,
+                    id: testOooRequest.id,
+                    status: REQUEST_STATE.REJECTED,
+                    lastModifiedBy: testSuperUserId,
+                    updatedAt: response.data.updatedAt
+                }
+            });
         });
 
         it("should throw error", async function() {
@@ -246,15 +231,15 @@ describe.skip("Test OOO Request Service", function() {
             const createSpy = sinon.spy(require("../../../services/oooRequest"), "acknowledgeOOORequest");
 
             try {
-                // await acknowledgeOOORequest(
-                //     validOOORequest.id,
-                //     acknowledgeOooRequest,
-                //     testSuperUserId
-                // );
+                await acknowledgeOOORequest(
+                    testOooRequest.id,
+                    acknowledgeOooRequest,
+                    testSuperUserId
+                );
             } catch (error) {
                 expect(error.message).to.equal(errorMessage);
                 expect(createSpy.calledOnce).to.be.true;
             }
-         });
+        });
     });
 });
