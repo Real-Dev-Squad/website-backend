@@ -94,6 +94,9 @@ module.exports = {
 
   botToken: {
     botPublicKey: "BOT_PUBLIC_KEY",
+  },
+
+  discordServiceToken: {
     discordServicePublicKey: "DISCORD_SERVICE_PUBLIC_KEY",
   },
 
