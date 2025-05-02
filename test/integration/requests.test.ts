@@ -324,36 +324,34 @@ describe("/requests OOO", function () {
   });
 
   describe.skip("PATCH /requests/:id", function () {
-    let pendingOooRequestId1: string;
-    let oooRequestData3: any;
-    let invalidRequestId: string;
-    let approvedOooRequestId: string;
-    let rejectedOooRequestId: string;
+    let testOooRequest;
+    let onboardingRequest;
+    let approvedOooRequest;
+    let rejectedOooRequest;
 
     beforeEach(async function () {
-      oooRequestData3 = { ...createOooRequests3, userId: testUserId };
 
-      const { id: pendingOooId1 }: any = await createRequest(oooRequestData3);
-      pendingOooRequestId1 = pendingOooId1;
+      oooRequestData = { ...createOooRequests3, userId: testUserId };
+      testOooRequest = await createRequest(oooRequestData);
 
-      const { id: pendingOooId2 }: any = await createRequest(oooRequestData3);
+      onboardingRequest = await createRequest({
+        type: REQUEST_TYPE.ONBOARDING,
+        numberOfDays: 5,
+        reason: "This is the reason",
+        userId: testUserId,
+      });
 
-      const { id: pendingOooId3 }: any = await createRequest(oooRequestData3);
+      const pendingOooRequest1 = await createRequest(oooRequestData);
+      approvedOooRequest = await updateRequest(pendingOooRequest1.id, { status: REQUEST_STATE.APPROVED }, testSuperUserId, REQUEST_TYPE.OOO);
 
-      const { id: invalidId }: any = await createRequest({...oooRequestData3, type: "XYZ"});
-      invalidRequestId = invalidId;
-
-      const { id: approvedOooId }: any = await updateRequest(pendingOooId2, { status: REQUEST_STATE.APPROVED }, testSuperUserId, REQUEST_TYPE.OOO);
-      approvedOooRequestId = approvedOooId;
-
-      const { id: rejectedOooId }: any = await updateRequest(pendingOooId3, { status: REQUEST_STATE.REJECTED }, testSuperUserId, REQUEST_TYPE.OOO);
-      rejectedOooRequestId = rejectedOooId;
+      const pendingOooRequest2 = await createRequest(oooRequestData);
+      rejectedOooRequest = await updateRequest(pendingOooRequest2.id, { status: REQUEST_STATE.REJECTED }, testSuperUserId, REQUEST_TYPE.OOO);
     });
 
     it("should return 401 if user is not logged in", function (done) {
       chai
         .request(app)
-        .patch(`/requests/${pendingOooRequestId1}?dev=true`)
+        .patch(`/requests/${testOooRequest.id}?dev=true`)
         .send(acknowledgeOooRequest)
         .end(function (err, res) {
           expect(res).to.have.status(401);
@@ -366,7 +364,7 @@ describe("/requests OOO", function () {
     it("should return 501 and 'Feature not implemented' message when dev is false", function (done) {
       chai
         .request(app)
-        .patch(`/requests/${pendingOooRequestId1}?dev=false`)
+        .patch(`/requests/${testOooRequest.id}?dev=false`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(acknowledgeOooRequest)
         .end(function (err, res) {
@@ -382,7 +380,7 @@ describe("/requests OOO", function () {
     it("should return 404 if request does not exist", function (done) {
       chai
         .request(app)
-        .patch(`/requests/111111?dev=true`)
+        .patch(`/requests/11111111111111?dev=true`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(acknowledgeOooRequest)
         .end(function (err, res) {
@@ -398,7 +396,7 @@ describe("/requests OOO", function () {
     it("should return 403 if user does not have super user permission", function (done) {
       chai
         .request(app)
-        .patch(`/requests/${pendingOooRequestId1}?dev=true`)
+        .patch(`/requests/${testOooRequest.id}?dev=true`)
         .set("cookie", `${cookieName}=${authToken}`)
         .send(acknowledgeOooRequest)
         .end(function (err, res) {
@@ -414,7 +412,7 @@ describe("/requests OOO", function () {
     it("should return 409 if OOO request is already approved", function (done) {
       chai
         .request(app)
-        .patch(`/requests/${approvedOooRequestId}?dev=true`)
+        .patch(`/requests/${approvedOooRequest.id}?dev=true`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(acknowledgeOooRequest)
         .end(function (err, res) {
@@ -430,7 +428,7 @@ describe("/requests OOO", function () {
     it("should return 409 if OOO request is already rejected", function (done) {
       chai
         .request(app)
-        .patch(`/requests/${rejectedOooRequestId}?dev=true`)
+        .patch(`/requests/${rejectedOooRequest.id}?dev=true`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(acknowledgeOooRequest)
         .end(function (err, res) {
@@ -443,10 +441,10 @@ describe("/requests OOO", function () {
         });
     });
 
-    it("should return 400 if request type is not OOO", function (done) {
+    it("should return 400 when the request type for the given ID is not 'OOO'", function (done) {
       chai
         .request(app)
-        .patch(`/requests/${invalidRequestId}?dev=true`)
+        .patch(`/requests/${onboardingRequest.id}?dev=true`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(acknowledgeOooRequest)
         .end(function (err, res) {
@@ -462,7 +460,7 @@ describe("/requests OOO", function () {
     it("should approve OOO request when dev is true", function (done) {
       chai
         .request(app)
-        .patch(`/requests/${pendingOooRequestId1}?dev=true`)
+        .patch(`/requests/${testOooRequest.id}?dev=true`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(acknowledgeOooRequest)
         .end(function (err, res) {
@@ -478,7 +476,7 @@ describe("/requests OOO", function () {
     it("should reject OOO request when dev is true", function (done) {
       chai
         .request(app)
-        .patch(`/requests/${pendingOooRequestId1}?dev=true`)
+        .patch(`/requests/${testOooRequest.id}?dev=true`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send({...acknowledgeOooRequest, status: REQUEST_STATE.REJECTED})
         .end(function (err, res) {
@@ -495,7 +493,7 @@ describe("/requests OOO", function () {
       sinon.stub(logUtils, "addLog").throws("Error");
       chai
         .request(app)
-        .patch(`/requests/${pendingOooRequestId1}?dev=true`)
+        .patch(`/requests/${testOooRequest.id}?dev=true`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(acknowledgeOooRequest)
         .end(function (err, res) {
