@@ -4,8 +4,10 @@ const { expect } = chai;
 
 import {
   createOooStatusRequestValidator,
+  // acknowledgeOOORequestsValidator,
 } from "./../../../middlewares/validators/oooRequests";
-import { validOooStatusRequests } from "../../fixtures/oooRequest/oooRequest";
+import { acknowledgeOooRequest, validOooStatusRequests, validOooStatusUpdate } from "../../fixtures/oooRequest/oooRequest";
+import _ from "lodash";
 
 describe("OOO Status Request Validators", function () {
   let req: any;
@@ -86,6 +88,44 @@ describe("OOO Status Request Validators", function () {
         expect(error).to.be.an.instanceOf(Error);
         expect(error.details[0].message).to.equal("until date must be greater than or equal to from date");
       }
+    });
+  });
+
+  describe.skip("acknowledgeOOORequestsValidator", function () {
+    it("should not validate for an invalid request for invalid request type", async function () {
+      req = {
+        body: { ...acknowledgeOooRequest, type: "XYZ"}
+      };
+
+      // await acknowledgeOOORequestsValidator(req, res, nextSpy);
+      expect(nextSpy.notCalled).to.be.true;
+    });
+
+    it("should not validate for an invalid request if status is incorrect", async function () {
+      req = {
+        body: { ...acknowledgeOooRequest, status: "PENDING"}
+      };
+
+      // await acknowledgeOOORequestsValidator(req, res, nextSpy);
+      expect(nextSpy.notCalled).to.be.true;
+    });
+
+    it("should validate for a valid acknowledge OOO request if comment not provided by superusers", async function() {
+      req = {
+        body: _.omit(acknowledgeOooRequest, "comment")
+      };
+      res = {};
+      // await acknowledgeOOORequestsValidator(req, res, nextSpy);
+      expect(nextSpy.calledOnce).to.be.true;
+    });
+
+    it("should validate for a valid acknowledge OOO request", async function() {
+      req = {
+        body: acknowledgeOooRequest
+      };
+      res = {};
+      // await acknowledgeOOORequestsValidator(req, res, nextSpy);
+      expect(nextSpy.calledOnce).to.be.true;
     });
   });
 });
