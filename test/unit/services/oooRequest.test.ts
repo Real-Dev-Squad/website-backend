@@ -1,8 +1,6 @@
 import sinon from "sinon";
 import cleanDb from "../../utils/cleanDb";
 import {
-    // OOO_STATUS_ALREADY_EXIST,
-    // USER_STATUS_NOT_FOUND,
     INVALID_REQUEST_TYPE,
     REQUEST_ALREADY_APPROVED,
     REQUEST_ALREADY_REJECTED,
@@ -10,7 +8,9 @@ import {
     REQUEST_DOES_NOT_EXIST,
     REQUEST_REJECTED_SUCCESSFULLY,
     REQUEST_STATE,
-    REQUEST_TYPE
+    REQUEST_TYPE,
+    OOO_STATUS_ALREADY_EXIST,
+    USER_STATUS_NOT_FOUND,
 } from "../../../constants/requests";
 // import { 
     // createOOORequest, 
@@ -18,8 +18,9 @@ import {
     // acknowledgeOOORequest, 
     // validateOOOAcknowledgeRequest 
 // } from "../../../services/oooRequest";
+import { createOooRequest, validateUserStatus } from "../../../services/oooRequest";
 import { expect } from "chai";
-// import { testUserStatus, validOooStatusRequests, validUserCurrentStatus, createdOOORequest } from "../../fixtures/oooRequest/oooRequest";
+import { testUserStatus, validOooStatusRequests, validUserCurrentStatus, createdOOORequest } from "../../fixtures/oooRequest/oooRequest";
 import { updateUserStatus } from "../../../models/userStatus";
 import { userState } from "../../../constants/userStatus";
 import addUser from "../../utils/addUser";
@@ -48,42 +49,42 @@ describe("Test OOO Request Service", function() {
     describe("validateUserStatus", function() {
 
         it("should return USER_STATUS_NOT_FOUND if user status not found", async function() {
-            // const validationResponse = await validateUserStatus(
-            //     testUserId,
-            //     { ...testUserStatus, userStatusExists: false }
-            // );
-            // expect(validationResponse).to.be.not.undefined;
-            // expect(validationResponse.error).to.equal(USER_STATUS_NOT_FOUND);
+            const validationResponse = await validateUserStatus(
+                testUserId,
+                { ...testUserStatus, userStatusExists: false }
+            );
+            expect(validationResponse).to.be.not.undefined;
+            expect(validationResponse.error).to.equal(USER_STATUS_NOT_FOUND);
         });
 
         it("should return OOO_STATUS_ALREADY_EXIST if user status is already OOO", async function() {
-            // const validationResponse = await validateUserStatus(
-            //     testUserId,
-            //     {
-            //         ...testUserStatus,
-            //         data: {
-            //             ...testUserStatus.data,
-            //             currentStatus: {
-            //                 ...testUserStatus.data.currentStatus,
-            //                 state: userState.OOO
-            //             }
-            //         }
-            //     }
-            // );
-            // expect(validationResponse).to.be.not.undefined;
-            // expect(validationResponse.error).to.equal(OOO_STATUS_ALREADY_EXIST);
+            const validationResponse = await validateUserStatus(
+                testUserId,
+                {
+                    ...testUserStatus,
+                    data: {
+                        ...testUserStatus.data,
+                        currentStatus: {
+                            ...testUserStatus.data.currentStatus,
+                            state: userState.OOO
+                        }
+                    }
+                }
+            );
+            expect(validationResponse).to.be.not.undefined;
+            expect(validationResponse.error).to.equal(OOO_STATUS_ALREADY_EXIST);
         });
 
         it("should return undefined when all validation checks passes", async function() {
-            // const response = await validateUserStatus(testUserId, testUserStatus);
-            // expect(response).to.not.exist;
+            const response = await validateUserStatus(testUserId, testUserStatus);
+            expect(response).to.not.exist;
         });
     });
 
-    describe("createOOORequest", function() {
+    describe("createOooRequest", function() {
 
         beforeEach(async function() {
-            // await updateUserStatus(testUserId, testUserStatus.data);
+            await updateUserStatus(testUserId, testUserStatus.data);
         });
 
         afterEach(async function () {
@@ -91,20 +92,20 @@ describe("Test OOO Request Service", function() {
         });
 
         it("should create OOO request", async function() {
-            // const response = await createOOORequest(validOooStatusRequests, testUserName, testUserId);
-            // expect(response).to.deep.include({
-            //     ...createdOOORequest,
-            //     id: response.id,
-            //     requestedBy:testUserName,
-            //     userId: testUserId
-            // });
+            const response = await createOooRequest(validOooStatusRequests, testUserName, testUserId);
+            expect(response).to.deep.include({
+                ...createdOOORequest,
+                id: response.id,
+                requestedBy:testUserName,
+                userId: testUserId
+            });
         });
 
         it("should throw error", async function () {
             sinon.stub(logService, "addLog").throws(new Error(errorMessage));
 
             try {
-                // await createOOORequest(validOooStatusRequests, testUserName, testUserId);
+                await createOooRequest(validOooStatusRequests, testUserName, testUserId);
             } catch (error) {
                 expect(error.message).to.equal(errorMessage);
             }

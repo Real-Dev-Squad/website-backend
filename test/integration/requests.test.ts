@@ -31,9 +31,9 @@ import {
   REQUEST_ALREADY_REJECTED,
   INVALID_REQUEST_TYPE,
   // UNAUTHORIZED_TO_ACKNOWLEDGE_OOO_REQUEST,
-  // UNAUTHORIZED_TO_CREATE_OOO_REQUEST,
-  // USER_STATUS_NOT_FOUND,
-  // OOO_STATUS_ALREADY_EXIST,
+  UNAUTHORIZED_TO_CREATE_OOO_REQUEST,
+  USER_STATUS_NOT_FOUND,
+  OOO_STATUS_ALREADY_EXIST,
 } from "../../constants/requests";
 import { updateTask } from "../../models/tasks";
 import { validTaskAssignmentRequest, validTaskCreqtionRequest } from "../fixtures/taskRequests/taskRequests";
@@ -113,7 +113,7 @@ describe("/requests OOO", function () {
       await cleanDb();
     });
 
-    it.skip("should return 501 and 'Feature not implemented' message when dev is false", function (done) {
+    it("should return 501 and 'Feature not implemented' message when dev is false", function (done) {
       chai
         .request(app)
         .post("/requests?dev=false")
@@ -142,7 +142,7 @@ describe("/requests OOO", function () {
         });
     });
 
-    it.skip("should return 403 if user is not part of discord", function (done) {
+    it("should return 403 if user is not part of discord", function (done) {
       const authTokenForArchivedUserId = authService.generateAuthToken(
         { userId: testArchivedUserId }
       );
@@ -154,7 +154,7 @@ describe("/requests OOO", function () {
         .end(function (err, res) {
           expect(res).to.have.status(403);
           expect(res.body.error).to.equal("Forbidden");
-          // expect(res.body.message).to.equal(UNAUTHORIZED_TO_CREATE_OOO_REQUEST);
+          expect(res.body.message).to.equal(UNAUTHORIZED_TO_CREATE_OOO_REQUEST);
           done();
         });
     });
@@ -174,7 +174,7 @@ describe("/requests OOO", function () {
         });
     });
 
-    it.skip("should create a new request when dev is true", function (done) {
+    it("should create a new request when dev is true", function (done) {
       chai
         .request(app)
         .post(requestsEndpoint)
@@ -193,7 +193,7 @@ describe("/requests OOO", function () {
             status: REQUEST_STATE.PENDING
           }).then((request) => {
             expect(request).to.not.be.null;
-            // expect(request.reason).to.equal(validOooStatusRequests.reason);
+            expect(request.reason).to.equal(validOooStatusRequests.reason);
             done();
           }).catch(done);
         });
@@ -244,17 +244,17 @@ describe("/requests OOO", function () {
         });
     });
 
-    it("should return 400 when message field is missing in request body", function (done) {
+    it("should return 400 when reason field is missing in request body", function (done) {
       chai
         .request(app)
         .post(requestsEndpoint)
         .set("cookie", `${cookieName}=${authToken}`)
-        .send(_.omit(validOooStatusRequests, "message"))
+        .send(_.omit(validOooStatusRequests, "reason"))
         .end(function (err, res) {
           if (err) return done(err);
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal("message is required");
+          expect(res.body.message).to.equal("reason is required");
           done();
         });
     });
@@ -274,7 +274,7 @@ describe("/requests OOO", function () {
         });
     });
 
-    it.skip("should return 404 with error when user status not found", async function () {
+    it("should return 404 with error when user status not found", async function () {
       await deleteUserStatus(testUserId);
       const response = await chai
         .request(app)
@@ -284,10 +284,10 @@ describe("/requests OOO", function () {
 
       expect(response).to.have.status(404);
       expect(response.body).to.have.property("message");
-      // expect(response.body.message).to.equal(USER_STATUS_NOT_FOUND);
+      expect(response.body.message).to.equal(USER_STATUS_NOT_FOUND);
     });
 
-    it.skip("should return 403 with error when user status is already OOO", async function () {
+    it("should return 403 with error when user status is already OOO", async function () {
       const testOOOUserStatus = {
         currentStatus: {
           state: userState.OOO
@@ -302,10 +302,10 @@ describe("/requests OOO", function () {
 
       expect(response).to.have.status(403);
       expect(response.body).to.have.property("message");
-      // expect(response.body.message).to.equal(OOO_STATUS_ALREADY_EXIST);
+      expect(response.body.message).to.equal(OOO_STATUS_ALREADY_EXIST);
     });
 
-    it.skip("should return 409 with error when user already have pending OOO request", async function () {
+    it("should return 409 with error when user already have pending OOO request", async function () {
       await chai
         .request(app)
         .post(requestsEndpoint)

@@ -1,5 +1,5 @@
 import { REQUEST_STATE, REQUEST_TYPE } from "../../../constants/requests";
-// import { UserStatus } from "../../../types/userStatus";
+import { UserStatus } from "../../../types/userStatus";
 
 export const createOooStatusRequests = {
   type: "OOO",
@@ -16,22 +16,21 @@ export const validOooStatusRequests = {
   type: "OOO",
   from: Date.now() + 1 * 24 * 60 * 60 * 1000,
   until: Date.now() + 5 * 24 * 60 * 60 * 1000,
-  message: "Out of office for personal reasons.",
-  state: REQUEST_STATE.PENDING,
+  reason: "Out of office for personal reasons."
 };
 
-// export const createdOOORequest = {
-//   id: "Js7JnT6uRBLjGvSJM5X5",
-//   type: validOooStatusRequests.type,
-//   from: validOooStatusRequests.from,
-//   until: validOooStatusRequests.until,
-//   reason: validOooStatusRequests.reason,
-//   status: "PENDING",
-//   lastModifiedBy: null,
-//   requestedBy: "suraj-maity-1",
-//   userId: "jCqqOYCnm93mcmaYuSsQ",
-//   comment: null
-// };
+export const createdOOORequest = {
+  id: "Js7JnT6uRBLjGvSJM5X5",
+  type: validOooStatusRequests.type,
+  from: validOooStatusRequests.from,
+  until: validOooStatusRequests.until,
+  reason: validOooStatusRequests.reason,
+  status: "PENDING",
+  lastModifiedBy: null,
+  requestedBy: "suraj-maity-1",
+  userId: "jCqqOYCnm93mcmaYuSsQ",
+  comment: null
+};
 
 export const validUserCurrentStatus = {
   from: Date.now(),
@@ -41,13 +40,13 @@ export const validUserCurrentStatus = {
   updatedAt: Date.now(),
 };
 
-// export const testUserStatus: UserStatus = {
-//   id: "wcl0ZLsnngKUNZY9GkCo",
-//   data: {
-//       currentStatus: validUserCurrentStatus
-//   },
-//   userStatusExists: true
-// };
+export const testUserStatus: UserStatus = {
+  id: "wcl0ZLsnngKUNZY9GkCo",
+  data: {
+      currentStatus: validUserCurrentStatus
+  },
+  userStatusExists: true
+};
 
 export const invalidOooStatusRequests = {
   type: "OOO",
