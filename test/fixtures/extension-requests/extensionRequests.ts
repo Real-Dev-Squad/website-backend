@@ -7,5 +7,5 @@ export const extensionCreateObject = {
   newEndsOn: 1709674980000,
   message: "request message",
   type: REQUEST_TYPE.EXTENSION,
-  state: REQUEST_STATUS.PENDING,
+  status: REQUEST_STATUS.PENDING,
 };

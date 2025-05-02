@@ -32,9 +32,9 @@ export const createExtensionRequestValidator = async (
       message: joi.string().required().messages({
         "string.empty": "message cannot be empty",
       }),
-      state: joi.string().valid(REQUEST_STATUS.PENDING).required().messages({
-        "string.empty": "state cannot be empty",
-        "any.required": "state is required",
+      status: joi.string().valid(REQUEST_STATUS.PENDING).required().messages({
+        "string.empty": "status cannot be empty",
+        "any.required": "status is required",
       }),
       type: joi.string().valid(REQUEST_TYPE.EXTENSION).required().messages({
         "string.empty": "type cannot be empty",

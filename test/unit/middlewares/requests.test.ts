@@ -100,7 +100,7 @@ describe("Create Request Validators", function () {
       req = {
         query: {
           type: "RANDOM",
-          state: "RANDOM",
+          status: "RANDOM",
         },
       };
       res = {

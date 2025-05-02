@@ -73,7 +73,7 @@ export const createOnboardingExtensionRequestController = async (
             type: REQUEST_TYPE.ONBOARDING
         });
 
-        if(latestExtensionRequest && latestExtensionRequest.state === REQUEST_STATUS.PENDING){
+        if(latestExtensionRequest && latestExtensionRequest.status === REQUEST_STATUS.PENDING){
             return res.boom.conflict(REQUEST_ALREADY_PENDING);
         }
         
@@ -93,7 +93,7 @@ export const createOnboardingExtensionRequestController = async (
         if(!latestExtensionRequest){
             requestNumber = 1;
             oldEndsOn = discordJoinedDateInMillisecond + millisecondsInThirtyOneDays;
-        }else if(latestExtensionRequest.state === REQUEST_STATUS.REJECTED) {
+        }else if(latestExtensionRequest.status === REQUEST_STATUS.REJECTED) {
             requestNumber = latestExtensionRequest.requestNumber + 1;
             oldEndsOn = latestExtensionRequest.oldEndsOn;
         }else{
@@ -105,7 +105,7 @@ export const createOnboardingExtensionRequestController = async (
         
         const onboardingExtension = await createRequest({
             type: REQUEST_TYPE.ONBOARDING,
-            state: REQUEST_STATUS.PENDING,
+            status: REQUEST_STATUS.PENDING,
             userId: userId,
             requestedBy: username,
             oldEndsOn: oldEndsOn,

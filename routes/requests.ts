@@ -23,5 +23,6 @@ router.get("/", getRequestsMiddleware, getRequestsController);
 router.post("/", skipAuthenticateForOnboardingExtensionRequest(authenticate, verifyDiscordBot), createRequestsMiddleware, createRequestController);
 router.put("/:id",authenticate, authorizeRoles([SUPERUSER]), updateRequestsMiddleware, updateRequestController);
 router.patch("/:id", authenticate, updateRequestValidator, updateRequestBeforeAcknowledgedController);
+// Make a route here -> / router.post("/migrations");
 module.exports = router;
 

@@ -117,7 +117,7 @@ export const updateTaskExtensionRequest = async (req: any, res: any) => {
       return res.boom.badRequest(requestResult.error);
     }
     const [logType, returnMessage] =
-      requestResult.state === REQUEST_STATUS.APPROVED
+      requestResult.status === REQUEST_STATUS.APPROVED
         ? [REQUEST_LOG_TYPE.REQUEST_APPROVED, REQUEST_APPROVED_SUCCESSFULLY]
         : [REQUEST_LOG_TYPE.REQUEST_REJECTED, REQUEST_REJECTED_SUCCESSFULLY];
 

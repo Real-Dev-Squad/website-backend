@@ -60,12 +60,12 @@ export const getRequestsController = async (req: any, res: any) => {
       return res.status(204).send();
     }
 
-       if (query.id) {
-         return res.status(200).json({
-           message: REQUEST_FETCHED_SUCCESSFULLY,
-           data: requests,
-         });
-       }
+    if (query.id) {
+      return res.status(200).json({
+        message: REQUEST_FETCHED_SUCCESSFULLY,
+        data: requests,
+      });
+    }
 
     const { allRequests, next, prev, page } = requests;
     if (allRequests.length === 0) {
@@ -123,7 +123,7 @@ export const getRequestsController = async (req: any, res: any) => {
  */
 export const updateRequestBeforeAcknowledgedController = async (req: Request, res: CustomResponse) => {
   const type = req.body.type;
-  switch(type){
+  switch (type) {
     case REQUEST_TYPE.ONBOARDING:
       await updateOnboardingExtensionRequestController(req as UpdateOnboardingExtensionRequest, res as OnboardingExtensionResponse);
       break;
@@ -131,3 +131,12 @@ export const updateRequestBeforeAcknowledgedController = async (req: Request, re
       return res.boom.badRequest("Invalid request");
   }
 }
+
+// Write a function here for 'state' to 'status' update.
+export const updateRequestStateToStatus = async (req: Request, res: CustomResponse) => {
+  try {
+    
+  } catch (error) {
+
+  }
+};

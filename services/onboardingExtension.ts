@@ -63,9 +63,9 @@ export const validateOnboardingExtensionUpdateRequest = async (
             };
         }
         
-        if(extensionRequest.state !== REQUEST_STATUS.PENDING){
+        if(extensionRequest.status !== REQUEST_STATUS.PENDING){
             await addLog(logType.PENDING_REQUEST_CAN_BE_UPDATED,
-                { state: extensionRequest.state },
+                { status: extensionRequest.status },
                 { message:PENDING_REQUEST_UPDATED }
             );
             return {

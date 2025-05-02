@@ -35,7 +35,7 @@ describe("Extension Request Validators", function () {
 
         it("should not validate for an invalid extension request on wrong status", async function () {
             const req = {
-                body: { ...extensionCreateObject, state: REQUEST_STATUS.APPROVED },
+                body: { ...extensionCreateObject, status: REQUEST_STATUS.APPROVED },
             };
             const res = {};
             const nextSpy = sinon.spy();
@@ -43,7 +43,7 @@ describe("Extension Request Validators", function () {
                 await createExtensionRequestValidator(req as ExtensionRequestRequest, res as ExtensionRequestResponse, nextSpy);
             } catch (error) {
                 expect(error).to.be.an.instanceOf(Error);
-                expect(error.details[0].message).to.equal(`"state" must be [PENDING]`);
+                expect(error.details[0].message).to.equal(`"status" must be [PENDING]`);
             }
         });
 

@@ -28,7 +28,7 @@ export const createOooRequestController = async (req: OooRequestCreateRequest, r
   }
 
   try {
-    const latestOooRequest:OooStatusRequest = await getRequestByKeyValues({ requestedBy: userId, type: REQUEST_TYPE.OOO , status: REQUEST_STATUS.PENDING });
+    const latestOooRequest: OooStatusRequest = await getRequestByKeyValues({ requestedBy: userId, type: REQUEST_TYPE.OOO, status: REQUEST_STATUS.PENDING });
 
     if (latestOooRequest && latestOooRequest.status === REQUEST_STATUS.PENDING) {
       return res.boom.badRequest(REQUEST_ALREADY_PENDING);
@@ -98,7 +98,7 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
         const userFutureStatusData = {
           requestId,
           status: REQUEST_TYPE.OOO,
-          status: statusState.UPCOMING,
+          state: statusState.UPCOMING,
           from,
           endsOn: until,
           userId: requestedBy,

@@ -62,7 +62,7 @@ describe("OOO Status Request Validators", function () {
           from: null,
           until: null,
           message: "",
-          state: "APPROVED",
+          status: "APPROVED",
         },
       };
       try {
@@ -73,7 +73,7 @@ describe("OOO Status Request Validators", function () {
         expect(error.details[0].message).to.equal(`"from" must be a number`);
         expect(error.details[1].message).to.equal(`"until" must be a number`);
         expect(error.details[2].message).to.equal("message cannot be empty");
-        expect(error.details[3].message).to.equal("state must be PENDING");
+        expect(error.details[3].message).to.equal("status must be PENDING");
       }
     });
 

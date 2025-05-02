@@ -176,7 +176,7 @@ describe("/requests OOO", function () {
         .request(app)
         .post("/requests")
         .set("cookie", `${cookieName}=${authToken}`)
-        .send({ ...validOooStatusRequests, state: REQUEST_STATUS.APPROVED })
+        .send({ ...validOooStatusRequests, status: REQUEST_STATUS.APPROVED })
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
@@ -390,7 +390,7 @@ describe("/requests Extension", function () {
     oldEndsOn: 1694736000,
     newEndsOn: 1709674980000,
     message: "Due to some reasons",
-    state: "PENDING"
+    status: "PENDING"
   };
 
   const taskData = [
@@ -592,17 +592,17 @@ describe("/requests Extension", function () {
     let pendingExtensionRequestId: string;
 
     const approvedExtensionRequest = {
-      state: REQUEST_STATUS.APPROVED,
+      status: REQUEST_STATUS.APPROVED,
       type: REQUEST_TYPE.EXTENSION,
     };
 
     const rejectedExtensionRequest = {
-      state: REQUEST_STATUS.REJECTED,
+      status: REQUEST_STATUS.REJECTED,
       type: REQUEST_TYPE.EXTENSION,
     };
 
     const invalidExtensionRequest = {
-      state: "ACTIVE",
+      status: "ACTIVE",
       type: REQUEST_TYPE.EXTENSION,
     };
 

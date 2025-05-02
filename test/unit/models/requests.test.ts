@@ -54,8 +54,8 @@ describe("models/oooRequests", () => {
         , REQUEST_TYPE.OOO
       );
       expect(updatedOooRequest).to.not.be.null;
-      expect(updatedOooRequest).to.have.property("state");
-      expect(updatedOooRequest.state).to.equal(updateOooApprovedRequests.state);
+      expect(updatedOooRequest).to.have.property("status");
+      expect(updatedOooRequest.status).to.equal(updateOooApprovedRequests.status);
     });
 
     it("should throw an error if the OOO request does not exist", async () => {
@@ -115,14 +115,14 @@ describe("models/oooRequests", () => {
     it("Should return a list of all the requests with specified state - APPROVED", async () => {
       const oooRequest: any = await createRequest(createOooStatusRequests);
       await updateRequest(oooRequest.id, updateOooApprovedRequests, updateOooApprovedRequests.lastModifiedBy, REQUEST_TYPE.OOO)
-      const query = { dev: "true", state: REQUEST_STATUS.APPROVED };
+      const query = { dev: "true", status: REQUEST_STATUS.APPROVED };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData.allRequests[0].state).to.be.equal(REQUEST_STATUS.APPROVED);
     });
 
     it("Should return a list of all the requests with specified state - PENDING", async () => {
       await createRequest(createOooStatusRequests);
-      const query = { dev: "true", state: REQUEST_STATUS.PENDING };
+      const query = { dev: "true", status: REQUEST_STATUS.PENDING };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData.allRequests[0].state).to.be.equal(REQUEST_STATUS.PENDING);
     });
@@ -144,7 +144,7 @@ describe("models/oooRequests", () => {
     });
 
     it("Should return empty array if no data is found", async () => {
-      const query = { dev: "true", state: REQUEST_STATUS.PENDING };
+      const query = { dev: "true", status: REQUEST_STATUS.PENDING };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData).to.be.equal(null);
     });

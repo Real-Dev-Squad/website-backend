@@ -228,7 +228,7 @@ describe("/requests Onboarding Extension", () => {
     
         it("should return 409 response when a user already has a pending request", (done)=> {
             createUserStatusWithState(testUserId, userStatusModel, userState.ONBOARDING);
-            requestsQuery.createRequest({...extensionRequest, state: REQUEST_STATUS.PENDING, userId: testUserId});
+            requestsQuery.createRequest({...extensionRequest, status: REQUEST_STATUS.PENDING, userId: testUserId});
     
             chai.request(app)
             .post(`${postEndpoint}?dev=true`)
@@ -255,7 +255,7 @@ describe("/requests Onboarding Extension", () => {
                 expect(res.body.message).to.equal(ONBOARDING_REQUEST_CREATED_SUCCESSFULLY);
                 expect(res.body.data.requestNumber).to.equal(1);
                 expect(res.body.data.reason).to.equal(body.reason);
-                expect(res.body.data.state).to.equal(REQUEST_STATUS.PENDING);
+                expect(res.body.data.status).to.equal(REQUEST_STATUS.PENDING);
                 done();
             })
         })
@@ -265,7 +265,7 @@ describe("/requests Onboarding Extension", () => {
             const latestApprovedExtension = await requestsQuery.createRequest({
                 ...extensionRequest, 
                 userId: testUserId, 
-                state: REQUEST_STATUS.APPROVED,
+                status: REQUEST_STATUS.APPROVED,
                 newEndsOn: Date.now() + 2*24*60*60*1000,
                 oldEndsOn: Date.now() - 24*60*60*1000,
             });
@@ -279,7 +279,7 @@ describe("/requests Onboarding Extension", () => {
             expect(res.body.message).to.equal(ONBOARDING_REQUEST_CREATED_SUCCESSFULLY);
             expect(res.body.data.requestNumber).to.equal(2);
             expect(res.body.data.reason).to.equal(body.reason);
-            expect(res.body.data.state).to.equal(REQUEST_STATUS.PENDING);
+            expect(res.body.data.status).to.equal(REQUEST_STATUS.PENDING);
             expect(res.body.data.oldEndsOn).to.equal(latestApprovedExtension.newEndsOn);
             expect(res.body.data.newEndsOn).to.equal(latestApprovedExtension.newEndsOn + (body.numberOfDays*24*60*60*1000));
         })
@@ -289,7 +289,7 @@ describe("/requests Onboarding Extension", () => {
             const currentDate = Date.now();
             const latestRejectedExtension = await requestsQuery.createRequest({
                 ...extensionRequest, 
-                state: REQUEST_STATUS.REJECTED, 
+                status: REQUEST_STATUS.REJECTED, 
                 userId: testUserId,
                 newEndsOn: currentDate,
                 oldEndsOn: currentDate - 24*60*60*1000,
@@ -304,7 +304,7 @@ describe("/requests Onboarding Extension", () => {
             expect(res.body.message).to.equal(ONBOARDING_REQUEST_CREATED_SUCCESSFULLY);
             expect(res.body.data.requestNumber).to.equal(2);
             expect(res.body.data.reason).to.equal(body.reason);;
-            expect(res.body.data.state).to.equal(REQUEST_STATUS.PENDING);
+            expect(res.body.data.status).to.equal(REQUEST_STATUS.PENDING);
             expect(res.body.data.oldEndsOn).to.equal(latestRejectedExtension.oldEndsOn);
             expect(new Date(res.body.data.newEndsOn).toDateString())
             .to.equal(new Date(currentDate + (body.numberOfDays*24*60*60*1000)).toDateString());
@@ -373,17 +373,17 @@ describe("/requests Onboarding Extension", () => {
             });
         });
     
-        it("should fetch onboarding extension request by state field", (done) =>  {
-            requestsQuery.createRequest({ type: REQUEST_TYPE.ONBOARDING, state: REQUEST_STATUS.APPROVED });
+        it("should fetch onboarding extension request by status field", (done) =>  {
+            requestsQuery.createRequest({ type: REQUEST_TYPE.ONBOARDING, status: REQUEST_STATUS.APPROVED });
             chai.request(app)
-            .get(`${getEndpoint}?state=APPROVED`)
+            .get(`${getEndpoint}?status=APPROVED`)
             .end((err, res) => {
                 if (err) return done(err);
                 expect(res.statusCode).to.equal(200);
                 expect(res.body.message).to.equal(REQUEST_FETCHED_SUCCESSFULLY);
                 expect(res.body.data.length).to.equal(1);
                 expect(res.body.data[0].type).to.equal(REQUEST_TYPE.ONBOARDING);
-                expect(res.body.data[0].state).to.equal(REQUEST_STATUS.APPROVED);
+                expect(res.body.data[0].status).to.equal(REQUEST_STATUS.APPROVED);
                 return done();
             });
         });
@@ -392,7 +392,7 @@ describe("/requests Onboarding Extension", () => {
     describe("PUT /requests", () => {
         const body = {
             type: REQUEST_TYPE.ONBOARDING,
-            state: REQUEST_STATUS.APPROVED,
+            status: REQUEST_STATUS.APPROVED,
             message: "test-message"
         };
         let latestExtension: OnboardingExtension;
@@ -405,18 +405,18 @@ describe("/requests Onboarding Extension", () => {
         beforeEach(async () => {
             userId = await addUser(userData[4]);
             latestExtension =  await requestsQuery.createRequest({ 
-                state: REQUEST_STATUS.PENDING, 
+                status: REQUEST_STATUS.PENDING, 
                 type: REQUEST_TYPE.ONBOARDING, 
                 requestNumber: 1
             });
             latestApprovedExtension = await requestsQuery.createRequest({
-                state: REQUEST_STATUS.APPROVED, 
+                status: REQUEST_STATUS.APPROVED, 
                 type: REQUEST_TYPE.ONBOARDING, requestNumber: 2
             });
             latestRejectedExtension = await requestsQuery.createRequest({
-                state: REQUEST_STATUS.REJECTED, 
+                status: REQUEST_STATUS.REJECTED, 
                 type: REQUEST_TYPE.ONBOARDING, 
-                requestNumber: 2
+                requestNumber: 3
             });
             putEndpoint = `/requests/${latestExtension.id}?dev=true`;
             authToken = generateAuthToken({userId});
@@ -498,11 +498,11 @@ describe("/requests Onboarding Extension", () => {
             chai.request(app)
             .put(putEndpoint)
             .set("authorization", `Bearer ${authToken}`)
-            .send({...body, state: REQUEST_STATUS.PENDING})
+            .send({...body, status: REQUEST_STATUS.PENDING})
             .end((err, res) => {
                 if (err) return done(err);
                 expect(res.statusCode).to.equal(400);
-                expect(res.body.message).to.equal("state must be APPROVED or REJECTED");
+                expect(res.body.message).to.equal("status must be APPROVED or REJECTED");
                 expect(res.body.error).to.equal("Bad Request");
                 done();
             })
@@ -581,7 +581,7 @@ describe("/requests Onboarding Extension", () => {
             chai.request(app)
             .put(putEndpoint)
             .set("authorization", `Bearer ${authToken}`)
-            .send({...body, state: REQUEST_STATUS.REJECTED})
+            .send({...body, status: REQUEST_STATUS.REJECTED})
             .end((err, res) => {
                 if (err) return done(err);
                 expect(res.statusCode).to.equal(200);
@@ -628,19 +628,19 @@ describe("/requests Onboarding Extension", () => {
             invalidUserId = await addUser(userData[0]);
             superUserId = await addUser(userData[4]);
             latestInvalidExtension =  await requestsQuery.createRequest({ 
-                state: REQUEST_STATUS.PENDING, 
+                status: REQUEST_STATUS.PENDING, 
                 type: REQUEST_TYPE.ONBOARDING, 
                 oldEndsOn: Date.now() + convertDaysToMilliseconds(5),
                 userId: userId,
             });
             latestValidExtension = await requestsQuery.createRequest({
-                state: REQUEST_STATUS.PENDING, 
+                status: REQUEST_STATUS.PENDING, 
                 type: REQUEST_TYPE.ONBOARDING, 
                 oldEndsOn: Date.now() - convertDaysToMilliseconds(3),
                 userId: userId
             });
             latestApprovedExtension = await requestsQuery.createRequest({
-                state: REQUEST_STATUS.APPROVED, 
+                status: REQUEST_STATUS.APPROVED, 
                 type: REQUEST_TYPE.ONBOARDING, 
                 oldEndsOn: Date.now(),
                 userId: userId

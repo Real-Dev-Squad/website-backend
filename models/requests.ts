@@ -88,8 +88,8 @@ export const getRequests = async (query: any) => {
         ...requestDoc.data(),
       };
     }
-    
-    if(requestedBy && dev){
+
+    if (requestedBy && dev) {
       requestQuery = requestQuery.where("requestedBy", "==", requestedBy);
     }
     else if (requestedBy) {
@@ -191,3 +191,4 @@ export const getRequestByKeyValues = async (keyValues: KeyValues) => {
   }
 };
 
+// Write a function for migration for state to status. 

@@ -29,7 +29,7 @@ describe("Test Onboarding Extension Service", () => {
         validExtensionRequest = await requestModel.add({
             type: REQUEST_TYPE.ONBOARDING,
             oldEndsOn: Date.now() - convertDaysToMilliseconds(2),
-            state: REQUEST_STATUS.PENDING,
+            status: REQUEST_STATUS.PENDING,
             userId,
         })
         validExtensionRequestDoc = await requestModel.doc(validExtensionRequest.id).get();
@@ -55,14 +55,14 @@ describe("Test Onboarding Extension Service", () => {
             });
             invalidTypeRequestDoc = await requestModel.doc(invalidTypeRequest.id).get();
             invalidStateRequest = await requestModel.add({
-                state: REQUEST_STATUS.APPROVED,
+                status: REQUEST_STATUS.APPROVED,
                 userId,
                 type: REQUEST_TYPE.ONBOARDING,
             })
             invalidStateRequestDoc = await requestModel.doc(invalidStateRequest.id).get();
             invalidDeadlineRequest = await requestModel.add({
                 type: REQUEST_TYPE.ONBOARDING,
-                state: REQUEST_STATUS.PENDING,
+                status: REQUEST_STATUS.PENDING,
                 oldEndsOn: Date.now() + convertDaysToMilliseconds(2),
                 userId,
             })
