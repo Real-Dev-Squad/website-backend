@@ -1,8 +1,8 @@
 import joi from "joi";
 import { NextFunction } from "express";
 import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/requests";
-import { AcknowledgeOOORequest, OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
-import { acknowledgeOOORequestsValidator, createOooStatusRequestValidator } from "./oooRequests";
+import { AcknowledgeOooRequest, OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
+import { acknowledgeOooRequestsValidator, createOooStatusRequestValidator } from "./oooRequests";
 import { createExtensionRequestValidator } from "./extensionRequestsv2";
 import {createTaskRequestValidator} from "./taskRequests";
 import { ExtensionRequestRequest, ExtensionRequestResponse } from "../../types/extensionRequests";
@@ -125,13 +125,13 @@ export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: O
 /**
  * Validates update requests based on their type.
  * 
- * @param {UpdateOnboardingExtensionRequest | AcknowledgeOOORequest} req - Request object.
+ * @param {UpdateOnboardingExtensionRequest | AcknowledgeOooRequest} req - Request object.
  * @param {CustomResponse} res - Response object.
  * @param {NextFunction} next - Next middleware if valid.
  * @returns {Promise<void>} Resolves or sends errors.
  */
 export const updateRequestValidator = async (
-  req: UpdateOnboardingExtensionRequest | AcknowledgeOOORequest,
+  req: UpdateOnboardingExtensionRequest | AcknowledgeOooRequest,
   res: CustomResponse,
   next: NextFunction
   ): Promise<void> => {
@@ -139,7 +139,7 @@ export const updateRequestValidator = async (
 
   switch (type) {
       case REQUEST_TYPE.OOO:
-          await acknowledgeOOORequestsValidator(
+          await acknowledgeOooRequestsValidator(
             req,
             res as OooRequestResponse, next);
           break;

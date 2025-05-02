@@ -1,7 +1,7 @@
 import joi from "joi";
 import { NextFunction } from "express";
 import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/requests";
-import { AcknowledgeOOORequest, OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
+import { AcknowledgeOooRequest, OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
 
 export const createOooStatusRequestValidator = async (
   req: OooRequestCreateRequest,
@@ -26,14 +26,14 @@ export const createOooStatusRequestValidator = async (
           "number.min": "until date must be greater than or equal to from date",
         })
         .required(),
-      message: joi.string().required().messages({
-        "any.required": "message is required",
-        "string.empty": "message cannot be empty",
+      reason: joi.string().required().messages({
+        "any.required": "reason is required",
+        "string.empty": "reason cannot be empty",
       }),
-      state: joi.string().valid(REQUEST_STATE.PENDING).required().messages({
-        "any.only": "state must be PENDING",
+      type: joi.string().valid(REQUEST_TYPE.OOO).required().messages({
+        "string.empty": "type cannot be empty",
+        "any.required": "type is required",
       }),
-      type: joi.string().valid(REQUEST_TYPE.OOO).required(),
     });
 
   await schema.validateAsync(req.body, { abortEarly: false });
@@ -42,13 +42,13 @@ export const createOooStatusRequestValidator = async (
 /**
  * Middleware to validate the acknowledge Out-Of-Office (OOO) request payload.
  * 
- * @param {AcknowledgeOOORequest} req - The request object containing the body to be validated.
+ * @param {AcknowledgeOooRequest} req - The request object containing the body to be validated.
  * @param {OooRequestResponse} res - The response object used to send error responses if validation fails.
  * @param {NextFunction} next - The next middleware function to call if validation succeeds.
  * @returns {Promise<void>} Resolves or sends errors.
  */
-export const acknowledgeOOORequestsValidator = async (
-  req: AcknowledgeOOORequest,
+export const acknowledgeOooRequestsValidator = async (
+  req: AcknowledgeOooRequest,
   res: OooRequestResponse,
   next: NextFunction
 ): Promise<void> => {

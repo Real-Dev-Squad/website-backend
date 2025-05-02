@@ -5,8 +5,8 @@ import {
 } from "../constants/requests";
 import { getRequests } from "../models/requests";
 import { getPaginatedLink } from "../utils/helper";
-import { acknowledgeOOORequestController, createOooRequestController, updateOooRequestController } from "./oooRequests";
-import { AcknowledgeOOORequest, OooRequestCreateRequest, OooRequestResponse } from "../types/oooRequest";
+import { acknowledgeOooRequestController, createOooRequestController, updateOooRequestController } from "./oooRequests";
+import { AcknowledgeOooRequest, OooRequestCreateRequest, OooRequestResponse } from "../types/oooRequest";
 import { CustomResponse } from "../typeDefinitions/global";
 import { ExtensionRequestRequest, ExtensionRequestResponse } from "../types/extensionRequests";
 import { createTaskExtensionRequest, updateTaskExtensionRequest } from "./extensionRequestsv2";
@@ -125,7 +125,7 @@ export const updateRequestBeforeAcknowledgedController = async (req: Request, re
 
   switch(type){
     case REQUEST_TYPE.OOO:
-      await acknowledgeOOORequestController(req as AcknowledgeOOORequest, res as OooRequestResponse);
+      await acknowledgeOooRequestController(req as AcknowledgeOooRequest, res as OooRequestResponse);
       break;
     case REQUEST_TYPE.ONBOARDING:
       await updateOnboardingExtensionRequestController(req as UpdateOnboardingExtensionRequest, res as OnboardingExtensionResponse);
