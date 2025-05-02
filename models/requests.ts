@@ -9,7 +9,7 @@ import {
 } from "../constants/requests";
 import { getUserId } from "../utils/users";
 const SIZE = 5;
-
+import { FieldValue } from "firebase-admin/firestore";
 export const createRequest = async (body: any) => {
   try {
     const requestBody: any = {
@@ -29,7 +29,7 @@ export const createRequest = async (body: any) => {
   }
 };
 
-export const updateRequest = async (id: string, body: any, lastModifiedBy: string, type:string) => {
+export const updateRequest = async (id: string, body: any, lastModifiedBy: string, type: string) => {
   try {
     const existingRequestDoc = await requestModel.doc(id).get();
     if (!existingRequestDoc.exists) {
@@ -191,4 +191,47 @@ export const getRequestByKeyValues = async (keyValues: KeyValues) => {
   }
 };
 
-// Write a function for migration for state to status. 
+export const updateRequestStateToStatus = async (id: string) => {
+  const docRef = requestModel.doc(id);
+
+  try {
+    return await firestore.runTransaction(async (transaction) => {
+      const doc = await transaction.get(docRef);
+
+      if (!doc.exists) {
+        return {
+          success: false,
+          message: `Document with ID ${id} not found`
+        };
+      }
+
+      const data = doc.data();
+
+      if (data.state === undefined) {
+        return {
+          success: false,
+          message: 'Document does not have state field to migrate'
+        };
+      }
+
+      const updateData = {
+        status: data.state,
+      };
+      updateData['state'] = FieldValue.delete();
+      transaction.update(docRef, updateData);
+
+      return {
+        success: true,
+        message: 'Successfully migrated document',
+        data: {
+          ...data,
+          status: data.state,
+          state: null
+        }
+      };
+    });
+  } catch (error) {
+    console.error(`Error migrating document ${id}:`, error);
+    throw error;
+  }
+};

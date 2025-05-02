@@ -3,7 +3,7 @@ import {
   REQUEST_FETCHED_SUCCESSFULLY,
   REQUEST_TYPE,
 } from "../constants/requests";
-import { getRequests } from "../models/requests";
+import { getRequests, updateRequestStateToStatus } from "../models/requests";
 import { getPaginatedLink } from "../utils/helper";
 import { createOooRequestController, updateOooRequestController } from "./oooRequests";
 import { OooRequestCreateRequest, OooRequestResponse } from "../types/oooRequest";
@@ -130,13 +130,36 @@ export const updateRequestBeforeAcknowledgedController = async (req: Request, re
     default:
       return res.boom.badRequest("Invalid request");
   }
+};
+interface RequestWithParams extends Request {
+  params: {
+    id: string;
+  };
 }
 
-// Write a function here for 'state' to 'status' update.
-export const updateRequestStateToStatus = async (req: Request, res: CustomResponse) => {
+export const migrateRequestStateToStatus = async (req: RequestWithParams, res: CustomResponse) => {
   try {
+    const docId = req.params.id;
+    const result = await updateRequestStateToStatus(docId);
     
+    if (result.success) {
+      return res.status(200).json({
+        success: true,
+        message: 'Successfully migrated state to status',
+        data: result.data
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: result.message
+      });
+    }
   } catch (error) {
-
+    console.error('Migration error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to migrate document',
+      error: error.message
+    });
   }
 };
