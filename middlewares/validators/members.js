@@ -15,6 +15,4 @@ const validateGetMembers = async (req, res, next) => {
   }
 };
 
-export default {
-  validateGetMembers,
-};
+export { validateGetMembers };

@@ -11,7 +11,7 @@ import {
 import authenticate from "../middlewares/authenticate.js";
 import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 import validators from "../middlewares/validators/task-requests.js";
-import validateUser from "../middlewares/taskRequests.js";
+import { validateUser } from "../middlewares/taskRequests.js";
 
 const router = express.Router();
 const { SUPERUSER } = ROLES;

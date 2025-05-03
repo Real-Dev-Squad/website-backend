@@ -2,7 +2,7 @@ import express from "express";
 import authenticate from "../middlewares/authenticate.js";
 import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 import { addNewStock, fetchStocks, getSelfStocks, getUserStocks } from "../controllers/stocks.js";
-import createStock from "../middlewares/validators/stocks.js";
+import { createStock } from "../middlewares/validators/stocks.js";
 import { ROLES } from "../constants/roles.js";
 import { devFlagMiddleware } from "../middlewares/devFlag.js";
 import { userAuthorization } from "../middlewares/userAuthorization.js";

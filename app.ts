@@ -28,7 +28,7 @@ app.use(function (err, req, res, next) {
   if (isMulterError(err)) {
     return multerErrorHandling(err, req, res, next);
   }
-  logger.error(err);
+  console.error(err); // TODO: add logger here
   return res.boom.boomify(err, {
     statusCode: err.statusCode,
   });

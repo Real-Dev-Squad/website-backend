@@ -22,6 +22,4 @@ const validateRecruiter = async (req, res, next) => {
   }
 };
 
-export default {
-  validateRecruiter,
-};
+export { validateRecruiter };

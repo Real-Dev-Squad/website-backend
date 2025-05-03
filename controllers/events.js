@@ -2,7 +2,7 @@ import logger from "../utils/logger.js";
 import { GET_ALL_EVENTS_LIMIT_MIN, UNWANTED_PROPERTIES_FROM_100MS, EVENT_ROLES } from "../constants/events.js";
 import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
 import { EventTokenService, EventAPIService } from "../services/index.js";
-import { createEvent as createEventQuery, getEventCodes } from "../models/events.js";
+import { createEvent as createEventQuery, getEventCodes as getEventCodesQuery } from "../models/events.js";
 import { removeUnwantedProperties } from "../utils/events.js";
 import crypto from "crypto";
 import { addLog } from "../models/logs.js";
@@ -97,7 +97,7 @@ const joinEvent = async (req, res) => {
 
   try {
     if (role === EVENT_ROLES.MAVEN) {
-      const eventCodes = await getEventCodes({ id: roomId });
+      const eventCodes = await getEventCodesQuery({ id: roomId });
       const allEventCodesArray = eventCodes.map((eventCode) => {
         return eventCode.code;
       });
@@ -344,6 +344,35 @@ const generateEventCode = async (req, res) => {
   }
 };
 
+/**
+ * Gets event codes for particular event
+ *
+ * @async
+ * @function
+ * @param {Object} req - The Express request object.
+ * @param {Object} res - The Express response object.
+ * @returns {Promise<Object>} The JSON response with a success message if the event codes are fetched succesfully
+ * @throws {Object} The JSON response with an error message if an error occurred while getting the event codes data
+ */
+const getEventCodes = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const eventCodes = await getEventCodesQuery({ id });
+
+    return res.status(200).json({
+      message: "Event codes is successfully fetched for the event!",
+      data: eventCodes,
+    });
+  } catch (error) {
+    logger.error({ error });
+    return res.status(500).json({
+      error: error.code,
+      message: "Something went wrong while getting the event codes!",
+    });
+  }
+};
+
 export default {
   createEvent,
   getAllEvents,
@@ -352,6 +381,7 @@ export default {
   updateEvent,
   endActiveEvent,
   addPeerToEvent,
+  getEventCodes,
   kickoutPeer,
   generateEventCode,
 };

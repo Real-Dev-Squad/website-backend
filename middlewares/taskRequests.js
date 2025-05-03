@@ -34,6 +34,4 @@ async function validateUser(req, res, next) {
   }
 }
 
-export default {
-  validateUser,
-};
+export { validateUser };

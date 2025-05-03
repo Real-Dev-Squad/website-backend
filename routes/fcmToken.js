@@ -5,6 +5,6 @@ import { fcmTokenValidator } from "../middlewares/validators/fcmToken.js";
 
 const router = express.Router();
 
-router.post("/", authenticate, fcmTokenValidator.validateFcmToken, fcmTokenController);
+router.post("/", authenticate, fcmTokenValidator, fcmTokenController);
 
 export default router;
