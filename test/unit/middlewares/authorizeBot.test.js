@@ -117,8 +117,8 @@ describe("Middleware | Authorize Bot", function () {
     });
   });
 
-  describe("Check authorization of bot for discord service", function (done) {
-    it("return false when token is expired or malformed for discord service", function () {
+  describe("Check authorization of bot for discord service", function () {
+    it("should return unauthorized when token is expired or malformed for discord service", function () {
       const jwtStub = sinon.stub(jwt, "verify").throws(new Error("invalid token"));
 
       const request = {
@@ -144,7 +144,7 @@ describe("Middleware | Authorize Bot", function () {
       jwtStub.restore();
     });
 
-    it("return false when token is invalid from discord service", function () {
+    it("should return bad request when token is invalid for discord service", function () {
       const request = {
         headers: {
           authorization: `Bearer BAD_TOKEN`,
@@ -164,7 +164,7 @@ describe("Middleware | Authorize Bot", function () {
       expect(response.boom.badRequest.calledOnce).to.be.equal(true);
     });
 
-    it("return true when token is valid for discord service", function () {
+    it("should allow request propagation when token is valid for discord service", function () {
       const jwtToken = bot.generateDiscordServiceToken({ name: DISCORD_SERVICE });
       const request = {
         headers: {
@@ -180,7 +180,7 @@ describe("Middleware | Authorize Bot", function () {
       expect(nextSpy.calledOnce).to.be.equal(true);
     });
 
-    it("return true when token is valid for cloudflare worker where service name is not DISCORD_SERVICE", function () {
+    it("should allow request propagation when token is valid for cloudflare worker and service name is not DISCORD_SERVICE", function () {
       const jwtToken = bot.generateDiscordServiceToken({ name: DISCORD_SERVICE });
       const request = {
         headers: {
@@ -196,7 +196,7 @@ describe("Middleware | Authorize Bot", function () {
       expect(nextSpy.calledOnce).to.be.equal(true);
     });
 
-    it("return false when token is valid but not for discord service", function () {
+    it("should return unauthorized when token is valid but not for discord service", function () {
       const jwtToken = bot.generateDiscordServiceToken({ name: "Invalid" });
       const request = {
         headers: {
@@ -212,7 +212,7 @@ describe("Middleware | Authorize Bot", function () {
       expect(nextSpy.calledOnce).to.be.equal(false);
     });
 
-    it("return false when token is valid but not for cloudflare worker", function () {
+    it("should return unauthorized when token is valid but not for cloudflare worker", function () {
       const jwtToken = bot.generateToken({ name: "Invalid" });
 
       const request = {
