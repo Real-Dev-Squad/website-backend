@@ -6,6 +6,7 @@ import { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, TASK_SIZE } from "../constants
 import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
 import { BATCH_SIZE_IN_CLAUSE } from "../constants/firebase.js";
 import * as userUtils from "../utils/users.js";
+import logger from "../utils/logger.js";
 
 const tasksModel = firestore.collection("tasks");
 const userModel = firestore.collection("users");
@@ -778,7 +779,7 @@ const fetchIncompleteTasksByUserIds = async (userIds) => {
   }
 };
 
-export {
+export default {
   updateTaskStatusToDone,
   updateTask,
   addDependency,

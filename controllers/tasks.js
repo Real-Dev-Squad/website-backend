@@ -7,8 +7,8 @@ import { addLog } from "../models/logs.js";
 import * as tasksModel from "../models/tasks.js";
 import { addOrUpdate, getRdsUserInfoByGitHubUsername } from "../models/users.js";
 import { updateStatusOnTaskCompletion, updateUserStatusOnTaskUpdate } from "../models/userStatus.js";
-import dataAccess from "../services/dataAccessLayer.js";
-import tasksService, { addTaskCreatedAtAndUpdatedAtFields } from "../services/tasks.js";
+import { retrieveUsers } from "../services/dataAccessLayer.js";
+import { addTaskCreatedAtAndUpdatedAtFields, fetchOrphanedTasks } from "../services/tasks.js";
 import { getPaginatedLink } from "../utils/helper.js";
 import logger from "../utils/logger.js";
 import { RQLQueryParser } from "../utils/RQLParser.js";
@@ -176,7 +176,7 @@ const fetchTasks = async (req, res) => {
         return res.boom.notFound("Route not found");
       }
       try {
-        const orphanedTasks = await tasksService.fetchOrphanedTasks();
+        const orphanedTasks = await fetchOrphanedTasks();
         if (!orphanedTasks || orphanedTasks.length === 0) {
           return res.sendStatus(204);
         }
@@ -316,7 +316,7 @@ const updateTask = async (req, res) => {
     }
     const requestData = { ...req.body, updatedAt: Math.round(Date.now() / 1000) };
     if (requestData?.assignee) {
-      const user = await dataAccess.retrieveUsers({ username: requestData.assignee });
+      const user = await retrieveUsers({ username: requestData.assignee });
       if (!user.userExists) {
         return res.boom.notFound("User doesn't exist");
       }

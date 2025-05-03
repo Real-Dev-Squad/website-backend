@@ -1,16 +1,10 @@
 import express from "express";
 import authenticate from "../middlewares/authenticate.js";
 import * as tasks from "../controllers/tasks.js";
-import {
-  createTask,
-  updateTask,
-  updateSelfTask,
-  getTasksValidator,
-  getUsersValidator,
-} from "../middlewares/validators/tasks.js";
-import authorizeRoles from "../middlewares/authorizeRoles.js";
+import validateTask from "../middlewares/validators/tasks.js";
+import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 import { authorizeAndAuthenticate } from "../middlewares/authorizeUsersAndService.js";
-import { APPOWNER, SUPERUSER } from "../constants/roles.js";
+import { ROLES } from "../constants/roles.js";
 import assignTask from "../middlewares/assignTask.js";
 import { cacheResponse, invalidateCache } from "../utils/cache.js";
 import { ALL_TASKS } from "../constants/cacheKeys.js";
@@ -20,6 +14,7 @@ import { devFlagMiddleware } from "../middlewares/devFlag.js";
 import { userAuthorization } from "../middlewares/userAuthorization.js";
 
 const router = express.Router();
+const { APPOWNER, SUPERUSER } = ROLES;
 
 const oldAuthorizationMiddleware = authorizeRoles([APPOWNER, SUPERUSER]);
 const newAuthorizationMiddleware = authorizeAndAuthenticate(
@@ -36,7 +31,12 @@ const enableDevModeMiddleware = (req, res, next) => {
   }
 };
 
-router.get("/", getTasksValidator, cacheResponse({ invalidationKey: ALL_TASKS, expiry: 10 }), tasks.fetchTasks);
+router.get(
+  "/",
+  validateTask.getTasksValidator,
+  cacheResponse({ invalidationKey: ALL_TASKS, expiry: 10 }),
+  tasks.fetchTasks
+);
 router.get("/self", authenticate, tasks.getSelfTasks);
 
 router.get("/overdue", authenticate, authorizeRoles([SUPERUSER]), tasks.overdueTasks);
@@ -45,7 +45,7 @@ router.post(
   authenticate,
   authorizeRoles([APPOWNER, SUPERUSER]),
   invalidateCache({ invalidationKeys: [ALL_TASKS] }),
-  createTask,
+  validateTask.createTask,
   tasks.addNewTask
 );
 router.patch(
@@ -53,7 +53,7 @@ router.patch(
   authenticate,
   enableDevModeMiddleware,
   invalidateCache({ invalidationKeys: [ALL_TASKS] }),
-  updateTask,
+  validateTask.updateTask,
   tasks.updateTask
 );
 router.get("/:id/details", tasks.getTask);
@@ -63,7 +63,7 @@ router.patch(
   "/self/:id",
   authenticate,
   invalidateCache({ invalidationKeys: [ALL_TASKS] }),
-  updateSelfTask,
+  validateTask.updateSelfTask,
   tasks.updateTaskStatus,
   assignTask
 ); // this route is being deprecated in favor of /tasks/:id/status.
@@ -72,7 +72,7 @@ router.patch(
   authenticate,
   devFlagMiddleware,
   invalidateCache({ invalidationKeys: [ALL_TASKS] }),
-  updateSelfTask,
+  validateTask.updateSelfTask,
   tasks.updateTaskStatus,
   assignTask
 );
@@ -87,7 +87,7 @@ router.patch(
   tasks.assignTask
 );
 
-router.get("/users/discord", verifyCronJob, getUsersValidator, tasks.getUsersHandler);
+router.get("/users/discord", verifyCronJob, validateTask.getUsersValidator, tasks.getUsersHandler);
 
 router.post("/migration", authenticate, authorizeRoles([SUPERUSER]), tasks.updateStatus);
 router.post("/orphanTasks", authenticate, authorizeRoles([SUPERUSER]), tasks.orphanTasks);

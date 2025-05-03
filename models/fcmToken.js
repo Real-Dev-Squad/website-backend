@@ -1,5 +1,6 @@
 import firestore from "../utils/firestore.js";
-import { Conflict } from "http-errors";
+import httpError from "http-errors";
+import logger from "../utils/logger.js";
 
 const fcmTokenModel = firestore.collection("fcmToken");
 
@@ -28,7 +29,7 @@ const saveFcmToken = async (fcmTokenData) => {
         });
         return fcmTokenObj.id;
       } else {
-        throw new Conflict("Device Already Registered");
+        throw new httpError.Conflict("Device Already Registered");
       }
     }
   } catch (err) {

@@ -1,3 +1,7 @@
+import { NextFunction } from "express";
+import { CustomRequest, CustomResponse } from "../types/global.js";
+import logger from "../utils/logger.js";
+
 /**
  * This middleware authorizes if the requested resource belongs to that user or the user is a superuser
  * for that route.
@@ -8,11 +12,6 @@
  * @return {Object} - Returns unauthorized user if the role is not assigned
  *
  **/
-
-import { NextFunction } from "express";
-import { CustomRequest, CustomResponse } from "../types/global";
-import logger from "../utils/logger.js";
-
 const authorizeOwnOrSuperUser = (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
   try {
     const isSuperUser = req.userData.roles.super_user;

@@ -9,7 +9,7 @@ import {
   updateUserStatusController,
 } from "../controllers/userStatus.js";
 import authenticate from "../middlewares/authenticate.js";
-import authorizeRoles from "../middlewares/authorizeRoles.js";
+import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 import {
   validateUserStatus,
   validateMassUpdate,

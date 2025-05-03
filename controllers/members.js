@@ -1,9 +1,11 @@
-import ROLES from "../constants/roles.js";
+import { ROLES } from "../constants/roles.js";
 import * as members from "../models/members.js";
 import * as tasks from "../models/tasks.js";
 import { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
-import dataAccess from "../services/dataAccessLayer.js";
+import { retrieveMembers, retrieveUsersWithRole, retrieveUsers } from "../services/dataAccessLayer.js";
 import { addLog } from "../models/logs.js";
+import logger from "../utils/logger.js";
+
 /**
  * Fetches the data about our members
  *
@@ -13,7 +15,7 @@ import { addLog } from "../models/logs.js";
 
 const getMembers = async (req, res) => {
   try {
-    const allUsers = await dataAccess.retrieveMembers(req.query);
+    const allUsers = await retrieveMembers(req.query);
     return res.json({
       message: allUsers.length ? "Members returned successfully!" : "No member found",
       members: allUsers,
@@ -33,7 +35,7 @@ const getMembers = async (req, res) => {
 
 const getIdleMembers = async (req, res) => {
   try {
-    const onlyMembers = await dataAccess.retrieveUsersWithRole(ROLES.MEMBER);
+    const onlyMembers = await retrieveUsersWithRole(ROLES.MEMBER);
     const taskParticipants = await tasks.fetchActiveTaskMembers();
     const idleMembers = onlyMembers?.filter(({ id }) => !taskParticipants.has(id));
     const idleMemberUserNames = idleMembers?.map((member) => member.username);
@@ -58,7 +60,7 @@ const getIdleMembers = async (req, res) => {
 const moveToMembers = async (req, res) => {
   try {
     const { username } = req.params;
-    const result = await dataAccess.retrieveUsers({ username });
+    const result = await retrieveUsers({ username });
     if (result.userExists) {
       const successObject = await members.moveToMembers(result.user.id);
       if (successObject.isAlreadyMember) {
@@ -83,7 +85,7 @@ const moveToMembers = async (req, res) => {
 const archiveMembers = async (req, res) => {
   try {
     const { username } = req.params;
-    const user = await dataAccess.retrieveUsers({ username });
+    const user = await retrieveUsers({ username });
     const superUserId = req.userData.id;
     const { reason } = req.body;
     const roles = req?.userData?.roles;

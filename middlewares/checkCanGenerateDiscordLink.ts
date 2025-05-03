@@ -1,6 +1,6 @@
 import { NextFunction } from "express";
-import { CustomRequest, CustomResponse } from "../types/global";
-const ApplicationModel = require("../models/applications");
+import { CustomRequest, CustomResponse } from "../types/global.js";
+import { getUserApplications } from "../models/applications.js";
 
 export const checkCanGenerateDiscordLink = async (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
   const { id: userId, roles } = req.userData;
@@ -16,14 +16,16 @@ export const checkCanGenerateDiscordLink = async (req: CustomRequest, res: Custo
   }
 
   try {
-    const applications = await ApplicationModel.getUserApplications(userId);
-    
+    const applications = await getUserApplications(userId);
+
     if (!applications || applications.length === 0) {
       return res.boom.forbidden("No applications found.");
     }
 
-    const approvedApplication = applications.find((application: { status: string; }) => application.status === 'accepted');
-    
+    const approvedApplication = applications.find(
+      (application: { status: string }) => application.status === "accepted"
+    );
+
     if (!approvedApplication) {
       return res.boom.forbidden("Only users with an accepted application can generate a Discord invite link.");
     }
@@ -34,10 +36,8 @@ export const checkCanGenerateDiscordLink = async (req: CustomRequest, res: Custo
   }
 };
 
-
 // <------ We have to revisit this later ------->
 // <--- https://github.com/Real-Dev-Squad/website-backend/issues/2078 --->
-
 
 // const checkCanGenerateDiscordLink = async (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
 //   const { discordId, roles, id: userId, profileStatus } = req.userData;
@@ -63,4 +63,4 @@ export const checkCanGenerateDiscordLink = async (req: CustomRequest, res: Custo
 //   return next();
 // };
 
-export default  checkCanGenerateDiscordLink;
+export default checkCanGenerateDiscordLink;

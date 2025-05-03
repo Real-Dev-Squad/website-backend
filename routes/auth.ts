@@ -1,10 +1,21 @@
 import express from "express";
+import {
+  githubAuthLogin,
+  githubAuthCallback,
+  googleAuthLogin,
+  googleAuthCallback,
+  signout,
+  fetchUserDeviceInfo,
+  storeUserDeviceInfo,
+  fetchDeviceDetails,
+  updateAuthStatus,
+} from "../controllers/auth.js";
+import authenticate from "../middlewares/authenticate.js";
+import userDeviceInfoValidator from "../middlewares/validators/qrCodeAuth.js";
+import qrCodeAuthValidator from "../middlewares/validators/qrCodeAuth.js";
+import { devFlagMiddleware } from "../middlewares/devFlag.js";
+
 const router = express.Router();
-import { githubAuthLogin, githubAuthCallback, googleAuthLogin, googleAuthCallback, signout, fetchUserDeviceInfo, storeUserDeviceInfo, fetchDeviceDetails, updateAuthStatus } from "../controllers/auth";
-import authenticate from "../middlewares/authenticate";
-import userDeviceInfoValidator from "../middlewares/validators/qrCodeAuth";
-import qrCodeAuthValidator from "../middlewares/validators/qrCodeAuth";
-import { devFlagMiddleware } from "../middlewares/devFlag";
 
 router.get("/github/login", githubAuthLogin);
 

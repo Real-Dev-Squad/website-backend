@@ -20,6 +20,4 @@ const fetch = async (url, options = {}) => {
   }
 };
 
-export default {
-  fetch,
-};
+export { fetch };

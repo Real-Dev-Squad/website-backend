@@ -2,7 +2,7 @@
  * This file contains wrapper functions to interact with the DB.
  * This will contain the DB schema if we start consuming an ORM for managing the DB operations
  */
-import { walletConstants } from "../constants/wallets.js";
+import { INITIAL_WALLET } from "../constants/wallets.js";
 import firestore from "../utils/firestore.js";
 import { fetchWallet, createWallet } from "../models/wallets.js";
 import { updateUserStatus } from "../models/userStatus.js";
@@ -23,6 +23,7 @@ import { formatUsername } from "../utils/username.js";
 import { logType } from "../constants/logs.js";
 import { addLog } from "../services/logService.js";
 import admin from "firebase-admin";
+import logger from "../utils/logger.js";
 
 const userModel = firestore.collection("users");
 const joinModel = firestore.collection("applicants");
@@ -464,7 +465,7 @@ const initializeUser = async (userId) => {
   // Create wallet and give them initial amount
   const userWallet = await fetchWallet(userId);
   if (!userWallet) {
-    await createWallet(userId, walletConstants.INITIAL_WALLET);
+    await createWallet(userId, INITIAL_WALLET);
   }
   await updateUserStatus(userId, { currentStatus: { state: userState.ONBOARDING }, monthlyHours: { committed: 0 } });
   return true;

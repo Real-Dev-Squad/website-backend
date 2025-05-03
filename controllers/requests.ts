@@ -1,23 +1,22 @@
+import { Request } from "express";
 import {
   ERROR_WHILE_FETCHING_REQUEST,
   REQUEST_FETCHED_SUCCESSFULLY,
   REQUEST_TYPE,
-} from "../constants/requests";
-import { getRequests } from "../models/requests";
-import { getPaginatedLink } from "../utils/helper";
-import { createOooRequestController, updateOooRequestController } from "./oooRequests";
-import { OooRequestCreateRequest, OooRequestResponse } from "../types/oooRequest";
-import { CustomResponse } from "../typeDefinitions/global";
-import { ExtensionRequestRequest, ExtensionRequestResponse } from "../types/extensionRequests";
-import { createTaskExtensionRequest, updateTaskExtensionRequest } from "./extensionRequestsv2";
-import { UpdateRequest } from "../types/requests";
-import { TaskRequestRequest } from "../types/taskRequests";
-import { createTaskRequestController } from "./taskRequestsv2";
-import { OnboardingExtensionCreateRequest, OnboardingExtensionResponse, UpdateOnboardingExtensionStateRequest } from "../types/onboardingExtension";
-import { createOnboardingExtensionRequestController, updateOnboardingExtensionRequestController, updateOnboardingExtensionRequestState } from "./onboardingExtension";
-import { UpdateOnboardingExtensionRequest } from "../types/onboardingExtension";
-
-import { Request } from "express";
+} from "../constants/requests.js";
+import { getRequests } from "../models/requests.js";
+import { getPaginatedLink } from "../utils/helper.js";
+import { createOooRequestController, updateOooRequestController } from "./oooRequests.js";
+import { OooRequestCreateRequest, OooRequestResponse } from "../types/oooRequest.js";
+import { CustomResponse } from "../typeDefinitions/global.js";
+import { ExtensionRequestRequest, ExtensionRequestResponse } from "../types/extensionRequests.js";
+import { createTaskExtensionRequest, updateTaskExtensionRequest } from "./extensionRequestsv2.js";
+import { UpdateRequest } from "../types/requests.js";
+import { TaskRequestRequest } from "../types/taskRequests.js";
+import { createTaskRequestController } from "./taskRequestsv2.js";
+import { OnboardingExtensionCreateRequest, OnboardingExtensionResponse, UpdateOnboardingExtensionStateRequest } from "../types/onboardingExtension.js";
+import { createOnboardingExtensionRequestController, updateOnboardingExtensionRequestController, updateOnboardingExtensionRequestState } from "./onboardingExtension.js";
+import { UpdateOnboardingExtensionRequest } from "../types/onboardingExtension.js";
 import logger from "../utils/logger.js";
 
 export const createRequestController = async (
@@ -117,7 +116,7 @@ export const getRequestsController = async (req: any, res: any) => {
 
 /**
  * Processes update requests before acknowledgment based on type.
- * 
+ *
  * @param {Request} req - The request object.
  * @param {CustomResponse} res - The response object.
  * @returns {Promise<void>} Resolves or sends an error for invalid types.

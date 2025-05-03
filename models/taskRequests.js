@@ -581,7 +581,7 @@ const removeOldField = async () => {
   return { documentsModified, totalDocuments };
 };
 
-export {
+export default {
   fetchTaskRequests,
   fetchPaginatedTaskRequests,
   fetchTaskRequestById,

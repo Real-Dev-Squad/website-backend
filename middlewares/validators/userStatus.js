@@ -1,5 +1,6 @@
 import Joi from "joi";
 import { userState, CANCEL_OOO } from "../../constants/userStatus.js";
+import logger from "../../utils/logger.js";
 
 const threeDaysInMilliseconds = 172800000;
 
@@ -136,8 +137,4 @@ const validateGetQueryParams = async (req, res, next) => {
   }
 };
 
-export default {
-  validateUserStatus,
-  validateMassUpdate,
-  validateGetQueryParams,
-};
+export { validateUserStatus, validateMassUpdate, validateGetQueryParams };

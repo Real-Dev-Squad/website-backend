@@ -2,7 +2,7 @@ import firestore from "../utils/firestore.js";
 import { chunks } from "../utils/array.js";
 import { DOCUMENT_WRITE_SIZE as FIRESTORE_BATCH_OPERATIONS_LIMIT } from "../constants/constants.js";
 import { fetchUsersNotInDiscordServer } from "../models/users.js";
-import { fetchIncompleteTasksByUserIds } from "../models/tasks.js";
+import taskModel from "../models/tasks.js";
 import logger from "../utils/logger.js";
 
 const tasksModel = firestore.collection("tasks");
@@ -68,7 +68,7 @@ const fetchOrphanedTasks = async () => {
 
     const userIds = userSnapshot.docs.map((doc) => doc.id);
 
-    const orphanedTasksData = await fetchIncompleteTasksByUserIds(userIds);
+    const orphanedTasksData = await taskModel.fetchIncompleteTasksByUserIds(userIds);
 
     if (orphanedTasksData.empty) {
       return [];

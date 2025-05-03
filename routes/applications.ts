@@ -1,9 +1,9 @@
 // @ts-nocheck
 
 import express from "express";
-import ROLES from "../constants/roles.js";
+import { ROLES } from "../constants/roles.js";
 import authenticate from "../middlewares/authenticate.js";
-import authorizeRoles from "../middlewares/authorizeRoles.js";
+import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 import * as applications from "../controllers/applications.js";
 import { authorizeOwnOrSuperUser } from "../middlewares/authorizeOwnOrSuperUser.js";
 import * as applicationValidator from "../middlewares/validators/application.js";

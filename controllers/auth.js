@@ -1,9 +1,10 @@
 import config from "config";
 import passport from "passport";
+
 import { DATA_ADDED_SUCCESSFULLY, SOMETHING_WENT_WRONG } from "../constants/errorMessages.js";
 import QrCodeAuthModel from "../models/qrCodeAuth.js";
-import users from "../models/users.js";
-import authService from "../services/authService.js";
+import { addOrUpdate, fetchUser } from "../models/users.js";
+import { generateAuthToken } from "../services/authService.js";
 import logger from "../utils/logger.js";
 
 const googleAuthLogin = (req, res, next) => {
@@ -80,7 +81,7 @@ async function handleGoogleLogin(req, res, user, authRedirectionUrl) {
       updated_at: null,
     };
 
-    const userDataFromDB = await users.fetchUser({ email: userData.email });
+    const userDataFromDB = await fetchUser({ email: userData.email });
 
     if (userDataFromDB.userExists) {
       if (userDataFromDB.user.roles?.developer) {
@@ -90,9 +91,9 @@ async function handleGoogleLogin(req, res, user, authRedirectionUrl) {
       }
     }
 
-    const { userId, incompleteUserDetails } = await users.addOrUpdate(userData);
+    const { userId, incompleteUserDetails } = await addOrUpdate(userData);
 
-    const token = authService.generateAuthToken({ userId });
+    const token = generateAuthToken({ userId });
 
     const cookieOptions = getAuthCookieOptions();
 
@@ -184,9 +185,9 @@ const githubAuthCallback = (req, res, next) => {
         }
       }
 
-      const { userId, incompleteUserDetails, role } = await users.addOrUpdate(userData);
+      const { userId, incompleteUserDetails, role } = await addOrUpdate(userData);
 
-      const token = authService.generateAuthToken({ userId });
+      const token = generateAuthToken({ userId });
 
       const cookieOptions = getAuthCookieOptions();
       // respond with a cookie
@@ -194,7 +195,7 @@ const githubAuthCallback = (req, res, next) => {
 
       /* redirectUrl woud be like https://realdevsquad.com?v2=true */
       if (isV2FlagPresent) {
-        const tokenV2 = authService.generateAuthToken({ userId, role });
+        const tokenV2 = generateAuthToken({ userId, role });
         res.cookie(config.get("userToken.cookieV2Name"), tokenV2, cookieOptions);
       }
 
@@ -264,7 +265,7 @@ const updateAuthStatus = async (req, res) => {
     const authStatus = req.params.authorization_status;
     let token;
     if (authStatus === "AUTHORIZED") {
-      token = authService.generateAuthToken({ userId });
+      token = generateAuthToken({ userId });
     }
     const result = await QrCodeAuthModel.updateStatus(userId, authStatus, token);
 

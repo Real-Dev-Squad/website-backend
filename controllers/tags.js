@@ -87,9 +87,4 @@ const getTagsByType = async (req, res) => {
   }
 };
 
-export default {
-  addTag,
-  deleteTag,
-  getAllTags,
-  getTagsByType,
-};
+export { addTag, deleteTag, getAllTags, getTagsByType };

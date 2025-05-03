@@ -1,4 +1,4 @@
-import { fetchSkillLevelTask } from "../models/tasks.js";
+import taskModel from "../models/tasks.js";
 import firestore from "../utils/firestore.js";
 
 const tasks = firestore.collection("tasks");
@@ -6,7 +6,7 @@ const tasks = firestore.collection("tasks");
 const assignTask = async function (req, res) {
   try {
     // this hardcoded value will be removed once we have user skill
-    const { task } = await fetchSkillLevelTask("FRONTEND", 1);
+    const { task } = await taskModel.fetchSkillLevelTask("FRONTEND", 1);
     if (!task) return res.json({ message: "Task updated but another task not found" });
 
     const docId = task.id;

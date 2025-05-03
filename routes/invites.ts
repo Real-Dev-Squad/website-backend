@@ -1,8 +1,9 @@
 import express from "express";
+import { createInviteValidator } from "../middlewares/validators/invites.js";
+import { createInviteLink,getInviteLink } from "../controllers/invites.js";
+import authinticateServiceRequest from "../middlewares/authinticateServiceRequest.js";
+
 const router = express.Router();
-import { createInviteValidator } from "../middlewares/validators/invites";
-import { createInviteLink,getInviteLink } from "../controllers/invites";
-import authinticateServiceRequest from "../middlewares/authinticateServiceRequest";
 
 router.post("/",authinticateServiceRequest, createInviteValidator, createInviteLink);
 router.get("/:userId" ,authinticateServiceRequest, getInviteLink);

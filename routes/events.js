@@ -1,6 +1,6 @@
 import express from "express";
 import authenticate from "../middlewares/authenticate.js";
-import authorizeRoles from "../middlewares/authorizeRoles.js";
+import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 import { ROLES } from "../constants/roles.js";
 import events from "../controllers/events.js";
 import eventsValidator from "../middlewares/validators/events.js";

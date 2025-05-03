@@ -103,4 +103,4 @@ const subscribeUserToChallenge = async (userId, challengeId) => {
   }
 };
 
-export { fetchChallenges, fetchParticipantsData, postChallenge, subscribeUserToChallenge };
+export default { fetchChallenges, fetchParticipantsData, postChallenge, subscribeUserToChallenge };

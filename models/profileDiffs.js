@@ -200,7 +200,7 @@ const updateProfileDiff = async (profileDiffData, profileId) => {
   }
 };
 
-export {
+export default {
   fetchProfileDiffs,
   fetchProfileDiffsWithPagination,
   fetchProfileDiff,

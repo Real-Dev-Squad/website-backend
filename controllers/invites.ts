@@ -1,9 +1,9 @@
-import { addInviteToInviteModel, getUserDiscordInvite } from "../models/discordactions";
-import { InviteBodyRequest } from "../types/invites";
-import {CustomResponse} from "../types/global";
-import { addLog } from "../models/logs";
-import { generateDiscordInviteLink } from "../utils/discord-actions";
-import { logType } from "../constants/logs";
+import { addInviteToInviteModel, getUserDiscordInvite } from "../models/discordactions.js";
+import { InviteBodyRequest } from "../types/invites.js";
+import {CustomResponse} from "../types/global.js";
+import { addLog } from "../models/logs.js";
+import { generateDiscordInviteLink } from "../utils/discord-actions.js";
+import { logType } from "../constants/logs.js";
 import logger from "../utils/logger.js";
 
 export const createInviteLink = async (req: InviteBodyRequest, res: CustomResponse) => {

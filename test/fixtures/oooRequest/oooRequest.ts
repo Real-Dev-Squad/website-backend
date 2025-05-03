@@ -1,4 +1,4 @@
-import { REQUEST_STATE, REQUEST_TYPE } from "../../../constants/requests";
+import { REQUEST_STATE, REQUEST_TYPE } from "../../../constants/requests.js";
 
 export const createOooStatusRequests = {
   type: "OOO",

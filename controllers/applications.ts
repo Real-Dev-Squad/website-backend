@@ -1,7 +1,9 @@
-import { logType } from "../constants/logs.js";
 import type { Request, Response } from "express";
+import admin from "firebase-admin";
+
+import { logType } from "../constants/logs.js";
 import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
-import { 
+import {
   getAllApplications,
   getUserApplications,
   addApplication,
@@ -10,7 +12,6 @@ import {
   getApplicationById
 } from "../models/applications.js";
 import { API_RESPONSE_MESSAGES } from "../constants/application.js";
-import admin from "firebase-admin";
 import logger from "../utils/logger.js";
 import { addLog } from "../services/logService.js";
 

@@ -1,5 +1,6 @@
 import firestore from "../utils/firestore.js";
 import { buildExtensionRequests, formatExtensionRequest, generateNextLink } from "../utils/extensionRequests.js";
+import logger from "../utils/logger.js";
 
 const extensionRequestsModel = firestore.collection("extensionRequests");
 

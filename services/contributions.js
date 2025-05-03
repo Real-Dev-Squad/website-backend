@@ -1,5 +1,5 @@
 import { fetchPRsByUser } from "../services/githubService.js";
-import { fetchUserTasks } from "../models/tasks.js";
+import taskModel from "../models/tasks.js";
 import { fetchUser } from "../models/users.js";
 import { getUsername } from "../utils/users.js";
 
@@ -10,7 +10,7 @@ import { getUsername } from "../utils/users.js";
 const getUserContributions = async (username) => {
   const contributions = {};
   const { data } = await fetchPRsByUser(username);
-  const allUserTasks = await fetchUserTasks(username);
+  const allUserTasks = await taskModel.fetchUserTasks(username);
   const noteworthy = [];
   const all = [];
 
@@ -157,4 +157,4 @@ const extractUserDetails = (data) => {
   }
 };
 
-export { getUserContributions };
+export default { getUserContributions };

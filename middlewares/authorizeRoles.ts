@@ -1,4 +1,4 @@
-import { ROLES } from "../constants/roles";
+import { ROLES } from "../constants/roles.js";
 
 /**
  * Create an authorization middleware for a route based on the required role needed

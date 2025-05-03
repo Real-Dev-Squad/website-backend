@@ -1,5 +1,7 @@
-import authService from "../services/authService.js";
-import dataAccess from "../services/dataAccessLayer.js";
+import config from "config";
+import logger from "../utils/logger.js";
+import { decodeAuthToken, generateAuthToken, verifyAuthToken } from "../services/authService.js";
+import { retrieveUsers } from "../services/dataAccessLayer.js";
 
 /**
  * Middleware to check if the user has been restricted. If user is restricted,
@@ -51,10 +53,10 @@ export default async (req, res, next) => {
       token = req.headers.authorization.split(" ")[1];
     }
 
-    const { userId } = authService.verifyAuthToken(token);
+    const { userId } = verifyAuthToken(token);
 
     // add user data to `req.userData` for further use
-    const userData = await dataAccess.retrieveUsers({ id: userId });
+    const userData = await retrieveUsers({ id: userId });
     req.userData = userData.user;
 
     return checkRestricted(req, res, next);
@@ -64,8 +66,8 @@ export default async (req, res, next) => {
     if (err.name === "TokenExpiredError") {
       const refreshTtl = config.get("userToken.refreshTtl");
       const token = req.cookies[config.get("userToken.cookieName")];
-      const { userId, iat } = authService.decodeAuthToken(token);
-      const newToken = authService.generateAuthToken({ userId });
+      const { userId, iat } = decodeAuthToken(token);
+      const newToken = generateAuthToken({ userId });
       const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
 
       // add new JWT to the response if it satisfies the refreshTtl time
@@ -79,7 +81,7 @@ export default async (req, res, next) => {
         });
 
         // add user data to `req.userData` for further use
-        req.userData = await dataAccess.retrieveUsers({ id: userId });
+        req.userData = await retrieveUsers({ id: userId });
         return checkRestricted(req, res, next);
       } else {
         return res.boom.unauthorized("Unauthenticated User");

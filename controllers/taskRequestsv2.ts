@@ -1,13 +1,13 @@
-import { REQUEST_STATE, TASK_REQUEST_MESSAGES } from "../constants/requests";
-import { TASK_REQUEST_TYPE } from "../constants/taskRequests";
-import { addLog } from "../models/logs";
-import { createRequest, getRequestByKeyValues } from "../models/requests";
-import { fetchTask } from "../models/tasks";
-import { fetchUser } from "../models/users";
-import { fetchIssuesById } from "../services/githubService";
-import { CustomResponse } from "../typeDefinitions/global";
-import { userData } from "../types/global";
-import { TaskRequestRequest } from "../types/taskRequests";
+import { REQUEST_STATE, TASK_REQUEST_MESSAGES } from "../constants/requests.js";
+import { TASK_REQUEST_TYPE } from "../constants/taskRequests.js";
+import { addLog } from "../models/logs.js";
+import { createRequest, getRequestByKeyValues } from "../models/requests.js";
+import taskModel from "../models/tasks.js";
+import { fetchUser } from "../models/users.js";
+import { fetchIssuesById } from "../services/githubService.js";
+import { CustomResponse } from "../typeDefinitions/global.js";
+import { userData } from "../types/global.js";
+import { TaskRequestRequest } from "../types/taskRequests.js";
 import logger from "../utils/logger.js";
 
 export const createTaskRequestController = async (req: TaskRequestRequest, res: CustomResponse) => {
@@ -33,7 +33,7 @@ export const createTaskRequestController = async (req: TaskRequestRequest, res: 
         if (!req.userData.roles?.super_user) {
           return res.boom.unauthorized(TASK_REQUEST_MESSAGES.NOT_AUTHORIZED_TO_CREATE_REQUEST);
         }
-        const { taskData } = await fetchTask(taskRequestData.taskId);
+        const { taskData } = await taskModel.fetchTask(taskRequestData.taskId);
         if (!taskData) {
           return res.boom.badRequest(TASK_REQUEST_MESSAGES.TASK_NOT_EXIST);
         }

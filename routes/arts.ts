@@ -1,7 +1,7 @@
 import express from "express";
-import authenticate from "../middlewares/authenticate";
-import { createArt } from "../middlewares/validators/arts";
-import { addArt, getArts, getUserArts } from "../controllers/arts";
+import authenticate from "../middlewares/authenticate.js";
+import { createArt } from "../middlewares/validators/arts.js";
+import { addArt, getArts, getUserArts } from "../controllers/arts.js";
 
 const router = express.Router();
 

@@ -1,9 +1,9 @@
+import joi from "joi";
 import { NextFunction } from "express";
-import { CustomRequest, CustomResponse } from "../../types/global";
-import { customWordCountValidator } from "../../utils/customWordCountValidator";
-const joi = require("joi");
-const { APPLICATION_STATUS_TYPES } = require("../../constants/application");
-import logger from '../../utils/logger.js';
+import { CustomRequest, CustomResponse } from "../../types/global.js";
+import { customWordCountValidator } from "../../utils/customWordCountValidator.js";
+import { APPLICATION_STATUS_TYPES } from "../../constants/application.js";
+import logger from "../../utils/logger.js";
 
 const validateApplicationData = async (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
   const schema = joi
@@ -56,7 +56,7 @@ const validateApplicationUpdateData = async (req: CustomRequest, res: CustomResp
         .optional()
         .custom((value, helper) => {
           if (!APPLICATION_STATUS_TYPES.includes(value)) {
-            return helper.message("Status is not valid");
+            return helper.message({ custom: "Status is not valid" });
           }
           return value;
         }),
@@ -90,7 +90,7 @@ const validateApplicationQueryParam = async (req: CustomRequest, res: CustomResp
   }
 };
 
-export default  {
+export default {
   validateApplicationData,
   validateApplicationUpdateData,
   validateApplicationQueryParam,

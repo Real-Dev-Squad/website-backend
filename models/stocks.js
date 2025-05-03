@@ -1,4 +1,5 @@
 import firestore from "../utils/firestore.js";
+import logger from "../utils/logger.js";
 
 const stocksModel = firestore.collection("stocks");
 const userStocksModel = firestore.collection("user-stocks");

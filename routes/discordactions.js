@@ -26,7 +26,7 @@ import {
 import checkIsVerifiedDiscord from "../middlewares/verifydiscord.js";
 import checkCanGenerateDiscordLink from "../middlewares/checkCanGenerateDiscordLink.js";
 import { ROLES } from "../constants/roles.js";
-import authorizeRoles from "../middlewares/authorizeRoles.js";
+import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 import { Services } from "../constants/bot.js";
 import { verifyCronJob } from "../middlewares/authorizeBot.js";
 import { authorizeAndAuthenticate } from "../middlewares/authorizeUsersAndService.js";

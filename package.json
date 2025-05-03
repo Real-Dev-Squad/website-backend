@@ -7,7 +7,7 @@
     "start": "node ./dist/server.js",
     "tsc": "tsc",
     "postinstall": "yarn run tsc",
-    "dev": "cross-env NODE_ENV=development nodemon --verbose --ignore 'dist/**' --watch '**/*.{ts,js}' --exec 'tsc && node dist/server.js'",
+    "dev": "cross-env NODE_ENV=development nodemon --ignore 'dist/**' --watch '**/*.{ts,js}' --exec 'tsc && node dist/server.js'",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "validate-setup": "node scripts/validateSetup.js",

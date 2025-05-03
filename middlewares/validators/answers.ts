@@ -1,6 +1,6 @@
-const joi = require("joi");
+import joi from "joi";
 import { Request, NextFunction } from "express";
-import { CustomResponse } from "../../typeDefinitions/global";
+import { CustomResponse } from "../../typeDefinitions/global.js";
 import logger from "../../utils/logger.js";
 
 const createAnswer = async (req: Request, res: CustomResponse, next: NextFunction) => {
@@ -34,4 +34,4 @@ const updateAnswer = async (req: Request, res: CustomResponse, next: NextFunctio
   }
 };
 
-export default  { createAnswer, updateAnswer };
+export default { createAnswer, updateAnswer };

@@ -1,4 +1,5 @@
 import firestore from "../utils/firestore.js";
+import logger from "../utils/logger.js";
 
 const itemTagsModel = firestore.collection("itemTags");
 const tagModel = firestore.collection("tags");
@@ -91,4 +92,4 @@ const getItemBasedOnFilter = async (query) => {
   }
 };
 
-export { addTagsToItem, removeTagsFromItem, getItemBasedOnFilter };
+export default { addTagsToItem, removeTagsFromItem, getItemBasedOnFilter };

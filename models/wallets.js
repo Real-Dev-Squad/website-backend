@@ -1,5 +1,6 @@
 import { INITIAL_WALLET } from "../constants/wallets.js";
 import firestore from "../utils/firestore.js";
+import logger from "../utils/logger.js";
 
 const walletModel = firestore.collection("wallets");
 

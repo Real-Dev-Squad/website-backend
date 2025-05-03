@@ -1,7 +1,7 @@
+import config from "config";
 import firestore from "../utils/firestore.js";
 import { fetchAllUsers } from "../models/users.js";
 import { generateAuthTokenForCloudflare, generateCloudFlareHeaders } from "../utils/discord-actions.js";
-import config from "config";
 import logger from "../utils/logger.js";
 
 const userModel = firestore.collection("users");

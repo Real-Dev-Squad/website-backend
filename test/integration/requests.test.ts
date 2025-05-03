@@ -27,7 +27,7 @@ import {
   REQUEST_REJECTED_SUCCESSFULLY,
   REQUEST_ALREADY_REJECTED,
 } from "../../constants/requests.js";
-import { updateTask } from "../../models/tasks.js";
+import taskModel from "../../models/tasks.js";
 import { validTaskAssignmentRequest, validTaskCreqtionRequest } from "../fixtures/taskRequests/taskRequests.js";
 
 const userData = userDataFixture();
@@ -441,8 +441,8 @@ describe("/requests Extension", function () {
     userJwtToken2 = generateAuthToken({ userId: userId2 });
     superUserJwtToken = generateAuthToken({ userId: superUserId });
 
-    taskId1 = (await updateTask({ ...taskData[0], assigneeId: userId1 })).taskId;
-    taskId2 = (await updateTask({ ...taskData[1] })).taskId;
+    taskId1 = (await taskModel.updateTask({ ...taskData[0], assigneeId: userId1 })).taskId;
+    taskId2 = (await taskModel.updateTask({ ...taskData[1] })).taskId;
   });
 
   afterEach(async function () {

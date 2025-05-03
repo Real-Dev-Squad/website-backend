@@ -1,7 +1,7 @@
-import issuesService from "../services/issuesService.js";
+import { searchOrgIssues, getOrgIssues } from "../services/issuesService.js";
 import tasks from "../models/tasks.js";
 import { SOMETHING_WENT_WRONG } from "../constants/errorMessages.js";
-import githubService from "../services/githubService.js";
+import { fetchIssuesById } from "../services/githubService.js";
 import config from "config";
 import logger from "../utils/logger.js";
 
@@ -23,12 +23,12 @@ export const getIssues = async (req, res) => {
       const issueUrlPaths = url.pathname.split("/");
       const repositoryName = issueUrlPaths[2];
       const issueNumber = issueUrlPaths[4];
-      issues.data = [await githubService.fetchIssuesById(repositoryName, issueNumber)];
+      issues.data = [await fetchIssuesById(repositoryName, issueNumber)];
     } else if (queryString) {
-      const searchedIssues = await issuesService.searchOrgIssues(queryString);
+      const searchedIssues = await searchOrgIssues(queryString);
       issues.data = searchedIssues?.data?.items ?? [];
     } else {
-      issues = await issuesService.getOrgIssues();
+      issues = await getOrgIssues();
     }
 
     let issuesData = issues.data.length > 0 ? issues.data : [];

@@ -1,13 +1,13 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { verifyCronJob, verifyDiscordBot } from "./authorizeBot";
-import { CustomRequest, CustomResponse } from "../types/global";
 import { NextFunction } from "express";
-import authenticate from "./authenticate";
-import { authorizeRoles } from "./authorizeRoles";
+import { verifyCronJob, verifyDiscordBot } from "./authorizeBot.js";
+import { CustomRequest, CustomResponse } from "../types/global.js";
+import authenticate from "./authenticate.js";
+import { authorizeRoles } from "./authorizeRoles.js";
 import logger from "../utils/logger.js";
-import { Services } from "../constants/bot";
-import { ROLES } from "../constants/roles";
-import { INTERNAL_SERVER_ERROR_MESSAGE } from "../constants/progresses";
+import { Services } from "../constants/bot.js";
+import { ROLES } from "../constants/roles.js";
+import { INTERNAL_SERVER_ERROR_MESSAGE } from "../constants/progresses.js";
 
 export const authorizeAndAuthenticate = (allowedRoles: string[], allowedServices: string[]) => {
   const isRolesValid = allowedRoles.every((role) => Object.values(ROLES).includes(role));

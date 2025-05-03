@@ -1,14 +1,14 @@
 import { Request } from "express";
 import crypto from "crypto";
 
-import { Answer, AnswerClient, AnswerFieldsToUpdate, AnswerStatus } from "../typeDefinitions/answers";
-import { CustomRequest, CustomResponse } from "../typeDefinitions/global";
+import { Answer, AnswerClient, AnswerFieldsToUpdate, AnswerStatus } from "../typeDefinitions/answers.js";
+import { CustomRequest, CustomResponse } from "../typeDefinitions/global.js";
 
-import * as answerQuery from "../models/answers";
+import * as answerQuery from "../models/answers.js";
 
-import { ANSWER_STATUS } from "../constants/answers";
-import { HEADERS_FOR_SSE } from "../constants/constants";
-import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages";
+import { ANSWER_STATUS } from "../constants/answers.js";
+import { HEADERS_FOR_SSE } from "../constants/constants.js";
+import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
 import logger from "../utils/logger.js";
 
 /* Refer to limitation of this clients array here(in the limitations section of doc) - https://github.com/Real-Dev-Squad/website-www/wiki/%5BFeature%5D-%E2%80%90-Realtime-Word-Cloud-Questions-Answers-Feature*/

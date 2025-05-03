@@ -1,9 +1,9 @@
-import { PROFILE_SVC_GITHUB_URL } from "../constants/urls";
+import { PROFILE_SVC_GITHUB_URL } from "../constants/urls.js";
 import logger from "../utils/logger.js";
-import {addUserToGroup, createUser, fetchAwsUserIdByUsername} from "../utils/awsFunctions";
+import {addUserToGroup, createUser, fetchAwsUserIdByUsername} from "../utils/awsFunctions.js";
 
-import * as dataAccess from "../services/dataAccessLayer";
-import * as userDataLevels from '../constants/userDataLevels';
+import * as dataAccess from "../services/dataAccessLayer.js";
+import * as userDataLevels from '../constants/userDataLevels.js';
 
 export const addUserToAWSGroup = async (req, res) => {
     const { groupId, userId } = req.body;
@@ -15,15 +15,15 @@ export const addUserToAWSGroup = async (req, res) => {
       } else if(!userInfoData.user.email) {
         return res.status(400).json({ error: `User email is required to create an AWS user. Please update your email by setting up Profile service, url : ${PROFILE_SVC_GITHUB_URL}` });
       }
-      
+
       let awsUserId = await fetchAwsUserIdByUsername(userInfoData.user.username);
-      
+
       let userCreationResponse = null;
-      
+
       if (awsUserId === null){
         // We need to create the user in AWS before and then fetch its Id
         userCreationResponse = await createUser(userInfoData.user.username, userInfoData.user.email);
-        
+
         if (userCreationResponse.conflict){
           return res.status(400).json({
             error: `Username or Email is already being used, please use another email / username for creating account in AWS`

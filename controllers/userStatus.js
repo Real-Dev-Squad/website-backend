@@ -1,11 +1,21 @@
-import { Forbidden, NotFound } from "http-errors";
+import httpError from "http-errors";
 import { getUserIdBasedOnRoute } from "../utils/userStatus.js";
 import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
-import dataAccess from "../services/dataAccessLayer.js";
-import userStatusModel from "../models/userStatus.js";
+import { retrieveUsers } from "../services/dataAccessLayer.js";
+import {
+  deleteUserStatus as deleteUserStatusModel,
+  getUserStatus as getUserStatusModel,
+  getAllUserStatus as getAllUserStatusModel,
+  updateUserStatus as updateUserStatusModel,
+  updateAllUserStatus as updateAllUserStatusModel,
+  getTaskBasedUsersStatus as getTaskBasedUsersStatusModel,
+  batchUpdateUsersStatus as batchUpdateUsersStatusModel,
+  cancelOooStatus as cancelOooStatusModel,
+} from "../models/userStatus.js";
 import { userState, CANCEL_OOO } from "../constants/userStatus.js";
-import ROLES from "../constants/roles.js";
+import { ROLES } from "../constants/roles.js";
 import firestore from "../utils/firestore.js";
+import logger from "../utils/logger.js";
 
 const usersCollection = firestore.collection("users");
 
@@ -20,7 +30,7 @@ const usersCollection = firestore.collection("users");
 const deleteUserStatus = async (req, res) => {
   try {
     const { userId } = req.params;
-    const deletedUserStatus = await userStatusModel.deleteUserStatus(userId);
+    const deletedUserStatus = await deleteUserStatusModel(userId);
     const responseObj = { id: deletedUserStatus.id, userId };
     let statusCode;
     if (deletedUserStatus.userStatusExisted) {
@@ -47,7 +57,7 @@ const getUserStatus = async (req, res) => {
   try {
     const userId = getUserIdBasedOnRoute(req);
     if (userId) {
-      const userData = await userStatusModel.getUserStatus(userId);
+      const userData = await getUserStatusModel(userId);
       const { userStatusExists, id, data } = userData;
       const responseObject = { id, userId, data: null, message: "" };
       if (data) responseObject.data = data;
@@ -76,12 +86,12 @@ const getUserStatus = async (req, res) => {
  */
 const getAllUserStatus = async (req, res) => {
   try {
-    const { allUserStatus } = await userStatusModel.getAllUserStatus(req.query);
+    const { allUserStatus } = await getAllUserStatusModel(req.query);
     const activeUsers = [];
     if (allUserStatus) {
       const allUsersStatusFetchPromises = allUserStatus.map(async (status) => {
         //  fetching users from users collection with the help of userID in userStatus collection
-        const result = await dataAccess.retrieveUsers({ id: status.userId });
+        const result = await retrieveUsers({ id: status.userId });
         if (!result.user?.roles?.archived) {
           status.full_name = `${result.user.first_name} ${result.user.last_name}`;
           status.picture = result.user.picture;
@@ -118,7 +128,7 @@ const updateUserStatus = async (req, res) => {
 
     if (userId) {
       const dataToUpdate = req.body;
-      const updateStatus = await userStatusModel.updateUserStatus(userId, dataToUpdate);
+      const updateStatus = await updateUserStatusModel(userId, dataToUpdate);
       const { userStatusExists, id, data } = updateStatus;
       const responseObject = { id, userId, data: null, message: "" };
       let statusCode;
@@ -147,7 +157,7 @@ const updateUserStatus = async (req, res) => {
  */
 const updateAllUserStatus = async (req, res) => {
   try {
-    const data = await userStatusModel.updateAllUserStatus();
+    const data = await updateAllUserStatusModel();
     return res.status(200).json({
       message: "All User Status updated successfully.",
       data,
@@ -166,7 +176,7 @@ const updateAllUserStatus = async (req, res) => {
 
 const getTaskBasedUsersStatus = async (req, res) => {
   try {
-    const data = await userStatusModel.getTaskBasedUsersStatus();
+    const data = await getTaskBasedUsersStatusModel();
     return res.json({
       message: "All users based on tasks found successfully.",
       data,
@@ -195,7 +205,7 @@ const getUserStatusControllers = async (req, res, next) => {
  */
 const batchUpdateUsersStatus = async (req, res) => {
   try {
-    const data = await userStatusModel.batchUpdateUsersStatus(req.body.users);
+    const data = await batchUpdateUsersStatusModel(req.body.users);
     return res.json({
       message: "users status updated successfully.",
       data,
@@ -211,20 +221,20 @@ const batchUpdateUsersStatus = async (req, res) => {
 const cancelOOOStatus = async (req, res) => {
   const userId = req.userData.id;
   try {
-    const responseObject = await userStatusModel.cancelOooStatus(userId);
+    const responseObject = await cancelOooStatusModel(userId);
     return res.status(200).json(responseObject);
   } catch (error) {
     logger.error(`Error while cancelling the ${userState.OOO} Status : ${error}`);
-    if (error instanceof Forbidden) {
+    if (error instanceof httpError.Forbidden) {
       return res.status(403).json({
         statusCode: 403,
-        error: "Forbidden",
+        error: "httpErrpr.Forbidden",
         message: error.message,
       });
-    } else if (error instanceof NotFound) {
+    } else if (error instanceof httpError.NotFound) {
       return res.status(404).json({
         statusCode: 404,
-        error: "NotFound",
+        error: "httpErrpr.NotFound",
         message: error.message,
       });
     }
@@ -269,7 +279,7 @@ const updateUserStatuses = async (req, res, next) => {
   }
 };
 
-export default {
+export {
   deleteUserStatus,
   getUserStatus,
   getAllUserStatus,

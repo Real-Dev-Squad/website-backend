@@ -1,5 +1,7 @@
 import { SOMETHING_WENT_WRONG } from "../constants/errorMessages.js";
 import artsQuery from "../models/arts.js";
+import logger from "../utils/logger.js";
+
 /**
  * Adds art
  *

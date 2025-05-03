@@ -344,7 +344,7 @@ const generateEventCode = async (req, res) => {
   }
 };
 
-export {
+export default {
   createEvent,
   getAllEvents,
   joinEvent,

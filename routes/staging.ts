@@ -1,8 +1,8 @@
-import { removePrivileges, updateRoles } from "../controllers/staging";
-import { validateRevokePrivileges, validateUserRoles } from "../middlewares/validators/staging";
-
-import authenticate from "../middlewares/authenticate";
 import express from "express";
+
+import { removePrivileges, updateRoles } from "../controllers/staging.js";
+import { validateRevokePrivileges, validateUserRoles } from "../middlewares/validators/staging.js";
+import authenticate from "../middlewares/authenticate.js";
 
 const router = express.Router();
 

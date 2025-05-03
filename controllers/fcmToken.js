@@ -1,5 +1,6 @@
 import { saveFcmToken } from "../models/fcmToken.js";
-import { Conflict } from "http-errors";
+import httpError from "http-errors";
+import logger from "../utils/logger.js";
 
 /**
  * Route used to get the health status of teh server
@@ -17,7 +18,7 @@ export const fcmTokenController = async (req, res, next) => {
       message: "FCM token saved successfully",
     });
   } catch (error) {
-    if (error instanceof Conflict) {
+    if (error instanceof httpError.Conflict) {
       return next(error);
     }
     logger.error("Error in fcmTokenController: ", error);

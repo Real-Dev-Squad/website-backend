@@ -58,4 +58,4 @@ const getAllLevels = async () => {
   }
 };
 
-export { addLevel, deleteLevel, getAllLevels };
+export default { addLevel, deleteLevel, getAllLevels };

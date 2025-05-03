@@ -2,9 +2,12 @@
  * Initialise globals
  */
 import * as http from "http";
-import app from "./app.js";
-import logger from "./utils/logger.js";
 import config from "config";
+global.logger = logger;
+import logger from "./utils/logger.js";
+global.config = config;
+
+import app from "./app.js";
 
 // Initialise newrelic
 import "newrelic";

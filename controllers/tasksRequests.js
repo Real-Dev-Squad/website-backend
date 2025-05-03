@@ -4,8 +4,8 @@ import { addLog } from "../models/logs.js";
 import taskRequestsModel from "../models/taskRequests.js";
 import tasksModel from "../models/tasks.js";
 import { updateUserStatusOnTaskUpdate } from "../models/userStatus.js";
-import githubService from "../services/githubService.js";
-import usersUtils from "../utils/users.js";
+import { fetchIssuesById } from "../services/githubService.js";
+import { getUsername } from "../utils/users.js";
 import logger from "../utils/logger.js";
 
 const fetchTaskRequests = async (_, res) => {
@@ -48,7 +48,7 @@ const fetchTaskRequestById = async (req, res) => {
 const addTaskRequests = async (req, res) => {
   try {
     const taskRequestData = req.body;
-    const usernamePromise = usersUtils.getUsername(taskRequestData.userId);
+    const usernamePromise = getUsername(taskRequestData.userId);
     if (req.userData.id !== taskRequestData.userId && !req.userData.roles?.super_user) {
       return res.boom.forbidden("Not authorized to create the request");
     }
@@ -76,7 +76,7 @@ const addTaskRequests = async (req, res) => {
           const issueUrlPaths = url.pathname.split("/");
           const repositoryName = issueUrlPaths[3];
           const issueNumber = issueUrlPaths[5];
-          issuePromise = githubService.fetchIssuesById(repositoryName, issueNumber);
+          issuePromise = fetchIssuesById(repositoryName, issueNumber);
         } catch (error) {
           return res.boom.badRequest("External issue url is not valid");
         }
@@ -255,10 +255,10 @@ const migrateTaskRequests = async (req, res) => {
 };
 
 export {
+  updateTaskRequests,
+  addOrUpdate,
   fetchTaskRequests,
   fetchTaskRequestById,
   addTaskRequests,
-  addOrUpdate,
-  updateTaskRequests,
   migrateTaskRequests,
 };

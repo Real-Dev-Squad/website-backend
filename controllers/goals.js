@@ -1,11 +1,11 @@
 import { SOMETHING_WENT_WRONG } from "../constants/errorMessages.js";
-import goals from "../services/goalService.js";
+import { getOrCreateGoalUser } from "../services/goalService.js";
 
 export const getGoalSiteToken = async (req, res) => {
   try {
     const { roles, id: userId } = req.userData;
 
-    const goalApiResponse = await goals.getOrCreateGoalUser({ userId, roles });
+    const goalApiResponse = await getOrCreateGoalUser({ userId, roles });
 
     if (goalApiResponse.status === 201) {
       let goalApiData = await goalApiResponse.json();

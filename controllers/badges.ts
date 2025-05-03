@@ -26,7 +26,7 @@ export const getBadges = async (req, res, next) => {
  * @param res {Object} - Express response object
  * @returns {Object}: <badges: Array<badge>, message: string> - Return user badges
  */
-async function getUserBadges(req, res) {
+export async function getUserBadges(req, res) {
   try {
     const userId = req.params.id;
     const { badges } = await badgeQuery.fetchUserBadges(userId);

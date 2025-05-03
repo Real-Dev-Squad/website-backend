@@ -1,6 +1,6 @@
 import joi from "joi";
 
-import ROLES from "../../constants/roles.js";
+import { ROLES } from "../../constants/roles.js";
 import { userState } from "../../constants/userStatus.js";
 import { customWordCountValidator } from "../../utils/customWordCountValidator.js";
 import { IMAGE_VERIFICATION_TYPES } from "../../constants/imageVerificationTypes.js";

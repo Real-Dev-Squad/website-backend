@@ -1,5 +1,5 @@
 /* eslint-disable no-dupe-keys */
-import utils from "../utils/fetch.js";
+import { fetch } from "../utils/fetch.js";
 import logger from "../utils/logger.js";
 
 /**
@@ -88,7 +88,7 @@ const getGithubURL = (searchParams, resultsOptions = {}, searchString) => {
 };
 
 function getFetch(url) {
-  return utils.fetch(url, {
+  return fetch(url, {
     method: "GET",
     headers: {
       Accept: "application/vnd.github.v3+json",
@@ -223,13 +223,15 @@ const isLastPRMergedWithinDays = async (username, days) => {
 };
 
 export {
-  fetchClosedIssues,
-  fetchIssues,
-  fetchIssuesById,
-  fetchLastMergedPR,
-  fetchMergedPRs,
-  fetchOpenIssues,
-  fetchOpenPRs,
   fetchPRsByUser,
+  fetchOpenPRs,
+  fetchMergedPRs,
+  getFetch,
+  extractPRdetails,
+  fetchIssues,
+  fetchOpenIssues,
+  fetchClosedIssues,
+  fetchLastMergedPR,
   isLastPRMergedWithinDays,
+  fetchIssuesById,
 };

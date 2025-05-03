@@ -1,88 +1,97 @@
-import { SOMETHING_WENT_WRONG } from "../constants/errorMessages.js";
-import externalAccountsModel from "../models/external-accounts.js";
+import config from "config";
+import {
+  fetchExternalAccountData,
+  addExternalAccountData as _addExternalAccountData,
+} from "../models/external-accounts.js";
+import { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
+import { getDiscordMembers } from "../services/discordService.js";
+import { addOrUpdate, getUsersByRole, updateUsersInBatch } from "../models/users.js";
+import { retrieveDiscordUsers, fetchUsersForKeyValues } from "../services/dataAccessLayer.js";
+import { EXTERNAL_ACCOUNTS_POST_ACTIONS } from "../constants/external-accounts.js";
+import { removeDiscordRoleFromUser } from "../utils/removeDiscordRoleFromUser.js";
 import logger from "../utils/logger.js";
+import taskModel from "../models/tasks.js";
 
-// const addExternalAccountData = async (req, res) => {
-//   const createdOn = Date.now();
+const addExternalAccountData = async (req, res) => {
+  const createdOn = Date.now();
 
-//   try {
-//     const data = { ...req.body, createdOn };
+  try {
+    const data = { ...req.body, createdOn };
 
-//     // Check if token already exists
-//     const dataFound = await externalAccountsModel.fetchExternalAccountData("", data.token);
-//     if (dataFound.token && dataFound.token === data.token) {
-//       return res.boom.conflict("Token already exists");
-//     }
+    // Check if token already exists
+    const dataFound = await fetchExternalAccountData("", data.token);
+    if (dataFound.token && dataFound.token === data.token) {
+      return res.boom.conflict("Token already exists");
+    }
 
-//     await externalAccountsModel.addExternalAccountData(data);
+    await _addExternalAccountData(data);
 
-//     return res.status(201).json({ message: "Added external account data successfully" });
-//   } catch (error) {
-//     logger.error(`Error adding data: ${error}`);
-//     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
-//   }
-// };
+    return res.status(201).json({ message: "Added external account data successfully" });
+  } catch (error) {
+    logger(`Error adding data: ${error}`);
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+  }
+};
 
-// const getExternalAccountData = async (req, res) => {
-//   try {
-//     const externalAccountData = await externalAccountsModel.fetchExternalAccountData(req.query, req.params.token);
-//     if (!externalAccountData.id) {
-//       return res.boom.notFound("No data found");
-//     }
+const getExternalAccountData = async (req, res) => {
+  try {
+    const externalAccountData = await fetchExternalAccountData(req.query, req.params.token);
+    if (!externalAccountData.id) {
+      return res.boom.notFound("No data found");
+    }
 
-//     const attributes = externalAccountData.attributes;
-//     if (attributes.expiry && attributes.expiry < Date.now()) {
-//       return res.boom.unauthorized("Token Expired. Please generate it again");
-//     }
+    const attributes = externalAccountData.attributes;
+    if (attributes.expiry && attributes.expiry < Date.now()) {
+      return res.boom.unauthorized("Token Expired. Please generate it again");
+    }
 
-//     return res.status(200).json({ message: "Data returned successfully", attributes: attributes });
-//   } catch (error) {
-//     logger.error(`Error getting external account data: ${error}`);
-//     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
-//   }
-// };
+    return res.status(200).json({ message: "Data returned successfully", attributes: attributes });
+  } catch (error) {
+    logger(`Error getting external account data: ${error}`);
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+  }
+};
+const linkExternalAccount = async (req, res) => {
+  try {
+    const { id: userId, roles } = req.userData;
 
-// const linkExternalAccount = async (req, res) => {
-//   try {
-//     const { id: userId, roles } = req.userData;
+    const externalAccountData = await fetchExternalAccountData(req.query, req.params.token);
+    if (!externalAccountData.id) {
+      return res.boom.notFound("No data found");
+    }
 
-//     const externalAccountData = await externalAccountsModel.fetchExternalAccountData(req.query, req.params.token);
-//     if (!externalAccountData.id) {
-//       return res.boom.notFound("No data found");
-//     }
+    const attributes = externalAccountData.attributes;
+    if (attributes.expiry && attributes.expiry < Date.now()) {
+      return res.boom.unauthorized("Token Expired. Please generate it again");
+    }
 
-//     const attributes = externalAccountData.attributes;
-//     if (attributes.expiry && attributes.expiry < Date.now()) {
-//       return res.boom.unauthorized("Token Expired. Please generate it again");
-//     }
+    await addOrUpdate(
+      {
+        roles: { ...roles, in_discord: true, archived: false },
+        discordId: attributes.discordId,
+        discordJoinedAt: attributes.discordJoinedAt,
+      },
+      userId
+    );
 
-//     await addOrUpdate(
-//       {
-//         roles: { ...roles, in_discord: true, archived: false },
-//         discordId: attributes.discordId,
-//         discordJoinedAt: attributes.discordJoinedAt,
-//       },
-//       userId
-//     );
+    const unverifiedRoleId = config.get("discordUnverifiedRoleId");
+    const unverifiedRoleRemovalResponse = await removeDiscordRoleFromUser(
+      req.userData,
+      attributes.discordId,
+      unverifiedRoleId
+    );
 
-//     const unverifiedRoleId = config.get("discordUnverifiedRoleId");
-//     const unverifiedRoleRemovalResponse = await removeDiscordRoleUtils.removeDiscordRoleFromUser(
-//       req.userData,
-//       attributes.discordId,
-//       unverifiedRoleId
-//     );
+    if (!unverifiedRoleRemovalResponse.success) {
+      const message = `User details updated but ${unverifiedRoleRemovalResponse.message}. Please contact admin`;
+      return res.boom.internal(message, { message });
+    }
 
-//     if (!unverifiedRoleRemovalResponse.success) {
-//       const message = `User details updated but ${unverifiedRoleRemovalResponse.message}. Please contact admin`;
-//       return res.boom.internal(message, { message });
-//     }
-
-//     return res.status(204).json({ message: "Your discord profile has been linked successfully" });
-//   } catch (error) {
-//     logger.error(`Error getting external account data: ${error}`);
-//     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
-//   }
-// };
+    return res.status(204).json({ message: "Your discord profile has been linked successfully" });
+  } catch (error) {
+    logger(`Error getting external account data: ${error}`);
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+  }
+};
 
 /**
  * @deprecated
@@ -90,213 +99,187 @@ import logger from "../utils/logger.js";
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-// const syncExternalAccountData = async (req, res) => {
-//   try {
-//     const [discordUserData, rdsUserData] = await Promise.all([getDiscordMembers(), retrieveDiscordUsers()]);
-//     const rdsUserDataMap = {};
-//     const updateUserDataPromises = [];
-//     const userUpdatedWithInDiscordFalse = [];
-//     const updateArchivedPromises = [];
+const syncExternalAccountData = async (req, res) => {
+  try {
+    const [discordUserData, rdsUserData] = await Promise.all([getDiscordMembers(), retrieveDiscordUsers()]);
+    const rdsUserDataMap = {};
+    const updateUserDataPromises = [];
+    const userUpdatedWithInDiscordFalse = [];
+    const updateArchivedPromises = [];
 
-//     rdsUserData.forEach((rdsUser) => {
-//       rdsUserDataMap[rdsUser.discordId] = {
-//         id: rdsUser.id,
-//         roles: rdsUser.roles,
-//       };
-//     });
+    rdsUserData.forEach((rdsUser) => {
+      rdsUserDataMap[rdsUser.discordId] = {
+        id: rdsUser.id,
+        roles: rdsUser.roles,
+      };
+    });
 
-//     for (const rdsUser of rdsUserData) {
-//       const discordUser = discordUserData.find((discordUser) => discordUser.user.id === rdsUser.discordId);
+    for (const rdsUser of rdsUserData) {
+      const discordUser = discordUserData.find((discordUser) => discordUser.user.id === rdsUser.discordId);
 
-//       let userData = {};
-//       if (rdsUser.roles?.in_discord && !discordUser) {
-//         userData = {
-//           roles: {
-//             ...rdsUser.roles,
-//             in_discord: false,
-//           },
-//         };
-//         userUpdatedWithInDiscordFalse.push(rdsUser);
-//       } else if (discordUser) {
-//         userData = {
-//           discordJoinedAt: discordUser.joined_at,
-//           roles: {
-//             ...rdsUser.roles,
-//             in_discord: true,
-//           },
-//         };
-//       }
-//       updateUserDataPromises.push(addOrUpdate(userData, rdsUser.id));
-//     }
+      let userData = {};
+      if (rdsUser.roles?.in_discord && !discordUser) {
+        userData = {
+          roles: {
+            ...rdsUser.roles,
+            in_discord: false,
+          },
+        };
+        userUpdatedWithInDiscordFalse.push(rdsUser);
+      } else if (discordUser) {
+        userData = {
+          discordJoinedAt: discordUser.joined_at,
+          roles: {
+            ...rdsUser.roles,
+            in_discord: true,
+          },
+        };
+      }
+      updateUserDataPromises.push(addOrUpdate(userData, rdsUser.id));
+    }
 
-//     await Promise.all(updateUserDataPromises);
+    await Promise.all(updateUserDataPromises);
 
-//     const inDiscordUsers = await getUsersByRole("in_discord");
-//     inDiscordUsers.forEach((user) => {
-//       if (user.roles.archived === true) {
-//         const userData = {
-//           roles: {
-//             ...user.roles,
-//             archived: false,
-//           },
-//         };
-//         updateArchivedPromises.push(addOrUpdate(userData, user.id));
-//       }
-//     });
+    const inDiscordUsers = await getUsersByRole("in_discord");
+    inDiscordUsers.forEach((user) => {
+      if (user.roles.archived === true) {
+        const userData = {
+          roles: {
+            ...user.roles,
+            archived: false,
+          },
+        };
+        updateArchivedPromises.push(addOrUpdate(userData, user.id));
+      }
+    });
 
-//     await Promise.all(updateArchivedPromises);
+    await Promise.all(updateArchivedPromises);
 
-//     return res.json({
-//       rdsUsers: rdsUserData.length,
-//       discordUsers: discordUserData.length,
-//       userUpdatedWithInDiscordFalse: userUpdatedWithInDiscordFalse.length,
-//       usersMarkedUnArchived: updateArchivedPromises.length,
-//       message: "Data Sync Complete",
-//     });
-//   } catch (err) {
-//     logger.error("Error in syncing users discord joined at", err);
-//     return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
-//   }
-// };
+    return res.json({
+      rdsUsers: rdsUserData.length,
+      discordUsers: discordUserData.length,
+      userUpdatedWithInDiscordFalse: userUpdatedWithInDiscordFalse.length,
+      usersMarkedUnArchived: updateArchivedPromises.length,
+      message: "Data Sync Complete",
+    });
+  } catch (err) {
+    logger("Error in syncing users discord joined at", err);
+    return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
+  }
+};
 
-// const externalAccountsUsersPostHandler = async (req, res) => {
-//   const { action } = req.query;
+const externalAccountsUsersPostHandler = async (req, res) => {
+  const { action } = req.query;
 
-//   switch (action) {
-//     case EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC: {
-//       return await newSyncExternalAccountData(req, res);
-//     }
-//     default:
-//       return res.status(400).json({ message: "Invalid action" });
-//   }
-// };
+  switch (action) {
+    case EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC: {
+      return await newSyncExternalAccountData(req, res);
+    }
+    default:
+      return res.status(400).json({ message: "Invalid action" });
+  }
+};
 
 /**
  * Gets all group-roles
  * @param req {Object} - Express request object
  * @param res {Object} - Express response object
  */
-// const newSyncExternalAccountData = async (req, res) => {
-//   try {
-//     const [discordUserData, unArchivedRdsUsersData] = await Promise.all([
-//       getDiscordMembers(),
-//       fetchUsersForKeyValues("roles.archived", false),
-//     ]);
-//     let usersArchivedCount = 0;
-//     let usersUnArchivedCount = 0;
-//     let totalUsersProcessed = unArchivedRdsUsersData.length;
-
-//     const discordUserIdSet = new Set();
-
-//     discordUserData.forEach((discordUser) => discordUserIdSet.add(discordUser.user.id));
-
-//     let updateUserList = [];
-//     const archiveUserList = [];
-
-//     for (const rdsUser of unArchivedRdsUsersData) {
-//       let userData = {};
-
-//       // TODO: This if-block will be removed if the IN_DISCORD ROLE is deprecated. It can be tracked using the following issue : https://github.com/Real-Dev-Squad/website-backend/issues/1475
-//       if (discordUserIdSet.has(rdsUser?.discordId)) {
-//         discordUserIdSet.delete(rdsUser.discordId);
-
-//         if (rdsUser.roles?.in_discord) continue;
-
-//         userData = {
-//           ...rdsUser,
-//           roles: {
-//             ...rdsUser.roles,
-//             in_discord: true,
-//             archived: false,
-//           },
-//         };
-//       } else {
-//         usersArchivedCount++;
-//         userData = {
-//           ...rdsUser,
-//           roles: {
-//             ...rdsUser.roles,
-//             in_discord: false,
-//             archived: true,
-//           },
-//         };
-//         archiveUserList.push({ id: rdsUser.id }); // adding users which are to be archived
-//       }
-//       updateUserList.push(userData);
-//     }
-//     const unArchiveUsersInBatchPromise = updateUsersInBatch(updateUserList);
-//     // Mark un done tasks assigned to archived users BACKLOG
-//     const markTasksBacklogPromise = markUnDoneTasksOfArchivedUsersBacklog(archiveUserList);
-
-//     const archivedUsersInDiscordList = await fetchUsersForKeyValues("discordId", [...discordUserIdSet]);
-//     totalUsersProcessed += archivedUsersInDiscordList.length;
-//     updateUserList = [];
-
-//     for (const rdsUser of archivedUsersInDiscordList) {
-//       usersUnArchivedCount++;
-//       const userData = {
-//         ...rdsUser,
-//         roles: {
-//           ...rdsUser.roles,
-//           in_discord: true,
-//           archived: false,
-//         },
-//       };
-//       updateUserList.push(userData);
-//     }
-//     const archiveUsersInBatchPromise = updateUsersInBatch(updateUserList);
-
-//     const [, , backlogTasksCount] = await Promise.all([
-//       unArchiveUsersInBatchPromise,
-//       archiveUsersInBatchPromise,
-//       markTasksBacklogPromise,
-//     ]);
-
-//     return res.json({
-//       message: "Data Sync Complete",
-//       usersArchivedCount: usersArchivedCount,
-//       usersUnArchivedCount: usersUnArchivedCount,
-//       totalUsersProcessed: totalUsersProcessed,
-//       rdsDiscordServerUsers: discordUserData.length,
-//       backlogTasksCount: backlogTasksCount,
-//     });
-//   } catch (err) {
-//     logger.error("Error in syncing users discord joined at");
-//     return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
-//   }
-// };
-
-export const getExternalAccounts = async (req, res, next) => {
+const newSyncExternalAccountData = async (req, res) => {
   try {
-    const { id } = req.params;
-    const externalAccounts = await externalAccountsModel.fetchExternalAccounts(id);
-    return res.json(externalAccounts);
-  } catch (error) {
-    logger.error("Error in getExternalAccounts: ", error);
-    return next(SOMETHING_WENT_WRONG);
+    const [discordUserData, unArchivedRdsUsersData] = await Promise.all([
+      getDiscordMembers(),
+      fetchUsersForKeyValues("roles.archived", false),
+    ]);
+    let usersArchivedCount = 0;
+    let usersUnArchivedCount = 0;
+    let totalUsersProcessed = unArchivedRdsUsersData.length;
+
+    const discordUserIdSet = new Set();
+
+    discordUserData.forEach((discordUser) => discordUserIdSet.add(discordUser.user.id));
+
+    let updateUserList = [];
+    const archiveUserList = [];
+
+    for (const rdsUser of unArchivedRdsUsersData) {
+      let userData = {};
+
+      // TODO: This if-block will be removed if the IN_DISCORD ROLE is deprecated. It can be tracked using the following issue : https://github.com/Real-Dev-Squad/website-backend/issues/1475
+      if (discordUserIdSet.has(rdsUser?.discordId)) {
+        discordUserIdSet.delete(rdsUser.discordId);
+
+        if (rdsUser.roles?.in_discord) continue;
+
+        userData = {
+          ...rdsUser,
+          roles: {
+            ...rdsUser.roles,
+            in_discord: true,
+            archived: false,
+          },
+        };
+      } else {
+        usersArchivedCount++;
+        userData = {
+          ...rdsUser,
+          roles: {
+            ...rdsUser.roles,
+            in_discord: false,
+            archived: true,
+          },
+        };
+        archiveUserList.push({ id: rdsUser.id }); // adding users which are to be archived
+      }
+      updateUserList.push(userData);
+    }
+    const unArchiveUsersInBatchPromise = updateUsersInBatch(updateUserList);
+    // Mark un done tasks assigned to archived users BACKLOG
+    const markTasksBacklogPromise = taskModel.markUnDoneTasksOfArchivedUsersBacklog(archiveUserList);
+
+    const archivedUsersInDiscordList = await fetchUsersForKeyValues("discordId", [...discordUserIdSet]);
+    totalUsersProcessed += archivedUsersInDiscordList.length;
+    updateUserList = [];
+
+    for (const rdsUser of archivedUsersInDiscordList) {
+      usersUnArchivedCount++;
+      const userData = {
+        ...rdsUser,
+        roles: {
+          ...rdsUser.roles,
+          in_discord: true,
+          archived: false,
+        },
+      };
+      updateUserList.push(userData);
+    }
+    const archiveUsersInBatchPromise = updateUsersInBatch(updateUserList);
+
+    const [, , backlogTasksCount] = await Promise.all([
+      unArchiveUsersInBatchPromise,
+      archiveUsersInBatchPromise,
+      markTasksBacklogPromise,
+    ]);
+
+    return res.json({
+      message: "Data Sync Complete",
+      usersArchivedCount: usersArchivedCount,
+      usersUnArchivedCount: usersUnArchivedCount,
+      totalUsersProcessed: totalUsersProcessed,
+      rdsDiscordServerUsers: discordUserData.length,
+      backlogTasksCount: backlogTasksCount,
+    });
+  } catch (err) {
+    logger("Error in syncing users discord joined at");
+    return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
   }
 };
 
-export const updateExternalAccounts = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const { action, accountType } = req.body;
-    const result = await externalAccountsModel.updateExternalAccounts(id, action, accountType);
-    return res.json(result);
-  } catch (error) {
-    logger.error("Error in updateExternalAccounts: ", error);
-    return next(SOMETHING_WENT_WRONG);
-  }
-};
-
-export const deleteExternalAccounts = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const { accountType } = req.body;
-    await externalAccountsModel.deleteExternalAccounts(id, accountType);
-    return res.json({ message: "External account deleted successfully" });
-  } catch (error) {
-    logger.error("Error in deleteExternalAccounts: ", error);
-    return next(SOMETHING_WENT_WRONG);
-  }
+export default {
+  addExternalAccountData,
+  getExternalAccountData,
+  linkExternalAccount,
+  syncExternalAccountData,
+  newSyncExternalAccountData,
+  externalAccountsUsersPostHandler,
 };

@@ -1,6 +1,5 @@
-import { Conflict, NotFound } from "http-errors";
+import httpError from "http-errors";
 import * as progressesModel from "../models/progresses.js";
-
 import {
   INTERNAL_SERVER_ERROR_MESSAGE,
   PROGRESSES_PAGE_SIZE,
@@ -8,6 +7,7 @@ import {
   UNAUTHORIZED_WRITE,
 } from "../constants/progresses.js";
 import { sendTaskUpdate } from "../utils/sendTaskUpdate.js";
+import logger from "../utils/logger.js";
 
 /**
  * @typedef {Object} ProgressRequestBody
@@ -60,11 +60,11 @@ export const createProgress = async (req, res) => {
       message: `${type.charAt(0).toUpperCase() + type.slice(1)} ${progressesModel.PROGRESS_DOCUMENT_CREATED_SUCCEEDED}`,
     });
   } catch (error) {
-    if (error instanceof Conflict) {
+    if (error instanceof httpError.Conflict) {
       return res.status(409).json({
         message: error.message,
       });
-    } else if (error instanceof NotFound) {
+    } else if (error instanceof httpError.NotFound) {
       return res.status(404).json({
         message: error.message,
       });
@@ -146,7 +146,7 @@ export const getProgress = async (req, res) => {
       data,
     });
   } catch (error) {
-    if (error instanceof NotFound) {
+    if (error instanceof httpError.NotFound) {
       return res.status(404).json({
         message: error.message,
       });
@@ -200,7 +200,7 @@ export const getProgressRangeData = async (req, res) => {
       data,
     });
   } catch (error) {
-    if (error instanceof NotFound) {
+    if (error instanceof httpError.httpError.NotFound) {
       return res.status(404).json({
         message: error.message,
       });
@@ -254,7 +254,7 @@ export const getProgressBydDateController = async (req, res) => {
       data,
     });
   } catch (error) {
-    if (error instanceof NotFound) {
+    if (error instanceof httpError.NotFound) {
       return res.status(404).json({
         message: error.message,
       });

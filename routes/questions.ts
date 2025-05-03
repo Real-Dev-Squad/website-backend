@@ -1,10 +1,12 @@
 import express from "express";
 const router = express.Router();
-const authorizeRoles = require("../middlewares/authorizeRoles");
-const { SUPERUSER } = require("../constants/roles");
-const authenticate = require("../middlewares/authenticate");
-const questions = require("../controllers/questions");
-const questionValidators = require("../middlewares/validators/questions");
+import { authorizeRoles } from "../middlewares/authorizeRoles.js";
+import { ROLES } from "../constants/roles.js";
+import authenticate from "../middlewares/authenticate.js";
+import questions from "../controllers/questions.js";
+import questionValidators from "../middlewares/validators/questions.js";
+
+const { SUPERUSER } = ROLES;
 
 router.post(
   "/",
@@ -16,4 +18,4 @@ router.post(
 
 router.get("/", questions.getQuestions);
 
-export default  router;
+export default router;

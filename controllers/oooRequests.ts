@@ -9,15 +9,15 @@ import {
   ERROR_WHILE_UPDATING_REQUEST,
   REQUEST_APPROVED_SUCCESSFULLY,
   REQUEST_REJECTED_SUCCESSFULLY,
-} from "../constants/requests";
-import { statusState } from "../constants/userStatus";
-import { addLog } from "../models/logs";
-import { createRequest, getRequestByKeyValues, getRequests, updateRequest } from "../models/requests";
-import { createUserFutureStatus } from "../models/userFutureStatus";
-import { addFutureStatus } from "../models/userStatus";
-import { CustomResponse } from "../typeDefinitions/global";
-import { OooRequestCreateRequest, OooStatusRequest } from "../types/oooRequest";
-import { UpdateRequest } from "../types/requests";
+} from "../constants/requests.js";
+import { statusState } from "../constants/userStatus.js";
+import { addLog } from "../models/logs.js";
+import { createRequest, getRequestByKeyValues, getRequests, updateRequest } from "../models/requests.js";
+import { createUserFutureStatus } from "../models/userFutureStatus.js";
+import { addFutureStatus } from "../models/userStatus.js";
+import { CustomResponse } from "../typeDefinitions/global.js";
+import { OooRequestCreateRequest, OooStatusRequest } from "../types/oooRequest.js";
+import { UpdateRequest } from "../types/requests.js";
 import logger from "../utils/logger.js";
 
 export const createOooRequestController = async (req: OooRequestCreateRequest, res: CustomResponse) => {
@@ -29,7 +29,11 @@ export const createOooRequestController = async (req: OooRequestCreateRequest, r
   }
 
   try {
-    const latestOooRequest:OooStatusRequest = await getRequestByKeyValues({ requestedBy: userId, type: REQUEST_TYPE.OOO , state: REQUEST_STATE.PENDING });
+    const latestOooRequest: OooStatusRequest = await getRequestByKeyValues({
+      requestedBy: userId,
+      type: REQUEST_TYPE.OOO,
+      state: REQUEST_STATE.PENDING,
+    });
 
     if (latestOooRequest && latestOooRequest.state === REQUEST_STATE.PENDING) {
       return res.boom.badRequest(REQUEST_ALREADY_PENDING);

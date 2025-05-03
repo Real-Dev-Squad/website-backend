@@ -1,5 +1,5 @@
 import express from "express";
-import { getOpenPRs, getStalePRs, getUserPRs } from "../controllers/pullRequests";
+import { getOpenPRs, getStalePRs, getUserPRs } from "../controllers/pullRequests.js";
 
 const router = express.Router();
 

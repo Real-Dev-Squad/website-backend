@@ -1,5 +1,6 @@
 import joi from "joi";
 import { VALID_PROGRESS_TYPES, TYPE_MAP } from "../../constants/progresses.js";
+import logger from "../../utils/logger.js";
 
 const baseSchema = joi
   .object()
@@ -113,8 +114,4 @@ const validateGetTrackedProgressQueryParams = async (req, res, next) => {
   }
 };
 
-export default {
-  validateCreateTrackedProgressRecord,
-  validateUpdateTrackedProgress,
-  validateGetTrackedProgressQueryParams,
-};
+export { validateCreateTrackedProgressRecord, validateUpdateTrackedProgress, validateGetTrackedProgressQueryParams };

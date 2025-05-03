@@ -1,11 +1,15 @@
-import authenticate from "../middlewares/authenticate";
+import express from "express";
 
-const express = require("express");
-const authorizeRoles = require("../middlewares/authorizeRoles");
-const { SUPERUSER, MEMBER } = require("../constants/roles");
+import authenticate from "../middlewares/authenticate.js";
+import { authorizeRoles } from "../middlewares/authorizeRoles.js";
+import { ROLES } from "../constants/roles.js";
+import answers from "../controllers/answers.js";
+import answerValidators from "../middlewares/validators/answers.js";
+
+
+const { SUPERUSER, MEMBER } = ROLES;
 const router = express.Router();
-const answers = require("../controllers/answers");
-const answerValidators = require("../middlewares/validators/answers");
+
 
 router.post("/", answerValidators.createAnswer, answers.createAnswer);
 router.patch(
@@ -18,4 +22,4 @@ router.patch(
 
 router.get("/", answers.getAnswers);
 
-export default  router;
+export default router;

@@ -2,14 +2,14 @@ import { generateDiscordProfileImageUrl } from "../utils/discord-actions.js";
 import firestore from "../utils/firestore.js";
 import admin from "firebase-admin";
 import { findSubscribedGroupIds } from "../utils/helper.js";
-import dataAccess, { retrieveUsers } from "../services/dataAccessLayer.js";
+import { retrieveUsers } from "../services/dataAccessLayer.js";
 import { BATCH_SIZE_IN_CLAUSE } from "../constants/firebase.js";
 import { getAllUserStatus, getGroupRole, getUserStatus } from "./userStatus.js";
 import { userState } from "../constants/userStatus.js";
 import { ONE_DAY_IN_MS, SIMULTANEOUS_WORKER_CALLS, FIRESTORE_IN_CLAUSE_SIZE } from "../constants/users.js";
-import discordService, { getDiscordMembers, addRoleToUser, removeRoleFromUser } from "../services/discordService.js";
+import { getDiscordMembers, addRoleToUser, removeRoleFromUser } from "../services/discordService.js";
 import config from "config";
-import usersUtils from "../utils/users.js";
+import { updateNickname } from "../utils/users.js";
 import { getUsersBasedOnFilter, fetchUser } from "./users.js";
 import { convertDaysToMilliseconds, convertMillisToSeconds } from "../utils/time.js";
 import { chunks } from "../utils/array.js";
@@ -563,15 +563,15 @@ const updateUsersNicknameStatus = async (lastNicknameUpdate) => {
         const { state: currentState } = currentStatus;
 
         if (currentState === userState.OOO && today <= currentStatus.until) {
-          promises.push(usersUtils.updateNickname(userId, currentStatus));
+          promises.push(updateNickname(userId, currentStatus));
         } else if (
           futureState === userState.OOO &&
           today + 3 * ONE_DAY_IN_MS >= futureStatus.from &&
           today <= futureStatus.until
         ) {
-          promises.push(usersUtils.updateNickname(userId, futureStatus));
+          promises.push(updateNickname(userId, futureStatus));
         } else {
-          promises.push(usersUtils.updateNickname(userId));
+          promises.push(updateNickname(userId));
         }
       });
 
@@ -869,7 +869,7 @@ const updateUsersWith31DaysPlusOnboarding = async () => {
         usersForRoleAddition.map(async (user) => {
           const userDiscordId = user.discordId;
           try {
-            const result = await dataAccess.retrieveUsers({ id: userDiscordId });
+            const result = await retrieveUsers({ id: userDiscordId });
             if (result.user?.roles?.archived) {
               totalArchivedUsers++;
             } else if (!userDiscordId) {
@@ -967,7 +967,7 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
     missedUpdatesTasks: 0,
   };
   try {
-    const discordUsersPromise = discordService.getDiscordMembers();
+    const discordUsersPromise = getDiscordMembers();
     const missedUpdatesRoleId = discordMissedUpdatesRoleId;
 
     let gapWindowStart = Date.now() - convertDaysToMilliseconds(dateGap);

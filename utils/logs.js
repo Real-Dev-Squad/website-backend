@@ -2,7 +2,7 @@ import admin from "firebase-admin";
 import { logType } from "../constants/logs.js";
 import * as usersService from "../services/dataAccessLayer.js";
 import firestore from "./firestore.js";
-import { _ } from "lodash";
+import lodash from "lodash";
 
 const tasksModel = firestore.collection("tasks");
 
@@ -120,7 +120,7 @@ function formatTaskRequestsLogs(logsSnapshot, usersMap, tasksMap) {
     taskTitle: tasksMap[body.taskId]?.title,
     proposedStartDate: formattedData.users[0].proposedStartDate,
     proposedDeadline: formattedData.users[0].proposedDeadline,
-    ..._.omit(formattedData, "users"),
+    ...lodash.omit(formattedData, "users"),
   };
 }
 

@@ -1,6 +1,7 @@
-import authenticate from "../middlewares/authenticate";
 import express from "express";
-import { getGoalSiteToken } from "../controllers/goals";
+import authenticate from "../middlewares/authenticate.js";
+import { getGoalSiteToken } from "../controllers/goals.js";
+
 const router = express.Router();
 
 router.get("/token", authenticate, getGoalSiteToken);

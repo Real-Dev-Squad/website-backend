@@ -1,4 +1,4 @@
-import { NotFound } from "http-errors";
+import httpError from "http-errors";
 import { userState } from "../constants/userStatus.js";
 import { convertTimestampToUTCStartOrEndOfDay } from "./time.js";
 import logger from "./logger.js";
@@ -242,7 +242,7 @@ const createUserStatusWithState = async (userId, collection, state) => {
 /**
  * Retrieves the user ID based on the given username.
  * @param {string} userName - The username to search for.
- * @param {FireStore Object} usersCollection - The FireStore Collection to search for.
+ * @param {FireStore Object} usersCollundection - The FireStore Collection to search for.
  * @returns {Promise<string>} - The user ID corresponding to the given username.
  * @throws {Error} - If there is an error retrieving the user snapshot.
  * @throws {NotFound} - If the username could not be found.
@@ -256,7 +256,7 @@ async function getUserIdFromUserName(userName, usersCollection) {
     throw new Error(`Something went wrong. The User ${userName} couldn't be verified.`);
   }
   if (!userSnapShot.size) {
-    throw new NotFound(`Something went wrong. Username ${userName} could not be found.`);
+    throw new httpError.NotFound(`Something went wrong. Username ${userName} could not be found.`);
   }
   const [userDoc] = userSnapShot.docs;
   return userDoc.id;

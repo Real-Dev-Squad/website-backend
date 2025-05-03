@@ -1,6 +1,7 @@
-import githubService from "../services/githubService.js";
+import { fetchPRsByUser, extractPRdetails, fetchOpenPRs } from "../services/githubService.js";
 import { SOMETHING_WENT_WRONG } from "../constants/errorMessages.js";
 import { ORDER_TYPE } from "../utils/pullRequests.js";
+import logger from "../utils/logger.js";
 
 /**
  * Collects all pull requests and sends only required data for each pull request
@@ -11,10 +12,10 @@ import { ORDER_TYPE } from "../utils/pullRequests.js";
 
 export const getUserPRs = async (req, res) => {
   try {
-    const { data } = await githubService.fetchPRsByUser(req.params.username);
+    const { data } = await fetchPRsByUser(req.params.username);
 
     if (data.total_count) {
-      const allPRs = githubService.extractPRdetails(data);
+      const allPRs = extractPRdetails(data);
       return res.json({
         message: "Pull requests returned successfully!",
         pullRequests: allPRs,
@@ -41,10 +42,10 @@ export const getStalePRs = async (req, res) => {
   try {
     const order = ORDER_TYPE.ASC;
     const { size, page } = req.query;
-    const { data } = await githubService.fetchOpenPRs({ perPage: size, page, resultOptions: { order } });
+    const { data } = await fetchOpenPRs({ perPage: size, page, resultOptions: { order } });
 
     if (data.total_count) {
-      const allPRs = githubService.extractPRdetails(data);
+      const allPRs = extractPRdetails(data);
       return res.json({
         message: "Stale PRs",
         pullRequests: allPRs,
@@ -71,10 +72,10 @@ export const getOpenPRs = async (req, res) => {
   try {
     const order = ORDER_TYPE.DESC;
     const { size, page } = req.query;
-    const { data } = await githubService.fetchOpenPRs({ perPage: size, page, resultOptions: { order } });
+    const { data } = await fetchOpenPRs({ perPage: size, page, resultOptions: { order } });
 
     if (data.total_count) {
-      const allPRs = githubService.extractPRdetails(data);
+      const allPRs = extractPRdetails(data);
       return res.json({
         message: "Open PRs",
         pullRequests: allPRs,

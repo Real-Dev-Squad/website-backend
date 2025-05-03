@@ -1,4 +1,4 @@
-import tradeService from "../services/tradingService.js";
+import { trade as tradeService } from "../services/tradingService.js";
 import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
 import logger from "../utils/logger.js";
 
@@ -16,7 +16,7 @@ const trade = async (req, res) => {
       username,
       userId,
     };
-    const { canUserTrade, errorMessage, userBalance } = await tradeService.trade(tradeStockData);
+    const { canUserTrade, errorMessage, userBalance } = await tradeService(tradeStockData);
 
     if (!canUserTrade) {
       return res.boom.forbidden(errorMessage);

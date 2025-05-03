@@ -1,12 +1,12 @@
 import express from "express";
-import { SUPERUSER } from "../constants/roles.js";
+import { ROLES } from "../constants/roles.js";
 import {
   createTrackedProgressController,
   getTrackedProgressController,
   updateTrackedProgressController,
 } from "../controllers/monitor.js";
 import authenticate from "../middlewares/authenticate.js";
-import authorizeRoles from "../middlewares/authorizeRoles.js";
+import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 import {
   validateCreateTrackedProgressRecord,
   validateGetTrackedProgressQueryParams,
@@ -14,6 +14,7 @@ import {
 } from "../middlewares/validators/monitor.js";
 
 const router = express.Router();
+const { SUPERUSER } = ROLES;
 
 router.post(
   "/",

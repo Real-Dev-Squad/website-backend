@@ -1,5 +1,5 @@
-import { NotFound } from "http-errors";
-import { fetchTask } from "../models/tasks.js";
+import httpError from "http-errors";
+import taskModel from "../models/tasks.js";
 import { fetchUser } from "../models/users.js";
 import fireStore from "../utils/firestore.js";
 import {
@@ -48,13 +48,13 @@ const buildQueryForPostingProgress = ({ type, userId, taskId }) => {
  *
  * @async
  * @param {string} userId - The ID of the user to check for existence.
- * @throws {NotFound} If the user with the given ID does not exist.
+ * @throws {httpError.NotFound} If the user with the given ID does not exist.
  * @returns {Promise<void>} A promise that resolves if the user exists and rejects with a `NotFound` error if the user does not exist.
  */
 const assertUserExists = async (userId) => {
   const { userExists } = await fetchUser({ userId });
   if (!userExists) {
-    throw new NotFound(`User with id ${userId} does not exist.`);
+    throw new httpError.NotFound(`User with id ${userId} does not exist.`);
   }
 };
 
@@ -63,13 +63,13 @@ const assertUserExists = async (userId) => {
  *
  * @async
  * @param {string} taskData - The ID of the task to check for existence.
- * @throws {NotFound} If the task with the given ID does not exist.
+ * @throws {httpError.NotFound} If the task with the given ID does not exist.
  * @returns {Promise<void>} A promise that resolves if the task exists and rejects with a `NotFound` error if the task does not exist.
  */
 const assertTaskExists = async (taskId) => {
-  const { taskData } = await fetchTask(taskId);
+  const { taskData } = await taskModel.fetchTask(taskId);
   if (!taskData) {
-    throw new NotFound(`Task with id ${taskId} does not exist.`);
+    throw new httpError.NotFound(`Task with id ${taskId} does not exist.`);
   }
   return taskData.title;
 };
@@ -81,7 +81,7 @@ const assertTaskExists = async (taskId) => {
  * @param {Object} queryParams - An object containing the query parameters.
  * @param {string} [queryParams.userId] - (Optional) The ID of the user to check for existence.
  * @param {string} [queryParams.taskId] - (Optional) The ID of the task to check for existence.
- * @throws {NotFound} If neither a user nor a task with the given ID exists in the system.
+ * @throws {httpError.NotFound} If neither a user nor a task with the given ID exists in the system.
  * @returns {Promise<void>} A promise that resolves if either the user or the task exists and rejects with a `NotFound` error if neither exists.
  */
 const assertUserOrTaskExists = async (queryParams) => {
@@ -162,12 +162,12 @@ const buildQueryToFetchPaginatedDocs = async (queryParams) => {
  * Retrieves progress documents from Firestore based on the given query.
  * @param {Query} query - A Firestore query object for fetching progress documents.
  * @returns {Array.<Object>} An array of objects representing the retrieved progress documents. Each object contains the document ID and its data.
- * @throws {NotFound} If no progress documents are found based on the given query.
+ * @throws {httpError.NotFound} If no progress documents are found based on the given query.
  */
 const getProgressDocs = async (query) => {
   const progressesDocs = await query.get();
   if (!progressesDocs.size) {
-    throw new NotFound(PROGRESS_DOCUMENT_NOT_FOUND);
+    throw new httpError.NotFound(PROGRESS_DOCUMENT_NOT_FOUND);
   }
   const docsData = [];
   progressesDocs.forEach((doc) => {
@@ -183,12 +183,12 @@ const getProgressDocs = async (query) => {
  * @returns {Array.<Object>} An array of objects representing the retrieved progress documents.
  * Each object contains the document ID (`id`) and its associated data.
  *
- * @throws {NotFound} If no progress documents are found and no page number is specified.
+ * @throws {httpError.NotFound} If no progress documents are found and no page number is specified.
  */
 const getPaginatedProgressDocs = async (query, page) => {
   const progressesDocs = await query.get();
   if (!page && !progressesDocs.size) {
-    throw new NotFound(PROGRESS_DOCUMENT_NOT_FOUND);
+    throw new httpError.NotFound(PROGRESS_DOCUMENT_NOT_FOUND);
   }
   if (!progressesDocs.size) {
     return [];
@@ -238,7 +238,7 @@ const getProgressRecords = async (query, queryParams) => {
   const docsData = {};
   const queryResult = await query.get();
   if (!queryResult.size) {
-    throw new NotFound(PROGRESS_DOCUMENT_NOT_FOUND);
+    throw new httpError.NotFound(PROGRESS_DOCUMENT_NOT_FOUND);
   }
   const progressesDocs = queryResult.docs;
   progressesDocs.forEach((doc) => {

@@ -186,4 +186,4 @@ const makeNewBid = async ({ bidder, auctionId, bid }) => {
   }
 };
 
-export { fetchAuctionById, fetchAvailableAuctions, fetchAuctionBidders, createNewAuction, makeNewBid };
+export default { fetchAuctionById, fetchAvailableAuctions, fetchAuctionBidders, createNewAuction, makeNewBid };

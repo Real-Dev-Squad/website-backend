@@ -1,6 +1,6 @@
 import express from "express";
-import authenticate from "../middlewares/authenticate";
-import { healthCheck } from "../controllers/health";
+import authenticate from "../middlewares/authenticate.js";
+import { healthCheck } from "../controllers/health.js";
 
 const router = express.Router();
 

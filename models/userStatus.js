@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { Forbidden, NotFound } from "http-errors";
+import httpError from "http-errors";
 import admin from "firebase-admin";
 import firestore from "../utils/firestore.js";
 import {
@@ -20,6 +20,7 @@ import { TASK_STATUS } from "../constants/tasks.js";
 import { userState } from "../constants/userStatus.js";
 import { generateAuthTokenForCloudflare } from "../utils/discord-actions.js";
 import config from "config";
+import logger from "../utils/logger.js";
 
 const userStatusModel = firestore.collection("usersStatus");
 const tasksModel = firestore.collection("tasks");
@@ -412,7 +413,7 @@ const updateUserStatusOnTaskUpdate = async (userName) => {
     const userStatusUpdate = await updateUserStatusOnNewTaskAssignment(userId);
     return userStatusUpdate;
   } catch (error) {
-    if (error instanceof NotFound) {
+    if (error instanceof httpError.NotFound) {
       return {
         status: 404,
         error: "Not Found",
@@ -644,13 +645,13 @@ const cancelOooStatus = async (userId) => {
       throw error;
     }
     if (!userStatusDoc.size) {
-      throw new NotFound("No User status document found");
+      throw new httpError.NotFound("No User status document found");
     }
     const [userStatusDocument] = userStatusDoc.docs;
     const docId = userStatusDocument.id;
     const { futureStatus, ...docData } = userStatusDocument.data();
     if (docData.currentStatus.state !== userState.OOO) {
-      throw new Forbidden(
+      throw new httpError.Forbidden(
         `The ${userState.OOO} Status cannot be canceled because the current status is ${docData.currentStatus.state}.`
       );
     }

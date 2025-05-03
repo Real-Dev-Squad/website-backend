@@ -1,7 +1,9 @@
 import express from "express";
-import authenticate from "../middlewares/authenticate";
-import auction from "../controllers/auction";
-import auctionValidator from "../middlewares/validators/auctions";
+
+import authenticate from "../middlewares/authenticate.js";
+import auction from "../controllers/auction.js";
+import auctionValidator from "../middlewares/validators/auctions.js";
+
 const router = express.Router();
 
 router.get("/:id", auction.fetchAuctionById);

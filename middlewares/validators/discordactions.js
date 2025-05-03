@@ -62,7 +62,7 @@ const validateLazyLoadingParams = async (req, res, next) => {
   }
 };
 
-export default {
+export {
   validateGroupRoleBody,
   validateMemberRoleBody,
   validateLazyLoadingParams,

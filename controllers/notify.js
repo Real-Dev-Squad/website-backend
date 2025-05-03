@@ -1,6 +1,7 @@
-import { getMessaging } from "firebase-admin";
+import firebaseAdmin from "firebase-admin";
 import { getFcmTokenFromUserId } from "../services/getFcmTokenFromUserId.js";
 import { getUserIdsFromRoleId } from "../services/getUserIdsFromRoleId.js";
+import logger from "../utils/logger.js";
 
 /**
  * Route used to get the health status of teh server
@@ -70,7 +71,8 @@ const notifyController = async (req, res) => {
     res.error(401).send("Message length exceeds");
   }
 
-  getMessaging()
+  firebaseAdmin
+    .getMessaging()
     .sendEachForMulticast(message)
     .then(() => res.status(200).json({ status: 200, message: "User notified successfully" }))
     .catch((error) => {
