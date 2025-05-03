@@ -15,6 +15,8 @@ import {
   validOooStatusRequests,
   validOooStatusUpdate,
   createOooRequests2,
+  acknowledgeOooRequest,
+  createOooRequests3,
 } from "../fixtures/oooRequest/oooRequest";
 import { createRequest, updateRequest } from "../../models/requests";
 import {
@@ -27,6 +29,8 @@ import {
   REQUEST_ALREADY_PENDING,
   REQUEST_REJECTED_SUCCESSFULLY,
   REQUEST_ALREADY_REJECTED,
+  INVALID_REQUEST_TYPE,
+  // UNAUTHORIZED_TO_ACKNOWLEDGE_OOO_REQUEST,
   UNAUTHORIZED_TO_CREATE_OOO_REQUEST,
   USER_STATUS_NOT_FOUND,
   OOO_STATUS_ALREADY_EXIST,
@@ -36,6 +40,7 @@ import { validTaskAssignmentRequest, validTaskCreqtionRequest } from "../fixture
 import { deleteUserStatus, updateUserStatus } from "../../models/userStatus";
 import * as requestsQuery from "../../models/requests";
 import { userState } from "../../constants/userStatus";
+import * as logUtils from "../../services/logService";
 
 const userData = userDataFixture();
 chai.use(chaiHttp);
@@ -48,6 +53,7 @@ let approvedOooRequestId: string;
 let oooRequestData: any;
 let oooRequestData2: any;
 let testUserId: string;
+let testSuperUserId: string;
 let testArchivedUserId: string;
 
 describe("/requests OOO", function () {
@@ -58,6 +64,7 @@ describe("/requests OOO", function () {
     const userIdPromises = [addUser(userData[16]), addUser(userData[4]), addUser(userData[18])];
     const [userId, superUserId, archivedUserId] = await Promise.all(userIdPromises);
     testUserId = userId;
+    testSuperUserId = superUserId;
     testArchivedUserId = archivedUserId;
 
     oooRequestData = { ...createOooRequests, requestedBy: userId };
@@ -313,6 +320,189 @@ describe("/requests OOO", function () {
       expect(response).to.have.status(409);
       expect(response.body).to.have.property("message");
       expect(response.body.message).to.equal(REQUEST_ALREADY_PENDING);
+    });
+  });
+
+  describe.skip("PATCH /requests/:id", function () {
+    let testOooRequest;
+    let onboardingRequest;
+    let approvedOooRequest;
+    let rejectedOooRequest;
+
+    beforeEach(async function () {
+
+      oooRequestData = { ...createOooRequests3, userId: testUserId };
+      testOooRequest = await createRequest(oooRequestData);
+
+      onboardingRequest = await createRequest({
+        type: REQUEST_TYPE.ONBOARDING,
+        numberOfDays: 5,
+        reason: "This is the reason",
+        userId: testUserId,
+      });
+
+      const pendingOooRequest1 = await createRequest(oooRequestData);
+      approvedOooRequest = await updateRequest(pendingOooRequest1.id, { status: REQUEST_STATE.APPROVED }, testSuperUserId, REQUEST_TYPE.OOO);
+
+      const pendingOooRequest2 = await createRequest(oooRequestData);
+      rejectedOooRequest = await updateRequest(pendingOooRequest2.id, { status: REQUEST_STATE.REJECTED }, testSuperUserId, REQUEST_TYPE.OOO);
+    });
+
+    it("should return 401 if user is not logged in", function (done) {
+      chai
+        .request(app)
+        .patch(`/requests/${testOooRequest.id}?dev=true`)
+        .send(acknowledgeOooRequest)
+        .end(function (err, res) {
+          expect(res).to.have.status(401);
+          expect(res.body.error).to.equal("Unauthorized");
+          expect(res.body.message).to.equal("Unauthenticated User");
+          done();
+        });
+    });
+
+    it("should return 501 and 'Feature not implemented' message when dev is false", function (done) {
+      chai
+        .request(app)
+        .patch(`/requests/${testOooRequest.id}?dev=false`)
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send(acknowledgeOooRequest)
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.statusCode).to.equal(501);
+          expect(res.body.message).to.equal("Feature not implemented");
+          done();
+        });
+    });
+
+    it("should return 404 if request does not exist", function (done) {
+      chai
+        .request(app)
+        .patch(`/requests/11111111111111?dev=true`)
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send(acknowledgeOooRequest)
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.statusCode).to.equal(404);
+          expect(res.body.message).to.equal(REQUEST_DOES_NOT_EXIST);
+          done();
+        });
+    });
+
+    it("should return 403 if user does not have super user permission", function (done) {
+      chai
+        .request(app)
+        .patch(`/requests/${testOooRequest.id}?dev=true`)
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send(acknowledgeOooRequest)
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.statusCode).to.equal(403);
+          // expect(res.body.message).to.equal(UNAUTHORIZED_TO_ACKNOWLEDGE_OOO_REQUEST);
+          done();
+        });
+    });
+
+    it("should return 409 if OOO request is already approved", function (done) {
+      chai
+        .request(app)
+        .patch(`/requests/${approvedOooRequest.id}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send(acknowledgeOooRequest)
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.statusCode).to.equal(409);
+          expect(res.body.message).to.equal(REQUEST_ALREADY_APPROVED);
+          done();
+        });
+    });
+
+    it("should return 409 if OOO request is already rejected", function (done) {
+      chai
+        .request(app)
+        .patch(`/requests/${rejectedOooRequest.id}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send(acknowledgeOooRequest)
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.statusCode).to.equal(409);
+          expect(res.body.message).to.equal(REQUEST_ALREADY_REJECTED);
+          done();
+        });
+    });
+
+    it("should return 400 when the request type for the given ID is not 'OOO'", function (done) {
+      chai
+        .request(app)
+        .patch(`/requests/${onboardingRequest.id}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send(acknowledgeOooRequest)
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.statusCode).to.equal(400);
+          expect(res.body.message).to.equal(INVALID_REQUEST_TYPE);
+          done();
+        });
+    });
+
+    it("should approve OOO request when dev is true", function (done) {
+      chai
+        .request(app)
+        .patch(`/requests/${testOooRequest.id}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send(acknowledgeOooRequest)
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.statusCode).to.equal(200);
+          expect(res.body.message).to.equal(REQUEST_APPROVED_SUCCESSFULLY);
+          done();
+        });
+    });
+
+    it("should reject OOO request when dev is true", function (done) {
+      chai
+        .request(app)
+        .patch(`/requests/${testOooRequest.id}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send({...acknowledgeOooRequest, status: REQUEST_STATE.REJECTED})
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.statusCode).to.equal(200);
+          expect(res.body.message).to.equal(REQUEST_REJECTED_SUCCESSFULLY);
+          done();
+        });
+    });
+
+    it("should return 500 response for unexpected error", function (done) {
+      sinon.stub(logUtils, "addLog").throws("Error");
+      chai
+        .request(app)
+        .patch(`/requests/${testOooRequest.id}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send(acknowledgeOooRequest)
+        .end(function (err, res) {
+          if (err) return done(err);
+          expect(res.statusCode).to.equal(500);
+          expect(res.body.error).to.equal("Internal Server Error");
+          expect(res.body.message).to.equal("An internal server error occurred");
+          done();
+        });
     });
   });
 

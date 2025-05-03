@@ -158,3 +158,18 @@ export const updateOooStatusRequest = [
     reason: "Approval granted.",
   },
 ];
+
+export const createOooRequests3 = {
+  from: Date.now() + 100000,
+  until: Date.now() + 200000,
+  type: "OOO",
+  requestedBy: "suraj-maity-1",
+  reason: "Out of office for personal emergency.",
+  status: REQUEST_STATE.PENDING
+};
+
+export const acknowledgeOooRequest = {
+  type: REQUEST_TYPE.OOO,
+  status: REQUEST_STATE.APPROVED,
+  comment: "OOO request approved as it's emergency."
+};
