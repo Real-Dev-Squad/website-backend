@@ -9,6 +9,7 @@ global.config = config;
 
 import app from "./app.js";
 
+// TODO fix newrelic
 // Initialise newrelic
 import "newrelic";
 
