@@ -18,7 +18,7 @@ const verifyCronJob = async (req, res, next) => {
 const verifyDiscordBot = async (req, res, next) => {
   try {
     const token = req.headers.authorization.split(" ")[1];
-    const serviceName = req.headers["x-service-name"];
+    const serviceName = req.headers["x-service-name"] || "";
     if (serviceName === DISCORD_SERVICE) {
       const data = botVerifcation.verifyDiscordService(token);
       if (data.name !== DISCORD_SERVICE) {
