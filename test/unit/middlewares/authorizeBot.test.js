@@ -2,7 +2,8 @@ const authorizeBot = require("../../../middlewares/authorizeBot");
 const sinon = require("sinon");
 const expect = require("chai").expect;
 const bot = require("../../utils/generateBotToken");
-const { BAD_TOKEN, CLOUDFLARE_WORKER, CRON_JOB_HANDLER } = require("../../../constants/bot");
+const jwt = require("jsonwebtoken");
+const { BAD_TOKEN, CLOUDFLARE_WORKER, CRON_JOB_HANDLER, DISCORD_SERVICE } = require("../../../constants/bot");
 
 describe("Middleware | Authorize Bot", function () {
   describe("Check authorization of bot", function (done) {
@@ -113,6 +114,118 @@ describe("Middleware | Authorize Bot", function () {
       const nextSpy = sinon.spy();
       authorizeBot.verifyCronJob(request, response, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(true);
+    });
+  });
+
+  describe("Check authorization of bot for discord service", function (done) {
+    it("return false when token is expired or malformed for discord service", function () {
+      const jwtStub = sinon.stub(jwt, "verify").throws(new Error("invalid token"));
+
+      const request = {
+        headers: {
+          authorization: `Bearer ${BAD_TOKEN}`,
+          "x-service-name": DISCORD_SERVICE,
+        },
+      };
+
+      const response = {
+        boom: {
+          badRequest: sinon.spy(),
+          unauthorized: sinon.spy(),
+        },
+      };
+
+      const nextSpy = sinon.spy();
+      authorizeBot.verifyDiscordBot(request, response, nextSpy);
+
+      expect(nextSpy.calledOnce).to.be.equal(false);
+      expect(response.boom.unauthorized.calledOnce).to.be.equal(true);
+
+      jwtStub.restore();
+    });
+
+    it("return false when token is invalid from discord service", function () {
+      const request = {
+        headers: {
+          authorization: `Bearer BAD_TOKEN`,
+          "x-service-name": DISCORD_SERVICE,
+        },
+      };
+
+      const response = {
+        boom: {
+          badRequest: sinon.spy(),
+        },
+      };
+
+      const nextSpy = sinon.spy();
+      authorizeBot.verifyDiscordBot(request, response, nextSpy);
+      expect(nextSpy.calledOnce).to.be.equal(false);
+      expect(response.boom.badRequest.calledOnce).to.be.equal(true);
+    });
+
+    it("return true when token is valid for discord service", function () {
+      const jwtToken = bot.generateDiscordServiceToken({ name: DISCORD_SERVICE });
+      const request = {
+        headers: {
+          authorization: `Bearer ${jwtToken}`,
+          "x-service-name": DISCORD_SERVICE,
+        },
+      };
+
+      const response = {};
+
+      const nextSpy = sinon.spy();
+      authorizeBot.verifyDiscordBot(request, response, nextSpy);
+      expect(nextSpy.calledOnce).to.be.equal(true);
+    });
+
+    it("return true when token is valid for cloudflare worker where service name is not DISCORD_SERVICE", function () {
+      const jwtToken = bot.generateDiscordServiceToken({ name: DISCORD_SERVICE });
+      const request = {
+        headers: {
+          authorization: `Bearer ${jwtToken}`,
+          "x-service-name": DISCORD_SERVICE,
+        },
+      };
+
+      const response = {};
+
+      const nextSpy = sinon.spy();
+      authorizeBot.verifyDiscordBot(request, response, nextSpy);
+      expect(nextSpy.calledOnce).to.be.equal(true);
+    });
+
+    it("return false when token is valid but not for discord service", function () {
+      const jwtToken = bot.generateDiscordServiceToken({ name: "Invalid" });
+      const request = {
+        headers: {
+          authorization: `Bearer ${jwtToken}`,
+          "x-service-name": DISCORD_SERVICE,
+        },
+      };
+
+      const response = {};
+
+      const nextSpy = sinon.spy();
+      authorizeBot.verifyDiscordBot(request, response, nextSpy);
+      expect(nextSpy.calledOnce).to.be.equal(false);
+    });
+
+    it("return false when token is valid but not for cloudflare worker", function () {
+      const jwtToken = bot.generateToken({ name: "Invalid" });
+
+      const request = {
+        headers: {
+          authorization: `Bearer ${jwtToken}`,
+        },
+      };
+
+      const response = {};
+
+      const nextSpy = sinon.spy();
+      authorizeBot.verifyDiscordBot(request, response, nextSpy);
+      expect(nextSpy.calledOnce).to.be.equal(false);
     });
   });
 });
