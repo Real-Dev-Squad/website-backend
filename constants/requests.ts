@@ -48,7 +48,6 @@ export const REQUEST_ALREADY_PENDING = "Request already exists please wait for a
 export const UNAUTHORIZED_TO_CREATE_OOO_REQUEST = "Unauthorized to create OOO request";
 export const USER_STATUS_NOT_FOUND = "User status not found";
 export const OOO_STATUS_ALREADY_EXIST = "Your status is already OOO. Please cancel OOO to raise new one";
-export const UNAUTHORIZED_TO_ACKNOWLEDGE_OOO_REQUEST = "Only super users are allowed to acknowledge OOO requests";
 
 export const TASK_REQUEST_MESSAGES = {
   NOT_AUTHORIZED_TO_CREATE_REQUEST: "Not authorized to create the request",

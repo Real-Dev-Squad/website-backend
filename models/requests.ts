@@ -69,6 +69,23 @@ export const updateRequest = async (id: string, body: any, lastModifiedBy: strin
   }
 };
 
+export const getRequestById = async (id: string) => {
+  try {
+    const requestDoc = await requestModel.doc(id).get();
+
+    if (!requestDoc.exists) {
+      return {
+        error: REQUEST_DOES_NOT_EXIST,
+      };
+    }
+
+    return requestDoc.data();
+  } catch (error) {
+    logger.error(ERROR_WHILE_FETCHING_REQUEST, error);
+    throw error;
+  }
+};
+
 export const getRequests = async (query: any) => {
   let { id, type, requestedBy, state, prev, next, page, size = SIZE } = query;
   const dev = query.dev === "true";

@@ -12,7 +12,7 @@ import {
   REQUEST_ALREADY_PENDING,
   USER_STATUS_NOT_FOUND,
   OOO_STATUS_ALREADY_EXIST,
-  UNAUTHORIZED_TO_ACKNOWLEDGE_OOO_REQUEST,
+  UNAUTHORIZED_TO_UPDATE_REQUEST,
   ERROR_WHILE_ACKNOWLEDGING_REQUEST,
   REQUEST_DOES_NOT_EXIST,
   INVALID_REQUEST_TYPE,
@@ -172,14 +172,15 @@ export const acknowledgeOooRequestController = async (
 
     if(!dev) return res.boom.notImplemented("Feature not implemented");
 
-    const requestBody = req.body;
-    const superUserId = req.userData.id;
-    const requestId = req.params.id;
     const isSuperuser = req.userData.roles?.super_user;
 
     if (!isSuperuser) {
-      return res.boom.forbidden(UNAUTHORIZED_TO_ACKNOWLEDGE_OOO_REQUEST);
+      return res.boom.forbidden(UNAUTHORIZED_TO_UPDATE_REQUEST);
     }
+
+    const requestBody = req.body;
+    const superUserId = req.userData.id;
+    const requestId = req.params.id;
 
     try {
 

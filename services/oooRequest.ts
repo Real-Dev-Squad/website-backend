@@ -14,16 +14,14 @@ import {
     INVALID_REQUEST_TYPE,
 } from "../constants/requests";
 import { userState } from "../constants/userStatus";
-import { createRequest } from "../models/requests";
+import { createRequest, getRequestById } from "../models/requests";
 import { OooStatusRequest, OooStatusRequestBody } from "../types/oooRequest";
 import { UserStatus } from "../types/userStatus";
 import { addLog } from "./logService";
-import firestore from "../utils/firestore";
 import { BadRequest } from "http-errors";
 import { updateRequest } from "../models/requests";
 import { AcknowledgeOooRequestBody } from "../types/oooRequest";
 import { addFutureStatus } from "../models/userStatus";
-const requestModel = firestore.collection("requests");
 
 /**
  * Validates the user status.
@@ -124,30 +122,18 @@ export const validateOooAcknowledgeRequest = async (
     try {
 
         if (requestType !== REQUEST_TYPE.OOO) {
-            await addLog(logType.INVALID_REQUEST_TYPE,
-                { requestId, type: requestType },
-                { message: INVALID_REQUEST_TYPE }
-            );
             return {
                 error: INVALID_REQUEST_TYPE
             };
         }
 
         if (requestStatus === REQUEST_STATE.APPROVED) {
-            await addLog(logType.REQUEST_ALREADY_APPROVED,
-                { oooRequestId: requestId },
-                { message: REQUEST_ALREADY_APPROVED }
-            );
             return {
                 error: REQUEST_ALREADY_APPROVED
             };
         }
 
         if (requestStatus === REQUEST_STATE.REJECTED) {
-            await addLog(logType.REQUEST_ALREADY_REJECTED,
-                { oooRequestId: requestId },
-                { message: REQUEST_ALREADY_REJECTED }
-            );
             return {
                 error: REQUEST_ALREADY_REJECTED
             };
@@ -173,25 +159,21 @@ export const acknowledgeOooRequest = async (
     superUserId: string,
 ) => {
     try {
-        const request = await requestModel.doc(requestId).get();
+        const requestData = await getRequestById(requestId);
 
-        if (!request.exists) {
-            await addLog(logType.REQUEST_DOES_NOT_EXIST,
-                { oooRequestId: requestId },
-                { message: REQUEST_DOES_NOT_EXIST }
-            );
+        if (requestData.error) {
+            logger.error("Error while acknowledging OOO request", { requestId, reason: REQUEST_DOES_NOT_EXIST });
             return {
                 error: REQUEST_DOES_NOT_EXIST
             };
         }
 
-        const requestData = request.data();
+        const validationError = await validateOooAcknowledgeRequest(requestId, requestData.type, requestData.status);
 
-        const validationResponse = await validateOooAcknowledgeRequest(requestId, requestData.type, requestData.status);
-
-        if (validationResponse) {
+        if (validationError) {
+            logger.error(`Error while validating OOO acknowledge request`, { requestId, reason: validationError.error });
             return {
-                error: validationResponse.error
+                error: validationError.error
             };
         }
 
@@ -209,10 +191,9 @@ export const acknowledgeOooRequest = async (
         const requestLog = {
             type: acknowledgeLogType,
             meta: {
-                requestId: requestId,
+                requestId,
                 action: LOG_ACTION.UPDATE,
                 userId: superUserId,
-                createdAt: Date.now(),
             },
             body: requestResult,
         };
