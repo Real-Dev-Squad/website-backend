@@ -1,5 +1,5 @@
 const botVerifcation = require("../services/botVerificationService");
-const { CLOUDFLARE_WORKER, CRON_JOB_HANDLER } = require("../constants/bot");
+const { CLOUDFLARE_WORKER, CRON_JOB_HANDLER, DISCORD_SERVICE } = require("../constants/bot");
 
 const verifyCronJob = async (req, res, next) => {
   try {
@@ -18,12 +18,18 @@ const verifyCronJob = async (req, res, next) => {
 const verifyDiscordBot = async (req, res, next) => {
   try {
     const token = req.headers.authorization.split(" ")[1];
+    const serviceName = req.headers["x-service-name"];
+    if (serviceName === DISCORD_SERVICE) {
+      const data = botVerifcation.verifyDiscordService(token);
+      if (data.name !== DISCORD_SERVICE) {
+        return res.boom.unauthorized("Unauthorized Bot");
+      }
+      return next();
+    }
     const data = botVerifcation.verifyToken(token);
-
     if (data.name !== CLOUDFLARE_WORKER) {
       return res.boom.unauthorized("Unauthorized Bot");
     }
-
     return next();
   } catch (error) {
     if (error.message === "invalid token") {
@@ -32,5 +38,4 @@ const verifyDiscordBot = async (req, res, next) => {
     return res.boom.badRequest("Invalid Request");
   }
 };
-
 module.exports = { verifyDiscordBot, verifyCronJob };
