@@ -301,6 +301,51 @@ describe("tasks", function () {
       await cleanDb();
     });
 
+    it("should exclude overdue tasks with COMPLETED, DONE, VERIFIED, BACKLOG, and AVAILABLE statuses", async function () {
+      const overdueCompletedTask = {
+        ...tasksData[1],
+        endsOn: Date.now() / 1000 - 5 * 24 * 60 * 60,
+        status: TASK_STATUS.COMPLETED,
+      };
+      const overdueDoneTask = {
+        ...tasksData[2],
+        endsOn: Date.now() / 1000 - 5 * 24 * 60 * 60,
+        status: TASK_STATUS.DONE,
+      };
+      const overdueVerifiedTask = {
+        ...tasksData[3],
+        endsOn: Date.now() / 1000 - 5 * 24 * 60 * 60,
+        status: TASK_STATUS.VERIFIED,
+      };
+      const overdueBacklogTask = {
+        ...tasksData[4],
+        endsOn: Date.now() / 1000 - 5 * 24 * 60 * 60,
+        status: TASK_STATUS.BACKLOG,
+      };
+      const overdueAvailableTask = {
+        ...tasksData[5],
+        endsOn: Date.now() / 1000 - 5 * 24 * 60 * 60,
+        status: TASK_STATUS.AVAILABLE,
+      };
+
+      await tasks.updateTask(overdueCompletedTask);
+      await tasks.updateTask(overdueBacklogTask);
+      await tasks.updateTask(overdueAvailableTask);
+      await tasks.updateTask(overdueDoneTask);
+      await tasks.updateTask(overdueVerifiedTask);
+
+      const result = await tasks.getOverdueTasks();
+
+      const statuses = result.map((task) => task.status);
+      expect(statuses).to.not.include.members([
+        TASK_STATUS.COMPLETED,
+        TASK_STATUS.BACKLOG,
+        TASK_STATUS.AVAILABLE,
+        TASK_STATUS.DONE,
+        TASK_STATUS.VERIFIED,
+      ]);
+    });
+
     it("should return the overdue tasks for the given days", async function () {
       const days = 10;
       const overdueTask = { ...tasksData[0] };
@@ -311,8 +356,16 @@ describe("tasks", function () {
     });
 
     it("should return all users which have overdue tasks if days is not passed", async function () {
+      const overdueApprovedTask = {
+        ...tasksData[1],
+        endsOn: Date.now() / 1000 - 5 * 24 * 60 * 60,
+        status: TASK_STATUS.APPROVED,
+      };
+
+      await tasks.updateTask(overdueApprovedTask);
+
       const usersWithOverdueTasks = await tasks.getOverdueTasks();
-      expect(usersWithOverdueTasks.length).to.be.equal(4);
+      expect(usersWithOverdueTasks.length).to.be.equal(5);
     });
   });
 
