@@ -1,5 +1,5 @@
-const { expect } = require("chai");
-const { customWordCountValidator } = require("./../../../utils/customWordCountValidator");
+import { expect } from "chai";
+import { customWordCountValidator } from "./../../../utils/customWordCountValidator.js";
 
 describe("customWordCountValidator", function () {
   it("should return an error if the word count is less than the desired count", function () {

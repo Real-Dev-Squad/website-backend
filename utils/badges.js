@@ -1,4 +1,5 @@
-const firestore = require("./firestore");
+import firestore from "./firestore.js";
+
 const userBadgeModel = firestore.collection("userBadges");
 
 /**
@@ -57,8 +58,4 @@ async function assignOrRemoveBadgesInBulk({ userId, array, isRemove = false }) {
   return await bulkWriter.close();
 }
 
-module.exports = {
-  convertFirebaseDocumentToBadgeDocument,
-  convertFirebaseTimestampToDateTime,
-  assignOrRemoveBadgesInBulk,
-};
+export { convertFirebaseDocumentToBadgeDocument, convertFirebaseTimestampToDateTime, assignOrRemoveBadgesInBulk };

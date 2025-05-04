@@ -1,21 +1,23 @@
-import { CustomRequest, CustomResponse } from "../types/global";
-const { addOrUpdate } = require("../models/users");
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const nodemailer = require("nodemailer");
-const config = require("config");
+import config from "config";
+import nodemailer from "nodemailer";
+import { CustomRequest, CustomResponse } from "../types/global.js";
+import logger from "../utils/logger.js";
+import { addOrUpdate } from "../models/users.js";
+import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
+
 const emailServiceConfig = config.get("emailServiceConfig");
 
 export const subscribe = async (req: CustomRequest, res: CustomResponse) => {
-    const { email } = req.body;
-    const phone = req.body.phone || null;
-    const userId = req.userData.id;
-    const data = { email, isSubscribed: true, phone };
-    const userAlreadySubscribed = req.userData.isSubscribed;
+  const { email } = req.body;
+  const phone = req.body.phone || null;
+  const userId = req.userData.id;
+  const data = { email, isSubscribed: true, phone };
+  const userAlreadySubscribed = req.userData.isSubscribed;
   try {
     if (userAlreadySubscribed) {
       return res.boom.badRequest("User already subscribed");
     }
-    await addOrUpdate(data, userId);
+    await addOrUpdate(data, userId, false);
     return res.status(201).json("User subscribed successfully");
   } catch (error) {
     logger.error(`Error occurred while subscribing: ${error.message}`);
@@ -24,8 +26,8 @@ export const subscribe = async (req: CustomRequest, res: CustomResponse) => {
 };
 
 export const unsubscribe = async (req: CustomRequest, res: CustomResponse) => {
-    const userId = req.userData.id;
-    const userAlreadySubscribed = req.userData.isSubscribed;
+  const userId = req.userData.id;
+  const userAlreadySubscribed = req.userData.isSubscribed;
   try {
     if (!userAlreadySubscribed) {
       return res.boom.badRequest("User is already unsubscribed");
@@ -34,7 +36,8 @@ export const unsubscribe = async (req: CustomRequest, res: CustomResponse) => {
       {
         isSubscribed: false,
       },
-      userId
+      userId,
+      false
     );
     return res.status(200).json("User unsubscribed successfully");
   } catch (error) {
@@ -46,19 +49,24 @@ export const unsubscribe = async (req: CustomRequest, res: CustomResponse) => {
 // TODO: currently we are sending test email to a user only (i.e., Tejas sir as decided)
 // later we need to make service which send email to all subscribed user
 export const sendEmail = async (req: CustomRequest, res: CustomResponse) => {
-  try { 
+  try {
     const transporter = nodemailer.createTransport({
+      // @ts-ignore
       host: emailServiceConfig.host,
-      port:  emailServiceConfig.port,
+      // @ts-ignore
+      port: emailServiceConfig.port,
       secure: false,
 
       auth: {
+        // @ts-ignore
         user: emailServiceConfig.email,
+        // @ts-ignore
         pass: emailServiceConfig.password,
       },
     });
 
     const info = await transporter.sendMail({
+      // @ts-ignore
       from: `"Real Dev Squad" <${emailServiceConfig.email}>`,
       to: "tejasatrds@gmail.com",
       subject: "Hello local, Testing in progress.",

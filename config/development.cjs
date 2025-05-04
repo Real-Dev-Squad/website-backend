@@ -6,6 +6,7 @@
 const port = 3000;
 const localUrl = `http://localhost:${port}`;
 
+// @ts-ignore
 module.exports = {
   port: port,
   enableFileLogs: false,

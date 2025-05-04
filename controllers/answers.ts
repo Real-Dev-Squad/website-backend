@@ -1,14 +1,15 @@
 import { Request } from "express";
-const crypto = require("crypto");
+import crypto from "crypto";
 
-import { Answer, AnswerClient, AnswerFieldsToUpdate, AnswerStatus } from "../typeDefinitions/answers";
-import { CustomRequest, CustomResponse } from "../typeDefinitions/global";
+import { Answer, AnswerClient, AnswerFieldsToUpdate, AnswerStatus } from "../typeDefinitions/answers.js";
+import { CustomRequest, CustomResponse } from "../typeDefinitions/global.js";
 
-const answerQuery = require("../models/answers");
+import * as answerQuery from "../models/answers.js";
 
-const { ANSWER_STATUS } = require("../constants/answers");
-const { HEADERS_FOR_SSE } = require("../constants/constants");
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+import { ANSWER_STATUS } from "../constants/answers.js";
+import { HEADERS_FOR_SSE } from "../constants/constants.js";
+import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
+import logger from "../utils/logger.js";
 
 /* Refer to limitation of this clients array here(in the limitations section of doc) - https://github.com/Real-Dev-Squad/website-www/wiki/%5BFeature%5D-%E2%80%90-Realtime-Word-Cloud-Questions-Answers-Feature*/
 let clients: AnswerClient[] = [];
@@ -16,7 +17,7 @@ let clients: AnswerClient[] = [];
 async function sendAnswerToAll(newAnswer: Answer, res: CustomResponse, method: "POST" | "PATCH") {
   const questionId: string = newAnswer.question_id;
 
-  const allAnswers = await answerQuery.getAnswers({ questionId });
+  const allAnswers = await answerQuery.getAnswers({ question_id: questionId });
   if (method === "POST") {
     clients.forEach((client) => {
       if (client.status !== ANSWER_STATUS.APPROVED) {
@@ -30,7 +31,7 @@ async function sendAnswerToAll(newAnswer: Answer, res: CustomResponse, method: "
   }
 
   if (method === "PATCH") {
-    const answers = await answerQuery.getAnswers({ questionId, status: ANSWER_STATUS.APPROVED });
+    const answers = await answerQuery.getAnswers({ question_id: questionId, status: ANSWER_STATUS.APPROVED });
     clients.forEach((client) => {
       if (client.status === ANSWER_STATUS.APPROVED) {
         client.res.write(`data: ${JSON.stringify(answers)}\n\n`);
@@ -46,8 +47,7 @@ async function sendAnswerToAll(newAnswer: Answer, res: CustomResponse, method: "
 const createAnswer = async (req: Request, res: CustomResponse) => {
   try {
     const answerId = crypto.randomUUID({ disableEntropyCache: true });
-    const answer = await answerQuery.createAnswer({ ...req.body, id: answerId });
-
+    const answer = await answerQuery.createAnswer({ ...req.body, id: answerId }) as Answer;
     sendAnswerToAll(answer, res, "POST");
   } catch (error) {
     logger.error(`Error while creating answer: ${error}`);
@@ -62,7 +62,7 @@ const updateAnswer = async (req: CustomRequest, res: CustomResponse) => {
   try {
     const fieldsToUpdate: AnswerFieldsToUpdate = { status, reviewed_by: req.userData.id };
 
-    const answer = await answerQuery.updateAnswer(id, fieldsToUpdate);
+    const answer = await answerQuery.updateAnswer(id, fieldsToUpdate) as Answer;
     sendAnswerToAll(answer, res, "PATCH");
   } catch (error) {
     logger.error(`Error while updating answer: ${error}`);
@@ -99,4 +99,4 @@ const getAnswers = async (req: CustomRequest, res: CustomResponse) => {
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
-module.exports = { createAnswer, updateAnswer, getAnswers };
+export default  { createAnswer, updateAnswer, getAnswers };

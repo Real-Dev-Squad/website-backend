@@ -1,5 +1,5 @@
 // Use Roles with authorizeRoles middleware
-const ROLES = {
+export const ROLES = {
   SUPERUSER: "super_user",
   APPOWNER: "app_owner",
   MEMBER: "member",
@@ -7,4 +7,3 @@ const ROLES = {
   INDISCORD: "in_discord",
 };
 
-module.exports = ROLES;

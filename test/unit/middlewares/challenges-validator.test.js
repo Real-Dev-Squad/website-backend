@@ -1,6 +1,7 @@
-const Sinon = require("sinon");
-const { createChallenge } = require("../../../middlewares/validators/challenges");
-const { expect } = require("chai");
+import { expect } from "chai";
+import sinon from "sinon";
+
+import { createChallenge } from "../../../middlewares/validators/challenges.js";
 
 describe("Middleware | Validators | Challenges", function () {
   describe("create challenge validator", function () {
@@ -14,7 +15,7 @@ describe("Middleware | Validators | Challenges", function () {
         },
       };
       const res = {};
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       await createChallenge(req, res, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(true);
     });
@@ -30,7 +31,7 @@ describe("Middleware | Validators | Challenges", function () {
           badRequest: () => {},
         },
       };
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       await createChallenge(req, res, nextSpy).catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
       });

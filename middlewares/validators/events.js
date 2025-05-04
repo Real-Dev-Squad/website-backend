@@ -1,4 +1,5 @@
-const joi = require("joi");
+import joi from "joi";
+import logger from "../../utils/logger.js";
 
 const createEvent = async (req, res, next) => {
   const schema = joi.object({
@@ -184,7 +185,7 @@ const getEventCodes = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   createEvent,
   getAllEvents,
   joinEvent,

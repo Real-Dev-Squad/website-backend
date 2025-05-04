@@ -1,22 +1,23 @@
-const chai = require("chai");
-const sinon = require("sinon");
-const { expect } = chai;
-const firestore = require("../../../utils/firestore");
-const userStatusModel = firestore.collection("usersStatus");
-const tasksModel = firestore.collection("tasks");
-const {
+import { expect } from "chai";
+import sinon from "sinon";
+import firestore from "../../../utils/firestore.js";
+
+import {
   updateStatusOnTaskCompletion,
   updateUserStatusOnNewTaskAssignment,
   updateUserStatusOnTaskUpdate,
   batchUpdateUsersStatus,
   getTaskBasedUsersStatus,
-} = require("../../../models/userStatus");
-const cleanDb = require("../../utils/cleanDb");
-const addUser = require("../../utils/addUser");
-const { userState } = require("../../../constants/userStatus");
-const userData = require("../../fixtures/user/user");
-const allTasks = require("../../fixtures/tasks/tasks");
-const { generateStatusDataForState } = require("../../fixtures/userStatus/userStatus");
+} from "../../../models/userStatus.js";
+import cleanDb from "../../utils/cleanDb.js";
+import addUser from "../../utils/addUser.js";
+import { userState } from "../../../constants/userStatus.js";
+import userData from "../../fixtures/user/user.js";
+import allTasks from "../../fixtures/tasks/tasks.js";
+import { generateStatusDataForState } from "../../fixtures/userStatus/userStatus.js";
+
+const userStatusModel = firestore.collection("usersStatus");
+const tasksModel = firestore.collection("tasks");
 
 describe("Update Status based on task update", function () {
   describe("Tests for the Model Function to Update Status Based on Task Completion", function () {

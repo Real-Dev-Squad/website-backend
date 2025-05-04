@@ -1,5 +1,5 @@
-const { expect } = require("chai");
-const { parseSearchQuery } = require("../../../utils/tasks");
+import { expect } from "chai";
+import { parseSearchQuery } from "../../../utils/tasks.js";
 
 describe("parseSearchQuery", function () {
   it("should parse a valid query string", function () {

@@ -7,4 +7,4 @@ const Services = {
   CRON_JOB_HANDLER: CRON_JOB_HANDLER,
 };
 
-module.exports = { CLOUDFLARE_WORKER, BAD_TOKEN, CRON_JOB_HANDLER, Services };
+export { CLOUDFLARE_WORKER, BAD_TOKEN, CRON_JOB_HANDLER, Services };

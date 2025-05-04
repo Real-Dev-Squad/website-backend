@@ -50,7 +50,7 @@ const SIMULTANEOUS_WORKER_CALLS = 4;
 
 const MAX_USERNAME_LENGTH = 32;
 
-module.exports = {
+export {
   profileStatus,
   USER_STATUS,
   ALLOWED_FILTER_PARAMS,

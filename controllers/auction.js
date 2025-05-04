@@ -1,6 +1,7 @@
-const auctions = require("../models/auctions");
-const wallet = require("../models/wallets");
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+import auctions from "../models/auctions.js";
+import { fetchWallet } from "../models/wallets.js";
+import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
+import logger from "../utils/logger.js";
 
 /**
  * Fetches all the active (ongoing) auctions
@@ -52,7 +53,7 @@ const createNewAuction = async (req, res) => {
     const { id: seller } = req.userData;
     const { initial_price: initialPrice, item_type: itemType, end_time: endTime, quantity } = req.body;
 
-    const { currencies } = await wallet.fetchWallet(seller);
+    const { currencies } = await fetchWallet(seller);
     const itemQuantity = parseInt(currencies[`${itemType}`]);
     if (!itemQuantity || itemQuantity < quantity) return res.boom.forbidden(`You do not have enough of ${itemType}s!`);
 
@@ -89,7 +90,7 @@ const makeNewBid = async (req, res) => {
   }
 };
 
-module.exports = {
+export default {
   fetchAuctionById,
   fetchAvailableAuctions,
   createNewAuction,

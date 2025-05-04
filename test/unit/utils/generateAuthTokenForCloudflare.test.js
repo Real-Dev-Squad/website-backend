@@ -1,5 +1,5 @@
-const { expect } = require("chai");
-const { generateAuthTokenForCloudflare } = require("../../../utils/discord-actions");
+import { expect } from "chai";
+import { generateAuthTokenForCloudflare } from "../../../utils/discord-actions.js";
 
 describe("test generate auth token for cloudflare", function () {
   it("generates auth token", function () {

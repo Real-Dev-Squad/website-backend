@@ -1,13 +1,16 @@
-const externalAccountsModel = require("../models/external-accounts");
-const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const { getDiscordMembers } = require("../services/discordService");
-const { addOrUpdate, getUsersByRole, updateUsersInBatch } = require("../models/users");
-const { retrieveDiscordUsers, fetchUsersForKeyValues } = require("../services/dataAccessLayer");
-const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../constants/external-accounts");
-const removeDiscordRoleUtils = require("../utils/removeDiscordRoleFromUser");
-const config = require("config");
-const logger = require("../utils/logger");
-const { markUnDoneTasksOfArchivedUsersBacklog } = require("../models/tasks");
+import config from "config";
+import {
+  fetchExternalAccountData,
+  addExternalAccountData as _addExternalAccountData,
+} from "../models/external-accounts.js";
+import { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
+import { getDiscordMembers } from "../services/discordService.js";
+import { addOrUpdate, getUsersByRole, updateUsersInBatch } from "../models/users.js";
+import { retrieveDiscordUsers, fetchUsersForKeyValues } from "../services/dataAccessLayer.js";
+import { EXTERNAL_ACCOUNTS_POST_ACTIONS } from "../constants/external-accounts.js";
+import { removeDiscordRoleFromUser } from "../utils/removeDiscordRoleFromUser.js";
+import logger from "../utils/logger.js";
+import taskModel from "../models/tasks.js";
 
 const addExternalAccountData = async (req, res) => {
   const createdOn = Date.now();
@@ -16,23 +19,23 @@ const addExternalAccountData = async (req, res) => {
     const data = { ...req.body, createdOn };
 
     // Check if token already exists
-    const dataFound = await externalAccountsModel.fetchExternalAccountData("", data.token);
+    const dataFound = await fetchExternalAccountData("", data.token);
     if (dataFound.token && dataFound.token === data.token) {
       return res.boom.conflict("Token already exists");
     }
 
-    await externalAccountsModel.addExternalAccountData(data);
+    await _addExternalAccountData(data);
 
     return res.status(201).json({ message: "Added external account data successfully" });
   } catch (error) {
-    logger.error(`Error adding data: ${error}`);
+    logger(`Error adding data: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
 
 const getExternalAccountData = async (req, res) => {
   try {
-    const externalAccountData = await externalAccountsModel.fetchExternalAccountData(req.query, req.params.token);
+    const externalAccountData = await fetchExternalAccountData(req.query, req.params.token);
     if (!externalAccountData.id) {
       return res.boom.notFound("No data found");
     }
@@ -44,7 +47,7 @@ const getExternalAccountData = async (req, res) => {
 
     return res.status(200).json({ message: "Data returned successfully", attributes: attributes });
   } catch (error) {
-    logger.error(`Error getting external account data: ${error}`);
+    logger(`Error getting external account data: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
@@ -52,7 +55,7 @@ const linkExternalAccount = async (req, res) => {
   try {
     const { id: userId, roles } = req.userData;
 
-    const externalAccountData = await externalAccountsModel.fetchExternalAccountData(req.query, req.params.token);
+    const externalAccountData = await fetchExternalAccountData(req.query, req.params.token);
     if (!externalAccountData.id) {
       return res.boom.notFound("No data found");
     }
@@ -72,7 +75,7 @@ const linkExternalAccount = async (req, res) => {
     );
 
     const unverifiedRoleId = config.get("discordUnverifiedRoleId");
-    const unverifiedRoleRemovalResponse = await removeDiscordRoleUtils.removeDiscordRoleFromUser(
+    const unverifiedRoleRemovalResponse = await removeDiscordRoleFromUser(
       req.userData,
       attributes.discordId,
       unverifiedRoleId
@@ -85,7 +88,7 @@ const linkExternalAccount = async (req, res) => {
 
     return res.status(204).json({ message: "Your discord profile has been linked successfully" });
   } catch (error) {
-    logger.error(`Error getting external account data: ${error}`);
+    logger(`Error getting external account data: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
@@ -160,7 +163,7 @@ const syncExternalAccountData = async (req, res) => {
       message: "Data Sync Complete",
     });
   } catch (err) {
-    logger.error("Error in syncing users discord joined at", err);
+    logger("Error in syncing users discord joined at", err);
     return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
   }
 };
@@ -232,7 +235,7 @@ const newSyncExternalAccountData = async (req, res) => {
     }
     const unArchiveUsersInBatchPromise = updateUsersInBatch(updateUserList);
     // Mark un done tasks assigned to archived users BACKLOG
-    const markTasksBacklogPromise = markUnDoneTasksOfArchivedUsersBacklog(archiveUserList);
+    const markTasksBacklogPromise = taskModel.markUnDoneTasksOfArchivedUsersBacklog(archiveUserList);
 
     const archivedUsersInDiscordList = await fetchUsersForKeyValues("discordId", [...discordUserIdSet]);
     totalUsersProcessed += archivedUsersInDiscordList.length;
@@ -267,12 +270,12 @@ const newSyncExternalAccountData = async (req, res) => {
       backlogTasksCount: backlogTasksCount,
     });
   } catch (err) {
-    logger.error("Error in syncing users discord joined at");
+    logger("Error in syncing users discord joined at");
     return res.status(500).json({ message: INTERNAL_SERVER_ERROR });
   }
 };
 
-module.exports = {
+export default {
   addExternalAccountData,
   getExternalAccountData,
   linkExternalAccount,

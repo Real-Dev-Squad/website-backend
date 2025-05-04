@@ -1,5 +1,6 @@
-const Joi = require("joi");
-const { validateMillisecondsTimestamp } = require("./utils");
+import Joi from "joi";
+import logger from "../../utils/logger.js";
+import { validateMillisecondsTimestamp } from "./utils.js";
 
 const validateGroupRoleBody = async (req, res, next) => {
   const schema = Joi.object({
@@ -61,7 +62,7 @@ const validateLazyLoadingParams = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export {
   validateGroupRoleBody,
   validateMemberRoleBody,
   validateLazyLoadingParams,

@@ -1,23 +1,25 @@
-const chai = require("chai");
+import chai from "chai";
+import chaiHttp from "chai-http";
+import app from "../../server.js";
+import cleanDb from "../utils/cleanDb.js";
+import bot from "../utils/generateBotToken.js";
+import addUser from "../utils/addUser.js";
+import { BAD_TOKEN, CLOUDFLARE_WORKER } from "../../constants/bot.js";
+import { generateAuthToken } from "../../services/authService.js";
+import externalAccountData from "../fixtures/external-accounts/external-accounts.js";
+import externalAccountsModel from "../../models/external-accounts.js";
+import { usersFromRds, getDiscordMembers } from "../fixtures/discordResponse/discord-response.js";
+import Sinon from "sinon";
+import { INTERNAL_SERVER_ERROR } from "../../constants/errorMessages.js";
+import removeDiscordRoleUtils from "../../utils/removeDiscordRoleFromUser.js";
+import firestore from "../../utils/firestore.js";
+import userData from "../fixtures/user/user.js";
+import config from "config";
+import { EXTERNAL_ACCOUNTS_POST_ACTIONS } from "../../constants/external-accounts.js";
 const { expect } = chai;
-const chaiHttp = require("chai-http");
-const app = require("../../server");
-const cleanDb = require("../utils/cleanDb");
-const bot = require("../utils/generateBotToken");
-const addUser = require("../utils/addUser");
-const { BAD_TOKEN, CLOUDFLARE_WORKER } = require("../../constants/bot");
-const authService = require("../../services/authService");
-const externalAccountData = require("../fixtures/external-accounts/external-accounts")();
-const externalAccountsModel = require("../../models/external-accounts");
-const { usersFromRds, getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
-const Sinon = require("sinon");
-const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
-const removeDiscordRoleUtils = require("../../utils/removeDiscordRoleFromUser");
-const firestore = require("../../utils/firestore");
-const userData = require("../fixtures/user/user")();
+
 const userModel = firestore.collection("users");
 const tasksModel = firestore.collection("tasks");
-const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../../constants/external-accounts");
 chai.use(chaiHttp);
 const cookieName = config.get("userToken.cookieName");
 
@@ -142,7 +144,7 @@ describe("External Accounts", function () {
 
     beforeEach(async function () {
       const userId = await addUser();
-      jwt = authService.generateAuthToken({ userId });
+      jwt = generateAuthToken({ userId });
       await externalAccountsModel.addExternalAccountData(externalAccountData[2]);
       await externalAccountsModel.addExternalAccountData(externalAccountData[3]);
     });
@@ -236,7 +238,7 @@ describe("External Accounts", function () {
     beforeEach(async function () {
       // userData[4] is a super user
       const userId = await addUser(userData[4]);
-      superUserJwt = authService.generateAuthToken({ userId });
+      superUserJwt = generateAuthToken({ userId });
       await userModel.add(usersFromRds[0]);
       await userModel.add(usersFromRds[1]);
       await userModel.add(usersFromRds[2]);
@@ -299,7 +301,7 @@ describe("External Accounts", function () {
     beforeEach(async function () {
       // userData[4] is a super user
       const userId = await addUser(userData[4]);
-      superUserJwt = authService.generateAuthToken({ userId });
+      superUserJwt = generateAuthToken({ userId });
       fetchStub = Sinon.stub(global, "fetch");
     });
 
@@ -452,7 +454,7 @@ describe("External Accounts", function () {
 
     beforeEach(async function () {
       const userId = await addUser(userData[3]);
-      newUserJWT = authService.generateAuthToken({ userId });
+      newUserJWT = generateAuthToken({ userId });
       await externalAccountsModel.addExternalAccountData(externalAccountData[2]);
       await externalAccountsModel.addExternalAccountData(externalAccountData[3]);
     });

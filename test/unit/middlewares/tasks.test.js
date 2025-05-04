@@ -1,6 +1,7 @@
-const { updateTask } = require("../../../middlewares/validators/tasks"); // Replace with the actual path to your updateTask module
-const { expect } = require("chai");
-const sinon = require("sinon");
+import { expect } from "chai";
+import sinon from "sinon";
+
+import { updateTask } from "../../../middlewares/validators/tasks.js";
 
 describe("updateTask function", function () {
   // Helper function to create a request object with a specific body

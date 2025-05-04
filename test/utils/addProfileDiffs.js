@@ -1,9 +1,9 @@
-const firestore = require("../../utils/firestore");
+import firestore from "../../utils/firestore.js";
+import getProfileDiffs from "../fixtures/profileDiffs/profileDiffs.js";
+
 const profileDiffsModel = firestore.collection("profileDiffs");
 
-const getProfileDiffs = require("../fixtures/profileDiffs/profileDiffs");
-
-module.exports = async (userId) => {
+export default async (userId) => {
   const PROFILE_DIFFS = getProfileDiffs();
   const addPromises = PROFILE_DIFFS.map((profileDiff) => profileDiffsModel.add({ ...profileDiff, userId }));
   await Promise.all(addPromises);

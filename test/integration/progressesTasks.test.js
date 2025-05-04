@@ -1,22 +1,23 @@
-const chai = require("chai");
-const sinon = require("sinon");
+import chai from "chai";
+import sinon from "sinon";
 
-const firestore = require("../../utils/firestore");
-const app = require("../../server");
-const authService = require("../../services/authService");
-const tasks = require("../../models/tasks");
-const progressesModel = require("../../models/progresses");
-const addUser = require("../utils/addUser");
-const cleanDb = require("../utils/cleanDb");
-const {
+import firestore from "../../utils/firestore.js";
+import app from "../../server.js";
+import { generateAuthToken } from "../../services/authService.js";
+import tasks from "../../models/tasks.js";
+import progressesModel from "../../models/progresses.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
+import {
   taskProgressDay1,
   stubbedModelTaskProgressData,
   incompleteTaskProgress,
-} = require("../fixtures/progress/progresses");
+} from "../fixtures/progress/progresses.js";
 
-const userData = require("../fixtures/user/user")();
-const taskData = require("../fixtures/tasks/tasks")();
-const { INTERNAL_SERVER_ERROR_MESSAGE, UNAUTHORIZED_WRITE } = require("../../constants/progresses");
+import userData from "../fixtures/user/user.js";
+import taskData from "../fixtures/tasks/tasks.js";
+import { INTERNAL_SERVER_ERROR_MESSAGE, UNAUTHORIZED_WRITE } from "../../constants/progresses.js";
+import config from "config";
 const cookieName = config.get("userToken.cookieName");
 const { expect } = chai;
 
@@ -43,8 +44,8 @@ describe("Test Progress Updates API for Tasks", function () {
       });
       userId = await addUser(userData[1]);
       archivedUserId = await addUser(userData[5]);
-      archivedUserToken = authService.generateAuthToken({ userId: archivedUserId });
-      userToken = authService.generateAuthToken({ userId: userId });
+      archivedUserToken = generateAuthToken({ userId: archivedUserId });
+      userToken = generateAuthToken({ userId: userId });
       const taskObject1 = await tasks.updateTask(taskData[0]);
       taskId1 = taskObject1.taskId;
       const taskObject2 = await tasks.updateTask(taskData[1]);

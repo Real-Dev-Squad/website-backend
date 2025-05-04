@@ -111,4 +111,4 @@ const issuesData = {
 };
 
 const issuesHtmlUrl = "https://github.com/Real-Dev-Squad/website-www/issues/679";
-module.exports = { issuesData, issuesHtmlUrl };
+export default { issuesData, issuesHtmlUrl };

@@ -1,23 +1,23 @@
-const chai = require("chai");
-const { expect } = chai;
+import chai from "chai";
 
-const { authorizeUser } = require("../../middlewares/authorization");
-const authenticate = require("../../middlewares/authenticate");
-const authService = require("../../services/authService");
-const addUser = require("../utils/addUser");
-const cleanDb = require("../utils/cleanDb");
-const config = require("config");
+import { authorizeUser } from "../../middlewares/authorization.js";
+import authenticate from "../../middlewares/authenticate.js";
+import * as authService from "../../services/authService.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
+import config from "config";
+import userData from "../fixtures/user/user.js";
+
+// Setup some routes with various permissions for testing
+import express from "express";
+import AppMiddlewares from "../../middlewares/index.js";
+const { expect } = chai;
 const cookieName = config.get("userToken.cookieName");
-const userData = require("../fixtures/user/user")();
 
 const defaultUser = userData[0]; // user with no `roles` key
 const appOwner = userData[3];
 const superUser = userData[4];
-
-// Setup some routes with various permissions for testing
-const express = require("express");
 const router = express.Router();
-const AppMiddlewares = require("../../middlewares");
 
 const pongHandler = (_, res) => {
   return res.json({ message: "pong" });

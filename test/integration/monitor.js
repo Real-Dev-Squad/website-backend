@@ -1,27 +1,27 @@
-const chai = require("chai");
+import chai from "chai";
+import config from "config";
 
-const firestore = require("../../utils/firestore");
-const app = require("../../server");
-const authService = require("../../services/authService");
-
-const addUser = require("../utils/addUser");
-const cleanDb = require("../utils/cleanDb");
-const taskData = require("../fixtures/tasks/tasks")();
-const { updateTask } = require("../../models/tasks");
-const {
+import firestore from "../../utils/firestore.js";
+import app from "../../server.js";
+import { generateAuthToken } from "../../services/authService.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
+import taskData from "../fixtures/tasks/tasks.js";
+import { updateTask } from "../../models/tasks.js";
+import {
   predefinedTrackedProgressDataForUser,
   predefinedTrackedProgressDataForTask,
   isISOString,
   trackedProgressUserDataForPost,
   trackedProgressTaskDataForPost,
   trackedProgressDataForPatch,
-} = require("../fixtures/trackedProgress");
+} from "../fixtures/trackedProgress.js";
 
-const userData = require("../fixtures/user/user")();
-const [userData0, userData1, , , superUserData] = userData;
+import userData from "../fixtures/user/user.js";
 
-const cookieName = config.get("userToken.cookieName");
 const { expect } = chai;
+const cookieName = config.get("userToken.cookieName");
+const [userData0, userData1, , , superUserData] = userData;
 
 describe("Test the tracked Progress API", function () {
   let userId0, userId1, superUserId;
@@ -30,10 +30,10 @@ describe("Test the tracked Progress API", function () {
 
   beforeEach(async function () {
     userId0 = await addUser(userData0);
-    userIdToken0 = authService.generateAuthToken({ userId: userId0 });
+    userIdToken0 = generateAuthToken({ userId: userId0 });
     userId1 = await addUser(userData1);
     superUserId = await addUser(superUserData);
-    superUserToken = authService.generateAuthToken({ userId: superUserId });
+    superUserToken = generateAuthToken({ userId: superUserId });
 
     const taskObject0 = await updateTask(taskData[0]);
     taskId0 = taskObject0.taskId;

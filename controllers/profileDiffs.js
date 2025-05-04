@@ -1,5 +1,6 @@
-const profileDiffsQuery = require("../models/profileDiffs");
-const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+import profileDiffsQuery from "../models/profileDiffs.js";
+import { SOMETHING_WENT_WRONG } from "../constants/errorMessages.js";
+import logger from "../utils/logger.js";
 
 /**
  * Fetches the pending profile diffs
@@ -56,7 +57,4 @@ const getProfileDiff = async (req, res) => {
   }
 };
 
-module.exports = {
-  getProfileDiffs,
-  getProfileDiff,
-};
+export { getProfileDiffs, getProfileDiff };

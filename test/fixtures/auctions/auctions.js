@@ -1,4 +1,4 @@
-const { NEELAM } = require("../../../constants/wallets");
+import { NEELAM } from "../../../constants/wallets.js";
 
 /* Import fixtures
  *
@@ -18,4 +18,4 @@ const auctionKeys = ["auctions", "message"];
 
 const auctionWithIdKeys = ["bidders_and_bids", "end_time", "highest_bid", "item", "quantity", "seller", "start_time"];
 
-module.exports = { auctionData, auctionKeys, auctionWithIdKeys };
+export default { auctionData, auctionKeys, auctionWithIdKeys };

@@ -1,5 +1,5 @@
-const { expect } = require("chai");
-const { generateCloudFlareHeaders } = require("../../../utils/discord-actions");
+import { expect } from "chai";
+import { generateCloudFlareHeaders } from "../../../utils/discord-actions.js";
 
 describe("generateCloudFlareHeaders", function () {
   it("generates headers with property Content-Type and Authorization", function () {

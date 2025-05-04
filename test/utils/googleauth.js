@@ -1,7 +1,9 @@
+import config from "config";
+import sinon from "sinon";
+import passport from "passport";
+
 const defaultClientId = config.get("googleOauth.clientId");
 const baseURL = config.get("services.rdsApi.baseUrl");
-const sinon = require("sinon");
-const passport = require("passport");
 
 const generateGoogleAuthRedirectUrl = function ({
   baseUrl = "https://accounts.google.com/o/oauth2/v2/auth",
@@ -28,4 +30,4 @@ const stubPassportAuthenticate = function (userData, token = "accessToken") {
   });
 };
 
-module.exports = { generateGoogleAuthRedirectUrl, stubPassportAuthenticate };
+export { generateGoogleAuthRedirectUrl, stubPassportAuthenticate };

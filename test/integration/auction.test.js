@@ -1,23 +1,23 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
+import chai from "chai";
+import chaiHttp from "chai-http";
 
-const app = require("../../server");
-const authService = require("../../services/authService");
-const addUser = require("../utils/addUser");
-const cleanDb = require("../utils/cleanDb");
+import app from "../../server.js";
+import * as authService from "../../services/authService.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
 
-const { createNewAuction } = require("../../models/auctions");
-const { createWallet } = require("../../models/wallets");
+import { createNewAuction } from "../../models/auctions.js";
+import { createWallet } from "../../models/wallets.js";
 
 // Import fixtures
-const userData = require("../fixtures/user/user")();
-const { auctionData, auctionKeys, auctionWithIdKeys } = require("../fixtures/auctions/auctions");
-const { initial_price: initialPrice, item_type: itemType, end_time: endTime, quantity } = auctionData;
-const currencyDataArray = require("../fixtures/currencies/currencies");
-const currenciesData = currencyDataArray.default;
+import userData from "../fixtures/user/user.js";
+import { auctionData, auctionKeys, auctionWithIdKeys } from "../fixtures/auctions/auctions.js";
+import currencyDataArray from "../fixtures/currencies/currencies.js";
 
-const config = require("config");
+import config from "config";
+const { expect } = chai;
+const { initial_price: initialPrice, item_type: itemType, end_time: endTime, quantity } = auctionData;
+const currenciesData = currencyDataArray.default;
 const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);

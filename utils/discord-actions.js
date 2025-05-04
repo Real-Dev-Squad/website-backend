@@ -1,6 +1,8 @@
-const jwt = require("jsonwebtoken");
-const config = require("config");
-const { getDiscordMemberDetails } = require("../services/discordMembersService");
+import jwt from "jsonwebtoken";
+import config from "config";
+import { getDiscordMemberDetails } from "../services/discordMembersService.js";
+import logger from "./logger.js";
+
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 const RDS_SERVERLESS_PRIVATE_KEY = config.get("rdsServerlessBot.rdsServerLessPrivateKey");
 const RDS_SERVERLESS_TTL = config.get("rdsServerlessBot.ttl");
@@ -72,7 +74,7 @@ const generateDiscordInviteLink = async () => {
   }
 };
 
-module.exports = {
+export {
   generateDiscordProfileImageUrl,
   generateAuthTokenForCloudflare,
   generateCloudFlareHeaders,

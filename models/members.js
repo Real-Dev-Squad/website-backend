@@ -3,9 +3,11 @@
  * This will contain the DB schema if we start consuming an ORM for managing the DB operations
  */
 
-const firestore = require("../utils/firestore");
+import firestore from "../utils/firestore.js";
+import { ROLES } from "../constants/roles.js";
+
 const userModel = firestore.collection("users");
-const ROLES = require("../constants/roles");
+
 /**
  * Fetches the data about our users
  * @return {Promise<userModel|Array>}
@@ -111,9 +113,4 @@ const addArchiveRoleToMembers = async (userId) => {
   }
 };
 
-module.exports = {
-  moveToMembers,
-  addArchiveRoleToMembers,
-  fetchUsers,
-  fetchUsersWithRole,
-};
+export { moveToMembers, addArchiveRoleToMembers, fetchUsers, fetchUsersWithRole };

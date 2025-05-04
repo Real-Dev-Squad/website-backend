@@ -1,37 +1,48 @@
-const chai = require("chai");
-const sinon = require("sinon");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
+import chai from "chai";
+import sinon from "sinon";
+import chaiHttp from "chai-http";
+import config from "config";
 
-const firestore = require("../../utils/firestore");
-const logsModel = firestore.collection("logs");
-const app = require("../../server");
-const tasks = require("../../models/tasks");
-const authService = require("../../services/authService");
-const addUser = require("../utils/addUser");
-const userModel = require("../../models/users");
-const userStatusModel = require("../../models/userStatus");
-const config = require("config");
+import firestore from "../../utils/firestore.js";
+import app from "../../server.js";
+import tasks from "../../models/tasks.js";
+import authService from "../../services/authService.js";
+import addUser from "../utils/addUser.js";
+import userModel from "../../models/users.js";
+import userStatusModel from "../../models/userStatus.js";
+import userData from "../fixtures/user/user.js";
+import tasksData from "../fixtures/tasks/tasks.js";
+import { DINERO, NEELAM } from "../../constants/wallets.js";
+import cleanDb from "../utils/cleanDb.js";
+import { TASK_STATUS, tasksUsersStatus } from "../../constants/tasks.js";
+import updateTaskStatus from "../fixtures/tasks/tasks1.js";
+import userStatusData from "../fixtures/userStatus/userStatus.js";
+import discordService from "../../services/discordService.js";
+import { CRON_JOB_HANDLER } from "../../constants/bot.js";
+import { logType } from "../../constants/logs.js";
+import { INTERNAL_SERVER_ERROR } from "../../constants/errorMessages.js";
+import tasksService from "../../services/tasks.js";
+import tags from "../../models/tags.js";
+import levels from "../../models/levels.js";
+import items from "../../models/items.js";
+import taskController from "../../controllers/tasks.js";
+import { createProgressDocument } from "../../models/progresses.js";
+import { stubbedModelTaskProgressData } from "../fixtures/progress/progresses.js";
+import { convertDaysToMilliseconds } from "../../utils/time.js";
+import { getDiscordMembers } from "../fixtures/discordResponse/discord-response.js";
+import { generateCronJobToken } from "../utils/generateBotToken.js";
+import {
+  usersData as abandonedUsersData,
+  tasksData as abandonedTasksData,
+} from "../fixtures/abandoned-tasks/departed-users.js";
+
+const { expect } = chai;
 const cookieName = config.get("userToken.cookieName");
-const userData = require("../fixtures/user/user")();
-const tasksData = require("../fixtures/tasks/tasks")();
-const { DINERO, NEELAM } = require("../../constants/wallets");
-const cleanDb = require("../utils/cleanDb");
-const { TASK_STATUS, tasksUsersStatus } = require("../../constants/tasks");
-const updateTaskStatus = require("../fixtures/tasks/tasks1")();
-const userStatusData = require("../fixtures/userStatus/userStatus");
+const logsModel = firestore.collection("logs");
 const tasksModel = firestore.collection("tasks");
 const userDBModel = firestore.collection("users");
-const discordService = require("../../services/discordService");
-const { CRON_JOB_HANDLER } = require("../../constants/bot");
-const { logType } = require("../../constants/logs");
-const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
-const tasksService = require("../../services/tasks");
+
 chai.use(chaiHttp);
-const tags = require("../../models/tags");
-const levels = require("../../models/levels");
-const items = require("../../models/items");
-const taskController = require("../../controllers/tasks");
 
 const appOwner = userData[3];
 const superUser = userData[4];
@@ -39,15 +50,6 @@ const genZUser = userData[20];
 const testUser = userData[2];
 
 let jwt, superUserJwt;
-const { createProgressDocument } = require("../../models/progresses");
-const { stubbedModelTaskProgressData } = require("../fixtures/progress/progresses");
-const { convertDaysToMilliseconds } = require("../../utils/time");
-const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
-const { generateCronJobToken } = require("../utils/generateBotToken");
-const {
-  usersData: abandonedUsersData,
-  tasksData: abandonedTasksData,
-} = require("../fixtures/abandoned-tasks/departed-users");
 
 const taskData = [
   {

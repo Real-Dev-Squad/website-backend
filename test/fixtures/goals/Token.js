@@ -6,4 +6,4 @@ const GET_OR_CREATE_GOAL_USER = {
       data: { attributes: { rds_id: "134556", token: "WHhHhWHu9ijHjkKhdbvFFhbnhCj" } },
     }),
 };
-module.exports = { GET_OR_CREATE_GOAL_USER };
+export default { GET_OR_CREATE_GOAL_USER };

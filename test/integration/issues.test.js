@@ -1,11 +1,13 @@
-const chai = require("chai");
-const sinon = require("sinon");
+import chai from "chai";
+import sinon from "sinon";
+import chaiHttp from "chai-http";
+
+import app from "../../server.js";
+import cleanDb from "../utils/cleanDb.js";
+import githubService from "../../services/githubService.js";
+import issuesMockData from "../fixtures/issues/issues.js";
+
 const { expect } = chai;
-const chaiHttp = require("chai-http");
-const app = require("../../server");
-const cleanDb = require("../utils/cleanDb");
-const githubService = require("../../services/githubService");
-const issuesMockData = require("../fixtures/issues/issues");
 
 chai.use(chaiHttp);
 

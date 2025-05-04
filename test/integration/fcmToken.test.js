@@ -1,12 +1,13 @@
-const chai = require("chai");
+import chai from "chai";
+import app from "../../server.js";
+import cleanDb from "../utils/cleanDb.js";
+import addUser from "../utils/addUser.js";
+import userData from "../fixtures/user/user.js";
+import { generateAuthToken } from "../../services/authService.js";
+import config from "config";
 const { expect } = chai;
-const app = require("../../server");
-const cleanDb = require("../utils/cleanDb");
-const addUser = require("../utils/addUser");
-const userData = require("../fixtures/user/user")();
 
 const userData0 = userData[0];
-const authService = require("../../services/authService");
 
 const cookieName = config.get("userToken.cookieName");
 
@@ -15,7 +16,7 @@ describe("Fcm Token Test", function () {
 
   beforeEach(async function () {
     userId0 = await addUser(userData0);
-    userIdToken0 = authService.generateAuthToken({ userId: userId0 });
+    userIdToken0 = generateAuthToken({ userId: userId0 });
   });
 
   afterEach(async function () {

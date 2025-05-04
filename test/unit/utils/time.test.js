@@ -1,11 +1,8 @@
-const chai = require("chai");
-const sinon = require("sinon");
-const { expect } = chai;
-
-const cleanDb = require("../../utils/cleanDb");
-const timeUtils = require("../../../utils/time");
-
-const timeData = require("../../fixtures/time/time");
+import { expect } from "chai";
+import sinon from "sinon";
+import cleanDb from "../../utils/cleanDb.js";
+import timeUtils from "../../../utils/time.js";
+import timeData from "../../fixtures/time/time.js";
 
 describe("time", function () {
   afterEach(async function () {

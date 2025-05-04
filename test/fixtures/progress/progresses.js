@@ -1,11 +1,11 @@
-const standupProgressDay1 = {
+export const standupProgressDay1 = {
   type: "user",
   completed: "Working on a backend Go project",
   planned: "Implement error handling for API endpoints",
   blockers: "Waiting for database access credentials",
 };
 
-const incompleteProgress = [
+export const incompleteProgress = [
   {
     missingField: "type",
     payload: {
@@ -40,7 +40,7 @@ const incompleteProgress = [
   },
 ];
 
-const stubbedModelProgressData = (userId, createdAt, date) => {
+export const stubbedModelProgressData = (userId, createdAt, date) => {
   return {
     userId,
     createdAt,
@@ -52,7 +52,7 @@ const stubbedModelProgressData = (userId, createdAt, date) => {
   };
 };
 
-const taskProgressDay1 = (taskId) => {
+export const taskProgressDay1 = (taskId) => {
   return {
     taskId,
     type: "task",
@@ -62,7 +62,7 @@ const taskProgressDay1 = (taskId) => {
   };
 };
 
-const incompleteTaskProgress = (taskId) => [
+export const incompleteTaskProgress = (taskId) => [
   {
     missingField: "type",
     payload: {
@@ -110,7 +110,7 @@ const incompleteTaskProgress = (taskId) => [
   },
 ];
 
-const stubbedModelTaskProgressData = (userId, taskId, createdAt, date) => {
+export const stubbedModelTaskProgressData = (userId, taskId, createdAt, date) => {
   return {
     userId,
     taskId,
@@ -121,13 +121,4 @@ const stubbedModelTaskProgressData = (userId, taskId, createdAt, date) => {
     planned: "Refactor code to follow coding best practices",
     blockers: "Waiting for feedback from the code review",
   };
-};
-
-module.exports = {
-  standupProgressDay1,
-  incompleteProgress,
-  stubbedModelProgressData,
-  taskProgressDay1,
-  incompleteTaskProgress,
-  stubbedModelTaskProgressData,
 };

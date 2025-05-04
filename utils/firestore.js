@@ -1,5 +1,5 @@
-const admin = require("firebase-admin");
-const config = require("config");
+import admin from "firebase-admin";
+import config from "config";
 
 // Firestore config needs to contain the credentials as a string instead of JS object,
 // because we will be setting it as an environment variable during deployment
@@ -11,4 +11,4 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
-module.exports = db;
+export default db;

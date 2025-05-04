@@ -1,22 +1,21 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
-const sinon = require("sinon");
-const artsQuery = require("../../models/arts");
+import chai from "chai";
+import chaiHttp from "chai-http";
+import sinon from "sinon";
+import * as artsQuery from "../../models/arts.js";
 
-const app = require("../../server");
-const authService = require("../../services/authService");
-const addUser = require("../utils/addUser");
-const arts = require("../../models/arts");
-const cleanDb = require("../utils/cleanDb");
+import app from "../../server.js";
+import * as authService from "../../services/authService.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
 
 // Import fixtures
-const artData = require("../fixtures/arts/arts")();
+import artData from "../fixtures/arts/arts.js";
 
-const config = require("config");
+import config from "config";
+import { addJoinData } from "../../models/users.js";
+import joinData from "../fixtures/user/join.js";
+const { expect } = chai;
 const cookieName = config.get("userToken.cookieName");
-const { addJoinData } = require("../../models/users");
-const joinData = require("../fixtures/user/join");
 
 chai.use(chaiHttp);
 
@@ -27,7 +26,7 @@ describe("Arts", function () {
   beforeEach(async function () {
     userId = await addUser();
     jwt = authService.generateAuthToken({ userId });
-    await arts.addArt(artData[0], userId);
+    await artsQuery.addArt(artData[0], userId);
   });
 
   afterEach(async function () {

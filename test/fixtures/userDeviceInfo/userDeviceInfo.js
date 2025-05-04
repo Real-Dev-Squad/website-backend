@@ -15,4 +15,4 @@ const userDeviceInfoDataArray = [
 
 const userDeviceInfoIdKeys = ["user_id", "device_info", "device_id"];
 
-module.exports = { userDeviceInfoDataArray, userDeviceInfoIdKeys };
+export default { userDeviceInfoDataArray, userDeviceInfoIdKeys };

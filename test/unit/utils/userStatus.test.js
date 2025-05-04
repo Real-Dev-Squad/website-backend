@@ -1,11 +1,10 @@
-const chai = require("chai");
-const { expect } = chai;
-const { generateNewStatus, checkIfUserHasLiveTasks, convertTimestampsToUTC } = require("../../../utils/userStatus");
-const { userState } = require("../../../constants/userStatus");
-const {
+import { expect } from "chai";
+import { generateNewStatus, checkIfUserHasLiveTasks, convertTimestampsToUTC } from "../../../utils/userStatus.js";
+import { userState } from "../../../constants/userStatus.js";
+import {
   OutputFixtureForFnConvertTimestampsToUTC,
   inputFixtureForFnConvertTimestampsToUTC,
-} = require("../../fixtures/userStatus/userStatus");
+} from "../../fixtures/userStatus/userStatus.js";
 
 describe("User Status Functions", function () {
   describe("generateNewStatus", function () {

@@ -19,4 +19,4 @@ const checkIsVerifiedDiscord = async (req, res, next) => {
   return next();
 };
 
-module.exports = checkIsVerifiedDiscord;
+export default checkIsVerifiedDiscord;

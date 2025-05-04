@@ -4,23 +4,23 @@
  */
 /* eslint-disable security/detect-object-injection */
 
-const chai = require("chai");
-const sinon = require("sinon");
-const { expect } = chai;
-const cleanDb = require("../../utils/cleanDb");
-const tasksData = require("../../fixtures/tasks/tasks")();
-const tasks = require("../../../models/tasks");
-const { addDependency, updateTask, getBuiltTasks } = require("../../../models/tasks");
-const firestore = require("../../../utils/firestore");
-const { TASK_STATUS } = require("../../../constants/tasks");
+import { expect } from "chai";
+import sinon from "sinon";
+import cleanDb from "../../utils/cleanDb.js";
+import tasksData from "../../fixtures/tasks/tasks.js";
+import * as tasks from "../../../models/tasks.js";
+import { addDependency, updateTask, getBuiltTasks } from "../../../models/tasks.js";
+import firestore from "../../../utils/firestore.js";
+import { TASK_STATUS } from "../../../constants/tasks.js";
+import userData from "../../fixtures/user/user.js";
+import addUser from "../../utils/addUser.js";
+import {
+  usersData as abandonedUsersData,
+  tasksData as abandonedTasksData,
+} from "../../fixtures/abandoned-tasks/departed-users.js";
+
 const dependencyModel = firestore.collection("TaskDependencies");
 const tasksModel = firestore.collection("tasks");
-const userData = require("../../fixtures/user/user");
-const addUser = require("../../utils/addUser");
-const {
-  usersData: abandonedUsersData,
-  tasksData: abandonedTasksData,
-} = require("../../fixtures/abandoned-tasks/departed-users");
 
 describe("tasks", function () {
   afterEach(async function () {

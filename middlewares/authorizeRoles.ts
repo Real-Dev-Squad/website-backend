@@ -1,4 +1,4 @@
-const ROLES = require("../constants/roles");
+import { ROLES } from "../constants/roles.js";
 
 /**
  * Create an authorization middleware for a route based on the required role needed
@@ -7,7 +7,7 @@ const ROLES = require("../constants/roles");
  * @param {Array.<String>} allowedRoles - Roles allowed for a route.
  * @returns {Function} - A middleware function that authorizes given role.
  */
-const authorizeRoles = (allowedRoles) => {
+export const authorizeRoles = (allowedRoles) => {
   return (req, res, next) => {
     const { roles = {} } = req.userData;
 
@@ -25,4 +25,3 @@ const authorizeRoles = (allowedRoles) => {
   };
 };
 
-module.exports = authorizeRoles;

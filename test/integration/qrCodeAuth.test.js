@@ -1,14 +1,16 @@
-const chai = require("chai");
-const sinon = require("sinon");
+import chai from "chai";
+import sinon from "sinon";
+import config from "config";
+
+import app from "../../server.js";
+import cleanDb from "../utils/cleanDb.js";
+import userData from "../fixtures/user/user.js";
+import { userDeviceInfoDataArray } from "../fixtures/qrCodeAuth/qrCodeAuth.js";
+import addUser from "../utils/addUser.js";
+import qrCodeAuthModel from "../../models/qrCodeAuth.js";
+import { generateAuthToken } from "../../services/authService.js";
+
 const { expect } = chai;
-const app = require("../../server");
-const cleanDb = require("../utils/cleanDb");
-const userData = require("../fixtures/user/user")();
-const { userDeviceInfoDataArray } = require("../fixtures/qrCodeAuth/qrCodeAuth");
-const addUser = require("../utils/addUser");
-const qrCodeAuthModel = require("../../models/qrCodeAuth");
-const authService = require("../../services/authService");
-const config = require("config");
 const cookieName = config.get("userToken.cookieName");
 const USER_DOES_NOT_EXIST_ERROR = "User does not exist!";
 
@@ -101,7 +103,7 @@ describe("QrCodeAuth", function () {
 
     beforeEach(async function () {
       userId = await addUser();
-      jwt = authService.generateAuthToken({ userId });
+      jwt = generateAuthToken({ userId });
       userDeviceInfoData = { ...userDeviceInfoDataArray[0], user_id: userId };
       userDeviceInfoWithAuthStatus = { ...userDeviceInfoData, authorization_status: "NOT_INIT" };
     });
@@ -205,33 +207,10 @@ describe("QrCodeAuth", function () {
       await cleanDb();
     });
 
-    it("should successfully fetch the user device info", function (done) {
-      qrCodeAuthModel.storeUserDeviceInfo(userDeviceInfoData).then((response) => {
-        chai
-          .request(app)
-          .get(`/auth/qr-code-auth?device_id=${response.userDeviceInfoData.device_id}`)
-          .end((err, res) => {
-            if (err) {
-              return done(err);
-            }
-            expect(res).to.have.status(200);
-            expect(res.body).to.be.a("object");
-            expect(res.body.data.user_id).to.be.a("string");
-            expect(res.body.data.device_info).to.be.a("string");
-            expect(res.body.data.device_id).to.be.a("string");
-            expect(res.body.data.authorization_status).to.be.a("string");
-            expect(res.body.data.access_token).to.be.a("string");
-            expect(res.body.message).to.equal(`Authentication document retrieved successfully.`);
-
-            return done();
-          });
-      });
-    });
-
-    it("should fail with 404, when the document is not found", function (done) {
+    it("should fail with 404, when the user is not found", function (done) {
       chai
         .request(app)
-        .get(`/auth/qr-code-auth?device_id=${userDeviceInfoData.device_id}`)
+        .get("/auth/qr-code-auth/user-device-info")
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -239,8 +218,29 @@ describe("QrCodeAuth", function () {
 
           expect(res).to.have.status(404);
           expect(res.body).to.be.a("object");
-          expect(res.body.message).to.equal(`User with id ${userDeviceInfoData.device_id} does not exist.`);
+          expect(res.body.message).to.equal("Document not found!");
           expect(res.body.error).to.equal("Not Found");
+
+          return done();
+        });
+    });
+
+    it("should successfully fetch the user device info", function (done) {
+      qrCodeAuthModel.storeUserDeviceInfo(userDeviceInfoData);
+      chai
+        .request(app)
+        .get("/auth/qr-code-auth/user-device-info")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.userDeviceInfoData).to.be.a("object");
+          expect(res.body.userDeviceInfoData.user_id).to.equal(userId);
+          expect(res.body.userDeviceInfoData.authorization_status).to.equal("NOT_INIT");
+          expect(res.body.userDeviceInfoData.access_token).to.equal("ACCESS_TOKEN");
 
           return done();
         });

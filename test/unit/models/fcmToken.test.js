@@ -1,8 +1,8 @@
-const chai = require("chai");
-const expect = chai.expect;
-const firestore = require("../../../utils/firestore");
-const { saveFcmToken } = require("../../../models/fcmToken");
-const cleanDb = require("../../utils/cleanDb");
+import { expect } from "chai";
+import firestore from "../../../utils/firestore.js";
+import { saveFcmToken } from "../../../models/fcmToken.js";
+import cleanDb from "../../utils/cleanDb.js";
+
 const fcmTokenModel = firestore.collection("fcmToken");
 
 describe("FCM token", function () {

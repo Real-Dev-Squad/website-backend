@@ -4,7 +4,8 @@ import {
   Operators,
   Queries,
   QueryTypes,
-} from "../typeDefinitions/rqlParser";
+} from "../typeDefinitions/rqlParser.js";
+import logger from "./logger.js";
 
 const KEY_VALUE_PAIR_DELIMITER_PATTERN = /\s+/;
 const KEY_VALUE_DELIMITER = ":";

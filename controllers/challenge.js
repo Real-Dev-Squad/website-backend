@@ -1,5 +1,6 @@
-const challengeQuery = require("../models/challenges");
-const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+import challengeQuery from "../models/challenges.js";
+import { SOMETHING_WENT_WRONG } from "../constants/errorMessages.js";
+import logger from "../utils/logger.js";
 
 /**
  * Get the challenges
@@ -82,8 +83,4 @@ const subscribeToChallenge = async (req, res) => {
   }
 };
 
-module.exports = {
-  fetchChallenges,
-  createChallenge,
-  subscribeToChallenge,
-};
+export { fetchChallenges, createChallenge, subscribeToChallenge };

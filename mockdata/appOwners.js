@@ -49,4 +49,4 @@ const appOwners = [
   },
 ];
 
-module.exports = appOwners;
+export default appOwners;

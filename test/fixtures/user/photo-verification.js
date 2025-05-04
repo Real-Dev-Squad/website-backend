@@ -39,4 +39,4 @@ const newUserPhotoVerificationData = {
   },
 };
 
-module.exports = { userPhotoVerificationData, newUserPhotoVerificationData };
+export default { userPhotoVerificationData, newUserPhotoVerificationData };

@@ -1,5 +1,5 @@
-const MAX_CACHE_PURGE_COUNT = 3;
-const CLOUDFLARE_ZONE_ID = config.get("cloudflare.CLOUDFLARE_ZONE_ID");
-const CLOUDFLARE_PURGE_CACHE_API = `https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache`;
+import config from 'config';
 
-module.exports = { MAX_CACHE_PURGE_COUNT, CLOUDFLARE_PURGE_CACHE_API };
+export const MAX_CACHE_PURGE_COUNT = 3;
+export const CLOUDFLARE_ZONE_ID = config.get("cloudflare.CLOUDFLARE_ZONE_ID");
+export const CLOUDFLARE_PURGE_CACHE_API = `https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache`;

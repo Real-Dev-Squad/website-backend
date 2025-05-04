@@ -1,7 +1,9 @@
-const firestore = require("../utils/firestore");
-const admin = require("firebase-admin");
+import firestore from "../utils/firestore.js";
+import admin from "firebase-admin";
+import logger from "../utils/logger.js";
 
 const chaincodeModel = firestore.collection("chaincodes");
+
 const storeChaincode = async (userId) => {
   try {
     const userChaincode = await chaincodeModel.add({
@@ -15,6 +17,4 @@ const storeChaincode = async (userId) => {
   }
 };
 
-module.exports = {
-  storeChaincode,
-};
+export { storeChaincode };

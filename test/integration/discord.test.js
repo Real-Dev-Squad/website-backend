@@ -1,20 +1,20 @@
-const chai = require("chai");
+import chai from "chai";
+import config from "config";
+
+import app from "../../server.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
+import { generateAuthToken } from "../../services/authService.js";
+import userData from "../fixtures/user/user.js";
+import { requestRoleData, groupData } from "../fixtures/discordactions/discordactions.js";
+
+import firestore from "../../utils/firestore.js";
+
+import { addGroupRoleToMember } from "../../models/discordactions.js";
+
 const { expect } = chai;
-
-const app = require("../../server");
-const addUser = require("../utils/addUser");
-const cleanDb = require("../utils/cleanDb");
-const authService = require("../../services/authService");
-const userData = require("../fixtures/user/user")();
-const { requestRoleData } = require("../fixtures/discordactions/discordactions");
-
-const firestore = require("../../utils/firestore");
 const discordRoleModel = firestore.collection("discord-roles");
 const userModel = firestore.collection("users");
-
-const { addGroupRoleToMember } = require("../../models/discordactions");
-
-const { groupData } = require("../fixtures/discordactions/discordactions");
 
 const cookieName = config.get("userToken.cookieName");
 
@@ -25,7 +25,7 @@ describe("test discord actions", function () {
   describe("test discord actions for archived users", function (done) {
     beforeEach(async function () {
       userId = await addUser(userData[5]);
-      jwt = authService.generateAuthToken({ userId });
+      jwt = generateAuthToken({ userId });
     });
 
     afterEach(async function () {
@@ -66,7 +66,7 @@ describe("test discord actions", function () {
     beforeEach(async function () {
       const user = { ...userData[4], discordId: "123456789" };
       userId = await addUser(user);
-      jwt = authService.generateAuthToken({ userId });
+      jwt = generateAuthToken({ userId });
 
       let allIds = [];
 

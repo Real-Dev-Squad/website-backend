@@ -1,12 +1,13 @@
-const jwt = require("jsonwebtoken");
-const config = require("config");
+import jwt from "jsonwebtoken";
+import config from "config";
+import logger from "../utils/logger.js";
+
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 
 /**
  * Extracts the discord data of a user
  * @param discordId {String} - User discordId
  */
-
 const getDiscordMemberDetails = async (discordId) => {
   try {
     const authToken = jwt.sign({}, config.get("rdsServerlessBot.rdsServerLessPrivateKey"), {
@@ -27,4 +28,4 @@ const getDiscordMemberDetails = async (discordId) => {
   }
 };
 
-module.exports = { getDiscordMemberDetails };
+export { getDiscordMemberDetails };

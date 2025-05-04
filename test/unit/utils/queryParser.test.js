@@ -1,5 +1,5 @@
-const { expect } = require("chai");
-const { parseQueryParams } = require("../../../utils/queryParser");
+import { expect } from "chai";
+import { parseQueryParams } from "../../../utils/queryParser.js";
 
 describe("parseQueryParams", function () {
   it("parses query parameters correctly", function () {

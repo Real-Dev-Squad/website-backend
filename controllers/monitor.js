@@ -1,11 +1,12 @@
-const { Conflict, NotFound } = require("http-errors");
-const { INTERNAL_SERVER_ERROR_MESSAGE } = require("../constants/progresses");
-const {
+import httpError from "http-errors";
+import { INTERNAL_SERVER_ERROR_MESSAGE } from "../constants/progresses.js";
+import {
   createTrackedProgressDocument,
   updateTrackedProgressDocument,
   getTrackedProgressDocuments,
-} = require("../models/monitor");
-const { RESPONSE_MESSAGES } = require("../constants/monitor");
+} from "../models/monitor.js";
+import { RESPONSE_MESSAGES } from "../constants/monitor.js";
+
 const { RESOURCE_CREATED_SUCCESSFULLY, RESOURCE_UPDATED_SUCCESSFULLY, RESOURCE_RETRIEVED_SUCCESSFULLY } =
   RESPONSE_MESSAGES;
 /**
@@ -51,11 +52,11 @@ const createTrackedProgressController = async (req, res) => {
       data,
     });
   } catch (error) {
-    if (error instanceof Conflict) {
+    if (error instanceof httpError.Conflict) {
       return res.status(409).json({
         message: error.message,
       });
-    } else if (error instanceof NotFound) {
+    } else if (error instanceof httpError.NotFound) {
       return res.status(404).json({
         message: error.message,
       });
@@ -113,7 +114,7 @@ const updateTrackedProgressController = async (req, res) => {
       message: RESOURCE_UPDATED_SUCCESSFULLY,
     });
   } catch (error) {
-    if (error instanceof NotFound) {
+    if (error instanceof httpError.NotFound) {
       return res.status(404).json({
         message: error.message,
       });
@@ -166,7 +167,7 @@ const getTrackedProgressController = async (req, res) => {
       data,
     });
   } catch (error) {
-    if (error instanceof NotFound) {
+    if (error instanceof httpError.NotFound) {
       const response = {
         message: error.message,
       };
@@ -181,8 +182,4 @@ const getTrackedProgressController = async (req, res) => {
   }
 };
 
-module.exports = {
-  createTrackedProgressController,
-  updateTrackedProgressController,
-  getTrackedProgressController,
-};
+export { createTrackedProgressController, updateTrackedProgressController, getTrackedProgressController };

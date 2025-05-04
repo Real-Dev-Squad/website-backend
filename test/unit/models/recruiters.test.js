@@ -2,17 +2,15 @@
  * This eslint rule is disabled because of https://github.com/nodesecurity/eslint-plugin-security/issues/21
  * It gives linting errors in testing the DB data with keys from fixtures
  */
-/* eslint-disable security/detect-object-injection */
-const chai = require("chai");
-const { expect } = chai;
+import { expect } from "chai";
+import cleanDb from "../../utils/cleanDb.js";
+import recruiters from "../../../models/recruiters.js";
+import firestore from "../../../utils/firestore.js";
+import { recruiterDataArray } from "../../fixtures/recruiter/recruiter.js";
+import userDataArray from "../../fixtures/user/user.js";
+import addUser from "../../utils/addUser.js";
 
-const cleanDb = require("../../utils/cleanDb");
-const recruiters = require("../../../models/recruiters");
-const firestore = require("../../../utils/firestore");
 const recruiterModel = firestore.collection("recruiters");
-const { recruiterDataArray } = require("../../fixtures/recruiter/recruiter");
-const userDataArray = require("../../fixtures/user/user")();
-const addUser = require("../../utils/addUser");
 
 describe("Recruiters", function () {
   beforeEach(async function () {

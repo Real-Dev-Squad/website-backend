@@ -1,6 +1,8 @@
-const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
-const dataAccess = require("../services/dataAccessLayer");
-const { TASK_REQUEST_ACTIONS } = require("../constants/taskRequests");
+import { SOMETHING_WENT_WRONG } from "../constants/errorMessages.js";
+import { retrieveUsers } from "../services/dataAccessLayer.js";
+import { TASK_REQUEST_ACTIONS } from "../constants/taskRequests.js";
+import logger from "../utils/logger.js";
+
 /**
  * Validates user id for task request
  *
@@ -18,7 +20,7 @@ async function validateUser(req, res, next) {
       return res.boom.badRequest("userId not provided");
     }
 
-    const { userExists, user } = await dataAccess.retrieveUsers({ id: userId });
+    const { userExists, user } = await retrieveUsers({ id: userId });
     if (!userExists) {
       return res.boom.conflict("User does not exist");
     }
@@ -32,6 +34,4 @@ async function validateUser(req, res, next) {
   }
 }
 
-module.exports = {
-  validateUser,
-};
+export { validateUser };

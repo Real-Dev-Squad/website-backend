@@ -1,17 +1,17 @@
 import chai from "chai";
 import chaiHttp from "chai-http";
 import config from "config";
-import app from "../../server";
-import cleanDb from "../utils/cleanDb";
-import authService from "../../services/authService";
-import userDataFixture from "../fixtures/user/user";
-import addUser from "../utils/addUser";
-import { createOooRequests } from "../fixtures/oooRequest/oooRequest";
-import { createRequest } from "../../models/requests";
-import logsQuery, { addLog } from "../../models/logs";
-import { LOG_ACTION, REQUEST_LOG_TYPE } from "../../constants/requests";
-import { requestsLogs } from "../fixtures/logs/requests";
-import { extensionRequestLogs } from "../fixtures/logs/extensionRequests";
+import app from "../../server.js";
+import cleanDb from "../utils/cleanDb.js";
+import { generateAuthToken } from "../../services/authService.js";
+import userDataFixture from "../fixtures/user/user.js";
+import addUser from "../utils/addUser.js";
+import { createOooRequests } from "../fixtures/oooRequest/oooRequest.js";
+import { createRequest } from "../../models/requests.js";
+import logsQuery, { addLog } from "../../models/logs.js";
+import { LOG_ACTION, REQUEST_LOG_TYPE } from "../../constants/requests.js";
+import { requestsLogs } from "../fixtures/logs/requests.js";
+import { extensionRequestLogs } from "../fixtures/logs/extensionRequests.js";
 const { expect } = chai;
 const cookieName = config.get("userToken.cookieName");
 
@@ -40,8 +40,8 @@ describe("/logs", function () {
     };
     await addLog(requestLog.type, requestLog.meta, requestLog.body);
     await addLogs();
-    authToken = authService.generateAuthToken({ userId });
-    superUserToken = authService.generateAuthToken({ userId: superUserId });
+    authToken = generateAuthToken({ userId });
+    superUserToken = generateAuthToken({ userId: superUserId });
   });
 
   afterEach(async function () {
@@ -300,7 +300,7 @@ describe("/logs", function () {
 
     beforeEach(async function () {
       userId = await addUser();
-      jwt = authService.generateAuthToken({ userId });
+      jwt = generateAuthToken({ userId });
     });
 
     it("Should update the users and capture the logs", async function () {

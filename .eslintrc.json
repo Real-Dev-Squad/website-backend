@@ -1,0 +1,33 @@
+{
+  "env": {
+    "es2021": true,
+    "node": true,
+    "mocha": true
+  },
+  "extends": [
+    "standard",
+    "plugin:mocha/recommended",
+    "plugin:security/recommended",
+    "plugin:prettier/recommended"
+  ],
+  "plugins": ["mocha", "security", "prettier"],
+  "parserOptions": {
+    "ecmaVersion": 13,
+    "sourceType": "module"
+  },
+  "globals": {
+    "config": "readonly",
+    "logger": "readonly"
+  },
+  "rules": {
+    "no-trailing-spaces": "error",
+    "consistent-return": "error",
+    "no-console": "error",
+    "import/extensions": ["error", "always"],
+    "import/no-commonjs": "error",
+    "mocha/no-skipped-tests": "error",
+    "mocha/no-exclusive-tests": "error",
+    "prettier/prettier": "error"
+  },
+  "ignorePatterns": ["public/*", "dist/*"]
+} 

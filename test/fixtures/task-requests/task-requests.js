@@ -1,4 +1,4 @@
-const { TASK_REQUEST_TYPE } = require("../../../constants/taskRequests");
+import { TASK_REQUEST_TYPE } from "../../../constants/taskRequests.js";
 const validAssignmentRequest = {
   taskId: "1234",
   externalIssueUrl: "https://api.github.com/repos/Real-Dev-Squad/website-status/issues/1564672",
@@ -72,7 +72,7 @@ const existingOldTaskRequestWithMultipleUsers = {
   status: "PENDING",
   taskId: "task456",
 };
-module.exports = {
+export default {
   existingOldTaskRequest,
   taskRequestData,
   existingTaskRequest,

@@ -1,5 +1,7 @@
-const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
+import config from "config";
+import logger from "../utils/logger.js";
 
 // A service class for Token generation and management
 
@@ -48,7 +50,7 @@ class EventTokenService {
     return this.#managementToken;
   }
 
-  // Generate new Auth token for a peer
+  // Generate Auth token for a user to join a room
   getAuthToken({ roomId, userId, role }) {
     const payload = {
       access_key: EventTokenService.#app_access_key,
@@ -63,4 +65,4 @@ class EventTokenService {
   }
 }
 
-module.exports = { EventTokenService };
+export { EventTokenService };

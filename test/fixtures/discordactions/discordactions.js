@@ -49,7 +49,7 @@ const groupOnboarding31dPlus = {
   createdBy: "1dad23q23j131j",
 };
 
-module.exports = {
+export {
   groupData,
   roleData,
   memberGroupData,

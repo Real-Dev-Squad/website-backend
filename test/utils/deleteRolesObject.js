@@ -1,4 +1,6 @@
-const firestore = require("../../utils/firestore");
+import firestore from "../../utils/firestore.js";
+import logger from "../../utils/logger.js";
+
 const userCollection = firestore.collection("users");
 
 /**
@@ -6,7 +8,7 @@ const userCollection = firestore.collection("users");
  * @param {string} userId - to identify the user whose roles are to be deleted
  * @return {boolean} success - are roles deleted or not
  */
-module.exports = async (userId) => {
+export default async (userId) => {
   if (!userId) {
     logger.info("User id is required to delete roles object");
     return false;

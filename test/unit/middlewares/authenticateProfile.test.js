@@ -1,7 +1,7 @@
-const chai = require("chai");
-const sinon = require("sinon");
-const { expect } = chai;
-const authenticateProfile = require("../../../middlewares/authenticateProfile.js");
+import { expect } from "chai";
+import sinon from "sinon";
+
+import authenticateProfile from "../../../middlewares/authenticateProfile.js";
 
 describe("authenticateProfile Middleware", function () {
   let req, res, next, authenticateStub, auth;

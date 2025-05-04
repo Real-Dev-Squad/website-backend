@@ -30,4 +30,4 @@ const getUserApplicationObject = (rawData: applicationPayload, userId: string, c
   return data;
 };
 
-module.exports = { getUserApplicationObject }
+export default  { getUserApplicationObject }

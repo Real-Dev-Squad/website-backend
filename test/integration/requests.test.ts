@@ -9,7 +9,7 @@ import authService from "../../services/authService";
 import userDataFixture from "../fixtures/user/user";
 import sinon from "sinon";
 const cookieName = config.get("userToken.cookieName");
-import addUser from "../utils/addUser";
+import addUser from "../utils/addUser.js";
 import {
   createOooRequests,
   validOooStatusRequests,
@@ -83,8 +83,8 @@ describe("/requests OOO", function () {
     );
     approvedOooRequestId = response?.id;
 
-    authToken = authService.generateAuthToken({ userId });
-    superUserToken = authService.generateAuthToken({ userId: superUserId });
+    authToken = generateAuthToken({ userId });
+    superUserToken = generateAuthToken({ userId: superUserId });
   });
 
   afterEach(async function () {
@@ -741,12 +741,12 @@ describe("/requests Extension", function () {
     userId2 = await addUser(userData[17]);
     superUserId = await addUser(userData[4]);
 
-    userJwtToken1 = authService.generateAuthToken({ userId: userId1 });
-    userJwtToken2 = authService.generateAuthToken({ userId: userId2 });
-    superUserJwtToken = authService.generateAuthToken({ userId: superUserId });
+    userJwtToken1 = generateAuthToken({ userId: userId1 });
+    userJwtToken2 = generateAuthToken({ userId: userId2 });
+    superUserJwtToken = generateAuthToken({ userId: superUserId });
 
-    taskId1 = (await updateTask({ ...taskData[0], assigneeId: userId1 })).taskId;
-    taskId2 = (await updateTask({ ...taskData[1] })).taskId;
+    taskId1 = (await taskModel.updateTask({ ...taskData[0], assigneeId: userId1 })).taskId;
+    taskId2 = (await taskModel.updateTask({ ...taskData[1] })).taskId;
   });
 
   afterEach(async function () {
@@ -1079,7 +1079,7 @@ describe("/requests Task", function () {
 
   beforeEach(async function () {
     userId1 = await addUser(userData[16]);
-    userJwtToken1 = authService.generateAuthToken({ userId: userId1 });
+    userJwtToken1 = generateAuthToken({ userId: userId1 });
   });
 
   afterEach(async function () {

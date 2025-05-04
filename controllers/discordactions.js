@@ -1,16 +1,42 @@
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const admin = require("firebase-admin");
-const config = require("config");
-const jwt = require("jsonwebtoken");
-const discordRolesModel = require("../models/discordactions");
-const discordServices = require("../services/discordService");
-const { fetchAllUsers, fetchUser } = require("../models/users");
-const { generateCloudFlareHeaders } = require("../utils/discord-actions");
-const { addLog } = require("../models/logs");
+import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
+import admin from "firebase-admin";
+import config from "config";
+import jwt from "jsonwebtoken";
+import {
+  isGroupRoleExists,
+  deleteGroupRole as deleteGroupRoleQuery,
+  getPaginatedGroupRolesByPage,
+  enrichGroupDataWithMembershipInfo,
+  getAllGroupRoles,
+  getGroupRolesForUser,
+  addGroupRoleToMember as addGroupRoleToMemberQuery,
+  groupUpdateLastJoinDate,
+  removeMemberGroup,
+  updateDiscordImageForVerification as updateDiscordImageForVerificationQuery,
+  updateIdleUsersOnDiscord,
+  updateIdle7dUsersOnDiscord,
+  updateUsersNicknameStatus as updateUsersNicknameStatusQuery,
+  getGroupRoleByName,
+  updateGroupRole,
+  createNewRole,
+  updateUsersWith31DaysPlusOnboarding,
+  addInviteToInviteModel,
+  getUserDiscordInvite as getUserDiscordInviteQuery,
+} from "../models/discordactions.js";
+import {
+  setUserDiscordNickname,
+  getDiscordMembers,
+  deleteGroupRoleFromDiscord,
+  getDiscordRoles,
+  removeRoleFromUser,
+} from "../services/discordService.js";
+import { fetchAllUsers, fetchUser } from "../models/users.js";
+import { generateCloudFlareHeaders } from "../utils/discord-actions.js";
+import { addLog } from "../models/logs.js";
+import logger from "../utils/logger.js";
+
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 const discordMavenRoleId = config.get("discordMavenRoleId");
-
-const { setUserDiscordNickname, getDiscordMembers } = discordServices;
 
 /**
  * Creates a role
@@ -25,7 +51,7 @@ const createGroupRole = async (req, res) => {
   try {
     const rolename = `group-${req.body.rolename}`;
 
-    const { roleExists } = await discordRolesModel.isGroupRoleExists({ rolename });
+    const { roleExists } = await isGroupRoleExists({ rolename });
 
     if (roleExists) {
       return res.status(400).json({
@@ -53,7 +79,7 @@ const createGroupRole = async (req, res) => {
 
     groupRoleData.roleid = responseForCreatedRole.id;
 
-    const { id } = await discordRolesModel.createNewRole(groupRoleData);
+    const { id } = await createNewRole(groupRoleData);
     return res.status(201).json({
       message: "Role created successfully!",
       id,
@@ -75,7 +101,7 @@ const deleteGroupRole = async (req, res) => {
   const { groupId } = req.params;
 
   try {
-    const { roleExists, existingRoles } = await discordRolesModel.isGroupRoleExists({ groupId });
+    const { roleExists, existingRoles } = await isGroupRoleExists({ groupId });
 
     if (!roleExists) {
       return res.boom.notFound("Group role not found");
@@ -83,13 +109,13 @@ const deleteGroupRole = async (req, res) => {
 
     const roleData = existingRoles.data();
 
-    const discordDeletion = await discordServices.deleteGroupRoleFromDiscord(roleData.roleid);
+    const discordDeletion = await deleteGroupRoleFromDiscord(roleData.roleid);
 
     if (!discordDeletion.success) {
       return res.boom.badImplementation(discordDeletion.message);
     }
 
-    const { isSuccess } = await discordRolesModel.deleteGroupRole(groupId, req.userData.id);
+    const { isSuccess } = await deleteGroupRoleQuery(groupId, req.userData.id);
 
     if (!isSuccess) {
       logger.error(`Role deleted from Discord but failed to delete from database for groupId: ${groupId}`);
@@ -136,8 +162,8 @@ const getPaginatedAllGroupRoles = async (req, res) => {
 
     const discordId = req.userData?.discordId;
     if (dev === "true") {
-      const { roles, total } = await discordRolesModel.getPaginatedGroupRolesByPage({ offset, limit });
-      const groupsWithMembershipInfo = await discordRolesModel.enrichGroupDataWithMembershipInfo(discordId, roles);
+      const { roles, total } = await getPaginatedGroupRolesByPage({ offset, limit });
+      const groupsWithMembershipInfo = await enrichGroupDataWithMembershipInfo(discordId, roles);
 
       const nextPage = offset + limit < total ? parseInt(page, 10) + 1 : null;
       const prevPage = page > 0 ? parseInt(page, 10) - 1 : null;
@@ -153,8 +179,8 @@ const getPaginatedAllGroupRoles = async (req, res) => {
       });
     }
 
-    const { groups } = await discordRolesModel.getAllGroupRoles();
-    const groupsWithMembershipInfo = await discordRolesModel.enrichGroupDataWithMembershipInfo(discordId, groups);
+    const { groups } = await getAllGroupRoles();
+    const groupsWithMembershipInfo = await enrichGroupDataWithMembershipInfo(discordId, groups);
 
     return res.json({
       message: "Roles fetched successfully!",
@@ -168,7 +194,7 @@ const getPaginatedAllGroupRoles = async (req, res) => {
 const getGroupsRoleId = async (req, res) => {
   try {
     const { discordId } = req.userData;
-    const userGroupRoles = await discordRolesModel.getGroupRolesForUser(discordId);
+    const userGroupRoles = await getGroupRolesForUser(discordId);
     return res.json({
       message: "User group roles Id fetched successfully!",
       ...userGroupRoles,
@@ -190,7 +216,7 @@ const addGroupRoleToMember = async (req, res) => {
       ...req.body,
       date: admin.firestore.Timestamp.fromDate(new Date()),
     };
-    const roleExistsPromise = discordRolesModel.isGroupRoleExists({
+    const roleExistsPromise = isGroupRoleExists({
       roleid: memberGroupRole.roleid,
     });
     const userDataPromise = fetchUser({ discordId: memberGroupRole.userid });
@@ -207,7 +233,7 @@ const addGroupRoleToMember = async (req, res) => {
       }
     }
 
-    const { roleData, wasSuccess } = await discordRolesModel.addGroupRoleToMember(memberGroupRole);
+    const { roleData, wasSuccess } = await addGroupRoleToMemberQuery(memberGroupRole);
 
     if (!wasSuccess) {
       return res.status(400).json({
@@ -227,7 +253,7 @@ const addGroupRoleToMember = async (req, res) => {
       body: JSON.stringify(dataForDiscord),
       headers,
     });
-    const discordLastJoinedDateUpdate = discordRolesModel.groupUpdateLastJoinDate({
+    const discordLastJoinedDateUpdate = groupUpdateLastJoinDate({
       id: existingRoles.docs[0].id,
     });
     await Promise.all([apiCallToDiscord, discordLastJoinedDateUpdate]);
@@ -245,7 +271,7 @@ const deleteRole = async (req, res) => {
   try {
     const { roleid, userid } = req.body;
 
-    const roleExistsPromise = discordRolesModel.isGroupRoleExists({
+    const roleExistsPromise = isGroupRoleExists({
       roleid,
     });
     const userDataPromise = fetchUser({ discordId: userid });
@@ -254,9 +280,9 @@ const deleteRole = async (req, res) => {
     if (!roleExists || req.userData.id !== userData.user.id) {
       return res.boom.forbidden("Permission denied. Cannot delete the role.");
     }
-    await discordServices.removeRoleFromUser(roleid, userid, req.userData);
+    await removeRoleFromUser(roleid, userid, req.userData);
 
-    const { wasSuccess } = await discordRolesModel.removeMemberGroup(roleid, userid);
+    const { wasSuccess } = await removeMemberGroup(roleid, userid);
     if (wasSuccess) {
       return res.status(200).json({ message: "Role deleted successfully" });
     } else {
@@ -276,7 +302,7 @@ const deleteRole = async (req, res) => {
 const updateDiscordImageForVerification = async (req, res) => {
   try {
     const { id: userDiscordId } = req.params;
-    const discordAvatarUrl = await discordRolesModel.updateDiscordImageForVerification(userDiscordId);
+    const discordAvatarUrl = await updateDiscordImageForVerificationQuery(userDiscordId);
     return res.json({
       message: "Discord avatar URL updated successfully!",
       discordAvatarUrl,
@@ -295,7 +321,7 @@ const updateDiscordImageForVerification = async (req, res) => {
 const setRoleIdleToIdleUsers = async (req, res) => {
   try {
     const { dev } = req.query;
-    const result = await discordRolesModel.updateIdleUsersOnDiscord(dev);
+    const result = await updateIdleUsersOnDiscord(dev);
     return res.status(201).json({
       message: "All Idle Users updated successfully.",
       ...result,
@@ -314,7 +340,7 @@ const setRoleIdleToIdleUsers = async (req, res) => {
 const setRoleIdle7DToIdleUsers = async (req, res) => {
   try {
     const { dev } = req.query;
-    const result = await discordRolesModel.updateIdle7dUsersOnDiscord(dev);
+    const result = await updateIdle7dUsersOnDiscord(dev);
     return res.status(201).json({
       message: "All Idle 7d+ Users updated successfully.",
       ...result,
@@ -413,7 +439,7 @@ const updateDiscordNicknames = async (req, res) => {
 const updateUsersNicknameStatus = async (req, res) => {
   try {
     const { lastNicknameUpdate = 0 } = req.body;
-    const data = await discordRolesModel.updateUsersNicknameStatus(lastNicknameUpdate);
+    const data = await updateUsersNicknameStatusQuery(lastNicknameUpdate);
     return res.json({
       message: "Updated discord users nickname based on status",
       data,
@@ -426,12 +452,12 @@ const updateUsersNicknameStatus = async (req, res) => {
 
 const syncDiscordGroupRolesInFirestore = async (req, res) => {
   try {
-    const discordRoles = await discordServices.getDiscordRoles();
+    const discordRoles = await getDiscordRoles();
     if (discordRoles.status === 500) {
       return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
     }
     const batch = discordRoles.roles.map(async (role) => {
-      const data = await discordRolesModel.getGroupRoleByName(role.name);
+      const data = await getGroupRoleByName(role.name);
 
       if (!data.data.empty) {
         const roleInFirestore = {
@@ -439,7 +465,7 @@ const syncDiscordGroupRolesInFirestore = async (req, res) => {
           ...data.data.docs[0].data(),
         };
         if (roleInFirestore.roleid !== role.id) {
-          await discordRolesModel.updateGroupRole(
+          await updateGroupRole(
             {
               roleid: role.id,
             },
@@ -447,7 +473,7 @@ const syncDiscordGroupRolesInFirestore = async (req, res) => {
           );
         }
       } else {
-        await discordRolesModel.createNewRole({
+        await createNewRole({
           createdBy: req.userData.id,
           rolename: role.name,
           roleid: role.id,
@@ -457,7 +483,7 @@ const syncDiscordGroupRolesInFirestore = async (req, res) => {
     });
     await Promise.all(batch);
 
-    const allRolesInFirestore = await discordRolesModel.getAllGroupRoles();
+    const allRolesInFirestore = await getAllGroupRoles();
 
     return res.json({
       response: allRolesInFirestore.groups,
@@ -477,7 +503,7 @@ const syncDiscordGroupRolesInFirestore = async (req, res) => {
  */
 const setRoleToUsersWith31DaysPlusOnboarding = async (req, res) => {
   try {
-    const result = await discordRolesModel.updateUsersWith31DaysPlusOnboarding();
+    const result = await updateUsersWith31DaysPlusOnboarding();
     return res.status(201).json({
       message: "All Users with 31 Days Plus Onboarding are updated successfully.",
       ...result,
@@ -493,7 +519,7 @@ const generateInviteForUser = async (req, res) => {
     const { userId } = req.query;
     const userIdForInvite = userId || req.userData.id;
 
-    const modelResponse = await discordRolesModel.getUserDiscordInvite(userIdForInvite);
+    const modelResponse = await getUserDiscordInviteQuery(userIdForInvite);
 
     if (!modelResponse.notFound) {
       return res.status(409).json({
@@ -520,7 +546,7 @@ const generateInviteForUser = async (req, res) => {
     const inviteCode = discordInviteResponse.data.code;
     const inviteLink = `discord.gg/${inviteCode}`;
 
-    await discordRolesModel.addInviteToInviteModel({ userId: userIdForInvite, inviteLink });
+    await addInviteToInviteModel({ userId: userIdForInvite, inviteLink });
 
     return res.status(201).json({
       message: "invite generated successfully",
@@ -541,7 +567,7 @@ const getUserDiscordInvite = async (req, res) => {
 
     const userIdForInvite = userId || req.userData.id;
 
-    const invite = await discordRolesModel.getUserDiscordInvite(userIdForInvite);
+    const invite = await getUserDiscordInviteQuery(userIdForInvite);
 
     if (invite.notFound) {
       return res.boom.notFound("User invite doesn't exist");
@@ -557,10 +583,11 @@ const getUserDiscordInvite = async (req, res) => {
   }
 };
 
-module.exports = {
-  getGroupsRoleId,
+export {
   createGroupRole,
+  deleteGroupRole,
   getPaginatedAllGroupRoles,
+  getGroupsRoleId,
   addGroupRoleToMember,
   deleteRole,
   updateDiscordImageForVerification,
@@ -570,7 +597,6 @@ module.exports = {
   updateUsersNicknameStatus,
   syncDiscordGroupRolesInFirestore,
   setRoleToUsersWith31DaysPlusOnboarding,
-  getUserDiscordInvite,
   generateInviteForUser,
-  deleteGroupRole,
+  getUserDiscordInvite,
 };

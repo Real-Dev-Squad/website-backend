@@ -9,6 +9,4 @@ const generateNextLink = (nextPageParams) => {
   return nextLink;
 };
 
-module.exports = {
-  generateNextLink,
-};
+export { generateNextLink };

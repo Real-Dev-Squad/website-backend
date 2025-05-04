@@ -1,11 +1,11 @@
 import express from "express";
-const router = express.Router();
-import authenticate from "../middlewares/authenticate";
-import challenges from "../controllers/challenge";
-import { createChallenge } from "../middlewares/validators/challenges";
+import authenticate from "../middlewares/authenticate.js";
+import * as challenges from "../controllers/challenge.js";
+import { createChallenge } from "../middlewares/validators/challenges.js";
 
+const router = express.Router();
 router.get("/", authenticate, challenges.fetchChallenges);
 router.post("/", authenticate, createChallenge, challenges.createChallenge);
 router.post("/subscribe", authenticate, challenges.subscribeToChallenge);
 
-module.exports = router;
+export default router;

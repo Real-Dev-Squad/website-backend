@@ -1,6 +1,7 @@
-const joi = require("joi");
+import joi from "joi";
+import logger from "../../utils/logger.js";
 
-const createChallenge = async (req, res, next) => {
+export const createChallenge = async (req, res, next) => {
   const schema = joi.object().strict().keys({
     title: joi.string().required(),
     level: joi.string().required(),
@@ -15,8 +16,4 @@ const createChallenge = async (req, res, next) => {
     logger.error(`Error validating createChallenge payload : ${error}`);
     res.boom.badRequest(error.details[0].message);
   }
-};
-
-module.exports = {
-  createChallenge,
 };

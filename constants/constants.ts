@@ -16,8 +16,4 @@ const HEADERS_FOR_SSE = {
   "Cache-Control": "no-cache",
 };
 
-module.exports = {
-  DOCUMENT_WRITE_SIZE,
-  daysOfWeek,
-  HEADERS_FOR_SSE,
-};
+export { DOCUMENT_WRITE_SIZE, daysOfWeek, HEADERS_FOR_SSE };

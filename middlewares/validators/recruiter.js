@@ -1,4 +1,5 @@
-const joi = require("joi");
+import joi from "joi";
+import logger from "../../utils/logger.js";
 
 const validateRecruiter = async (req, res, next) => {
   const schema = joi.object().strict().keys({
@@ -21,6 +22,4 @@ const validateRecruiter = async (req, res, next) => {
   }
 };
 
-module.exports = {
-  validateRecruiter,
-};
+export { validateRecruiter };

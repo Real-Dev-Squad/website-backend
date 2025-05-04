@@ -1,4 +1,6 @@
-const firestore = require("../utils/firestore");
+import firestore from "../utils/firestore.js";
+import logger from "../utils/logger.js";
+
 const artsModel = firestore.collection("arts");
 
 /**
@@ -62,8 +64,4 @@ const fetchUserArts = async (id) => {
   }
 };
 
-module.exports = {
-  addArt,
-  fetchArts,
-  fetchUserArts,
-};
+export default { addArt, fetchArts, fetchUserArts };

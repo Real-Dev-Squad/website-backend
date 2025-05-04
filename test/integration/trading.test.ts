@@ -1,15 +1,15 @@
 import chai from "chai";
 import chaiHttp from "chai-http";
-import app from "../../server";
-import authService from "../../services/authService";
-import addUser from "../utils/addUser";
-import cleanDb from "../utils/cleanDb";
-import stocks from "../../models/stocks";
-import wallet from "../../models/wallets";
+import app from "../../server.js";
+import { generateAuthToken } from "../../services/authService.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
+import * as stocksModel from "../../models/stocks.js";
+import * as walletModel from "../../models/wallets.js";
 import sinon from "sinon";
 import config from "config";
-import currencies from "../fixtures/currencies/currencies";
-import tradeService from "../../services/tradingService";
+import currencies from "../fixtures/currencies/currencies.js";
+import * as tradeService from "../../services/tradingService.js";
 
 const cookieName: string = config.get("userToken.cookieName");
 chai.use(chaiHttp);
@@ -25,9 +25,9 @@ describe("POST /trade/stock/new/:userId", function () {
 
   beforeEach(async function () {
     userId = await addUser();
-    jwt = authService.generateAuthToken({ userId });
-    ({ id, stockData } = await stocks.addStock(newStockData));
-    await wallet.createWallet(userId, currencies.default);
+    jwt = generateAuthToken({ userId });
+    ({ id, stockData } = await stocksModel.addStock(newStockData));
+    await walletModel.createWallet(userId, currencies.default);
     userStock = {
       stockId: id,
       stockName: stockData.name,

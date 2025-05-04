@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
-const { Forbidden, NotFound } = require("http-errors");
-const admin = require("firebase-admin");
-const firestore = require("../utils/firestore");
-const {
+import httpError from "http-errors";
+import admin from "firebase-admin";
+import firestore from "../utils/firestore.js";
+import {
   getTomorrowTimeStamp,
   filterStatusData,
   generateAlreadyExistingStatusResponse,
@@ -15,17 +15,19 @@ const {
   generateNewStatus,
   getNextDayTimeStamp,
   convertTimestampsToUTC,
-} = require("../utils/userStatus");
-const { TASK_STATUS } = require("../constants/tasks");
+} from "../utils/userStatus.js";
+import { TASK_STATUS } from "../constants/tasks.js";
+import { userState } from "../constants/userStatus.js";
+import { generateAuthTokenForCloudflare } from "../utils/discord-actions.js";
+import config from "config";
+import logger from "../utils/logger.js";
+
 const userStatusModel = firestore.collection("usersStatus");
 const tasksModel = firestore.collection("tasks");
-const { userState } = require("../constants/userStatus");
 const discordRoleModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
 const usersCollection = firestore.collection("users");
-const config = require("config");
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
-const { generateAuthTokenForCloudflare } = require("../utils/discord-actions");
 
 // added this function here to avoid circular dependency
 /**
@@ -411,7 +413,7 @@ const updateUserStatusOnTaskUpdate = async (userName) => {
     const userStatusUpdate = await updateUserStatusOnNewTaskAssignment(userId);
     return userStatusUpdate;
   } catch (error) {
-    if (error instanceof NotFound) {
+    if (error instanceof httpError.NotFound) {
       return {
         status: 404,
         error: "Not Found",
@@ -643,13 +645,13 @@ const cancelOooStatus = async (userId) => {
       throw error;
     }
     if (!userStatusDoc.size) {
-      throw new NotFound("No User status document found");
+      throw new httpError.NotFound("No User status document found");
     }
     const [userStatusDocument] = userStatusDoc.docs;
     const docId = userStatusDocument.id;
     const { futureStatus, ...docData } = userStatusDocument.data();
     if (docData.currentStatus.state !== userState.OOO) {
-      throw new Forbidden(
+      throw new httpError.Forbidden(
         `The ${userState.OOO} Status cannot be canceled because the current status is ${docData.currentStatus.state}.`
       );
     }
@@ -705,7 +707,10 @@ const addFutureStatus = async (futureStatusData) => {
   }
 };
 
-module.exports = {
+export {
+  getGroupRole,
+  removeGroupIdleRoleFromDiscordUser,
+  addGroupIdleRoleToDiscordUser,
   deleteUserStatus,
   getUserStatus,
   getAllUserStatus,
@@ -717,6 +722,5 @@ module.exports = {
   batchUpdateUsersStatus,
   getTaskBasedUsersStatus,
   cancelOooStatus,
-  getGroupRole,
   addFutureStatus,
 };

@@ -1,4 +1,4 @@
-const users = require("../controllers/users");
+import users from "../controllers/users.js";
 /**
  * Middleware to validate the authorized routes to be able to create & Update tasks
  * 1] Verifies the user's role as Application owner
@@ -14,7 +14,7 @@ const users = require("../controllers/users");
  * @param next {Function} - Express middleware function
  * @return {Object} - Returns unauthorized user if the role is not assigned
  */
-module.exports = async (req, res, next) => {
+export default async (req, res, next) => {
   try {
     // get user data from `req.userData` for further use
     const accountOwners = await users.getAccountOwners();

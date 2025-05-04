@@ -1,17 +1,14 @@
-const chai = require("chai");
-const { expect } = chai;
+import { expect } from "chai";
 
-const cleanDb = require("../../utils/cleanDb");
-const firestore = require("../../../utils/firestore");
-const addUser = require("../../utils/addUser");
+import cleanDb from "../../utils/cleanDb.js";
+import firestore from "../../../utils/firestore.js";
+import addUser from "../../utils/addUser.js";
+import * as challengeQuery from "../../../models/challenges.js";
+import userDataArray from "../../fixtures/user/user.js";
+import challengeDataArray from "../../fixtures/challenges/challenges.js";
 
-const challengeQuery = require("../../../models/challenges");
-const challengeModel = firestore.collection("challenges");
-
-// Import fixtures
-const userDataArray = require("../../fixtures/user/user")();
-const challengeDataArray = require("../../fixtures/challenges/challenges")();
 const challengeData = challengeDataArray[0];
+const challengeModel = firestore.collection("challenges");
 
 describe("Challenges", function () {
   let challengeId;

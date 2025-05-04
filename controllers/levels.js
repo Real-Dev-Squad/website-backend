@@ -1,6 +1,7 @@
-const LevelModel = require("../models/levels");
-const admin = require("firebase-admin");
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+import LevelModel from "../models/levels.js";
+import admin from "firebase-admin";
+import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
+import logger from "../utils/logger.js";
 
 /**
  * Creates a level
@@ -67,8 +68,4 @@ const getAllLevels = async (req, res) => {
   }
 };
 
-module.exports = {
-  addLevel,
-  deleteLevel,
-  getAllLevels,
-};
+export { addLevel, deleteLevel, getAllLevels };

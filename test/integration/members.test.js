@@ -1,20 +1,18 @@
-const chai = require("chai");
+import chai from "chai";
+import chaiHttp from "chai-http";
+import config from "config";
+import sinon from "sinon";
+
+import app from "../../server.js";
+import { generateAuthToken } from "../../services/authService.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
+import userData from "../fixtures/user/user.js";
+import { INTERNAL_SERVER_ERROR } from "../../constants/errorMessages.js";
+import members from "../../models/members.js";
+
 const { expect } = chai;
-const chaiHttp = require("chai-http");
-
-const app = require("../../server");
-const authService = require("../../services/authService");
-const addUser = require("../utils/addUser");
-const cleanDb = require("../utils/cleanDb");
-
-// Import fixtures
-const userData = require("../fixtures/user/user")();
-
-const config = require("config");
 const cookieName = config.get("userToken.cookieName");
-const Sinon = require("sinon");
-const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
-const members = require("../../models/members");
 
 chai.use(chaiHttp);
 
@@ -177,7 +175,7 @@ describe("Members", function () {
   describe("PATCH /members/moveToMembers/:username", function () {
     beforeEach(async function () {
       const superUserId = await addUser(superUser);
-      jwt = authService.generateAuthToken({ userId: superUserId });
+      jwt = generateAuthToken({ userId: superUserId });
     });
 
     it("Should return 404 if user doesn't exist", function (done) {
@@ -240,7 +238,7 @@ describe("Members", function () {
 
     it("Should return 401 if user is not a super_user", function (done) {
       addUser(nonSuperUser).then((nonSuperUserId) => {
-        const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
+        const nonSuperUserJwt = generateAuthToken({ userId: nonSuperUserId });
         chai
           .request(app)
           .patch(`/members/moveToMembers/${nonSuperUser.username}`)
@@ -265,16 +263,16 @@ describe("Members", function () {
 
     beforeEach(async function () {
       const superUserId = await addUser(superUser);
-      jwt = authService.generateAuthToken({ userId: superUserId });
+      jwt = generateAuthToken({ userId: superUserId });
     });
 
     afterEach(async function () {
-      Sinon.restore();
+      sinon.restore();
       await cleanDb();
     });
 
     it("Should return an object with status 500 and an error message", function (done) {
-      archiveRoleToMemberStub = Sinon.stub(members, "addArchiveRoleToMembers");
+      archiveRoleToMemberStub = sinon.stub(members, "addArchiveRoleToMembers");
       archiveRoleToMemberStub.throws(new Error(INTERNAL_SERVER_ERROR));
 
       addUser(userToBeArchived).then(() => {

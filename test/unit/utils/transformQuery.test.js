@@ -1,6 +1,6 @@
-const { expect } = require("chai");
-const { transformQuery } = require("../../../utils/tasks");
-const { MAPPED_TASK_STATUS, TASK_STATUS } = require("../../../constants/tasks");
+import { expect } from "chai";
+import { transformQuery } from "../../../utils/tasks.js";
+import { MAPPED_TASK_STATUS, TASK_STATUS } from "../../../constants/tasks.js";
 
 describe("transformQuery", function () {
   it("should transfrom status to it's mapped value", function () {

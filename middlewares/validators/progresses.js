@@ -1,7 +1,7 @@
-const joi = require("joi");
-const { VALID_PROGRESS_TYPES, PROGRESS_VALID_SORT_FIELDS } = require("../../constants/progresses");
+import joi from "joi";
+import { VALID_PROGRESS_TYPES, PROGRESS_VALID_SORT_FIELDS } from "../../constants/progresses.js";
 
-const validateCreateProgressRecords = async (req, res, next) => {
+export const validateCreateProgressRecords = async (req, res, next) => {
   const baseSchema = joi
     .object()
     .strict()
@@ -47,7 +47,7 @@ const validateCreateProgressRecords = async (req, res, next) => {
   }
 };
 
-const validateGetProgressRecordsQuery = async (req, res, next) => {
+export const validateGetProgressRecordsQuery = async (req, res, next) => {
   const schema = joi
     .object({
       type: joi
@@ -97,7 +97,7 @@ const validateGetProgressRecordsQuery = async (req, res, next) => {
   }
 };
 
-const validateGetRangeProgressRecordsParams = async (req, res, next) => {
+export const validateGetRangeProgressRecordsParams = async (req, res, next) => {
   const schema = joi
     .object({
       userId: joi.string().optional(),
@@ -123,7 +123,7 @@ const validateGetRangeProgressRecordsParams = async (req, res, next) => {
   }
 };
 
-const validateGetDayProgressParams = async (req, res, next) => {
+export const validateGetDayProgressParams = async (req, res, next) => {
   const schema = joi.object({
     type: joi
       .string()
@@ -143,10 +143,4 @@ const validateGetDayProgressParams = async (req, res, next) => {
     logger.error(`Error validating payload: ${error}`);
     res.boom.badRequest(error.details[0].message);
   }
-};
-module.exports = {
-  validateCreateProgressRecords,
-  validateGetProgressRecordsQuery,
-  validateGetRangeProgressRecordsParams,
-  validateGetDayProgressParams,
 };

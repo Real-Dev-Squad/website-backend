@@ -1,5 +1,7 @@
-const Joi = require("joi");
-const { userState, CANCEL_OOO } = require("../../constants/userStatus");
+import Joi from "joi";
+import { userState, CANCEL_OOO } from "../../constants/userStatus.js";
+import logger from "../../utils/logger.js";
+
 const threeDaysInMilliseconds = 172800000;
 
 const validateUserStatusData = async (todaysTime, req, res, next) => {
@@ -135,8 +137,4 @@ const validateGetQueryParams = async (req, res, next) => {
   }
 };
 
-module.exports = {
-  validateUserStatus,
-  validateMassUpdate,
-  validateGetQueryParams,
-};
+export { validateUserStatus, validateMassUpdate, validateGetQueryParams };

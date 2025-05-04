@@ -1,18 +1,17 @@
-const chai = require("chai");
-const sinon = require("sinon");
-const { expect } = chai;
-const cleanDb = require("../../utils/cleanDb");
-const { addUserDetailsToProgressDocs, getPaginatedProgressDocument } = require("../../../models/progresses");
-const fireStore = require("../../../utils/firestore");
-const progressesCollection = fireStore.collection("progresses");
-const { stubbedModelTaskProgressData, stubbedModelProgressData } = require("../../fixtures/progress/progresses");
-const addUser = require("../../utils/addUser");
-const userDataArray = require("../../fixtures/user/user")();
-const { removeSensitiveInfo } = require("../../../services/dataAccessLayer");
-const {
-  PROGRESSES_RESPONSE_MESSAGES: { PROGRESS_DOCUMENT_NOT_FOUND },
-} = require("../../../constants/progresses");
-const users = require("../../../models/users");
+import { expect } from "chai";
+import sinon from "sinon";
+import cleanDb from "../../utils/cleanDb.js";
+import { addUserDetailsToProgressDocs, getPaginatedProgressDocument } from "../../../models/progresses.js";
+import firestore from "../../../utils/firestore.js";
+import { PROGRESSES_RESPONSE_MESSAGES } from "../../../constants/progresses.js";
+import { stubbedModelTaskProgressData, stubbedModelProgressData } from "../../fixtures/progress/progresses.js";
+import addUser from "../../utils/addUser.js";
+import userDataArray from "../../fixtures/user/user.js";
+import { removeSensitiveInfo } from "../../../services/dataAccessLayer.js";
+import users from "../../../models/users.js";
+
+const progressesCollection = firestore.collection("progresses");
+
 describe("progressModel", function () {
   afterEach(async function () {
     await cleanDb();
@@ -69,7 +68,7 @@ describe("progressModel", function () {
         });
         throw new Error("Test failed: expected a NotFound error to be thrown.");
       } catch (err) {
-        expect(err.message).to.equal(PROGRESS_DOCUMENT_NOT_FOUND);
+        expect(err.message).to.equal(PROGRESSES_RESPONSE_MESSAGES.PROGRESS_DOCUMENT_NOT_FOUND);
       }
     });
 

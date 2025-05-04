@@ -32,7 +32,4 @@ function arraysHaveCommonItem(array1, array2) {
   return array1.some((value) => array2.includes(value));
 }
 
-module.exports = {
-  chunks,
-  arraysHaveCommonItem,
-};
+export { chunks, arraysHaveCommonItem };

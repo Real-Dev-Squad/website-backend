@@ -12,4 +12,4 @@ const RESPONSE_MESSAGES = {
   RESOURCE_ALREADY_TRACKED,
 };
 
-module.exports = { RESPONSE_MESSAGES };
+export { RESPONSE_MESSAGES };

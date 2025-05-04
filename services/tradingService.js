@@ -1,10 +1,12 @@
-const firestore = require("../utils/firestore");
+import firestore from "../utils/firestore.js";
+import { fetchWallet, updateWallet } from "../models/wallets.js";
+import { fetchUserStocks, updateUserStocks } from "../models/stocks.js";
+import { DINERO } from "../constants/wallets.js";
+import logger from "../utils/logger.js";
+
 const stocksModel = firestore.collection("stocks");
 const transactionsModel = firestore.collection("transactions");
 const tradeLogsModel = firestore.collection("trade-logs");
-const { fetchWallet, updateWallet } = require("../models/wallets");
-const { fetchUserStocks, updateUserStocks } = require("../models/stocks");
-const { DINERO } = require("../constants/wallets");
 
 const INSUFFICIENT_FUNDS = "Trade was not successful due to insufficient funds";
 const INSUFFICIENT_QUANTITIES = "Trade was not successful because you do not have enough quantity";
@@ -90,7 +92,6 @@ const trade = async (tradeData) => {
     };
 
     // Update user stocks
-
     await updateUserStocks(userId, {
       stockId,
       stockName,
@@ -100,7 +101,6 @@ const trade = async (tradeData) => {
     });
 
     // Transaction Log
-
     const { id } = await tradeLogsModel.add({
       type: `STOCK_${tradeType}`,
       userId: userId,
@@ -119,7 +119,6 @@ const trade = async (tradeData) => {
     });
 
     // update user wallet
-
     await updateWallet(userId, {
       ...currencies,
       ...updatedCurrencyData,
@@ -133,6 +132,4 @@ const trade = async (tradeData) => {
   }
 };
 
-module.exports = {
-  trade,
-};
+export { trade };

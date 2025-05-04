@@ -1,8 +1,9 @@
-const { getUsername, getUserId, getParticipantUsernames, getParticipantUserIds } = require("./users");
-const { TASK_TYPE, MAPPED_TASK_STATUS, COMPLETED_TASK_STATUS, TASK_STATUS } = require("../constants/tasks");
-const fireStore = require("../utils/firestore");
+import { getUsername, getUserId, getParticipantUsernames, getParticipantUserIds } from "./users.js";
+import { TASK_TYPE, MAPPED_TASK_STATUS, COMPLETED_TASK_STATUS, TASK_STATUS } from "../constants/tasks.js";
+import fireStore from "./firestore.js";
+import { daysOfWeek } from "../constants/constants.js";
+
 const tasksModel = fireStore.collection("tasks");
-const { daysOfWeek } = require("../constants/constants");
 
 const fromFirestoreData = async (task) => {
   if (!task) {
@@ -146,7 +147,7 @@ const transformTasksUsersQuery = (queries) => {
   return { dateGap: transformedDateGap, status: transformedStatus, size: transformedSize, weekdayList, dateList };
 };
 
-module.exports = {
+export {
   fromFirestoreData,
   toFirestoreData,
   buildTasks,

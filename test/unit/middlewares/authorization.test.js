@@ -1,5 +1,5 @@
-const { expect } = require("chai");
-const { userHasPermission } = require("../../../middlewares/authorization");
+import { expect } from "chai";
+import { userHasPermission } from "../../../middlewares/authorization.js";
 
 describe("userHasPermission", function () {
   it("user has default role and no required role is provided", function (done) {

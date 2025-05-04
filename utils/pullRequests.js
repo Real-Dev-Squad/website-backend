@@ -1,6 +1,11 @@
-const { fetchMultiplePageResults } = require("./fetchMultiplePageResults");
-const { getDateTimeRangeForPRs } = require("./helper");
-const githubService = require("../services/githubService");
+import { fetchMultiplePageResults } from "./fetchMultiplePageResults.js";
+import { getDateTimeRangeForPRs } from "./helper.js";
+import * as githubService from "../services/githubService.js";
+
+const ORDER_TYPE = {
+  ASC: "asc",
+  DESC: "desc",
+};
 
 const getFilteredPRsOrIssues = async (qualifiers) => {
   let allPRs = [];
@@ -54,12 +59,4 @@ const getFilteredPRsOrIssues = async (qualifiers) => {
   return allPRs;
 };
 
-const ORDER_TYPE = {
-  ASC: "asc",
-  DESC: "desc",
-};
-
-module.exports = {
-  getFilteredPRsOrIssues,
-  ORDER_TYPE,
-};
+export { getFilteredPRsOrIssues, ORDER_TYPE };

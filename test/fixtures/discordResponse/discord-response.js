@@ -290,7 +290,7 @@ const getOnboarding31DPlusMembers = [
   },
 ];
 
-module.exports = {
+export default {
   getDiscordMembers,
   usersFromRds,
   updatedNicknameResponse,

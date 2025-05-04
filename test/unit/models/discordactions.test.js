@@ -1,23 +1,17 @@
-const chai = require("chai");
-const expect = chai.expect;
-const sinon = require("sinon");
-const firestore = require("../../../utils/firestore");
-const photoVerificationModel = firestore.collection("photo-verification");
-const discordRoleModel = firestore.collection("discord-roles");
-const userStatusCollection = firestore.collection("usersStatus");
-const memberRoleModel = firestore.collection("member-group-roles");
-const userModel = firestore.collection("users");
-const admin = require("firebase-admin");
-const tasksData = require("../../fixtures/tasks/tasks")();
+import sinon from "sinon";
+import chai, { expect } from "chai";
+import admin from "firebase-admin";
 
-const addUser = require("../../utils/addUser");
-const userStatusData = require("../../fixtures/userStatus/userStatus");
-const { getDiscordMembers } = require("../../fixtures/discordResponse/discord-response");
-const discordService = require("../../../services/discordService");
-const { TASK_STATUS } = require("../../../constants/tasks");
-const tasksModel = firestore.collection("tasks");
-
-const {
+import firestore from "../../../utils/firestore.js";
+import photoVerificationModel from "../../../models/photo-verification.js";
+import discordRoleModel from "../../../models/discord-roles.js";
+import userStatusCollection from "../../../models/usersStatus.js";
+import tasksData from "../../fixtures/tasks/tasks.js";
+import { getDiscordMembers } from "../../fixtures/discordResponse/discord-response.js";
+import discordService from "../../../services/discordService.js";
+import { TASK_STATUS } from "../../../constants/tasks.js";
+import addUser from "../../utils/addUser.js";
+import {
   createNewRole,
   getAllGroupRoles,
   getPaginatedGroupRolesByPage,
@@ -41,8 +35,8 @@ const {
   getGroupRoleByName,
   getGroupRolesForUser,
   skipOnboardingUsersHavingApprovedExtensionRequest,
-} = require("../../../models/discordactions");
-const {
+} from "../../../models/discordactions.js";
+import {
   groupData,
   roleData,
   existingRole,
@@ -50,22 +44,25 @@ const {
   groupIdle,
   groupIdle7d,
   groupOnboarding31dPlus,
-} = require("../../fixtures/discordactions/discordactions");
-const cleanDb = require("../../utils/cleanDb");
-const { userPhotoVerificationData } = require("../../fixtures/user/photo-verification");
-const userData = require("../../fixtures/user/user")();
-const userStatusModel = require("../../../models/userStatus");
-const { getStatusData } = require("../../fixtures/userStatus/userStatus");
-const usersStatusData = getStatusData();
-const dataAccessLayer = require("../../../services/dataAccessLayer");
-const { ONE_DAY_IN_MS } = require("../../../constants/users");
-const { createProgressDocument } = require("../../../models/progresses");
-const { stubbedModelTaskProgressData } = require("../../fixtures/progress/progresses");
-const { convertDaysToMilliseconds } = require("../../../utils/time");
-const { generateUserStatusData } = require("../../fixtures/userStatus/userStatus");
-const { userState } = require("../../../constants/userStatus");
-const { REQUEST_TYPE, REQUEST_STATE } = require("../../../constants/requests");
-const { createRequest } = require("../../../models/requests");
+} from "../../fixtures/discordactions/discordactions.js";
+import cleanDb from "../../utils/cleanDb.js";
+import { userPhotoVerificationData } from "../../fixtures/user/photo-verification.js";
+import userData from "../../fixtures/user/user.js";
+import userStatusModel from "../../../models/userStatus.js";
+import { generateUserStatusData } from "../../fixtures/userStatus/userStatus.js";
+import dataAccessLayer from "../../../services/dataAccessLayer.js";
+import { ONE_DAY_IN_MS } from "../../../constants/users.js";
+import { createProgressDocument } from "../../../models/progresses.js";
+import { stubbedModelTaskProgressData } from "../../fixtures/progress/progresses.js";
+import { convertDaysToMilliseconds } from "../../../utils/time.js";
+import { userState } from "../../../constants/userStatus.js";
+import { REQUEST_TYPE, REQUEST_STATE } from "../../../constants/requests.js";
+import { createRequest } from "../../../models/requests.js";
+import userStatusData from "../fixtures/userStatus/userStatus.js";
+
+const tasksModel = firestore.collection("tasks");
+const memberRoleModel = firestore.collection("member-group-roles");
+const userModel = firestore.collection("users");
 
 chai.should();
 
@@ -571,7 +568,7 @@ describe("discordactions", function () {
     });
 
     before(async function () {
-      length = usersStatusData.length;
+      length = userStatusData.length;
       users = userData.filter((data) => data.username && data.discordId).slice(0, length);
       const addedUersPromise = users.map(async (user) => {
         const { id } = await userModel.add({ ...user });
@@ -580,7 +577,7 @@ describe("discordactions", function () {
 
       addedUers = await Promise.all(addedUersPromise);
 
-      const addedUsersStatusPromise = usersStatusData.map(async (data, index) => {
+      const addedUsersStatusPromise = userStatusData.map(async (data, index) => {
         const { id } = addedUers[index];
         const statusData = { ...data, userId: id };
         const { id: userStatusId } = await userStatusCollection.add(statusData);

@@ -91,7 +91,7 @@ router.get('/', authenticate, usersController.getUsers)
 `authenticate middleware`
 
 ```JS
-module.exports = async (req, res, next) => {
+export default  async (req, res, next) => {
   try {
     let token = req.cookies[config.get('userToken.cookieName')]
 

@@ -1,34 +1,33 @@
-const admin = require("firebase-admin");
-
+import admin from "firebase-admin";
 import { Question, QuestionBody } from "../types/questions";
-
-const firestore = require("../utils/firestore");
+import firestore from "../utils/firestore.js";
+import logger from "../utils/logger.js";
 
 const questionModel = firestore.collection("questions");
 
-const createQuestion = async (questionData: QuestionBody): Promise<Question> => {
+const createQuestion = async (inputData: QuestionBody): Promise<Question> => {
   try {
-    const { eventId: event_id, createdBy: created_by, question, maxCharacters: max_characters } = questionData;
-    const questionRef = questionModel.doc(questionData.id);
+    const { eventId: event_id, createdBy: created_by, question, maxCharacters } = inputData;
+    const questionRef = questionModel.doc(inputData.id);
     const createdAndUpdatedAt = admin.firestore.Timestamp.now();
 
-    await questionRef.set({
+    const questionData: Omit<Question, 'id'> = {
       question,
       event_id,
       created_by,
-      max_characters: max_characters || null,
+      max_characters: maxCharacters ? String(maxCharacters) : null,
       created_at: createdAndUpdatedAt,
-      updated_at: createdAndUpdatedAt,
-    });
+    };
+
+    await questionRef.set(questionData);
     const questionSnapshot = await questionRef.get();
     const id = questionSnapshot.id;
-    const questionFromDB = questionSnapshot.data();
 
-    return { id, ...questionFromDB };
+    return { id, ...questionData };
   } catch (error) {
     logger.error(`Some error occured while creating question ${error}`);
     throw error;
   }
 };
 
-module.exports = { createQuestion };
+export { createQuestion };

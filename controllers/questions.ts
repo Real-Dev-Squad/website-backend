@@ -1,13 +1,14 @@
-const crypto = require("crypto");
+import crypto from "crypto";
 import { Request } from "express";
 
-import { Client, Question } from "../types/questions";
-import { CustomRequest, CustomResponse } from "../types/global";
+import { Client, Question } from "../types/questions.js";
+import { CustomRequest, CustomResponse } from "../types/global.js";
+import logger from "../utils/logger.js";
 
-const { HEADERS_FOR_SSE } = require("../constants/constants");
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+import { HEADERS_FOR_SSE } from "../constants/constants.js";
+import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
 
-const questionQuery = require("../models/questions");
+import { createQuestion as modelCreateQuestion } from "../models/questions.js";
 
 /* Refer to limitation of this clients array here(in the limitations section of doc) - https://github.com/Real-Dev-Squad/website-www/wiki/%5BFeature%5D-%E2%80%90-Realtime-Word-Cloud-Questions-Answers-Feature*/
 let clients: Client[] = [];
@@ -24,7 +25,7 @@ function sendQuestionToAll(newQuestion: Question, res: CustomResponse) {
 const createQuestion = async (req: CustomRequest, res: CustomResponse) => {
   try {
     const questionId = crypto.randomUUID({ disableEntropyCache: true });
-    const question = await questionQuery.createQuestion({ ...req.body, id: questionId });
+    const question = await modelCreateQuestion({ ...req.body, id: questionId });
     return sendQuestionToAll(question, res);
   } catch (error) {
     logger.error(`Error while creating question: ${error}`);
@@ -60,4 +61,4 @@ const getQuestions = async (req: Request, res: CustomResponse) => {
   }
 };
 
-module.exports = { createQuestion, getQuestions };
+export default { createQuestion, getQuestions };

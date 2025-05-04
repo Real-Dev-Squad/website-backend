@@ -1,7 +1,9 @@
-import firestore from "../utils/firestore";
-const logsModel = firestore.collection("logs");
+import firestore from "../utils/firestore.js";
 import admin from "firebase-admin";
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
+import logger from "../utils/logger.js";
+
+const logsModel = firestore.collection("logs");
 
 interface LogMeta {
   userId?: string;

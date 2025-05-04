@@ -1,21 +1,22 @@
-const chai = require("chai");
+import chai from "chai";
+import config from "config";
+
+import app from "../../server.js";
+import { generateAuthToken } from "../../services/authService.js";
+import userData from "../fixtures/user/user.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
+
 const { expect } = chai;
-const app = require("../../server");
-const cleanDb = require("../utils/cleanDb");
-const addUser = require("../utils/addUser");
-const userData = require("../fixtures/user/user")();
-
-const userData0 = userData[0];
-const authService = require("../../services/authService");
-
 const cookieName = config.get("userToken.cookieName");
+const userData0 = userData[0];
 
 describe("Notify Test", function () {
   let userId0, userIdToken0;
 
   beforeEach(async function () {
     userId0 = await addUser(userData0);
-    userIdToken0 = authService.generateAuthToken({ userId: userId0 });
+    userIdToken0 = generateAuthToken({ userId: userId0 });
   });
 
   afterEach(async function () {

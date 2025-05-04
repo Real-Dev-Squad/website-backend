@@ -1,6 +1,6 @@
-const timeUtils = require("../../../utils/time");
+import timeUtils from "../../../utils/time.js";
 
-module.exports = () => {
+export default () => {
   return [
     {
       title: "Sherlock and Anagrams",

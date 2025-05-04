@@ -1,4 +1,4 @@
-const answerData = [
+export const SAMPLE_ANSWER_DATA = [
   {
     id: "dummy-answer-id",
     eventId: "event_id",
@@ -32,4 +32,3 @@ const answerData = [
   },
 ];
 
-module.exports = answerData;

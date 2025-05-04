@@ -1,5 +1,7 @@
-const { INITIAL_WALLET } = require("../constants/wallets");
-const firestore = require("../utils/firestore");
+import { INITIAL_WALLET } from "../constants/wallets.js";
+import firestore from "../utils/firestore.js";
+import logger from "../utils/logger.js";
+
 const walletModel = firestore.collection("wallets");
 
 /**
@@ -70,8 +72,4 @@ const updateWallet = async (userId, currencies) => {
   }
 };
 
-module.exports = {
-  fetchWallet,
-  updateWallet,
-  createWallet,
-};
+export { fetchWallet, updateWallet, createWallet };

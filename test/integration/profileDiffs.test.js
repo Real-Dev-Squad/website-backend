@@ -1,18 +1,17 @@
-const chai = require("chai");
+import chai from "chai";
+import chaiHttp from "chai-http";
+import config from "config";
+
+import app from "../../server.js";
+import { generateAuthToken } from "../../services/authService.js";
+import addUser from "../utils/addUser.js";
+import userData from "../fixtures/user/user.js";
+
 const { expect } = chai;
-const chaiHttp = require("chai-http");
+const cookieName = config.get("userToken.cookieName");
 
-const app = require("../../server");
-const authService = require("../../services/authService");
-
-const addUser = require("../utils/addUser");
-
-const userData = require("../fixtures/user/user")();
 const newUser = userData[3];
 const superUser = userData[4];
-
-const config = require("config");
-const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);
 
@@ -25,10 +24,10 @@ describe("GET /profileDiffs", function () {
 
   before(async function () {
     newUserId = await addUser(newUser);
-    newUserAuthToken = authService.generateAuthToken({ userId: newUserId });
+    newUserAuthToken = generateAuthToken({ userId: newUserId });
 
     superUserId = await addUser(superUser);
-    superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+    superUserAuthToken = generateAuthToken({ userId: superUserId });
   });
 
   it("Should return pending profileDiffs, using authorized user (super_user)", function (done) {

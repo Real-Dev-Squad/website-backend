@@ -1,62 +1,55 @@
-const joi = require("joi");
-const { ERROR_MESSAGES } = require("../../constants/badges");
-const {
-  VALIDATORS: { CREATE_BADGE, ASSIGN_OR_REMOVE_BADGES, API_PAYLOAD_VALIDATION_FAILED },
-} = ERROR_MESSAGES;
-const logger = require("../../utils/logger");
+import joi from "joi";
+import { ERROR_MESSAGES } from "../../constants/badges.js";
+import logger from "../../utils/logger.js";
+
+const { VALIDATORS } = ERROR_MESSAGES;
+const { CREATE_BADGE, ASSIGN_OR_REMOVE_BADGES } = VALIDATORS;
 
 /**
- * Validates badge payload
- * @param req {Object} - Express request object
- * @param res {Object} - Express response object
- * @param next {function} - Express middelware
+ * Validates the request payload for creating a new badge
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
  */
-async function createBadge(req, res, next) {
-  const schema = joi
-    .object()
-    .strict()
-    .keys({
-      name: joi.string().min(3).max(30).required(),
-      description: joi.string().min(3).max(130).optional(),
-      createdBy: joi.string().min(1).required(),
-    });
-  try {
-    if (!req.file) {
-      throw new Error(CREATE_BADGE.FILE_IS_MISSING);
-    }
-    await schema.validateAsync(req.body);
-    next();
-  } catch (error) {
-    logger.error(`${CREATE_BADGE.VALIDATON_FAILED}: ${error}`);
-    res.boom.badRequest(`${API_PAYLOAD_VALIDATION_FAILED}, ${error.details?.[0]?.message ?? error?.message}`);
-  }
-}
+// eslint-disable-next-line consistent-return
+const createBadge = (req, res, next) => {
+  const schema = joi.object({
+    name: joi.string().required(),
+    description: joi.string().required(),
+    imageUrl: joi.string().required(),
+  });
 
-/**
- * Validates param username and payload badgeIds
- * @param req {Object} - Express request object
- * @param res {Object} - Express response object
- * @param next {function} - Express middelware
- */
-async function assignOrRemoveBadges(req, res, next) {
-  const schema = joi
-    .object()
-    .strict()
-    .keys({
-      userId: joi.string().required(),
-      badgeIds: joi.array().min(1).items(joi.string().required()).unique().required(),
+  const { error } = schema.validate(req.body);
+  if (error) {
+    logger.error(`Error validating badge: ${error}`);
+    return res.boom.badRequest(CREATE_BADGE, {
+      error: error.details[0].message,
     });
-  try {
-    const { badgeIds, userId } = req.body;
-    await schema.validateAsync({ userId, badgeIds });
-    next();
-  } catch (error) {
-    logger.error(`${ASSIGN_OR_REMOVE_BADGES.VALIDATON_FAILED}: ${error}`);
-    res.boom.badRequest(`${API_PAYLOAD_VALIDATION_FAILED}, ${error.details?.[0]?.message}`);
   }
-}
-
-module.exports = {
-  createBadge,
-  assignOrRemoveBadges,
+  next();
 };
+
+/**
+ * Validates the request payload for assigning or removing badges
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ * @param {Function} next - Express next middleware function
+ */
+// eslint-disable-next-line consistent-return
+const assignOrRemoveBadges = (req, res, next) => {
+  const schema = joi.object({
+    userId: joi.string().required(),
+    badgeIds: joi.array().items(joi.string()).required(),
+  });
+
+  const { error } = schema.validate(req.body);
+  if (error) {
+    logger.error(`Error validating badge assignment: ${error}`);
+    return res.boom.badRequest(ASSIGN_OR_REMOVE_BADGES, {
+      error: error.details[0].message,
+    });
+  }
+  next();
+};
+
+export { assignOrRemoveBadges, createBadge };

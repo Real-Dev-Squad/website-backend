@@ -1,5 +1,6 @@
-const axios = require("axios");
-const { API_100MS_BASE_URL } = require("../constants/events");
+import axios from "axios";
+import { API_100MS_BASE_URL } from "../constants/events.js";
+import logger from "../utils/logger.js";
 
 // A service class for all REST API operations
 class EventAPIService {
@@ -54,17 +55,17 @@ class EventAPIService {
 
   // A method for GET requests using the configured Axios instance
   async get(path, queryParams) {
-    const res = await this.#axiosInstance.get(path, { params: queryParams });
-    logger.info(`get call to path - ${path}, status code - ${res.status}`);
-    return res.data;
+    const response = await this.#axiosInstance.get(path, { params: queryParams });
+    logger.info(`get call to path - ${path}, status code - ${response.status}`);
+    return response.data;
   }
 
   // A method for POST requests using the configured Axios instance
   async post(path, payload) {
-    const res = await this.#axiosInstance.post(path, payload);
-    logger.info(`post call to path - ${path}, status code - ${res.status}`);
-    return res.data;
+    const response = await this.#axiosInstance.post(path, payload);
+    logger.info(`post call to path - ${path}, status code - ${response.status}`);
+    return response.data;
   }
 }
 
-module.exports = { EventAPIService };
+export { EventAPIService };

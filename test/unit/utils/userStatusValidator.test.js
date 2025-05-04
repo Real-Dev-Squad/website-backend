@@ -1,6 +1,6 @@
-const Sinon = require("sinon");
-const { expect } = require("chai");
-const { validateMassUpdate } = require("../../../middlewares/validators/userStatus");
+import Sinon from "sinon";
+import { expect } from "chai";
+import { validateMassUpdate } from "../../../middlewares/validators/userStatus.js";
 
 describe("Middleware | Validators | massUpdateUserStatus", function () {
   describe("validateMassUpdate", function () {

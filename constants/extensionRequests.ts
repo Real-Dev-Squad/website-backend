@@ -4,6 +4,4 @@ const EXTENSION_REQUEST_STATUS = {
   DENIED: "DENIED",
 };
 
-module.exports = {
-  EXTENSION_REQUEST_STATUS,
-};
+export { EXTENSION_REQUEST_STATUS };

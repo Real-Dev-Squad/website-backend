@@ -7,6 +7,7 @@
  */
 
 const NODE_ENV = process.env.NODE_ENV;
+// @ts-ignore
 module.exports = {
   port: 3000,
   enableFileLogs: true,

@@ -1,8 +1,10 @@
-const admin = require("firebase-admin");
-const firestore = require("../utils/firestore");
+import admin from "firebase-admin";
+import firestore from "../utils/firestore.js";
+import { Answer, AnswerBody, AnswerFieldsToUpdate } from "../typeDefinitions/answers.js";
+import { ANSWER_STATUS } from "../constants/answers.js";
+import logger from "../utils/logger.js";
+
 const answerModel = firestore.collection("answers");
-import { Answer, AnswerBody, AnswerFieldsToUpdate } from "../typeDefinitions/answers";
-const { ANSWER_STATUS } = require("../constants/answers");
 
 const createAnswer = async (answerData: AnswerBody) => {
   try {
@@ -47,24 +49,33 @@ const updateAnswer = async (id: string, fieldsToUpdate: AnswerFieldsToUpdate) =>
   }
 };
 
-const getAnswers = async (queryFields) => {
-  const questionId = queryFields.questionId || "";
-  const eventId = queryFields.eventId || "";
-  const status = queryFields.status || "";
-  let answersRef = answerModel;
-  let answers: Answer[] = [];
+interface QueryFields {
+  event_id?: string;
+  answered_by?: string;
+  question_id?: string;
+  status?: string;
+}
 
+const getAnswers = async (queryFields: QueryFields): Promise<Answer[]> => {
   try {
-    answersRef = questionId ? answersRef.where("question_id", "==", questionId) : answersRef;
-    answersRef = eventId ? answersRef.where("event_id", "==", eventId) : answersRef;
-    answersRef = status ? answersRef.where("status", "==", status) : answersRef;
-
-    const answerSnapshot = await answersRef.get();
-
-    answerSnapshot.forEach((answer) => {
-      answers.push({ id: answer.id, ...answer.data() });
+    let query: admin.firestore.Query = answerModel;
+    if (queryFields.event_id) {
+      query = query.where("event_id", "==", queryFields.event_id);
+    }
+    if (queryFields.answered_by) {
+      query = query.where("answered_by", "==", queryFields.answered_by);
+    }
+    if (queryFields.question_id) {
+      query = query.where("question_id", "==", queryFields.question_id);
+    }
+    if (queryFields.status) {
+      query = query.where("status", "==", queryFields.status);
+    }
+    const answersSnapshot = await query.get();
+    const answers: Answer[] = [];
+    answersSnapshot.forEach((doc) => {
+      answers.push({ id: doc.id, ...doc.data() } as Answer);
     });
-
     return answers;
   } catch (error) {
     logger.error(`Some error occured while getting answers ${error}`);
@@ -72,4 +83,8 @@ const getAnswers = async (queryFields) => {
   }
 };
 
-module.exports = { createAnswer, updateAnswer, getAnswers };
+export {
+  createAnswer,
+  updateAnswer,
+  getAnswers,
+};

@@ -13,7 +13,7 @@ const TASK_REQUEST_ERROR_MESSAGE = {
   INVALID_PREV: "Invalid 'prev' value",
   INVALID_NEXT: "Invalid 'next' value",
 };
-export const TASK_REQUEST_TYPE = {
+const TASK_REQUEST_TYPE = {
   ASSIGNMENT: "ASSIGNMENT",
   CREATION: "CREATION",
 };
@@ -42,7 +42,7 @@ const MIGRATION_TYPE = {
   ADD_COUNT_CREATED: "add-count-created-time"
 };
 
-module.exports = {
+export {
   TASK_REQUEST_STATUS,
   TASK_REQUEST_TYPE,
   TASK_REQUEST_FILTER_KEYS,

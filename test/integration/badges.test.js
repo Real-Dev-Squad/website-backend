@@ -1,20 +1,21 @@
-const app = require("../../server");
-const chai = require("chai");
-const chaiHttp = require("chai-http");
-const sinon = require("sinon");
-const { Buffer } = require("node:buffer");
+import app from "../../server.js";
+import chai from "chai";
+import chaiHttp from "chai-http";
+import sinon from "sinon";
+import { Buffer } from "node:buffer";
+import config from "config";
 
-const fixture = require("../fixtures/badges/badges");
-const userData = require("../fixtures/user/user")();
+import fixture from "../fixtures/badges/badges.js";
+import userData from "../fixtures/user/user.js";
 
-const model = require("../../models/badges");
+import model from "../../models/badges.js";
 
-const authService = require("../../services/authService");
-const imageService = require("../../services/imageService");
-const addUser = require("../utils/addUser");
-const cleanDb = require("../utils/cleanDb");
+import { generateAuthToken } from "../../services/authService.js";
+import imageService from "../../services/imageService.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
 
-const { SUCCESS_MESSAGES, ERROR_MESSAGES } = require("../../constants/badges");
+import { SUCCESS_MESSAGES, ERROR_MESSAGES } from "../../constants/badges.js";
 const { CONTROLLERS: CONTROLLERS_SUCCESS_MESSAGES } = SUCCESS_MESSAGES;
 const { VALIDATORS: ERROR_MESSAGES_VALIDATORS, MISC } = ERROR_MESSAGES;
 const { expect } = chai;
@@ -30,7 +31,7 @@ chai.use(chaiHttp);
 describe("Badges", function () {
   before(async function () {
     userId = await addUser(superUser);
-    jwt = authService.generateAuthToken({ userId });
+    jwt = generateAuthToken({ userId });
   });
 
   after(async function () {

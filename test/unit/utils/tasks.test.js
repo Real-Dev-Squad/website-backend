@@ -1,7 +1,7 @@
-const { expect } = require("chai");
-const { transformTasksUsersQuery } = require("../../../utils/tasks");
-const { RQLQueryParser } = require("../../../utils/RQLParser");
-const { tasksUsersStatus } = require("../../../constants/tasks");
+import { expect } from "chai";
+import { transformTasksUsersQuery } from "../../../utils/tasks.js";
+import { RQLQueryParser } from "../../../utils/RQLParser.js";
+import { tasksUsersStatus } from "../../../constants/tasks.js";
 
 describe("Utils | Tasks", function () {
   describe("transformTasksUsersQuery", function () {

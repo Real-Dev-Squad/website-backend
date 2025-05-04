@@ -1,16 +1,18 @@
-const express = require("express");
-const cookieParser = require("cookie-parser");
-const morgan = require("morgan");
-const boom = require("express-boom");
-const helmet = require("helmet");
-const cors = require("cors");
-const passport = require("passport");
-const contentTypeCheck = require("./contentTypeCheck");
+import express from 'express';
+import cookieParser from 'cookie-parser';
+import morgan from 'morgan';
+import boom from 'express-boom';
+import helmet from 'helmet';
+import cors from 'cors';
+import passport from 'passport';
+import contentTypeCheck from './contentTypeCheck.js';
+import config from 'config';
+import logger from '../utils/logger.js';
 
-// require middlewares
-require("./passport");
+// import middlewares
+import './passport.js';
 
-const middleware = (app) => {
+export const middleware = (app) => {
   // Middleware for sending error responses with express response object. To be required above all middlewares
   app.use(boom());
 
@@ -45,5 +47,3 @@ const middleware = (app) => {
   // Initialise authentication middleware
   app.use(passport.initialize());
 };
-
-module.exports = middleware;

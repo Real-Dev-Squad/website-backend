@@ -48,7 +48,7 @@ const authorizeUser = (requiredRole) => {
   };
 };
 
-module.exports = {
+export default {
   authorizeUser,
   userHasPermission,
 };

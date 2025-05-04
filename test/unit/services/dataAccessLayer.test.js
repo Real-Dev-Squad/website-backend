@@ -1,11 +1,12 @@
-const chai = require("chai");
-const chaiHttp = require("chai-http");
+import sinon from "sinon";
+import * as chai from "chai";
+import chaiHttp from "chai-http";
 
-const userQuery = require("../../../models/users");
-const members = require("../../../models/members");
-const sinon = require("sinon");
+import userQuery from "../../../models/users.js";
+import members from "../../../models/members.js";
+import { KEYS_NOT_ALLOWED, ACCESS_LEVEL } from "../../../constants/userDataLevels.js";
 
-const {
+import {
   retrieveUsers,
   removeSensitiveInfo,
   retrieveDiscordUsers,
@@ -14,11 +15,8 @@ const {
   retreiveFilteredUsers,
   levelSpecificAccess,
   fetchUsersForKeyValues,
-} = require("../../../services/dataAccessLayer");
-
-const { KEYS_NOT_ALLOWED, ACCESS_LEVEL } = require("../../../constants/userDataLevels");
-
-const userData = require("../../fixtures/user/user")();
+} from "../../../services/dataAccessLayer.js";
+import userData from "../../fixtures/user/user.js";
 
 chai.use(chaiHttp);
 const expect = chai.expect;

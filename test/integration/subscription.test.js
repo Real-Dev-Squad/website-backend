@@ -1,25 +1,30 @@
-const chai = require("chai");
-const sinon = require("sinon");
-const app = require("../../server");
-const cookieName = config.get("userToken.cookieName");
-const { subscribedMessage, unSubscribedMessage, subscriptionData } = require("../fixtures/subscription/subscription");
-const addUser = require("../utils/addUser");
-const authService = require("../../services/authService");
-const chaiHttp = require("chai-http");
-chai.use(chaiHttp);
-const nodemailer = require("nodemailer");
-const nodemailerMock = require("nodemailer-mock");
-const userData = require("../fixtures/user/user")();
+import chai from "chai";
+import sinon from "sinon";
+import chaiHttp from "chai-http";
+import config from "config";
+import nodemailer from "nodemailer";
+import nodemailerMock from "nodemailer-mock";
+
+import app from "../../server.js";
+import { generateAuthToken } from "../../services/authService.js";
+import addUser from "../utils/addUser.js";
+import userData from "../fixtures/user/user.js";
+import { subscribedMessage, unSubscribedMessage, subscriptionData } from "../fixtures/subscription/subscription.js";
+
 const { expect } = chai;
+const cookieName = config.get("userToken.cookieName");
 let userId = "";
 const superUser = userData[4];
 let superUserAuthToken = "";
+
+chai.use(chaiHttp);
+
 describe("/subscription email notifications", function () {
   let jwt;
 
   beforeEach(async function () {
     userId = await addUser();
-    jwt = authService.generateAuthToken({ userId });
+    jwt = generateAuthToken({ userId });
   });
 
   it("Should return 401 if the user is not logged in", function (done) {
@@ -71,7 +76,7 @@ describe("/subscription email notifications", function () {
   describe("/notify endpoint", function () {
     beforeEach(async function () {
       const superUserId = await addUser(superUser);
-      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+      superUserAuthToken = generateAuthToken({ userId: superUserId });
       sinon.stub(nodemailerMock, "createTransport").callsFake(nodemailerMock.createTransport);
     });
 

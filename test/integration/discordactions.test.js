@@ -1,16 +1,39 @@
-const chai = require("chai");
+import chai from "chai";
+import chaiHttp from "chai-http";
+import config from "config";
+import sinon from "sinon";
+
+import app from "../../server.js";
+import { generateAuthToken } from "../../services/authService.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
+import userData from "../fixtures/user/user.js";
+import ApplicationModel from "../../models/applications.js";
+import usersInDiscord from "../fixtures/user/inDiscord.js";
+import firestore from "../../utils/firestore.js";
+import { userPhotoVerificationData } from "../fixtures/user/photo-verification.js";
+import {
+  groupData,
+  groupIdle7d,
+  roleDataFromDiscord,
+  memberGroupData,
+  groupOnboarding31dPlus,
+  groupIdle,
+} from "../fixtures/discordactions/discordactions.js";
+import discordServices from "../../services/discordService.js";
+import discordRolesModel, { addGroupRoleToMember, addInviteToInviteModel } from "../../models/discordactions.js";
+import { updateUserStatus } from "../../models/userStatus.js";
+import { generateUserStatusData, userStatusDataForOooState } from "../fixtures/userStatus/userStatus.js";
+import { getDiscordMembers, getOnboarding31DPlusMembers } from "../fixtures/discordResponse/discord-response.js";
+import { generateCronJobToken } from "../utils/generateBotToken.js";
+import { CRON_JOB_HANDLER } from "../../constants/bot.js";
+import { createRequest } from "../../models/requests.js";
+import { REQUEST_TYPE, REQUEST_STATE } from "../../constants/requests.js";
+import { convertDaysToMilliseconds } from "../../utils/time.js";
+
 const { expect } = chai;
-const chaiHttp = require("chai-http");
+const cookieName = config.get("userToken.cookieName");
 
-const app = require("../../server");
-const authService = require("../../services/authService");
-const addUser = require("../utils/addUser");
-const cleanDb = require("../utils/cleanDb");
-// Import fixtures
-const userData = require("../fixtures/user/user")();
-const ApplicationModel = require("../../models/applications");
-
-const usersInDiscord = require("../fixtures/user/inDiscord");
 const superUser = userData[4];
 const archievedUser = userData[19];
 const developerUserWithoutApprovedProfileStatus = userData[6];
@@ -18,39 +41,13 @@ const designerUser = userData[8];
 const productManagerUser = userData[9];
 const mavenUser = userData[10];
 
-const config = require("config");
-const sinon = require("sinon");
-const cookieName = config.get("userToken.cookieName");
-const firestore = require("../../utils/firestore");
-const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
 const photoVerificationModel = firestore.collection("photo-verification");
 const discordRoleModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
 const userModel = firestore.collection("users");
 const userStatusModel = firestore.collection("usersStatus");
 
-const {
-  groupData,
-  groupIdle7d,
-  roleDataFromDiscord,
-  memberGroupData,
-  groupOnboarding31dPlus,
-  groupIdle,
-} = require("../fixtures/discordactions/discordactions");
-const discordServices = require("../../services/discordService");
-const { addGroupRoleToMember, addInviteToInviteModel } = require("../../models/discordactions");
-const { updateUserStatus } = require("../../models/userStatus");
-const { generateUserStatusData } = require("../fixtures/userStatus/userStatus");
-const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
-const { getOnboarding31DPlusMembers } = require("../fixtures/discordResponse/discord-response");
-const discordRolesModel = require("../../models/discordactions");
 chai.use(chaiHttp);
-const { userStatusDataForOooState } = require("../fixtures/userStatus/userStatus");
-const { generateCronJobToken } = require("../utils/generateBotToken");
-const { CRON_JOB_HANDLER } = require("../../constants/bot");
-const { createRequest } = require("../../models/requests");
-const { REQUEST_TYPE, REQUEST_STATE } = require("../../constants/requests");
-const { convertDaysToMilliseconds } = require("../../utils/time");
 
 describe("Discord actions", function () {
   let superUserId;
@@ -75,9 +72,9 @@ describe("Discord actions", function () {
     fetchStub = sinon.stub(global, "fetch");
     userId = await addUser(userData[0]);
     superUserId = await addUser(superUser);
-    superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
-    userAuthToken = authService.generateAuthToken({ userId: userId });
-    jwt = authService.generateAuthToken({ userId });
+    superUserAuthToken = generateAuthToken({ userId: superUserId });
+    userAuthToken = generateAuthToken({ userId: userId });
+    jwt = generateAuthToken({ userId });
     discordId = "12345";
 
     const docRefUser0 = photoVerificationModel.doc();
@@ -226,7 +223,7 @@ describe("Discord actions", function () {
       groupId = docRef.id;
 
       superUserId = await addUser(superUser);
-      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+      superUserAuthToken = generateAuthToken({ userId: superUserId });
 
       sinon.stub(discordRolesModel, "deleteGroupRole").resolves({ isSuccess: true });
     });
@@ -1023,7 +1020,7 @@ describe("Discord actions", function () {
     // eslint-disable-next-line mocha/no-skipped-tests
     it.skip("should return 403 if user has role archieved", async function () {
       archievedUserId = await addUser(archievedUser);
-      archievedUserToken = authService.generateAuthToken({ userId: archievedUserId });
+      archievedUserToken = generateAuthToken({ userId: archievedUserId });
       const res = await chai
         .request(app)
         .post(`/discord-actions/invite`)
@@ -1036,7 +1033,7 @@ describe("Discord actions", function () {
     // eslint-disable-next-line mocha/no-skipped-tests
     it.skip("should return 403 if the user doesn't have role designer, product_manager, or mavens", async function () {
       developerUserWithoutApprovedProfileStatusId = await addUser(developerUserWithoutApprovedProfileStatus);
-      developerUserWithoutApprovedProfileStatusToken = authService.generateAuthToken({
+      developerUserWithoutApprovedProfileStatusToken = generateAuthToken({
         userId: developerUserWithoutApprovedProfileStatusId,
       });
       const res = await chai
@@ -1058,7 +1055,7 @@ describe("Discord actions", function () {
       );
 
       productManagerUserId = await addUser(productManagerUser);
-      productManagerAuthToken = authService.generateAuthToken({ userId: productManagerUserId });
+      productManagerAuthToken = generateAuthToken({ userId: productManagerUserId });
       const res = await chai
         .request(app)
         .post(`/discord-actions/invite`)
@@ -1079,7 +1076,7 @@ describe("Discord actions", function () {
       );
 
       designerUserId = await addUser(designerUser);
-      designerAuthToken = authService.generateAuthToken({ userId: designerUserId });
+      designerAuthToken = generateAuthToken({ userId: designerUserId });
       const res = await chai
         .request(app)
         .post(`/discord-actions/invite`)
@@ -1100,7 +1097,7 @@ describe("Discord actions", function () {
       );
 
       mavenUserId = await addUser(mavenUser);
-      mavenAuthToken = authService.generateAuthToken({ userId: mavenUserId });
+      mavenAuthToken = generateAuthToken({ userId: mavenUserId });
       const res = await chai
         .request(app)
         .post(`/discord-actions/invite`)
@@ -1146,6 +1143,7 @@ describe("Discord actions", function () {
         .set("cookie", `${cookieName}=${userAuthToken}`);
 
       expect(res).to.have.status(403);
+      expect(res.body).to.be.a("object");
       expect(res.body.message).to.be.equal(
         "Only users with an accepted application can generate a Discord invite link."
       );
@@ -1254,7 +1252,7 @@ describe("Discord actions", function () {
     beforeEach(async function () {
       const user = await addUser(userData[0]);
       userId = user;
-      userAuthToken = authService.generateAuthToken({ userId });
+      userAuthToken = generateAuthToken({ userId });
 
       await discordRoleModel.add(groupData[0]);
       await discordRoleModel.add(groupData[1]);

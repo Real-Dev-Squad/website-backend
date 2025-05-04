@@ -1,6 +1,7 @@
-const Sinon = require("sinon");
-const { expect } = require("chai");
-const { validateUserStatus } = require("../../../middlewares/validators/userStatus");
+import { expect } from "chai";
+import sinon from "sinon";
+
+import { validateUserStatus } from "../../../middlewares/validators/userStatus.js";
 
 describe("Validation Tests for Cancel OOO", function () {
   let req;
@@ -10,10 +11,10 @@ describe("Validation Tests for Cancel OOO", function () {
   beforeEach(function () {
     res = {
       boom: {
-        badRequest: Sinon.spy(),
+        badRequest: sinon.spy(),
       },
     };
-    nextSpy = Sinon.spy();
+    nextSpy = sinon.spy();
   });
 
   it("should validate for a valid request", async function () {

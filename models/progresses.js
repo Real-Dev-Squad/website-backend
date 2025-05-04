@@ -1,8 +1,7 @@
-const { Conflict, NotFound } = require("http-errors");
-const fireStore = require("../utils/firestore");
-const progressesCollection = fireStore.collection("progresses");
-const { PROGRESSES_RESPONSE_MESSAGES, TYPE_MAP } = require("../constants/progresses");
-const {
+import httpError from "http-errors";
+import fireStore from "../utils/firestore.js";
+import { PROGRESSES_RESPONSE_MESSAGES, TYPE_MAP } from "../constants/progresses.js";
+import {
   buildQueryToFetchDocs,
   getProgressDocs,
   buildRangeProgressQuery,
@@ -14,8 +13,10 @@ const {
   buildQueryToSearchProgressByDay,
   buildQueryToFetchPaginatedDocs,
   getPaginatedProgressDocs,
-} = require("../utils/progresses");
-const { retrieveUsers } = require("../services/dataAccessLayer");
+} from "../utils/progresses.js";
+import { retrieveUsers } from "../services/dataAccessLayer.js";
+
+const progressesCollection = fireStore.collection("progresses");
 const { PROGRESS_ALREADY_CREATED, PROGRESS_DOCUMENT_NOT_FOUND } = PROGRESSES_RESPONSE_MESSAGES;
 
 /**
@@ -35,7 +36,7 @@ const createProgressDocument = async (progressData) => {
   const query = buildQueryForPostingProgress(progressData);
   const existingDocumentSnapshot = await query.where("date", "==", progressDateTimestamp).get();
   if (!existingDocumentSnapshot.empty) {
-    throw new Conflict(`${type.charAt(0).toUpperCase() + type.slice(1)} ${PROGRESS_ALREADY_CREATED}`);
+    throw new httpError.Conflict(`${type.charAt(0).toUpperCase() + type.slice(1)} ${PROGRESS_ALREADY_CREATED}`);
   }
   const progressDocumentData = { ...progressData, createdAt: createdAtTimestamp, date: progressDateTimestamp };
   const { id } = await progressesCollection.add(progressDocumentData);
@@ -104,7 +105,7 @@ async function getProgressByDate(pathParams, queryParams) {
   const query = buildQueryToSearchProgressByDay({ [TYPE_MAP[type]]: typeId, date });
   const result = await query.get();
   if (!result.size) {
-    throw new NotFound(PROGRESS_DOCUMENT_NOT_FOUND);
+    throw new httpError.NotFound(PROGRESS_DOCUMENT_NOT_FOUND);
   }
   const doc = result.docs[0];
   const docData = doc.data();
@@ -146,7 +147,7 @@ const addUserDetailsToProgressDocs = async (progressDocs) => {
   }
 };
 
-module.exports = {
+export {
   createProgressDocument,
   getProgressDocument,
   getPaginatedProgressDocument,

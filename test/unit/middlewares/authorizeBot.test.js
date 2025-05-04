@@ -1,8 +1,9 @@
-const authorizeBot = require("../../../middlewares/authorizeBot");
-const sinon = require("sinon");
-const expect = require("chai").expect;
-const bot = require("../../utils/generateBotToken");
-const { BAD_TOKEN, CLOUDFLARE_WORKER, CRON_JOB_HANDLER } = require("../../../constants/bot");
+import { expect } from "chai";
+import sinon from "sinon";
+
+import authorizeBot from "../../../middlewares/authorizeBot.js";
+import { BAD_TOKEN, CLOUDFLARE_WORKER, CRON_JOB_HANDLER } from "../../../constants/bot.js";
+import bot from "../../utils/generateBotToken.js";
 
 describe("Middleware | Authorize Bot", function () {
   describe("Check authorization of bot", function (done) {

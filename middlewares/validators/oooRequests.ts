@@ -1,7 +1,7 @@
 import joi from "joi";
 import { NextFunction } from "express";
-import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/requests";
-import { OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
+import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/requests.js";
+import { OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest.js";
 
 export const createOooStatusRequestValidator = async (
   req: OooRequestCreateRequest,

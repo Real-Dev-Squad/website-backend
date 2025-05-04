@@ -1,4 +1,4 @@
-import { REQUEST_LOG_TYPE } from "./requests";
+import { REQUEST_LOG_TYPE } from "./requests.js";
 
 export const logType = {
   PROFILE_DIFF_APPROVED: "PROFILE_DIFF_APPROVED",

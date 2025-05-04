@@ -1,11 +1,12 @@
-const Sinon = require("sinon");
-const {
+import { expect } from "chai";
+import sinon from "sinon";
+
+import {
   validateGroupRoleBody,
   validateMemberRoleBody,
   validateUpdateUsersNicknameStatusBody,
   validateLazyLoadingParams,
-} = require("../../../middlewares/validators/discordactions");
-const { expect } = require("chai");
+} from "../../../middlewares/validators/discordactions.js";
 
 describe("Middleware | Validators | discord actions", function () {
   describe("validateGroupRoleBody", function () {
@@ -16,7 +17,7 @@ describe("Middleware | Validators | discord actions", function () {
           rolename: "test",
         },
       };
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       await validateGroupRoleBody(req, res, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(true);
     });
@@ -27,7 +28,7 @@ describe("Middleware | Validators | discord actions", function () {
           badRequest: () => {},
         },
       };
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       const req = {
         body: {},
       };
@@ -46,7 +47,7 @@ describe("Middleware | Validators | discord actions", function () {
           roleid: "12345654325544565",
         },
       };
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       const res = {};
       await validateMemberRoleBody(req, res, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(true);
@@ -58,7 +59,7 @@ describe("Middleware | Validators | discord actions", function () {
           badRequest: () => {},
         },
       };
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       const req = {
         body: {},
       };
@@ -76,7 +77,7 @@ describe("Middleware | Validators | discord actions", function () {
           lastNicknameUpdate: String(Date.now()),
         },
       };
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       const res = {};
       await validateUpdateUsersNicknameStatusBody(req, res, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(true);
@@ -88,7 +89,7 @@ describe("Middleware | Validators | discord actions", function () {
           lastNicknameUpdate: Date.now(),
         },
       };
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       const res = {};
       await validateUpdateUsersNicknameStatusBody(req, res, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(true);
@@ -100,7 +101,7 @@ describe("Middleware | Validators | discord actions", function () {
           badRequest: () => {},
         },
       };
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       const req = {
         body: {},
       };
@@ -120,7 +121,7 @@ describe("Middleware | Validators | discord actions", function () {
           dev: "true",
         },
       };
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       const res = {};
       await validateLazyLoadingParams(req, res, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(true);
@@ -129,7 +130,7 @@ describe("Middleware | Validators | discord actions", function () {
     it("should return a bad request error when size is out of range", async function () {
       const res = {
         boom: {
-          badRequest: Sinon.spy(),
+          badRequest: sinon.spy(),
         },
       };
       const req = {
@@ -137,7 +138,7 @@ describe("Middleware | Validators | discord actions", function () {
           size: 200,
         },
       };
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       await validateLazyLoadingParams(req, res, nextSpy);
       expect(nextSpy.called).to.be.equal(false);
       expect(res.boom.badRequest.calledOnce).to.be.equal(true);
@@ -146,7 +147,7 @@ describe("Middleware | Validators | discord actions", function () {
     it("should return a bad request error when page is negative", async function () {
       const res = {
         boom: {
-          badRequest: Sinon.spy(),
+          badRequest: sinon.spy(),
         },
       };
       const req = {
@@ -154,7 +155,7 @@ describe("Middleware | Validators | discord actions", function () {
           page: -1,
         },
       };
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       await validateLazyLoadingParams(req, res, nextSpy);
       expect(nextSpy.called).to.be.equal(false);
       expect(res.boom.badRequest.calledOnce).to.be.equal(true);
@@ -163,7 +164,7 @@ describe("Middleware | Validators | discord actions", function () {
     it("should return a bad request error when dev has an invalid value", async function () {
       const res = {
         boom: {
-          badRequest: Sinon.spy(),
+          badRequest: sinon.spy(),
         },
       };
       const req = {
@@ -171,7 +172,7 @@ describe("Middleware | Validators | discord actions", function () {
           dev: "invalid",
         },
       };
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       await validateLazyLoadingParams(req, res, nextSpy);
       expect(nextSpy.called).to.be.equal(false);
       expect(res.boom.badRequest.calledOnce).to.be.equal(true);

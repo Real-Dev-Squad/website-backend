@@ -1,7 +1,6 @@
 import { TaskRequestType } from "../typeDefinitions/task-requests";
 import { User } from "../typeDefinitions/users";
-
-import usersService from "../services/dataAccessLayer";
+import * as usersService from "../services/dataAccessLayer.js";
 import admin from "firebase-admin";
 
 const generateLink = (queries: { [key: string]: string }): string => {
@@ -43,9 +42,9 @@ const transformTaskRequests = async (taskRequestsList: TaskRequestType[]) => {
   taskRequestsList.forEach((data) => {
     data.users = data.users.map((userData) => {
       const user = usersMap.get(userData.userId);
-      const username = user?.username 
-      const firstName = user?.first_name 
-      const lastName = user?.last_name
+      const username = user?.username;
+      const firstName = user?.first_name;
+      const lastName = user?.last_name;
       const picture = user?.picture;
 
       return { ...userData, username, first_name: firstName, last_name: lastName, picture };
@@ -53,7 +52,7 @@ const transformTaskRequests = async (taskRequestsList: TaskRequestType[]) => {
   });
 };
 
-module.exports = {
+export {
   generateLink,
   buildTaskRequests,
   transformTaskRequests,

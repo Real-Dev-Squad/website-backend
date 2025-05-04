@@ -1,7 +1,7 @@
-const Sinon = require("sinon");
+import { expect } from "chai";
+import sinon from "sinon";
 
-const { expect } = require("chai");
-const { notifyValidator } = require("../../../middlewares/validators/notify");
+import { notifyValidator } from "../../../middlewares/validators/notify.js";
 
 describe("Test the notify validator", function () {
   it("Allows the request to pass with only user id", async function () {
@@ -13,7 +13,7 @@ describe("Test the notify validator", function () {
       },
     };
     const res = {};
-    const nextSpy = Sinon.spy();
+    const nextSpy = sinon.spy();
     await notifyValidator(req, res, nextSpy);
     expect(nextSpy.callCount).to.be.equal(1);
   });
@@ -27,7 +27,7 @@ describe("Test the notify validator", function () {
       },
     };
     const res = {};
-    const nextSpy = Sinon.spy();
+    const nextSpy = sinon.spy();
     await notifyValidator(req, res, nextSpy);
     expect(nextSpy.callCount).to.be.equal(1);
   });
@@ -46,7 +46,7 @@ describe("Test the notify validator", function () {
         badRequest: () => {},
       },
     };
-    const nextSpy = Sinon.spy();
+    const nextSpy = sinon.spy();
     await notifyValidator(req, res, nextSpy);
     expect(nextSpy.callCount).to.be.equal(0);
   });
@@ -62,7 +62,7 @@ describe("Test the notify validator", function () {
         badRequest: () => {},
       },
     };
-    const nextSpy = Sinon.spy();
+    const nextSpy = sinon.spy();
     await notifyValidator(req, res, nextSpy);
     expect(nextSpy.callCount).to.be.equal(0);
   });

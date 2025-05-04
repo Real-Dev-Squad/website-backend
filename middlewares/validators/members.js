@@ -1,4 +1,5 @@
-const joi = require("joi");
+import joi from "joi";
+import logger from "../../utils/logger.js";
 
 const validateGetMembers = async (req, res, next) => {
   const querySchema = joi.object().keys({
@@ -14,6 +15,4 @@ const validateGetMembers = async (req, res, next) => {
   }
 };
 
-module.exports = {
-  validateGetMembers,
-};
+export { validateGetMembers };

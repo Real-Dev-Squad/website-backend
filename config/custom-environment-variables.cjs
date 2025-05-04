@@ -5,6 +5,7 @@
  *
  * Documentation: https://github.com/lorenwest/node-config/wiki/Environment-Variables
  */
+// @ts-ignore
 module.exports = {
   port: {
     __name: "PORT",

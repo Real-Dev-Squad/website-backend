@@ -1,20 +1,22 @@
-const chai = require("chai");
-const sinon = require("sinon");
+import chai from "chai";
+import sinon from "sinon";
+import chaiHttp from "chai-http";
+import config from "config";
+
+import logsQuery from "../../models/logs.js";
+import app from "../../server.js";
+import extensionRequests from "../../models/extensionRequests.js";
+import tasks from "../../models/tasks.js";
+import { generateAuthToken } from "../../services/authService.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
+import userData from "../fixtures/user/user.js";
+import { DINERO, NEELAM } from "../../constants/wallets.js";
+import { EXTENSION_REQUEST_STATUS } from "../../constants/extensionRequests.js";
+import { LOGS_FETCHED_SUCCESSFULLY } from "../../constants/logs.js";
+
 const { expect } = chai;
-const chaiHttp = require("chai-http");
-const logsQuery = require("../../models/logs");
-const app = require("../../server");
-const extensionRequests = require("../../models/extensionRequests");
-const tasks = require("../../models/tasks");
-const authService = require("../../services/authService");
-const addUser = require("../utils/addUser");
-const config = require("config");
 const cookieName = config.get("userToken.cookieName");
-const userData = require("../fixtures/user/user")();
-const { DINERO, NEELAM } = require("../../constants/wallets");
-const cleanDb = require("../utils/cleanDb");
-const { EXTENSION_REQUEST_STATUS } = require("../../constants/extensionRequests");
-const { LOGS_FETCHED_SUCCESSFULLY } = require("../../constants/logs");
 
 chai.use(chaiHttp);
 
@@ -45,10 +47,10 @@ describe("Extension Requests", function () {
     const appOwnerUserId = await addUser(appOwner);
     appOwner.id = appOwnerUserId;
     superUserId = await addUser(superUser);
-    appOwnerjwt = authService.generateAuthToken({ userId: appOwnerUserId });
-    superUserJwt = authService.generateAuthToken({ userId: superUserId });
-    jwt = authService.generateAuthToken({ userId: userId });
-    user2Jwt = authService.generateAuthToken({ userId: userId2 });
+    appOwnerjwt = generateAuthToken({ userId: appOwnerUserId });
+    superUserJwt = generateAuthToken({ userId: superUserId });
+    jwt = generateAuthToken({ userId: userId });
+    user2Jwt = generateAuthToken({ userId: userId2 });
 
     const taskData = [
       {
