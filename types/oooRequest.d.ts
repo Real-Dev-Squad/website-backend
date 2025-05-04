@@ -18,6 +18,21 @@ export type OooStatusRequest = {
   updatedAt: Timestamp;
   comment: string | null;
 };
+
+export type OldOooRequest = {
+  id: string;
+  type: REQUEST_TYPE.OOO;
+  from: number;
+  until: number;
+  message: string;
+  state: REQUEST_STATE;
+  lastModifiedBy: string | null;
+  requestedBy: string;
+  reason: string | null;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+};
+
 export type OooStatusRequestBody = {
   from: number;
   until: number;

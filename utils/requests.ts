@@ -1,3 +1,8 @@
+import { ERROR_WHILE_FETCHING_REQUEST } from "../constants/requests";
+import { fetchUser } from "../models/users";
+import { userData } from "../types/global";
+import { OldOooRequest, OooStatusRequest } from "../types/oooRequest";
+
 /**
  * Calculates the new deadline based on the current date, the old end date, and the additional duration in milliseconds.
  *
@@ -31,4 +36,64 @@ export const convertDateStringToMilliseconds = (date: string): { isDate: boolean
         isDate: true,
         milliseconds,
     };
+};
+
+export const transformGetOooRequest = async (dev, allRequests) => {
+    const oooRequests = [];
+
+    if (dev) {
+        for (const request of allRequests) {
+            if (request.status) {
+                const modifiedRequest: OldOooRequest = {
+                    id: request.id,
+                    type: request.type,
+                    from: request.from,
+                    until: request.until,
+                    message: request.reason,
+                    state: request.status,
+                    lastModifiedBy: request.lastModifiedBy ?? "",
+                    requestedBy: request.userId,
+                    reason: request.comment ?? "",
+                    createdAt: request.createdAt,
+                    updatedAt: request.updatedAt
+                };
+                oooRequests.push(modifiedRequest);
+            } else {
+                oooRequests.push(request);
+            }
+        }
+    } else {
+        for (const request of allRequests) {
+            if (request.state) {
+                try {
+                    const userResponse: any = await fetchUser({ userId: request.requestedBy });
+                    const username = userResponse.user.username;
+
+                    const modifiedRequest: OooStatusRequest = {
+                        id: request.id,
+                        type: request.type,
+                        from: request.from,
+                        until: request.until,
+                        reason: request.message,
+                        status: request.state,
+                        lastModifiedBy: request.lastModifiedBy ?? null,
+                        requestedBy: username,
+                        comment: request.reason ?? null,
+                        createdAt: request.createdAt,
+                        updatedAt: request.updatedAt,
+                        userId: request.requestedBy
+                    };
+
+                    oooRequests.push(modifiedRequest);
+                } catch (error) {
+                    logger.error(ERROR_WHILE_FETCHING_REQUEST, error);
+                    throw error;
+                }
+            } else {
+                oooRequests.push(request);
+            }
+        }
+    }
+
+    return oooRequests;
 };
