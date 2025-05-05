@@ -14,10 +14,6 @@ import {
   OOO_STATUS_ALREADY_EXIST,
   UNAUTHORIZED_TO_UPDATE_REQUEST,
   ERROR_WHILE_ACKNOWLEDGING_REQUEST,
-  REQUEST_DOES_NOT_EXIST,
-  INVALID_REQUEST_TYPE,
-  REQUEST_ALREADY_APPROVED,
-  REQUEST_ALREADY_REJECTED,
 } from "../constants/requests";
 import { statusState } from "../constants/userStatus";
 import { logType } from "../constants/logs";
@@ -29,6 +25,7 @@ import { createOooRequest, validateUserStatus, acknowledgeOooRequest } from "../
 import { CustomResponse } from "../typeDefinitions/global";
 import { AcknowledgeOooRequest, OooRequestCreateRequest, OooRequestResponse, OooStatusRequest } from "../types/oooRequest";
 import { UpdateRequest } from "../types/requests";
+import { NextFunction } from "express";
 
 /**
  * Controller to handle the creation of OOO requests.
@@ -165,6 +162,7 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
 export const acknowledgeOooRequestController = async (
   req: AcknowledgeOooRequest,
   res: OooRequestResponse,
+  next: NextFunction
 )
   : Promise<OooRequestResponse> => {
 
@@ -186,25 +184,12 @@ export const acknowledgeOooRequestController = async (
 
       const response = await acknowledgeOooRequest(requestId, requestBody, superUserId);
 
-      if (response.error === REQUEST_DOES_NOT_EXIST) {
-        return res.boom.notFound(REQUEST_DOES_NOT_EXIST);
-      }
-      if (response.error === INVALID_REQUEST_TYPE) {
-        return res.boom.badRequest(INVALID_REQUEST_TYPE);
-      }
-      if (response.error === REQUEST_ALREADY_APPROVED) {
-        return res.boom.conflict(REQUEST_ALREADY_APPROVED);
-      }
-      if (response.error === REQUEST_ALREADY_REJECTED) {
-        return res.boom.conflict(REQUEST_ALREADY_REJECTED);
-      }
-
       return res.status(200).json({
         message: response.message,
       });
     }
     catch(error){
       logger.error(ERROR_WHILE_ACKNOWLEDGING_REQUEST, error);
-      return res.boom.badImplementation(ERROR_WHILE_ACKNOWLEDGING_REQUEST);
+      next(error);
   }
 };

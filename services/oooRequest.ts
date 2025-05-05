@@ -6,7 +6,6 @@ import {
     REQUEST_STATE,
     USER_STATUS_NOT_FOUND,
     REQUEST_TYPE,
-    REQUEST_DOES_NOT_EXIST,
     REQUEST_ALREADY_APPROVED,
     REQUEST_ALREADY_REJECTED,
     REQUEST_APPROVED_SUCCESSFULLY,
@@ -18,7 +17,7 @@ import { createRequest, getRequestById } from "../models/requests";
 import { OooStatusRequest, OooStatusRequestBody } from "../types/oooRequest";
 import { UserStatus } from "../types/userStatus";
 import { addLog } from "./logService";
-import { BadRequest } from "http-errors";
+import { BadRequest, Conflict } from "http-errors";
 import { updateRequest } from "../models/requests";
 import { AcknowledgeOooRequestBody } from "../types/oooRequest";
 import { addFutureStatus } from "../models/userStatus";
@@ -114,7 +113,6 @@ export const createOooRequest = async (
  * @throws {Error} Throws an error if an issue occurs during validation.
  */
 export const validateOooAcknowledgeRequest = async (
-    requestId: string,
     requestType: string,
     requestStatus: string,
 ) => {
@@ -122,21 +120,15 @@ export const validateOooAcknowledgeRequest = async (
     try {
 
         if (requestType !== REQUEST_TYPE.OOO) {
-            return {
-                error: INVALID_REQUEST_TYPE
-            };
+            throw new BadRequest(INVALID_REQUEST_TYPE);
         }
 
         if (requestStatus === REQUEST_STATE.APPROVED) {
-            return {
-                error: REQUEST_ALREADY_APPROVED
-            };
+            throw new Conflict(REQUEST_ALREADY_APPROVED);
         }
 
         if (requestStatus === REQUEST_STATE.REJECTED) {
-            return {
-                error: REQUEST_ALREADY_REJECTED
-            };
+            throw new Conflict(REQUEST_ALREADY_REJECTED);
         }
     } catch (error) {
         logger.error("Error while validating OOO acknowledge request", error);
@@ -161,26 +153,12 @@ export const acknowledgeOooRequest = async (
     try {
         const requestData = await getRequestById(requestId);
 
-        if (requestData.error) {
-            logger.error("Error while acknowledging OOO request", { requestId, reason: REQUEST_DOES_NOT_EXIST });
-            return {
-                error: REQUEST_DOES_NOT_EXIST
-            };
-        }
-
-        const validationError = await validateOooAcknowledgeRequest(requestId, requestData.type, requestData.status);
-
-        if (validationError) {
-            logger.error(`Error while validating OOO acknowledge request`, { requestId, reason: validationError.error });
-            return {
-                error: validationError.error
-            };
-        }
+        await validateOooAcknowledgeRequest(requestData.type, requestData.status);
 
         const requestResult = await updateRequest(requestId, body, superUserId, REQUEST_TYPE.OOO);
 
         if ("error" in requestResult) {
-            throw BadRequest(requestResult.error);
+            throw new BadRequest(requestResult.error);
         }
 
         const [acknowledgeLogType, returnMessage] =
@@ -201,16 +179,14 @@ export const acknowledgeOooRequest = async (
         await addLog(requestLog.type, requestLog.meta, requestLog.body);
 
         if (requestResult.status === REQUEST_STATE.APPROVED) {
-            const { from, until, userId } = requestData;
-            const userFutureStatusData = {
+            await addFutureStatus({
                 requestId,
                 state: REQUEST_TYPE.OOO,
-                from,
-                endsOn: until,
-                userId,
+                from: requestData.from,
+                endsOn: requestData.until,
+                userId: requestData.userId,
                 message: body.comment,
-            };
-            await addFutureStatus(userFutureStatusData);
+            });
         }
 
         return {

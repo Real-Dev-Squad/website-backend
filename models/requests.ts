@@ -8,6 +8,7 @@ import {
   REQUEST_DOES_NOT_EXIST,
 } from "../constants/requests";
 import { getUserId } from "../utils/users";
+import { NotFound } from "http-errors";
 const SIZE = 5;
 
 export const createRequest = async (body: any) => {
@@ -74,9 +75,7 @@ export const getRequestById = async (id: string) => {
     const requestDoc = await requestModel.doc(id).get();
 
     if (!requestDoc.exists) {
-      return {
-        error: REQUEST_DOES_NOT_EXIST,
-      };
+      throw new NotFound(REQUEST_DOES_NOT_EXIST);
     }
 
     return requestDoc.data();
