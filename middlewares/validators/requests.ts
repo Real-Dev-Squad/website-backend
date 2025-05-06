@@ -2,7 +2,7 @@ import joi from "joi";
 import { NextFunction } from "express";
 import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/requests";
 import { AcknowledgeOooRequest, OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
-import { acknowledgeOooRequestsValidator, createOooStatusRequestValidator } from "./oooRequests";
+import { acknowledgeOooRequest, createOooStatusRequestValidator } from "./oooRequests";
 import { createExtensionRequestValidator } from "./extensionRequestsv2";
 import {createTaskRequestValidator} from "./taskRequests";
 import { ExtensionRequestRequest, ExtensionRequestResponse } from "../../types/extensionRequests";
@@ -139,7 +139,7 @@ export const updateRequestValidator = async (
 
   switch (type) {
       case REQUEST_TYPE.OOO:
-          await acknowledgeOooRequestsValidator(
+          await acknowledgeOooRequest(
             req,
             res as OooRequestResponse, next);
           break;

@@ -4,7 +4,7 @@ const { expect } = chai;
 
 import {
   createOooStatusRequestValidator,
-  acknowledgeOooRequestsValidator,
+  acknowledgeOooRequest,
 } from "./../../../middlewares/validators/oooRequests";
 import { testAcknowledgeOooRequest, validOooStatusRequests, validOooStatusUpdate } from "../../fixtures/oooRequest/oooRequest";
 import _ from "lodash";
@@ -97,7 +97,7 @@ describe("OOO Status Request Validators", function () {
         body: { ...testAcknowledgeOooRequest, type: "XYZ"}
       };
 
-      await acknowledgeOooRequestsValidator(req, res, nextSpy);
+      await acknowledgeOooRequest(req, res, nextSpy);
       expect(nextSpy.notCalled).to.be.true;
     });
 
@@ -106,7 +106,7 @@ describe("OOO Status Request Validators", function () {
         body: { ...testAcknowledgeOooRequest, status: "PENDING"}
       };
 
-      await acknowledgeOooRequestsValidator(req, res, nextSpy);
+      await acknowledgeOooRequest(req, res, nextSpy);
       expect(nextSpy.notCalled).to.be.true;
     });
 
@@ -115,7 +115,7 @@ describe("OOO Status Request Validators", function () {
         body: _.omit(testAcknowledgeOooRequest, "comment")
       };
       res = {};
-      await acknowledgeOooRequestsValidator(req, res, nextSpy);
+      await acknowledgeOooRequest(req, res, nextSpy);
       expect(nextSpy.calledOnce).to.be.true;
     });
 
@@ -124,7 +124,7 @@ describe("OOO Status Request Validators", function () {
         body: testAcknowledgeOooRequest
       };
       res = {};
-      await acknowledgeOooRequestsValidator(req, res, nextSpy);
+      await acknowledgeOooRequest(req, res, nextSpy);
       expect(nextSpy.calledOnce).to.be.true;
     });
   });

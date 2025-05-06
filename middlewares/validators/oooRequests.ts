@@ -67,7 +67,7 @@ const schema = joi
  * @param {NextFunction} next - The next middleware function to call if validation succeeds.
  * @returns {Promise<void>} Resolves or sends errors.
  */
-export const acknowledgeOooRequestsValidator = async (
+export const acknowledgeOooRequest = async (
   req: AcknowledgeOooRequest,
   res: OooRequestResponse,
   next: NextFunction

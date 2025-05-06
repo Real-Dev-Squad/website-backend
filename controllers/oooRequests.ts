@@ -14,6 +14,7 @@ import {
   OOO_STATUS_ALREADY_EXIST,
   UNAUTHORIZED_TO_UPDATE_REQUEST,
   ERROR_WHILE_ACKNOWLEDGING_REQUEST,
+  REQUEST_ID_REQUIRED,
 } from "../constants/requests";
 import { statusState } from "../constants/userStatus";
 import { logType } from "../constants/logs";
@@ -21,7 +22,8 @@ import { addLog } from "../models/logs";
 import { getRequestByKeyValues, getRequests, updateRequest } from "../models/requests";
 import { createUserFutureStatus } from "../models/userFutureStatus";
 import { getUserStatus, addFutureStatus } from "../models/userStatus";
-import { createOooRequest, validateUserStatus, acknowledgeOooRequest } from "../services/oooRequest";
+import { createOooRequest, validateUserStatus } from "../services/oooRequest";
+import * as oooRequestService from "../services/oooRequest";
 import { CustomResponse } from "../typeDefinitions/global";
 import { AcknowledgeOooRequest, OooRequestCreateRequest, OooRequestResponse, OooStatusRequest } from "../types/oooRequest";
 import { UpdateRequest } from "../types/requests";
@@ -159,30 +161,30 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
  * @param {OooRequestResponse} res - The response object.
  * @returns {Promise<OooRequestResponse>} Resolves with success or failure.
  */
-export const acknowledgeOooRequestController = async (
+export const acknowledgeOooRequest = async (
   req: AcknowledgeOooRequest,
   res: OooRequestResponse,
   next: NextFunction
 )
   : Promise<OooRequestResponse> => {
-
-    const dev = req.query.dev === "true";
-
-    if(!dev) return res.boom.notImplemented("Feature not implemented");
-
-    const isSuperuser = req.userData.roles?.super_user;
-
-    if (!isSuperuser) {
-      return res.boom.forbidden(UNAUTHORIZED_TO_UPDATE_REQUEST);
-    }
-
-    const requestBody = req.body;
-    const superUserId = req.userData.id;
-    const requestId = req.params.id;
-
     try {
+      const dev = req.query.dev === "true";
+      if(!dev) return res.boom.notImplemented("Feature not implemented");
 
-      const response = await acknowledgeOooRequest(requestId, requestBody, superUserId);
+      const isSuperuser = req.userData?.roles?.super_user;
+      if (!isSuperuser) {
+        return res.boom.forbidden(UNAUTHORIZED_TO_UPDATE_REQUEST);
+      }
+
+      const requestBody = req.body;
+      const superUserId = req.userData.id;
+      const requestId = req.params.id;
+
+      if (!requestId) {
+        return res.boom.badRequest(REQUEST_ID_REQUIRED);
+      }
+
+      const response = await oooRequestService.acknowledgeOooRequest(requestId, requestBody, superUserId);
 
       return res.status(200).json({
         message: response.message,
@@ -191,5 +193,6 @@ export const acknowledgeOooRequestController = async (
     catch(error){
       logger.error(ERROR_WHILE_ACKNOWLEDGING_REQUEST, error);
       next(error);
+      return res;
   }
 };
