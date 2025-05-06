@@ -164,6 +164,28 @@ describe("models/oooRequests", () => {
       const oooRequestData = await getRequests(query);
       expect(oooRequestData.allRequests).to.have.lengthOf(1);
     });
+
+    it("should return OOO requests with state and message field when dev is true", async () => {
+      await createRequest(createOooRequests);
+      await createRequest(createOooRequests2);
+      const query = { dev: "true", type: REQUEST_TYPE.OOO };
+      const oooRequests = await getRequests(query);
+      oooRequests.allRequests.forEach((request) => {
+        expect(request).to.have.property('state');
+        expect(request).to.have.property('message');
+      });
+    });
+
+    it("should return OOO requests with status and reason field when dev is false", async () => {
+      await createRequest(createOooRequests);
+      await createRequest(createOooRequests2);
+      const query = { dev: "false", type: REQUEST_TYPE.OOO };
+      const oooRequests = await getRequests(query);
+      oooRequests.allRequests.forEach((request) => {
+        expect(request).to.have.property('status');
+        expect(request).to.have.property('reason');
+      });
+    });
   });
 
   describe("getRequestByKeyValue", () => {
