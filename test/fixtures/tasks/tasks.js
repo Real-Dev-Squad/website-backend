@@ -158,5 +158,20 @@ module.exports = () => {
       createdAt: 1644753600,
       updatedAt: 1644753600,
     },
+    {
+      title: "createdAt test",
+      type: "feature",
+      status: "AVAILABLE",
+      priority: "HIGH",
+      percentCompleted: 11,
+    },
+    {
+      title: "createdAt and updatedAt test",
+      createdAt: 1691918779936,
+      type: "feature",
+      status: "AVAILABLE",
+      priority: "HIGH",
+      percentCompleted: 11,
+    },
   ];
 };
