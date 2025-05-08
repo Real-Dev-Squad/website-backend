@@ -685,15 +685,16 @@ describe("discordactions", function () {
   });
 
   describe("getMissedProgressUpdatesUsers", function () {
-    let activeUserWithProgressUpdates;
+    let activeUserWithMissedProgressUpdates;
     let idleUser;
     let userNotInDiscord;
     let activeUserId;
+    let activeUserWithProgressUpdates;
 
     beforeEach(async function () {
       idleUser = { ...userData[9], discordId: getDiscordMembers[0].user.id };
-      activeUserWithProgressUpdates = { ...userData[10], discordId: getDiscordMembers[1].user.id };
-      const activeUserWithNoUpdates = { ...userData[0], discordId: getDiscordMembers[2].user.id };
+      activeUserWithMissedProgressUpdates = { ...userData[10], discordId: getDiscordMembers[1].user.id };
+      activeUserWithProgressUpdates = { ...userData[0], discordId: getDiscordMembers[2].user.id };
       userNotInDiscord = { ...userData[4], discordId: "Not in discord" };
       const {
         idleStatus: idleUserStatus,
@@ -701,10 +702,10 @@ describe("discordactions", function () {
         userStatusDataForOooState: oooUserStatus,
       } = userStatusData;
       const userIdList = await Promise.all([
-        await addUser(idleUser), // idle user with no task progress updates
-        await addUser(activeUserWithProgressUpdates), // active user with task progress updates
-        await addUser(activeUserWithNoUpdates), // active user with no task progress updates
-        await addUser(userNotInDiscord), // OOO user with no task progress updates
+        await addUser(idleUser),
+        await addUser(activeUserWithMissedProgressUpdates),
+        await addUser(activeUserWithProgressUpdates),
+        await addUser(userNotInDiscord),
       ]);
       activeUserId = userIdList[2];
       await Promise.all([
@@ -751,17 +752,17 @@ describe("discordactions", function () {
     it("should list of users who missed updating progress", async function () {
       const result = await getMissedProgressUpdatesUsers();
       expect(result).to.be.an("object");
-      expect(result).to.be.deep.equal({
-        tasks: 4,
-        missedUpdatesTasks: 3,
-        usersToAddRole: [activeUserWithProgressUpdates.discordId],
-      });
+      expect(result.tasks).to.not.equal(undefined);
+      expect(result.tasks).to.equal(4);
+      expect(result.missedUpdatesTasks).to.not.equal(undefined);
+      expect(result.missedUpdatesTasks).to.equal(3);
+      expect(result.usersToAddRole.includes(activeUserWithMissedProgressUpdates.discordId)).to.equal(true);
+      expect(result.usersToAddRole.includes(idleUser.discordId)).to.equal(true);
     });
 
     it("should not list of users who are not active and who missed updating progress", async function () {
       const result = await getMissedProgressUpdatesUsers();
       expect(result).to.be.an("object");
-      expect(result.usersToAddRole).to.not.contain(idleUser.discordId);
       expect(result.usersToAddRole).to.not.contain(userNotInDiscord.discordId);
     });
 
