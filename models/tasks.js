@@ -7,7 +7,7 @@ const userUtils = require("../utils/users");
 const { chunks } = require("../utils/array");
 const { DOCUMENT_WRITE_SIZE } = require("../constants/constants");
 const { fromFirestoreData, toFirestoreData, buildTasks } = require("../utils/tasks");
-const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, TASK_SIZE } = require("../constants/tasks");
+const { TASK_TYPE, TASK_STATUS, TASK_STATUS_OLD, TASK_SIZE, COMPLETED_TASK_STATUS } = require("../constants/tasks");
 const {
   IN_PROGRESS,
   NEEDS_REVIEW,
@@ -19,6 +19,7 @@ const {
   SANITY_CHECK,
   BACKLOG,
   DONE,
+  AVAILABLE,
 } = TASK_STATUS;
 const { OLD_ACTIVE, OLD_BLOCKED, OLD_PENDING, OLD_COMPLETED } = TASK_STATUS_OLD;
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
@@ -597,17 +598,11 @@ const getOverdueTasks = async (days = 0) => {
     const currentTime = Math.floor(Date.now() / 1000);
     const targetTime = days > 0 ? currentTime + days * 24 * 60 * 60 : currentTime;
 
-    const OVERDUE_TASK_STATUSES = [
-      IN_PROGRESS,
-      ASSIGNED,
-      NEEDS_REVIEW,
-      IN_REVIEW,
-      SMOKE_TESTING,
-      BLOCKED,
-      SANITY_CHECK,
-    ];
+    const completeTaskStatuses = Object.values(COMPLETED_TASK_STATUS);
 
-    const query = tasksModel.where("endsOn", "<", targetTime).where("status", "in", OVERDUE_TASK_STATUSES);
+    const query = tasksModel
+      .where("endsOn", "<", targetTime)
+      .where("status", "not-in", [...completeTaskStatuses, BACKLOG, AVAILABLE]);
     const snapshot = await query.get();
 
     if (snapshot.empty) {
