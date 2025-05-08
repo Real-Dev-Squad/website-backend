@@ -24,6 +24,7 @@ export const createTaskRequestController = async (req: TaskRequestRequest, res: 
   const userPromise: any = await fetchUser({ userId: taskRequestData.userId });
   const userData: userData = userPromise.user;
   if (!userData.id || !userData.username) {
+    console.log("userData", userData);
     return res.boom.notFound(TASK_REQUEST_MESSAGES.USER_NOT_FOUND);
   }
   try {

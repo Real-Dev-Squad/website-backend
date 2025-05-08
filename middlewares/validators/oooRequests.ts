@@ -31,7 +31,7 @@ export const createOooStatusRequestValidator = async (
         "string.empty": "message cannot be empty",
       }),
       state: joi.string().valid(REQUEST_STATUS.PENDING).required().messages({
-        "any.only": "state must be PENDING",
+        "any.only": "status must be PENDING",
       }),
       type: joi.string().valid(REQUEST_TYPE.OOO).required(),
     });

@@ -37,8 +37,8 @@ export const createTaskRequestValidator = async (
                 "any.required": "type is required",
             }),
             state: joi.string().valid(REQUEST_STATUS.PENDING).required().messages({
-                "string.empty": "state cannot be empty",
-                "any.required": "state is required",
+                "string.empty": "status cannot be empty",
+                "any.required": "status is required",
             }),
             proposedStartDate: joi.number().required().messages({
                 "number.base": "proposedStartDate must be a number",

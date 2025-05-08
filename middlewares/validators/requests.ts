@@ -58,12 +58,12 @@ export const updateRequestsMiddleware = async (
       .messages({
         "string.empty": "reason cannot be empty",
       }),
-    state: joi
+    status: joi
       .string()
       .valid(REQUEST_STATUS.APPROVED, REQUEST_STATUS.REJECTED)
       .required()
       .messages({
-        "any.only": "state must be APPROVED or REJECTED",
+        "any.only": "status must be APPROVED or REJECTED",
       }),
     type: joi.string().valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION, REQUEST_TYPE.ONBOARDING).required(),
     message: joi.string().optional()

@@ -84,9 +84,9 @@ const addTaskRequests = async (req, res) => {
         if (!username) {
           return res.boom.badRequest("User not found");
         }
-        if (!issueData) {
-          return res.boom.badRequest("Issue does not exist");
-        }
+        // if (!issueData) {
+        //   return res.boom.badRequest("Issue does not exist");
+        // }
         break;
       }
     }
@@ -112,7 +112,6 @@ const addTaskRequests = async (req, res) => {
       body: newTaskRequest.taskRequest,
     };
     await addLog(taskRequestLog.type, taskRequestLog.meta, taskRequestLog.body);
-
     const statusCode = newTaskRequest.isCreate ? 201 : 200;
     return res.status(statusCode).json({
       message: "Task request successful.",

@@ -24,6 +24,7 @@ export const createRequestController = async (
   res: CustomResponse
 ) => {
   const type = req.body.type;
+  console.log("type", type); 
   switch (type) {
     case REQUEST_TYPE.OOO:
       return await createOooRequestController(req as OooRequestCreateRequest, res as OooRequestResponse);
@@ -140,6 +141,7 @@ interface RequestWithParams extends Request {
 export const migrateRequestStateToStatus = async (req: RequestWithParams, res: CustomResponse) => {
   try {
     const docId = req.params.id;
+    console.log(docId);
     const result = await updateRequestStateToStatus(docId);
     
     if (result.success) {
