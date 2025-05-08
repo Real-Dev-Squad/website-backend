@@ -302,37 +302,11 @@ describe("tasks", function () {
     });
 
     it("should exclude overdue tasks with COMPLETED, DONE, VERIFIED, BACKLOG, and AVAILABLE statuses", async function () {
-      const overdueCompletedTask = {
-        ...tasksData[1],
-        endsOn: Date.now() / 1000 - 5 * 24 * 60 * 60,
-        status: TASK_STATUS.COMPLETED,
-      };
-      const overdueDoneTask = {
-        ...tasksData[2],
-        endsOn: Date.now() / 1000 - 5 * 24 * 60 * 60,
-        status: TASK_STATUS.DONE,
-      };
-      const overdueVerifiedTask = {
-        ...tasksData[3],
-        endsOn: Date.now() / 1000 - 5 * 24 * 60 * 60,
-        status: TASK_STATUS.VERIFIED,
-      };
-      const overdueBacklogTask = {
-        ...tasksData[4],
-        endsOn: Date.now() / 1000 - 5 * 24 * 60 * 60,
-        status: TASK_STATUS.BACKLOG,
-      };
-      const overdueAvailableTask = {
-        ...tasksData[5],
-        endsOn: Date.now() / 1000 - 5 * 24 * 60 * 60,
-        status: TASK_STATUS.AVAILABLE,
-      };
-
-      await tasks.updateTask(overdueCompletedTask);
-      await tasks.updateTask(overdueBacklogTask);
-      await tasks.updateTask(overdueAvailableTask);
-      await tasks.updateTask(overdueDoneTask);
-      await tasks.updateTask(overdueVerifiedTask);
+      await tasks.updateTask(tasksData[8]);
+      await tasks.updateTask(tasksData[11]);
+      await tasks.updateTask(tasksData[12]);
+      await tasks.updateTask(tasksData[9]);
+      await tasks.updateTask(tasksData[10]);
 
       const result = await tasks.getOverdueTasks();
 
@@ -352,17 +326,11 @@ describe("tasks", function () {
       overdueTask.endsOn = Date.now() / 1000 + 24 * 60 * 60 * 7;
       await tasks.updateTask(overdueTask);
       const usersWithOverdueTasks = await tasks.getOverdueTasks(days);
-      expect(usersWithOverdueTasks.length).to.be.equal(5);
+      expect(usersWithOverdueTasks.length).to.be.equal(6);
     });
 
     it("should return all users which have overdue tasks if days is not passed", async function () {
-      const overdueApprovedTask = {
-        ...tasksData[1],
-        endsOn: Date.now() / 1000 - 5 * 24 * 60 * 60,
-        status: TASK_STATUS.APPROVED,
-      };
-
-      await tasks.updateTask(overdueApprovedTask);
+      await tasks.updateTask(tasksData[12]);
 
       const usersWithOverdueTasks = await tasks.getOverdueTasks();
       expect(usersWithOverdueTasks.length).to.be.equal(5);
@@ -389,8 +357,8 @@ describe("tasks", function () {
 
     it("Should update task status COMPLETED to DONE", async function () {
       const res = await tasks.updateTaskStatus();
-      expect(res.totalTasks).to.be.equal(9);
-      expect(res.totalUpdatedStatus).to.be.equal(9);
+      expect(res.totalTasks).to.be.equal(15);
+      expect(res.totalUpdatedStatus).to.be.equal(15);
     });
 
     it("should throw an error if firebase batch operation fails", async function () {
