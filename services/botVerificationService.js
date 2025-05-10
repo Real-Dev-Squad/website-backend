@@ -17,7 +17,7 @@ const verifyToken = (token) => {
  * @return {Object} - Decode value of JWT
  */
 const verifyDiscordService = (token) => {
-  return jwt.verify(token, config.get("discordServiceToken.discordServicePublicKey"), { algorithms: ["RS256"] });
+  return jwt.verify(token, config.get("discordService.publicKey"), { algorithms: ["RS256"] });
 };
 
 /**
