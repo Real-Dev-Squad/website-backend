@@ -94,8 +94,8 @@ module.exports = {
     botPublicKey: "<botpublicKey>",
   },
 
-  discordServiceToken: {
-    discordServicePublicKey: "DISCORD_SERVICE_PUBLIC_KEY",
+  discordService: {
+    publicKey: "DISCORD_SERVICE_PUBLIC_KEY",
   },
 
   // Cloudinary keys
