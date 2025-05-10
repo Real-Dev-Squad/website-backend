@@ -20,7 +20,7 @@ const generateToken = (data) => {
  * @return {String} - Generated JWT
  */
 const generateDiscordServiceToken = (data) => {
-  return jwt.sign(data, config.get("discordServiceToken.discordServicePrivateKey"), {
+  return jwt.sign(data, config.get("discordService.privateKey"), {
     algorithm: "RS256",
     expiresIn: "1m",
   });
