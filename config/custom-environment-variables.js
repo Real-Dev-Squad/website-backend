@@ -100,8 +100,8 @@ module.exports = {
     botPublicKey: "BOT_PUBLIC_KEY",
   },
 
-  discordServiceToken: {
-    discordServicePublicKey: "DISCORD_SERVICE_PUBLIC_KEY",
+  discordService: {
+    publicKey: "DISCORD_SERVICE_PUBLIC_KEY",
   },
 
   cronJobHandler: {
