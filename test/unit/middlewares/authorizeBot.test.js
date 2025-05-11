@@ -206,7 +206,7 @@ describe("Middleware | Authorize Bot", function () {
       expect(nextSpy.calledOnce).to.be.equal(true);
     });
 
-    it("should return unauthorized when token is valid but not for discord service", function () {
+    it("should return unauthorized when token is invalid for discord service", function () {
       const jwtToken = bot.generateDiscordServiceToken({ name: "Invalid" });
       const request = {
         headers: {
