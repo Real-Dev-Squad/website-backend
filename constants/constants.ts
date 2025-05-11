@@ -16,8 +16,13 @@ const HEADERS_FOR_SSE = {
   "Cache-Control": "no-cache",
 };
 
+const HEADERS = {
+  SERVICE_NAME: "x-service-name",
+};
+
 module.exports = {
   DOCUMENT_WRITE_SIZE,
   daysOfWeek,
   HEADERS_FOR_SSE,
+  HEADERS,
 };

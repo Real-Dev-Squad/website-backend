@@ -1,4 +1,5 @@
 const botVerifcation = require("../services/botVerificationService");
+const { HEADERS } = require("../constants/constants.ts");
 const { CLOUDFLARE_WORKER, CRON_JOB_HANDLER, DISCORD_SERVICE } = require("../constants/bot");
 
 const verifyCronJob = async (req, res, next) => {
@@ -18,7 +19,7 @@ const verifyCronJob = async (req, res, next) => {
 const verifyDiscordBot = async (req, res, next) => {
   try {
     const token = req.headers.authorization.split(" ")[1];
-    const serviceName = req.headers["x-service-name"] || "";
+    const serviceName = req.headers[HEADERS.SERVICE_NAME] || "";
     if (serviceName === DISCORD_SERVICE) {
       const data = botVerifcation.verifyDiscordService(token);
       if (data.name !== DISCORD_SERVICE) {

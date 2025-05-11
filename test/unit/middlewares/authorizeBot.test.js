@@ -3,6 +3,8 @@ const sinon = require("sinon");
 const expect = require("chai").expect;
 const bot = require("../../utils/generateBotToken");
 const jwt = require("jsonwebtoken");
+const { HEADERS } = require("../../../constants/constants.ts");
+
 const { BAD_TOKEN, CLOUDFLARE_WORKER, CRON_JOB_HANDLER, DISCORD_SERVICE } = require("../../../constants/bot");
 
 describe("Middleware | Authorize Bot", function () {
@@ -118,28 +120,39 @@ describe("Middleware | Authorize Bot", function () {
   });
 
   describe("Check authorization of bot for discord service", function () {
-    it("should return unauthorized when token is expired or malformed for discord service", function () {
+    let nextSpy, boomBadRequestSpy, boomUnauthorizedSpy;
+
+    beforeEach(function () {
+      nextSpy = sinon.spy();
+      boomBadRequestSpy = sinon.spy();
+      boomUnauthorizedSpy = sinon.spy();
+    });
+
+    afterEach(function () {
+      sinon.restore();
+    });
+
+    it("should return unauthorized when token is malformed for discord service", function () {
       const jwtStub = sinon.stub(jwt, "verify").throws(new Error("invalid token"));
 
       const request = {
         headers: {
           authorization: `Bearer ${BAD_TOKEN}`,
-          "x-service-name": DISCORD_SERVICE,
+          [HEADERS.SERVICE_NAME]: DISCORD_SERVICE,
         },
       };
 
       const response = {
         boom: {
-          badRequest: sinon.spy(),
-          unauthorized: sinon.spy(),
+          badRequest: boomBadRequestSpy,
+          unauthorized: boomUnauthorizedSpy,
         },
       };
 
-      const nextSpy = sinon.spy();
       authorizeBot.verifyDiscordBot(request, response, nextSpy);
 
       expect(nextSpy.calledOnce).to.be.equal(false);
-      expect(response.boom.unauthorized.calledOnce).to.be.equal(true);
+      expect(boomUnauthorizedSpy.calledOnce).to.be.equal(true);
 
       jwtStub.restore();
     });
@@ -148,20 +161,19 @@ describe("Middleware | Authorize Bot", function () {
       const request = {
         headers: {
           authorization: `Bearer BAD_TOKEN`,
-          "x-service-name": DISCORD_SERVICE,
+          [HEADERS.SERVICE_NAME]: DISCORD_SERVICE,
         },
       };
 
       const response = {
         boom: {
-          badRequest: sinon.spy(),
+          badRequest: boomBadRequestSpy,
         },
       };
 
-      const nextSpy = sinon.spy();
       authorizeBot.verifyDiscordBot(request, response, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(false);
-      expect(response.boom.badRequest.calledOnce).to.be.equal(true);
+      expect(boomBadRequestSpy.calledOnce).to.be.equal(true);
     });
 
     it("should allow request propagation when token is valid for discord service", function () {
@@ -169,13 +181,12 @@ describe("Middleware | Authorize Bot", function () {
       const request = {
         headers: {
           authorization: `Bearer ${jwtToken}`,
-          "x-service-name": DISCORD_SERVICE,
+          [HEADERS.SERVICE_NAME]: DISCORD_SERVICE,
         },
       };
 
       const response = {};
 
-      const nextSpy = sinon.spy();
       authorizeBot.verifyDiscordBot(request, response, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(true);
     });
@@ -185,13 +196,12 @@ describe("Middleware | Authorize Bot", function () {
       const request = {
         headers: {
           authorization: `Bearer ${jwtToken}`,
-          "x-service-name": DISCORD_SERVICE,
+          [HEADERS.SERVICE_NAME]: DISCORD_SERVICE,
         },
       };
 
       const response = {};
 
-      const nextSpy = sinon.spy();
       authorizeBot.verifyDiscordBot(request, response, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(true);
     });
@@ -201,13 +211,12 @@ describe("Middleware | Authorize Bot", function () {
       const request = {
         headers: {
           authorization: `Bearer ${jwtToken}`,
-          "x-service-name": DISCORD_SERVICE,
+          [HEADERS.SERVICE_NAME]: DISCORD_SERVICE,
         },
       };
 
       const response = {};
 
-      const nextSpy = sinon.spy();
       authorizeBot.verifyDiscordBot(request, response, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(false);
     });
@@ -223,7 +232,6 @@ describe("Middleware | Authorize Bot", function () {
 
       const response = {};
 
-      const nextSpy = sinon.spy();
       authorizeBot.verifyDiscordBot(request, response, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(false);
     });
