@@ -192,11 +192,11 @@ describe("Middleware | Authorize Bot", function () {
     });
 
     it("should allow request propagation when token is valid for cloudflare worker and service name is not DISCORD_SERVICE", function () {
-      const jwtToken = bot.generateDiscordServiceToken({ name: DISCORD_SERVICE });
+      const jwtToken = bot.generateDiscordServiceToken({ name: CLOUDFLARE_WORKER });
       const request = {
         headers: {
           authorization: `Bearer ${jwtToken}`,
-          [HEADERS.SERVICE_NAME]: DISCORD_SERVICE,
+          [HEADERS.SERVICE_NAME]: CLOUDFLARE_WORKER,
         },
       };
 
@@ -215,10 +215,15 @@ describe("Middleware | Authorize Bot", function () {
         },
       };
 
-      const response = {};
+      const response = {
+        boom: {
+          unauthorized: boomUnauthorizedSpy,
+        },
+      };
 
       authorizeBot.verifyDiscordBot(request, response, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(false);
+      expect(response.boom.unauthorized.calledOnce).to.be.equal(true);
     });
 
     it("should return unauthorized when token is valid but not for cloudflare worker", function () {
