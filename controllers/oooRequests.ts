@@ -68,7 +68,7 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
   const userId = req?.userData?.id;
   const requestId = req.params.id;
   const { dev } = req.query;
-  const isDev = dev === 'true' ? true : false;
+  const isDev = dev === "true";
   const stateStatus = isDev ? 'status' : 'state';
   if (!userId) {
     return res.boom.unauthorized();
@@ -80,7 +80,7 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
       return res.boom.badRequest(requestResult.error);
     }
     const [logType, returnMessage] =
-      requestResult.stateStatus === REQUEST_STATE.APPROVED
+      requestResult[stateStatus] === REQUEST_STATE.APPROVED
         ? [REQUEST_LOG_TYPE.REQUEST_APPROVED, REQUEST_APPROVED_SUCCESSFULLY]
         : [REQUEST_LOG_TYPE.REQUEST_REJECTED, REQUEST_REJECTED_SUCCESSFULLY];
 
@@ -95,7 +95,7 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
       body: requestResult,
     };
     await addLog(requestLog.type, requestLog.meta, requestLog.body);
-    if (requestResult.stateStatus === REQUEST_STATE.APPROVED) {
+    if (requestResult[stateStatus] === REQUEST_STATE.APPROVED) {
       const requestData = await getRequests({ id: requestId });
 
       if (requestData) {

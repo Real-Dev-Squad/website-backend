@@ -13,7 +13,7 @@ export const createTaskRequestController = async (req: TaskRequestRequest, res: 
   const taskRequestData = req.body;
   const requestedBy = req?.userData?.id;
   const { dev } = req.query;
-  const isDev = dev === "true" ? true : false;
+ const isDev = dev === "true";
   const stateStatus = isDev ? 'status' : 'state';
   if (!requestedBy) {
     return res.boom.unauthorized();
@@ -66,13 +66,13 @@ export const createTaskRequestController = async (req: TaskRequestRequest, res: 
 
     if (
       existingRequest &&
-      existingRequest.stateStatus === REQUEST_STATE.PENDING &&
+      existingRequest[stateStatus] === REQUEST_STATE.PENDING &&
       existingRequest.requestors.includes(requestedBy)
     ) {
       return res.boom.badRequest(TASK_REQUEST_MESSAGES.TASK_REQUEST_EXISTS);
     } else if (
       existingRequest &&
-      existingRequest.stateStatus === REQUEST_STATE.PENDING &&
+      existingRequest[stateStatus] === REQUEST_STATE.PENDING &&
       !existingRequest.requestors.includes(requestedBy)
     ) {
       existingRequest.requestors.push(requestedBy);

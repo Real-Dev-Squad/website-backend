@@ -57,7 +57,7 @@ export const createOnboardingExtensionRequestController = async (
         const data = req.body as CreateOnboardingExtensionBody;
         const { user, userExists } = await fetchUser({ discordId: data.userId });
         const { dev } = req.query;
-        const isDev = dev === "true" ? true : false;
+        const isDev = dev === "true";
         const stateStatus = isDev ? 'status' : 'state';
         if (!userExists) {
             return res.boom.notFound("User not found");
@@ -83,7 +83,7 @@ export const createOnboardingExtensionRequestController = async (
         const numberOfDaysInMillisecond = convertDaysToMilliseconds(data.numberOfDays);
         const { isDate, milliseconds: discordJoinedDateInMillisecond } = convertDateStringToMilliseconds(discordJoinedAt);
 
-        if(!isDate){
+        if (!isDate) {
             logger.error(ERROR_WHILE_CREATING_REQUEST, "Invalid date");
             return res.boom.badImplementation(ERROR_WHILE_CREATING_REQUEST);
         }
@@ -92,17 +92,17 @@ export const createOnboardingExtensionRequestController = async (
         let oldEndsOn: number;
         const currentDate = Date.now();
 
-        if(!latestExtensionRequest){
+        if (!latestExtensionRequest) {
             requestNumber = 1;
             oldEndsOn = discordJoinedDateInMillisecond + millisecondsInThirtyOneDays;
-        }else if(latestExtensionRequest.state === REQUEST_STATE.REJECTED) {
+        } else if (latestExtensionRequest.state === REQUEST_STATE.REJECTED) {
             requestNumber = latestExtensionRequest.requestNumber + 1;
             oldEndsOn = latestExtensionRequest.oldEndsOn;
-        }else{
+        } else {
             requestNumber = latestExtensionRequest.requestNumber + 1;
             oldEndsOn = latestExtensionRequest.newEndsOn;
         }
-        
+
         const newEndsOn = getNewDeadline(currentDate, oldEndsOn, numberOfDaysInMillisecond);
         const onboardingExtension = await createRequest({
             type: REQUEST_TYPE.ONBOARDING,
@@ -129,13 +129,13 @@ export const createOnboardingExtensionRequestController = async (
         await addLog(onboardingExtensionLog.type, onboardingExtensionLog.meta, onboardingExtensionLog.body);
 
         return res.status(201).json({
-            message: ONBOARDING_REQUEST_CREATED_SUCCESSFULLY,  
+            message: ONBOARDING_REQUEST_CREATED_SUCCESSFULLY,
             data: {
                 id: onboardingExtension.id,
                 ...onboardingExtension,
             }
         });
-    }catch (err) {
+    } catch (err) {
         logger.error(ERROR_WHILE_CREATING_REQUEST, err);
         return res.boom.badImplementation(ERROR_WHILE_CREATING_REQUEST);
     }
@@ -149,12 +149,13 @@ export const createOnboardingExtensionRequestController = async (
  * @returns {Promise<OnboardingExtensionResponse>} Sends the response with the result of the update operation.
  */
 export const updateOnboardingExtensionRequestState = async (
-    req: UpdateOnboardingExtensionStateRequest, 
-    res: OnboardingExtensionResponse )
+    req: UpdateOnboardingExtensionStateRequest,
+    res: OnboardingExtensionResponse)
     : Promise<OnboardingExtensionResponse> => {
     const dev = req.query.dev === "true";
-    
-    if(!dev) return res.boom.notImplemented("Feature not implemented");
+    const stateStatus = dev ? 'status' : 'state';
+
+    if (!dev) return res.boom.notImplemented("Feature not implemented");
 
     const body = req.body as UpdateOnboardingExtensionStateRequestBody;
     const lastModifiedBy = req?.userData?.id;
@@ -165,10 +166,10 @@ export const updateOnboardingExtensionRequestState = async (
         type: body.type,
     }
 
-    if(body.message){
+    if (body.message) {
         requestBody = { ...requestBody, message: body.message };
     }
-    
+
     try {
         const response = await updateRequest(extensionId, requestBody, lastModifiedBy, REQUEST_TYPE.ONBOARDING);
 
@@ -179,7 +180,7 @@ export const updateOnboardingExtensionRequestState = async (
             return res.boom.badRequest(response.error);
         }
 
-        const [logType, returnMessage] = response.stateStatus === REQUEST_STATE.APPROVED
+        const [logType, returnMessage] = response[stateStatus] === REQUEST_STATE.APPROVED
             ? [REQUEST_LOG_TYPE.REQUEST_APPROVED, REQUEST_APPROVED_SUCCESSFULLY]
             : [REQUEST_LOG_TYPE.REQUEST_REJECTED, REQUEST_REJECTED_SUCCESSFULLY];
 
@@ -201,7 +202,7 @@ export const updateOnboardingExtensionRequestState = async (
                 ...response,
             },
         });
-    }catch(error){
+    } catch (error) {
         logger.error(ERROR_WHILE_UPDATING_REQUEST, error);
         return res.boom.badImplementation(ERROR_WHILE_UPDATING_REQUEST);
     }
@@ -226,22 +227,22 @@ export const updateOnboardingExtensionRequestController = async (
 
     if (!dev) return res.boom.notImplemented("Feature not implemented");
 
-    try{
+    try {
         const extensionRequestDoc = await requestModel.doc(id).get();
         const validationResponse = await validateOnboardingExtensionUpdateRequest(
-            extensionRequestDoc, 
+            extensionRequestDoc,
             id,
             isSuperuser,
             lastModifiedBy,
             body.newEndsOn,
         )
 
-        if (validationResponse){
-            if(validationResponse.error === REQUEST_DOES_NOT_EXIST){
+        if (validationResponse) {
+            if (validationResponse.error === REQUEST_DOES_NOT_EXIST) {
                 return res.boom.notFound(validationResponse.error);
             }
-            if(validationResponse.error === UNAUTHORIZED_TO_UPDATE_REQUEST){
-                return res.boom.forbidden(UNAUTHORIZED_TO_UPDATE_REQUEST); 
+            if (validationResponse.error === UNAUTHORIZED_TO_UPDATE_REQUEST) {
+                return res.boom.forbidden(UNAUTHORIZED_TO_UPDATE_REQUEST);
             }
             return res.boom.badRequest(validationResponse.error);
         }
@@ -254,11 +255,11 @@ export const updateOnboardingExtensionRequestController = async (
         return res.status(200).json({
             message: REQUEST_UPDATED_SUCCESSFULLY,
             data: {
-            id: extensionRequestDoc.id,
-            ...requestBody
+                id: extensionRequestDoc.id,
+                ...requestBody
             }
         })
-    }catch(error){
+    } catch (error) {
         logger.error(ERROR_WHILE_UPDATING_REQUEST, error);
         return res.boom.badImplementation(ERROR_WHILE_UPDATING_REQUEST);
     }
