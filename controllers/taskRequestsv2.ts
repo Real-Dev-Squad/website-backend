@@ -12,7 +12,9 @@ import { TaskRequestRequest } from "../types/taskRequests";
 export const createTaskRequestController = async (req: TaskRequestRequest, res: CustomResponse) => {
   const taskRequestData = req.body;
   const requestedBy = req?.userData?.id;
-
+  const { dev } = req.query;
+  const isDev = dev === "true" ? true : false;
+  const stateStatus = isDev ? 'status' : 'state';
   if (!requestedBy) {
     return res.boom.unauthorized();
   }
@@ -64,13 +66,13 @@ export const createTaskRequestController = async (req: TaskRequestRequest, res: 
 
     if (
       existingRequest &&
-      existingRequest.state === REQUEST_STATE.PENDING &&
+      existingRequest.stateStatus === REQUEST_STATE.PENDING &&
       existingRequest.requestors.includes(requestedBy)
     ) {
       return res.boom.badRequest(TASK_REQUEST_MESSAGES.TASK_REQUEST_EXISTS);
     } else if (
       existingRequest &&
-      existingRequest.state === REQUEST_STATE.PENDING &&
+      existingRequest.stateStatus === REQUEST_STATE.PENDING &&
       !existingRequest.requestors.includes(requestedBy)
     ) {
       existingRequest.requestors.push(requestedBy);
@@ -83,7 +85,7 @@ export const createTaskRequestController = async (req: TaskRequestRequest, res: 
         markdownEnabled: taskRequestData.markdownEnabled,
         firstName: userData.first_name,
         lastName: userData.last_name,
-        state: REQUEST_STATE.PENDING,
+        stateStatus: REQUEST_STATE.PENDING,
         requestedAt: Date.now(),
       });
       const updatedRequest = await createRequest(existingRequest);
@@ -116,7 +118,7 @@ export const createTaskRequestController = async (req: TaskRequestRequest, res: 
       externalIssueHtmlUrl: taskRequestData.externalIssueHtmlUrl,
       requestType: taskRequestData.requestType,
       type: taskRequestData.type,
-      state: REQUEST_STATE.PENDING,
+      stateStatus: REQUEST_STATE.PENDING,
       requestedBy: requestedBy,
       taskTitle: taskRequestData.taskTitle,
       users: [

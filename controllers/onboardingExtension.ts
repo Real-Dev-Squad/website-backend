@@ -20,11 +20,11 @@ import { createRequest, getRequestByKeyValues, updateRequest } from "../models/r
 import { fetchUser } from "../models/users";
 import { getUserStatus } from "../models/userStatus";
 import { User } from "../typeDefinitions/users";
-import { 
-    CreateOnboardingExtensionBody, 
-    OnboardingExtension, 
-    OnboardingExtensionCreateRequest, 
-    OnboardingExtensionResponse, 
+import {
+    CreateOnboardingExtensionBody,
+    OnboardingExtension,
+    OnboardingExtensionCreateRequest,
+    OnboardingExtensionResponse,
     UpdateOnboardingExtensionStateRequest,
     UpdateOnboardingExtensionStateRequestBody,
     UpdateOnboardingExtensionRequest,
@@ -48,23 +48,25 @@ const requestModel = firestore.collection("requests");
 * @returns {Promise<OnboardingExtensionResponse>} Resolves to a response with the status and data or an error message.
 */
 export const createOnboardingExtensionRequestController = async (
-    req: OnboardingExtensionCreateRequest, 
-    res: OnboardingExtensionResponse )
+    req: OnboardingExtensionCreateRequest,
+    res: OnboardingExtensionResponse)
     : Promise<OnboardingExtensionResponse> => {
 
     try {
 
         const data = req.body as CreateOnboardingExtensionBody;
-        const {user, userExists} = await fetchUser({discordId: data.userId});
-        
-        if(!userExists) {
+        const { user, userExists } = await fetchUser({ discordId: data.userId });
+        const { dev } = req.query;
+        const isDev = dev === "true" ? true : false;
+        const stateStatus = isDev ? 'status' : 'state';
+        if (!userExists) {
             return res.boom.notFound("User not found");
         }
 
-        const { id: userId, discordJoinedAt, username} = user as User;
-        const { data: userStatus } =  await getUserStatus(userId);
+        const { id: userId, discordJoinedAt, username } = user as User;
+        const { data: userStatus } = await getUserStatus(userId);
 
-        if(!userStatus || userStatus.currentStatus.state != userState.ONBOARDING){
+        if (!userStatus || userStatus.currentStatus.stateStatus != userState.ONBOARDING) {
             return res.boom.forbidden(UNAUTHORIZED_TO_CREATE_ONBOARDING_EXTENSION_REQUEST);
         }
 
@@ -73,10 +75,10 @@ export const createOnboardingExtensionRequestController = async (
             type: REQUEST_TYPE.ONBOARDING
         });
 
-        if(latestExtensionRequest && latestExtensionRequest.state === REQUEST_STATE.PENDING){
+        if (latestExtensionRequest && latestExtensionRequest[stateStatus] === REQUEST_STATE.PENDING) {
             return res.boom.conflict(REQUEST_ALREADY_PENDING);
         }
-        
+
         const millisecondsInThirtyOneDays = convertDaysToMilliseconds(31);
         const numberOfDaysInMillisecond = convertDaysToMilliseconds(data.numberOfDays);
         const { isDate, milliseconds: discordJoinedDateInMillisecond } = convertDateStringToMilliseconds(discordJoinedAt);
@@ -102,10 +104,9 @@ export const createOnboardingExtensionRequestController = async (
         }
         
         const newEndsOn = getNewDeadline(currentDate, oldEndsOn, numberOfDaysInMillisecond);
-        
         const onboardingExtension = await createRequest({
             type: REQUEST_TYPE.ONBOARDING,
-            state: REQUEST_STATE.PENDING,
+            stateStatus: REQUEST_STATE.PENDING,
             userId: userId,
             requestedBy: username,
             oldEndsOn: oldEndsOn,
@@ -151,7 +152,6 @@ export const updateOnboardingExtensionRequestState = async (
     req: UpdateOnboardingExtensionStateRequest, 
     res: OnboardingExtensionResponse )
     : Promise<OnboardingExtensionResponse> => {
-    
     const dev = req.query.dev === "true";
     
     if(!dev) return res.boom.notImplemented("Feature not implemented");
@@ -179,7 +179,7 @@ export const updateOnboardingExtensionRequestState = async (
             return res.boom.badRequest(response.error);
         }
 
-        const [logType, returnMessage] = response.state === REQUEST_STATE.APPROVED 
+        const [logType, returnMessage] = response.stateStatus === REQUEST_STATE.APPROVED
             ? [REQUEST_LOG_TYPE.REQUEST_APPROVED, REQUEST_APPROVED_SUCCESSFULLY]
             : [REQUEST_LOG_TYPE.REQUEST_REJECTED, REQUEST_REJECTED_SUCCESSFULLY];
 
@@ -194,7 +194,6 @@ export const updateOnboardingExtensionRequestState = async (
         };
 
         await addLog(requestLog.type, requestLog.meta, requestLog.body);
-        
         return res.status(200).json({
             message: returnMessage,
             data: {
@@ -216,17 +215,16 @@ export const updateOnboardingExtensionRequestState = async (
  * @returns {Promise<OnboardingExtensionResponse>} Resolves with success or failure.
  */
 export const updateOnboardingExtensionRequestController = async (
-    req: UpdateOnboardingExtensionRequest, 
-    res: OnboardingExtensionResponse): Promise<OnboardingExtensionResponse> => 
-{
-    
+    req: UpdateOnboardingExtensionRequest,
+    res: OnboardingExtensionResponse): Promise<OnboardingExtensionResponse> => {
+
     const body = req.body as UpdateOnboardingExtensionRequestBody;
     const id = req.params.id;
     const lastModifiedBy = req?.userData?.id;
     const isSuperuser = req?.userData?.roles?.super_user === true;
     const dev = req.query.dev === "true";
 
-    if(!dev) return res.boom.notImplemented("Feature not implemented");
+    if (!dev) return res.boom.notImplemented("Feature not implemented");
 
     try{
         const extensionRequestDoc = await requestModel.doc(id).get();
@@ -247,7 +245,6 @@ export const updateOnboardingExtensionRequestController = async (
             }
             return res.boom.badRequest(validationResponse.error);
         }
-        
         const requestBody = await updateOnboardingExtensionRequest(
             id,
             body,
