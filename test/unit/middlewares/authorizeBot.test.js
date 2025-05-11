@@ -119,7 +119,7 @@ describe("Middleware | Authorize Bot", function () {
     });
   });
 
-  describe("Check authorization of bot for discord service", function () {
+  describe("Check authorization for discord service", function () {
     let nextSpy, boomBadRequestSpy, boomUnauthorizedSpy;
 
     beforeEach(function () {
