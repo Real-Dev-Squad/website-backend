@@ -29,20 +29,21 @@ export const createRequest = async (body: any) => {
   }
 };
 
-export const updateRequest = async (id: string, body: any, lastModifiedBy: string, type:string) => {
+export const updateRequest = async (id: string, body: any, lastModifiedBy: string, type: string, dev?: boolean) => {
   try {
+    const stateStatus = dev ? 'status' : 'state';
     const existingRequestDoc = await requestModel.doc(id).get();
     if (!existingRequestDoc.exists) {
       return {
         error: REQUEST_DOES_NOT_EXIST,
       };
     }
-    if (existingRequestDoc.data().state === REQUEST_STATE.APPROVED) {
+    if (existingRequestDoc.data()[stateStatus] === REQUEST_STATE.APPROVED) {
       return {
         error: REQUEST_ALREADY_APPROVED,
       };
     }
-    if (existingRequestDoc.data().state === REQUEST_STATE.REJECTED) {
+    if (existingRequestDoc.data()[stateStatus] === REQUEST_STATE.REJECTED) {
       return {
         error: REQUEST_ALREADY_REJECTED,
       };
@@ -72,7 +73,6 @@ export const updateRequest = async (id: string, body: any, lastModifiedBy: strin
 export const getRequests = async (query: any) => {
   let { id, type, requestedBy, state, prev, next, page, size = SIZE } = query;
   const dev = query.dev === "true";
-
   size = parseInt(size);
   page = parseInt(page);
   try {
@@ -88,8 +88,8 @@ export const getRequests = async (query: any) => {
         ...requestDoc.data(),
       };
     }
-    
-    if(requestedBy && dev){
+
+    if (requestedBy && dev) {
       requestQuery = requestQuery.where("requestedBy", "==", requestedBy);
     }
     else if (requestedBy) {
@@ -101,7 +101,8 @@ export const getRequests = async (query: any) => {
       requestQuery = requestQuery.where("type", "==", type);
     }
     if (state) {
-      requestQuery = requestQuery.where("state", "==", state);
+      const stateStatus = dev ? "status" : "state";
+      requestQuery = requestQuery.where(stateStatus, "==", state);
     }
 
     requestQuery = requestQuery.orderBy("createdAt", "desc");

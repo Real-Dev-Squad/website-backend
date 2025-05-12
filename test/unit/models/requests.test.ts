@@ -114,17 +114,21 @@ describe("models/oooRequests", () => {
 
     it("Should return a list of all the requests with specified state - APPROVED", async () => {
       const oooRequest: any = await createRequest(createOooStatusRequests);
-      await updateRequest(oooRequest.id, updateOooApprovedRequests, updateOooApprovedRequests.lastModifiedBy, REQUEST_TYPE.OOO)
+      await updateRequest(oooRequest.id, updateOooApprovedRequests, updateOooApprovedRequests.lastModifiedBy, REQUEST_TYPE.OOO, true);
       const query = { dev: "true", state: REQUEST_STATE.APPROVED };
+      const isDev= query.dev === "true";
+      const stateStatus = isDev ? 'status' : 'state';
       const oooRequestData = await getRequests(query);
-      expect(oooRequestData.allRequests[0].state).to.be.equal(REQUEST_STATE.APPROVED);
+      expect(oooRequestData.allRequests[0][stateStatus]).to.be.equal(REQUEST_STATE.APPROVED);
     });
 
     it("Should return a list of all the requests with specified state - PENDING", async () => {
       await createRequest(createOooStatusRequests);
       const query = { dev: "true", state: REQUEST_STATE.PENDING };
+      const isDev= query.dev === "true";
+      const stateStatus = isDev ? 'status' : 'state';
       const oooRequestData = await getRequests(query);
-      expect(oooRequestData.allRequests[0].state).to.be.equal(REQUEST_STATE.PENDING);
+      expect(oooRequestData.allRequests[0][stateStatus]).to.be.equal(REQUEST_STATE.PENDING);
     });
 
     it("Should return a list of all the requests by specific user ", async () => {

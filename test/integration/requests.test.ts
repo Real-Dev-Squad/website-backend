@@ -42,12 +42,20 @@ let oooRequestData: any;
 let oooRequestData2: any;
 let testUserId: string;
 
+let stateStatus: string;
+
+before(async () => {
+    const flag = chai.request(app).get("/requests").query({ dev: true }) as any;
+    const { qs } = flag;
+    const isDev = qs.dev === "true";
+    const stateStatus = isDev ? 'status' : 'state';
+});
+
 describe("/requests OOO", function () {
   beforeEach(async function () {
     const userIdPromises = [addUser(userData[16]), addUser(userData[4])];
     const [userId, superUserId] = await Promise.all(userIdPromises);
     testUserId = userId;
-
     oooRequestData = { ...createOooRequests, requestedBy: userId };
     oooRequestData2 = { ...createOooRequests2, requestedBy: superUserId };
 
@@ -56,7 +64,7 @@ describe("/requests OOO", function () {
     const { id: pendingOooId }: any = await createRequest(oooRequestData2);
     pendingOooRequestId = pendingOooId;
 
-    const { id: approveOooId }: any = await updateRequest(oooRequestId, { state: REQUEST_STATE.APPROVED }, superUserId, REQUEST_TYPE.OOO);
+    const { id: approveOooId }: any = await updateRequest(oooRequestId, { [stateStatus]: REQUEST_STATE.APPROVED }, superUserId, REQUEST_TYPE.OOO);
     approvedOooRequestId = approveOooId;
 
     authToken = authService.generateAuthToken({ userId });
@@ -122,7 +130,7 @@ describe("/requests OOO", function () {
           expect(res.body.data.until).to.be.above(res.body.data.from);
           expect(res.body.data).to.have.property("requestedBy");
           expect(res.body.data.type).to.equal(REQUEST_TYPE.OOO);
-          expect(res.body.data.state).to.equal(REQUEST_STATE.PENDING);
+          expect(res.body.data[stateStatus]).to.equal(REQUEST_STATE.PENDING);
           expect(res.body.message).to.equal(REQUEST_CREATED_SUCCESSFULLY);
           done();
         });
@@ -176,7 +184,7 @@ describe("/requests OOO", function () {
         .request(app)
         .post("/requests")
         .set("cookie", `${cookieName}=${authToken}`)
-        .send({ ...validOooStatusRequests, state: REQUEST_STATE.APPROVED })
+        .send({ ...validOooStatusRequests, [stateStatus]: REQUEST_STATE.APPROVED })
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
@@ -267,7 +275,7 @@ describe("/requests OOO", function () {
           expect(res.body.data[0]).to.have.property("id");
           expect(res.body.data[0]).to.have.property("requestedBy");
           expect(res.body.data[0]).to.have.property("type");
-          expect(res.body.data[0]).to.have.property("state");
+          expect(res.body.data[0]).to.have.property(stateStatus);
           expect(res.body.data[0]).to.have.property("message");
           done();
         });
@@ -301,7 +309,7 @@ describe("/requests OOO", function () {
         .get(`/requests?state=APPROVED&requestedBy=${userData[16].username}`)
         .end(function (err, res) {
           expect(res).to.have.status(200);
-          expect(res.body.data.every((e: any) => e.state === "APPROVED"));
+          expect(res.body.data.every((e: any) => e[stateStatus] === "APPROVED"));
           expect(res.body.data.every((e: any) => e.requestedBy === testUserId));
           done();
         });
