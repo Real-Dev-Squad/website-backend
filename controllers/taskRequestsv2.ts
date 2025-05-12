@@ -85,7 +85,7 @@ export const createTaskRequestController = async (req: TaskRequestRequest, res: 
         markdownEnabled: taskRequestData.markdownEnabled,
         firstName: userData.first_name,
         lastName: userData.last_name,
-        stateStatus: REQUEST_STATE.PENDING,
+        [stateStatus]: REQUEST_STATE.PENDING,
         requestedAt: Date.now(),
       });
       const updatedRequest = await createRequest(existingRequest);
@@ -118,7 +118,7 @@ export const createTaskRequestController = async (req: TaskRequestRequest, res: 
       externalIssueHtmlUrl: taskRequestData.externalIssueHtmlUrl,
       requestType: taskRequestData.requestType,
       type: taskRequestData.type,
-      stateStatus: REQUEST_STATE.PENDING,
+      [stateStatus]: REQUEST_STATE.PENDING,
       requestedBy: requestedBy,
       taskTitle: taskRequestData.taskTitle,
       users: [

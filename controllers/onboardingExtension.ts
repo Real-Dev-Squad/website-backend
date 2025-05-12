@@ -66,7 +66,7 @@ export const createOnboardingExtensionRequestController = async (
         const { id: userId, discordJoinedAt, username } = user as User;
         const { data: userStatus } = await getUserStatus(userId);
 
-        if (!userStatus || userStatus.currentStatus.stateStatus != userState.ONBOARDING) {
+        if (!userStatus || userStatus.currentStatus[stateStatus] != userState.ONBOARDING) {
             return res.boom.forbidden(UNAUTHORIZED_TO_CREATE_ONBOARDING_EXTENSION_REQUEST);
         }
 
@@ -106,7 +106,7 @@ export const createOnboardingExtensionRequestController = async (
         const newEndsOn = getNewDeadline(currentDate, oldEndsOn, numberOfDaysInMillisecond);
         const onboardingExtension = await createRequest({
             type: REQUEST_TYPE.ONBOARDING,
-            stateStatus: REQUEST_STATE.PENDING,
+            [stateStatus]: REQUEST_STATE.PENDING,
             userId: userId,
             requestedBy: username,
             oldEndsOn: oldEndsOn,

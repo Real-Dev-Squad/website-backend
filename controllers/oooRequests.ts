@@ -23,7 +23,7 @@ export const createOooRequestController = async (req: OooRequestCreateRequest, r
   const requestBody = req.body;
   const userId = req?.userData?.id;
   const { dev } = req.query;
-  const isDev = dev === 'true' ? true : false;
+  const isDev = dev === 'true';
   const stateStatus = isDev ? 'status' : 'state';
   if (!userId) {
     return res.boom.unauthorized();
