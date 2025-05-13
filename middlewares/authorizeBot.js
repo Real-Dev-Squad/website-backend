@@ -20,6 +20,7 @@ const verifyDiscordBot = async (req, res, next) => {
   try {
     const token = req.headers.authorization.split(" ")[1];
     const serviceName = req.headers[HEADERS.SERVICE_NAME] || "";
+
     if (serviceName === DISCORD_SERVICE) {
       const data = botVerifcation.verifyDiscordService(token);
       if (data.name !== DISCORD_SERVICE) {
