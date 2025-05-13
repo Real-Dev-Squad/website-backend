@@ -155,8 +155,6 @@ export const updateOnboardingExtensionRequestState = async (
     const dev = req.query.dev === "true";
     const stateStatus = dev ? 'status' : 'state';
 
-    if (!dev) return res.boom.notImplemented("Feature not implemented");
-
     const body = req.body as UpdateOnboardingExtensionStateRequestBody;
     const lastModifiedBy = req?.userData?.id;
     const extensionId = req.params.id;
