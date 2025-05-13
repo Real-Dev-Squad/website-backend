@@ -1,0 +1,65 @@
+paths:
+  /arts:
+    $ref: "./arts.yaml#/paths/~1arts"
+  /arts/user/self:
+    $ref: "./arts.yaml#/paths/~1arts~1user~1self"
+  /arts/user/{userId}:
+    $ref: "./arts.yaml#/paths/~1arts~1user~1{userId}"
+  /arts/user/add:
+    $ref: "./arts.yaml#/paths/~1arts~1user~1add"
+  /auctions:
+    $ref: "./auctions.yaml#/paths/~1auctions"
+  /auctions/{id}:
+    $ref: "./auctions.yaml#/paths/~1auctions~1{id}"
+  /auctions/bid/{id}:
+    $ref: "./auctions.yaml#/paths/~1auctions~1bid~1{id}"
+  /auth/github/login:
+    $ref: "./auth.yaml#/paths/~1auth~1github~1login"
+  /auth/github/callback:
+    $ref: "./auth.yaml#/paths/~1auth~1github~1callback"
+  /auth/signout:
+    $ref: "./auth.yaml#/paths/~1auth~1signout"
+  /auth/qr-code-auth:
+    $ref: "./auth.yaml#/paths/~1auth~1qr-code-auth"
+  /auth/device:
+    $ref: "./auth.yaml#/paths/~1auth~1device"
+  /auth/qr-code-auth/authorization_status/{authorization_status}:
+    $ref: "./auth.yaml#/paths/~1auth~1qr-code-auth~1authorization_status~1{authorization_status}"
+  /badges:
+    $ref: "./badges.yaml#/paths/~1badges"
+  /badges/assign:
+    $ref: "./badges.yaml#/paths/~1badges~1assign"
+  /badges/remove:
+    $ref: "./badges.yaml#/paths/~1badges~1remove"
+  /challenges:
+    $ref: "./challenges.yaml#/paths/~1challenges"
+  /challenges/subscribe:
+    $ref: "./challenges.yaml#/paths/~1challenges~1subscribe"
+  /contributions/{username}:
+    $ref: "./contributions.yaml#/paths/~1contributions~1{username}"
+  /pullrequests/open:
+    $ref: "./pullrequests.yaml#/paths/~1pullrequests~1open"
+  /pullrequests/stale:
+    $ref: "./pullrequests.yaml#/paths/~1pullrequests~1stale"
+  /pullrequests/user/{username}:
+    $ref: "./pullrequests.yaml#/paths/~1pullrequests~1user~1{username}"
+  /healthcheck:
+    $ref: "./healthCheck.yaml#/paths/~1healthcheck"
+  /healthcheck/v2:
+    $ref: "./healthCheck.yaml#/paths/~1healthcheck~1v2"
+  /logs:
+    $ref: "./logs.yaml#/paths/~1logs"
+  /logs/{type}:
+    $ref: "./logs.yaml#/paths/~1logs~1{type}"
+  /members:
+    $ref: "./members.yaml#/paths/~1members"
+  /members/idle:
+    $ref: "./members.yaml#/paths/~1members~1idle"
+  /members/intro/{username}:
+    $ref: "./members.yaml#/paths/~1members~1intro~1{username}"
+  /members/intro:
+    $ref: "./members.yaml#/paths/~1members~1intro"
+  /members/moveToMembers/{username}:
+    $ref: "./members.yaml#/paths/~1members~1moveToMembers~1{username}"
+  /members/archiveMembers/{username}:
+    $ref: "./members.yaml#/paths/~1members~1archiveMembers~1{username}"
