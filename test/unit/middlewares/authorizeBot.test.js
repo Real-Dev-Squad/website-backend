@@ -4,7 +4,6 @@ const expect = require("chai").expect;
 const bot = require("../../utils/generateBotToken");
 const jwt = require("jsonwebtoken");
 const { HEADERS } = require("../../../constants/constants.ts");
-
 const { BAD_TOKEN, CLOUDFLARE_WORKER, CRON_JOB_HANDLER, DISCORD_SERVICE } = require("../../../constants/bot");
 
 describe("Middleware | Authorize Bot", function () {
