@@ -7,6 +7,7 @@ import app from "../../server";
 import cleanDb from "../utils/cleanDb";
 import authService from "../../services/authService";
 import userDataFixture from "../fixtures/user/user";
+import sinon from "sinon";
 const cookieName = config.get("userToken.cookieName");
 import addUser from "../utils/addUser";
 import {
@@ -14,6 +15,8 @@ import {
   validOooStatusRequests,
   validOooStatusUpdate,
   createOooRequests2,
+  acknowledgeOooRequest,
+  createOooRequests3,
 } from "../fixtures/oooRequest/oooRequest";
 import { createRequest, updateRequest } from "../../models/requests";
 import {
@@ -26,9 +29,18 @@ import {
   REQUEST_ALREADY_PENDING,
   REQUEST_REJECTED_SUCCESSFULLY,
   REQUEST_ALREADY_REJECTED,
+  INVALID_REQUEST_TYPE,
+  // UNAUTHORIZED_TO_ACKNOWLEDGE_OOO_REQUEST,
+  UNAUTHORIZED_TO_CREATE_OOO_REQUEST,
+  USER_STATUS_NOT_FOUND,
+  OOO_STATUS_ALREADY_EXIST,
 } from "../../constants/requests";
 import { updateTask } from "../../models/tasks";
 import { validTaskAssignmentRequest, validTaskCreqtionRequest } from "../fixtures/taskRequests/taskRequests";
+import { deleteUserStatus, updateUserStatus } from "../../models/userStatus";
+import * as requestsQuery from "../../models/requests";
+import { userState } from "../../constants/userStatus";
+import * as logUtils from "../../services/logService";
 
 const userData = userDataFixture();
 chai.use(chaiHttp);
@@ -41,6 +53,8 @@ let approvedOooRequestId: string;
 let oooRequestData: any;
 let oooRequestData2: any;
 let testUserId: string;
+let testSuperUserId: string;
+let testArchivedUserId: string;
 
 let stateStatus: string;
 
@@ -52,10 +66,16 @@ before(async () => {
 });
 
 describe("/requests OOO", function () {
+
+  const requestsEndpoint: string = "/requests?dev=true";
+
   beforeEach(async function () {
-    const userIdPromises = [addUser(userData[16]), addUser(userData[4])];
-    const [userId, superUserId] = await Promise.all(userIdPromises);
+    const userIdPromises = [addUser(userData[16]), addUser(userData[4]), addUser(userData[18])];
+    const [userId, superUserId, archivedUserId] = await Promise.all(userIdPromises);
     testUserId = userId;
+    testSuperUserId = superUserId;
+    testArchivedUserId = archivedUserId;
+
     oooRequestData = { ...createOooRequests, requestedBy: userId };
     oooRequestData2 = { ...createOooRequests2, requestedBy: superUserId };
 
@@ -64,66 +84,116 @@ describe("/requests OOO", function () {
     const { id: pendingOooId }: any = await createRequest(oooRequestData2);
     pendingOooRequestId = pendingOooId;
 
+
     const { id: approveOooId }: any = await updateRequest(oooRequestId, { [stateStatus]: REQUEST_STATE.APPROVED }, superUserId, REQUEST_TYPE.OOO);
     approvedOooRequestId = approveOooId;
 
+    const response = await updateRequest(
+      oooRequestId,
+      { state: REQUEST_STATE.APPROVED },
+      superUserId,
+      REQUEST_TYPE.OOO
+    );
+    approvedOooRequestId = response?.id;
     authToken = authService.generateAuthToken({ userId });
     superUserToken = authService.generateAuthToken({ userId: superUserId });
   });
 
   afterEach(async function () {
+    sinon.restore();
     await cleanDb();
   });
 
   describe("POST /requests", function () {
+
+    beforeEach(async function () {
+      const userIdPromises = [addUser(userData[16])];
+      const [userId] = await Promise.all(userIdPromises);
+
+      authToken = authService.generateAuthToken({ userId });
+
+      const testUserStatus = {
+        currentStatus: {
+          state: userState.ACTIVE
+        }
+      };
+
+      await updateUserStatus(userId, testUserStatus);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("should return 501 and 'Feature not implemented' message when dev is false", function (done) {
+      chai
+        .request(app)
+        .post("/requests?dev=false")
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send(validOooStatusRequests)
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.statusCode).to.equal(501);
+          expect(res.body.message).to.equal("Feature not implemented");
+          done();
+        });
+    });
+
     it("should return 401 if user is not logged in", function (done) {
       chai
         .request(app)
-        .post("/requests")
+        .post(requestsEndpoint)
         .send(validOooStatusRequests)
         .end(function (err, res) {
           expect(res).to.have.status(401);
+          expect(res.body.error).to.equal("Unauthorized");
+          expect(res.body.message).to.equal("Unauthenticated User");
           done();
         });
     });
 
-    it("should create a new request", function (done) {
+    it("should return 403 if user is not part of discord", function (done) {
+      const authTokenForArchivedUserId = authService.generateAuthToken(
+        { userId: testArchivedUserId }
+      );
       chai
         .request(app)
-        .post("/requests")
-        .set("cookie", `${cookieName}=${authToken}`)
+        .post(requestsEndpoint)
+        .set("cookie", `${cookieName}=${authTokenForArchivedUserId}`)
         .send(validOooStatusRequests)
         .end(function (err, res) {
-          expect(res).to.have.status(201);
-          expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal(REQUEST_CREATED_SUCCESSFULLY);
+          expect(res).to.have.status(403);
+          expect(res.body.error).to.equal("Forbidden");
+          expect(res.body.message).to.equal(UNAUTHORIZED_TO_CREATE_OOO_REQUEST);
           done();
         });
     });
 
-    it("should return 400, if already created request is created again", async function () {
-      await chai
-        .request(app)
-        .post("/requests")
-        .set("cookie", `${cookieName}=${authToken}`)
-        .send(validOooStatusRequests);
-      const response = await chai
-        .request(app)
-        .post("/requests")
-        .set("cookie", `${cookieName}=${authToken}`)
-        .send(validOooStatusRequests);
-      expect(response).to.have.status(400);
-      expect(response.body).to.have.property("message");
-      expect(response.body.message).to.equal(REQUEST_ALREADY_PENDING);
-    });
-
-    it("should create a new request and have all the required fields in the response", function (done) {
-      chai
-        .request(app)
-        .post("/requests")
+    it("should return 500 response when creating OOO request fails", function (done) {
+      sinon.stub(requestsQuery, "createRequest")
+      .throws("Error while creating OOO request");
+      chai.request(app)
+        .post(requestsEndpoint)
         .set("cookie", `${cookieName}=${authToken}`)
         .send(validOooStatusRequests)
         .end(function (err, res) {
+          if (err) return done(err);
+          expect(res.statusCode).to.equal(500);
+          expect(res.body.message).to.equal("An internal server error occurred");
+          done();
+        });
+    });
+
+    it("should create a new request when dev is true", function (done) {
+      chai
+        .request(app)
+        .post(requestsEndpoint)
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send(validOooStatusRequests)
+        .end(async function (err, res) {
+          if (err) return done(err);
           expect(res).to.have.status(201);
           expect(res.body).to.have.property("message");
           expect(Object.keys(res.body.data)).to.have.lengthOf(9);
@@ -132,21 +202,17 @@ describe("/requests OOO", function () {
           expect(res.body.data.type).to.equal(REQUEST_TYPE.OOO);
           expect(res.body.data[stateStatus]).to.equal(REQUEST_STATE.PENDING);
           expect(res.body.message).to.equal(REQUEST_CREATED_SUCCESSFULLY);
-          done();
-        });
-    });
+          expect(res.body).to.not.have.property("data");
 
-    it("should create a new request", function (done) {
-      chai
-        .request(app)
-        .post("/requests")
-        .set("cookie", `${cookieName}=${authToken}`)
-        .send(validOooStatusRequests)
-        .end(function (err, res) {
-          expect(res).to.have.status(201);
-          expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal(REQUEST_CREATED_SUCCESSFULLY);
-          done();
+          await requestsQuery.getRequestByKeyValues({
+            userId: testUserId,
+            type: REQUEST_TYPE.OOO,
+            status: REQUEST_STATE.PENDING
+          }).then((request) => {
+            expect(request).to.not.be.null;
+            expect(request.reason).to.equal(validOooStatusRequests.reason);
+            done();
+          }).catch(done);
         });
     });
 
@@ -154,7 +220,7 @@ describe("/requests OOO", function () {
       const type = "ACTIVE";
       chai
         .request(app)
-        .post("/requests")
+        .post(requestsEndpoint)
         .set("cookie", `${cookieName}=${authToken}`)
         .send({ ...validOooStatusRequests, type })
         .end(function (err, res) {
@@ -165,30 +231,293 @@ describe("/requests OOO", function () {
         });
     });
 
-    it("should return error if message is not present in body", function (done) {
+    it("should return 400 when until date is smalller than from date in request body", function (done) {
       chai
         .request(app)
-        .post("/requests")
+        .post(requestsEndpoint)
         .set("cookie", `${cookieName}=${authToken}`)
-        .send(_.omit(validOooStatusRequests, "message"))
+        .send({...validOooStatusRequests, until: Date.now()})
         .end(function (err, res) {
+          if (err) return done(err);
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal("message is required");
+          expect(res.body.message).to.equal("until date must be greater than or equal to from date");
           done();
         });
     });
 
-    it("should return error if state in the body is not PENDING", function (done) {
+    it("should return 400 when from date is less than today's date in request body", function (done) {
       chai
         .request(app)
-        .post("/requests")
+        .post(requestsEndpoint)
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send({...validOooStatusRequests, from: Date.now() - 1 * 24 * 60 * 60 * 1000 })
+        .end(function (err, res) {
+          if (err) return done(err);
+          expect(res).to.have.status(400);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal("from date must be greater than or equal to Today's date");
+          done();
+        });
+    });
+
+    it("should return 400 when reason field is missing in request body", function (done) {
+      chai
+        .request(app)
+        .post(requestsEndpoint)
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send(_.omit(validOooStatusRequests, "reason"))
+        .end(function (err, res) {
+          if (err) return done(err);
+          expect(res).to.have.status(400);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal("reason is required");
+          done();
+        });
+    });
+
+    it("should return 400 with error when status field is included in request body", function (done) {
+      chai
+        .request(app)
+        .post(requestsEndpoint)
         .set("cookie", `${cookieName}=${authToken}`)
         .send({ ...validOooStatusRequests, [stateStatus]: REQUEST_STATE.APPROVED })
         .end(function (err, res) {
+          if (err) return done(err);
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal("state must be PENDING");
+          expect(res.body.message).to.equal(`"status" is not allowed`);
+          done();
+        });
+    });
+
+    it("should return 404 with error when user status not found", async function () {
+      await deleteUserStatus(testUserId);
+      const response = await chai
+        .request(app)
+        .post(requestsEndpoint)
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send(validOooStatusRequests);
+
+      expect(response).to.have.status(404);
+      expect(response.body).to.have.property("message");
+      expect(response.body.message).to.equal(USER_STATUS_NOT_FOUND);
+    });
+
+    it("should return 403 with error when user status is already OOO", async function () {
+      const testOOOUserStatus = {
+        currentStatus: {
+          state: userState.OOO
+        }
+      };
+      await updateUserStatus(testUserId, testOOOUserStatus);
+      const response = await chai
+        .request(app)
+        .post(requestsEndpoint)
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send(validOooStatusRequests);
+
+      expect(response).to.have.status(403);
+      expect(response.body).to.have.property("message");
+      expect(response.body.message).to.equal(OOO_STATUS_ALREADY_EXIST);
+    });
+
+    it("should return 409 with error when user already have pending OOO request", async function () {
+      await chai
+        .request(app)
+        .post(requestsEndpoint)
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send(validOooStatusRequests);
+      const response = await chai
+        .request(app)
+        .post(requestsEndpoint)
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send(validOooStatusRequests);
+
+      expect(response).to.have.status(409);
+      expect(response.body).to.have.property("message");
+      expect(response.body.message).to.equal(REQUEST_ALREADY_PENDING);
+    });
+  });
+
+  describe.skip("PATCH /requests/:id", function () {
+    let testOooRequest;
+    let onboardingRequest;
+    let approvedOooRequest;
+    let rejectedOooRequest;
+
+    beforeEach(async function () {
+
+      oooRequestData = { ...createOooRequests3, userId: testUserId };
+      testOooRequest = await createRequest(oooRequestData);
+
+      onboardingRequest = await createRequest({
+        type: REQUEST_TYPE.ONBOARDING,
+        numberOfDays: 5,
+        reason: "This is the reason",
+        userId: testUserId,
+      });
+
+      const pendingOooRequest1 = await createRequest(oooRequestData);
+      approvedOooRequest = await updateRequest(pendingOooRequest1.id, { status: REQUEST_STATE.APPROVED }, testSuperUserId, REQUEST_TYPE.OOO);
+
+      const pendingOooRequest2 = await createRequest(oooRequestData);
+      rejectedOooRequest = await updateRequest(pendingOooRequest2.id, { status: REQUEST_STATE.REJECTED }, testSuperUserId, REQUEST_TYPE.OOO);
+    });
+
+    it("should return 401 if user is not logged in", function (done) {
+      chai
+        .request(app)
+        .patch(`/requests/${testOooRequest.id}?dev=true`)
+        .send(acknowledgeOooRequest)
+        .end(function (err, res) {
+          expect(res).to.have.status(401);
+          expect(res.body.error).to.equal("Unauthorized");
+          expect(res.body.message).to.equal("Unauthenticated User");
+          done();
+        });
+    });
+
+    it("should return 501 and 'Feature not implemented' message when dev is false", function (done) {
+      chai
+        .request(app)
+        .patch(`/requests/${testOooRequest.id}?dev=false`)
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send(acknowledgeOooRequest)
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.statusCode).to.equal(501);
+          expect(res.body.message).to.equal("Feature not implemented");
+          done();
+        });
+    });
+
+    it("should return 404 if request does not exist", function (done) {
+      chai
+        .request(app)
+        .patch(`/requests/11111111111111?dev=true`)
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send(acknowledgeOooRequest)
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.statusCode).to.equal(404);
+          expect(res.body.message).to.equal(REQUEST_DOES_NOT_EXIST);
+          done();
+        });
+    });
+
+    it("should return 403 if user does not have super user permission", function (done) {
+      chai
+        .request(app)
+        .patch(`/requests/${testOooRequest.id}?dev=true`)
+        .set("cookie", `${cookieName}=${authToken}`)
+        .send(acknowledgeOooRequest)
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.statusCode).to.equal(403);
+          // expect(res.body.message).to.equal(UNAUTHORIZED_TO_ACKNOWLEDGE_OOO_REQUEST);
+          done();
+        });
+    });
+
+    it("should return 409 if OOO request is already approved", function (done) {
+      chai
+        .request(app)
+        .patch(`/requests/${approvedOooRequest.id}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send(acknowledgeOooRequest)
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.statusCode).to.equal(409);
+          expect(res.body.message).to.equal(REQUEST_ALREADY_APPROVED);
+          done();
+        });
+    });
+
+    it("should return 409 if OOO request is already rejected", function (done) {
+      chai
+        .request(app)
+        .patch(`/requests/${rejectedOooRequest.id}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send(acknowledgeOooRequest)
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.statusCode).to.equal(409);
+          expect(res.body.message).to.equal(REQUEST_ALREADY_REJECTED);
+          done();
+        });
+    });
+
+    it("should return 400 when the request type for the given ID is not 'OOO'", function (done) {
+      chai
+        .request(app)
+        .patch(`/requests/${onboardingRequest.id}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send(acknowledgeOooRequest)
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.statusCode).to.equal(400);
+          expect(res.body.message).to.equal(INVALID_REQUEST_TYPE);
+          done();
+        });
+    });
+
+    it("should approve OOO request when dev is true", function (done) {
+      chai
+        .request(app)
+        .patch(`/requests/${testOooRequest.id}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send(acknowledgeOooRequest)
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.statusCode).to.equal(200);
+          expect(res.body.message).to.equal(REQUEST_APPROVED_SUCCESSFULLY);
+          done();
+        });
+    });
+
+    it("should reject OOO request when dev is true", function (done) {
+      chai
+        .request(app)
+        .patch(`/requests/${testOooRequest.id}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send({...acknowledgeOooRequest, status: REQUEST_STATE.REJECTED})
+        .end(function (err, res) {
+          if (err) {
+            return done(err);
+          }
+          expect(res.statusCode).to.equal(200);
+          expect(res.body.message).to.equal(REQUEST_REJECTED_SUCCESSFULLY);
+          done();
+        });
+    });
+
+    it("should return 500 response for unexpected error", function (done) {
+      sinon.stub(logUtils, "addLog").throws("Error");
+      chai
+        .request(app)
+        .patch(`/requests/${testOooRequest.id}?dev=true`)
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send(acknowledgeOooRequest)
+        .end(function (err, res) {
+          if (err) return done(err);
+          expect(res.statusCode).to.equal(500);
+          expect(res.body.error).to.equal("Internal Server Error");
+          expect(res.body.message).to.equal("An internal server error occurred");
           done();
         });
     });
@@ -281,16 +610,16 @@ describe("/requests OOO", function () {
         });
     });
 
-       it("should return the request by Id query", function (done) {
-         chai
-           .request(app)
-           .get(`/requests?id=${oooRequestId}`)
-           .end(function (err, res) {
-             expect(res).to.have.status(200);
-             expect(res.body.data.id === oooRequestId);
-             done();
-           });
-       });
+    it("should return the request by Id query", function (done) {
+      chai
+        .request(app)
+        .get(`/requests?id=${oooRequestId}`)
+        .end(function (err, res) {
+          expect(res).to.have.status(200);
+          expect(res.body.data.id === oooRequestId);
+          done();
+        });
+    });
 
     it("should return all requests by specific user", function (done) {
       chai
@@ -398,7 +727,7 @@ describe("/requests Extension", function () {
     oldEndsOn: 1694736000,
     newEndsOn: 1709674980000,
     message: "Due to some reasons",
-    state: "PENDING"
+    state: "PENDING",
   };
 
   const taskData = [
@@ -435,7 +764,6 @@ describe("/requests Extension", function () {
 
     taskId1 = (await updateTask({ ...taskData[0], assigneeId: userId1 })).taskId;
     taskId2 = (await updateTask({ ...taskData[1] })).taskId;
-
   });
 
   afterEach(async function () {
@@ -456,7 +784,7 @@ describe("/requests Extension", function () {
     it("should create a new extension request", function (done) {
       const extensionRequestObj = {
         taskId: taskId1,
-        ...extensionRequest
+        ...extensionRequest,
       };
       chai
         .request(app)
@@ -466,7 +794,7 @@ describe("/requests Extension", function () {
         .end(function (err, res) {
           expect(res).to.have.status(201);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal('Extension Request created successfully!');
+          expect(res.body.message).to.equal("Extension Request created successfully!");
           done();
         });
     });
@@ -474,7 +802,7 @@ describe("/requests Extension", function () {
     it("should create a new extension request by super user", function (done) {
       const extensionRequestObj = {
         taskId: taskId1,
-        ...extensionRequest
+        ...extensionRequest,
       };
       chai
         .request(app)
@@ -484,7 +812,7 @@ describe("/requests Extension", function () {
         .end(function (err, res) {
           expect(res).to.have.status(201);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal('Extension Request created successfully!');
+          expect(res.body.message).to.equal("Extension Request created successfully!");
           done();
         });
     });
@@ -492,7 +820,7 @@ describe("/requests Extension", function () {
     it("should not create a new extension request by another user", function (done) {
       const extensionRequestObj = {
         taskId: taskId1,
-        ...extensionRequest
+        ...extensionRequest,
       };
       chai
         .request(app)
@@ -502,7 +830,9 @@ describe("/requests Extension", function () {
         .end(function (err, res) {
           expect(res).to.have.status(403);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal('Only assigned user and super user can create an extension request for this task.');
+          expect(res.body.message).to.equal(
+            "Only assigned user and super user can create an extension request for this task."
+          );
           done();
         });
     });
@@ -510,7 +840,7 @@ describe("/requests Extension", function () {
     it("should not create a new extension request if task is not exist", function (done) {
       const extensionRequestObj = {
         taskId: "randomId",
-        ...extensionRequest
+        ...extensionRequest,
       };
       chai
         .request(app)
@@ -520,7 +850,7 @@ describe("/requests Extension", function () {
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal('Task Not Found');
+          expect(res.body.message).to.equal("Task Not Found");
           done();
         });
     });
@@ -528,7 +858,7 @@ describe("/requests Extension", function () {
     it("should not create a new extension request if assignee is not present", function (done) {
       const extensionRequestObj = {
         taskId: taskId2,
-        ...extensionRequest
+        ...extensionRequest,
       };
       chai
         .request(app)
@@ -538,7 +868,7 @@ describe("/requests Extension", function () {
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal('Assignee is not present for this task');
+          expect(res.body.message).to.equal("Assignee is not present for this task");
           done();
         });
     });
@@ -547,7 +877,7 @@ describe("/requests Extension", function () {
       const extensionRequestObj = {
         taskId: taskId1,
         ...extensionRequest,
-        oldEndsOn: 1234
+        oldEndsOn: 1234,
       };
       chai
         .request(app)
@@ -557,7 +887,7 @@ describe("/requests Extension", function () {
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal('Old ETA does not match the task\'s ETA');
+          expect(res.body.message).to.equal("Old ETA does not match the task's ETA");
           done();
         });
     });
@@ -565,7 +895,7 @@ describe("/requests Extension", function () {
     it("should not create a new extension request if an extension request for this task already exists", function (done) {
       const extensionRequestObj = {
         taskId: taskId1,
-        ...extensionRequest
+        ...extensionRequest,
       };
       chai
         .request(app)
@@ -575,11 +905,11 @@ describe("/requests Extension", function () {
         .end(async function (err, res) {
           expect(res).to.have.status(201);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal('Extension Request created successfully!');
+          expect(res.body.message).to.equal("Extension Request created successfully!");
 
           const extensionRequestObj2 = {
             taskId: taskId1,
-            ...extensionRequest
+            ...extensionRequest,
           };
           const response = await chai
             .request(app)
@@ -588,7 +918,7 @@ describe("/requests Extension", function () {
             .send(extensionRequestObj2);
           expect(response).to.have.status(400);
           expect(response.body).to.have.property("message");
-          expect(response.body.message).to.equal('An extension request for this task already exists.');
+          expect(response.body.message).to.equal("An extension request for this task already exists.");
           done();
         });
     });
@@ -617,17 +947,26 @@ describe("/requests Extension", function () {
     beforeEach(async function () {
       const extensionRequestObj = {
         taskId: taskId1,
-        ...extensionRequest
+        ...extensionRequest,
       };
       const { id: approvedId } = await createRequest({ ...extensionRequestObj, requestedBy: userId1 });
-      approvedExtensionRequestId = await updateRequest(approvedId, approvedExtensionRequest, superUserId, REQUEST_TYPE.EXTENSION);
+      approvedExtensionRequestId = await updateRequest(
+        approvedId,
+        approvedExtensionRequest,
+        superUserId,
+        REQUEST_TYPE.EXTENSION
+      );
 
       const { id: rejectedId } = await createRequest({ ...extensionRequestObj, requestedBy: userId1 });
-      rejectedExtensionRequestId = await updateRequest(rejectedId, rejectedExtensionRequest, superUserId, REQUEST_TYPE.EXTENSION);
+      rejectedExtensionRequestId = await updateRequest(
+        rejectedId,
+        rejectedExtensionRequest,
+        superUserId,
+        REQUEST_TYPE.EXTENSION
+      );
 
       const { id: pendingId } = await createRequest({ ...extensionRequestObj, requestedBy: userId1 });
       pendingExtensionRequestId = pendingId;
-
     });
 
     it("should return 401(Unauthorized) if user is not logged in", function (done) {
@@ -730,7 +1069,7 @@ describe("/requests Extension", function () {
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal('state must be APPROVED or REJECTED');
+          expect(res.body.message).to.equal("state must be APPROVED or REJECTED");
           done();
         });
     });
@@ -749,9 +1088,7 @@ describe("/requests Extension", function () {
         });
     });
   });
-
 });
-
 
 describe("/requests Task", function () {
   let userId1: string;
@@ -779,7 +1116,7 @@ describe("/requests Task", function () {
     });
 
     it("should not create a new task request if issue does not exist", function (done) {
-      let taskRequestObj = validTaskCreqtionRequest
+      const taskRequestObj = validTaskCreqtionRequest;
       taskRequestObj.externalIssueUrl = "https://api.github.com/repos/Real-Dev-Squad/website-my/issues/1245";
       taskRequestObj.userId = userId1;
       chai
@@ -796,7 +1133,7 @@ describe("/requests Task", function () {
     });
 
     it("should not create a new task request if task id is not present in the request body", function (done) {
-      let taskRequestObj = validTaskAssignmentRequest
+      const taskRequestObj = validTaskAssignmentRequest;
       delete taskRequestObj.taskId;
       chai
         .request(app)
@@ -806,7 +1143,7 @@ describe("/requests Task", function () {
         .end(function (err, res) {
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
-          expect(res.body.message).to.equal('taskId is required when requestType is ASSIGNMENT');
+          expect(res.body.message).to.equal("taskId is required when requestType is ASSIGNMENT");
           done();
         });
     });

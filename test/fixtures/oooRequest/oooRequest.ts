@@ -1,4 +1,5 @@
 import { REQUEST_STATE, REQUEST_TYPE } from "../../../constants/requests";
+import { UserStatus } from "../../../types/userStatus";
 
 export const createOooStatusRequests = {
   type: "OOO",
@@ -13,10 +14,38 @@ export const createOooStatusRequests = {
 
 export const validOooStatusRequests = {
   type: "OOO",
-  from: Date.now() + 100000,
-  until: Date.now() + 200000,
-  message: "Out of office for personal reasons.",
-  state: REQUEST_STATE.PENDING,
+  from: Date.now() + 1 * 24 * 60 * 60 * 1000,
+  until: Date.now() + 5 * 24 * 60 * 60 * 1000,
+  reason: "Out of office for personal reasons."
+};
+
+export const createdOOORequest = {
+  id: "Js7JnT6uRBLjGvSJM5X5",
+  type: validOooStatusRequests.type,
+  from: validOooStatusRequests.from,
+  until: validOooStatusRequests.until,
+  reason: validOooStatusRequests.reason,
+  status: "PENDING",
+  lastModifiedBy: null,
+  requestedBy: "suraj-maity-1",
+  userId: "jCqqOYCnm93mcmaYuSsQ",
+  comment: null
+};
+
+export const validUserCurrentStatus = {
+  from: Date.now(),
+  until: Date.now() + 1 * 24 * 60 * 60 * 1000,
+  message: "",
+  state: "ACTIVE",
+  updatedAt: Date.now(),
+};
+
+export const testUserStatus: UserStatus = {
+  id: "wcl0ZLsnngKUNZY9GkCo",
+  data: {
+      currentStatus: validUserCurrentStatus
+  },
+  userStatusExists: true
 };
 
 export const invalidOooStatusRequests = {
@@ -129,3 +158,18 @@ export const updateOooStatusRequest = [
     reason: "Approval granted.",
   },
 ];
+
+export const createOooRequests3 = {
+  from: Date.now() + 100000,
+  until: Date.now() + 200000,
+  type: "OOO",
+  requestedBy: "suraj-maity-1",
+  reason: "Out of office for personal emergency.",
+  status: REQUEST_STATE.PENDING
+};
+
+export const acknowledgeOooRequest = {
+  type: REQUEST_TYPE.OOO,
+  status: REQUEST_STATE.APPROVED,
+  comment: "OOO request approved as it's emergency."
+};

@@ -152,8 +152,10 @@ export const updateOnboardingExtensionRequestState = async (
     req: UpdateOnboardingExtensionStateRequest,
     res: OnboardingExtensionResponse)
     : Promise<OnboardingExtensionResponse> => {
+
     const dev = req.query.dev === "true";
     const stateStatus = dev ? 'status' : 'state';
+
 
     const body = req.body as UpdateOnboardingExtensionStateRequestBody;
     const lastModifiedBy = req?.userData?.id;
@@ -221,9 +223,8 @@ export const updateOnboardingExtensionRequestController = async (
     const id = req.params.id;
     const lastModifiedBy = req?.userData?.id;
     const isSuperuser = req?.userData?.roles?.super_user === true;
-    const dev = req.query.dev === "true";
 
-    if (!dev) return res.boom.notImplemented("Feature not implemented");
+    const dev = req.query.dev === "true";
 
     try {
         const extensionRequestDoc = await requestModel.doc(id).get();
