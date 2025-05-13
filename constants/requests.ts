@@ -15,6 +15,7 @@ export const REQUEST_TYPE = {
   EXTENSION: "EXTENSION",
   TASK: "TASK",
   ALL: "ALL",
+  ONBOARDING: "ONBOARDING",
 };
 
 export const REQUEST_LOG_TYPE = {
@@ -23,6 +24,8 @@ export const REQUEST_LOG_TYPE = {
   REQUEST_REJECTED: "REQUEST_REJECTED",
   REQUEST_BLOCKED: "REQUEST_BLOCKED",
   REQUEST_CANCELLED: "REQUEST_CANCELLED",
+  REQUEST_UPDATED: "REQUEST_UPDATED",
+  PENDING_REQUEST_FOUND: "PENDING_REQUEST_FOUND",
 };
 
 export const REQUEST_CREATED_SUCCESSFULLY = "Request created successfully";
@@ -39,6 +42,9 @@ export const ERROR_WHILE_UPDATING_REQUEST = "Error while updating request";
 
 export const REQUEST_DOES_NOT_EXIST = "Request does not exist";
 export const REQUEST_ALREADY_PENDING = "Request already exists please wait for approval or rejection";
+export const UNAUTHORIZED_TO_CREATE_OOO_REQUEST = "Unauthorized to create OOO request";
+export const USER_STATUS_NOT_FOUND = "User status not found";
+export const OOO_STATUS_ALREADY_EXIST = "Your status is already OOO. Please cancel OOO to raise new one";
 
 export const TASK_REQUEST_MESSAGES = {
   NOT_AUTHORIZED_TO_CREATE_REQUEST: "Not authorized to create the request",
@@ -53,3 +59,12 @@ export const TASK_REQUEST_MESSAGES = {
   ERROR_CREATING_TASK_REQUEST: "Error while creating task request",
   TASK_REQUEST_UPDATED_SUCCESS: "Task request updated successfully",
 };
+
+export const ONBOARDING_REQUEST_CREATED_SUCCESSFULLY = "Onboarding extension request created successfully"
+export const UNAUTHORIZED_TO_CREATE_ONBOARDING_EXTENSION_REQUEST = "Only super user and onboarding user are authorized to create an onboarding extension request"
+
+export const PENDING_REQUEST_UPDATED = "Only pending extension request can be updated";
+export const INVALID_REQUEST_TYPE = "Invalid request type";
+export const INVALID_REQUEST_DEADLINE = "New deadline of the request must be greater than old deadline";
+export const REQUEST_UPDATED_SUCCESSFULLY = "Request updated successfully";
+export const UNAUTHORIZED_TO_UPDATE_REQUEST = "Unauthorized to update request";

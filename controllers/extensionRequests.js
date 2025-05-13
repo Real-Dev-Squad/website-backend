@@ -74,7 +74,7 @@ const createTaskExtensionRequest = async (req, res) => {
       type: "extensionRequests",
       meta: {
         taskId: extensionBody.taskId,
-        createdBy: req.userData.id,
+        userId: req.userData.id,
       },
       body: {
         extensionRequestId: extensionRequest.id,
@@ -105,7 +105,7 @@ const createTaskExtensionRequest = async (req, res) => {
  */
 const fetchExtensionRequests = async (req, res) => {
   try {
-    const { cursor, size, order } = req.query;
+    const { cursor, size = 5, order } = req.query;
     const { status, taskId, assignee } = parseQueryParams(req._parsedUrl.search);
     const { transformedSize, transformedStatus } = transformQuery(size, status);
 
@@ -202,10 +202,21 @@ const getSelfExtensionRequests = async (req, res) => {
  * @param res {Object} - Express response object
  */
 const updateExtensionRequest = async (req, res) => {
+  const { dev } = req.query;
+  const isDev = dev === "true";
+  const isSuperUser = req.userData?.roles.super_user;
   try {
     const extensionRequest = await extensionRequestsQuery.fetchExtensionRequest(req.params.id);
     if (!extensionRequest.extensionRequestData) {
       return res.boom.notFound("Extension Request not found");
+    }
+
+    if (isDev && !isSuperUser && extensionRequest.extensionRequestData.status !== EXTENSION_REQUEST_STATUS.PENDING) {
+      return res.boom.badRequest("Only pending extension request can be updated");
+    }
+
+    if (isDev && !isSuperUser && extensionRequest.extensionRequestData.assigneeId !== req.userData.id) {
+      return res.boom.forbidden("You don't have permission to update the extension request");
     }
 
     if (req.body.assignee) {

@@ -36,6 +36,9 @@ export type userData = {
   status: string;
   username: string;
   updated_at: number;
+  isSubscribed: boolean;
+  phone: string | null;
+  email: string;
 };
 
 export type CustomResponse = Response & { boom: Boom };

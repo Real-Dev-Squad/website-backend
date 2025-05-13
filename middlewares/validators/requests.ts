@@ -9,9 +9,11 @@ import { ExtensionRequestRequest, ExtensionRequestResponse } from "../../types/e
 import { CustomResponse } from "../../typeDefinitions/global";
 import { UpdateRequest } from "../../types/requests";
 import { TaskRequestRequest, TaskRequestResponse } from "../../types/taskRequests";
+import { createOnboardingExtensionRequestValidator, updateOnboardingExtensionRequestValidator } from "./onboardingExtensionRequest";
+import { OnboardingExtensionCreateRequest, OnboardingExtensionResponse, UpdateOnboardingExtensionRequest } from "../../types/onboardingExtension";
 
 export const createRequestsMiddleware = async (
-  req: OooRequestCreateRequest|ExtensionRequestRequest | TaskRequestRequest,
+  req: OooRequestCreateRequest|ExtensionRequestRequest | TaskRequestRequest | OnboardingExtensionCreateRequest,
   res: CustomResponse,
   next: NextFunction
 ) => {
@@ -28,6 +30,9 @@ export const createRequestsMiddleware = async (
       case REQUEST_TYPE.TASK:
         await createTaskRequestValidator(req as TaskRequestRequest, res as TaskRequestResponse, next);
         break;
+      case REQUEST_TYPE.ONBOARDING:
+        await createOnboardingExtensionRequestValidator(req as OnboardingExtensionCreateRequest, res as OnboardingExtensionResponse, next);
+        break;
       default:
         res.boom.badRequest(`Invalid request type: ${type}`);
     }
@@ -36,7 +41,7 @@ export const createRequestsMiddleware = async (
   } catch (error) {
     const errorMessages = error.details.map((detail:any) => detail.message);
     logger.error(`Error while validating request payload : ${errorMessages}`);
-    res.boom.badRequest(errorMessages);
+    return res.boom.badRequest(errorMessages);
   }
 };
 
@@ -60,7 +65,8 @@ export const updateRequestsMiddleware = async (
       .messages({
         "any.only": "state must be APPROVED or REJECTED",
       }),
-    type: joi.string().valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION).required(),
+    type: joi.string().valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION, REQUEST_TYPE.ONBOARDING).required(),
+    message: joi.string().optional()
   });
 
   try {
@@ -79,7 +85,7 @@ export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: O
     id: joi.string().optional(),
     type: joi
       .string()
-      .valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION, REQUEST_TYPE.TASK, REQUEST_TYPE.ALL)
+      .valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION, REQUEST_TYPE.TASK, REQUEST_TYPE.ALL, REQUEST_TYPE.ONBOARDING)
       .optional(),
     requestedBy: joi.string().insensitive().optional(),
     state: joi
@@ -113,5 +119,30 @@ export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: O
     const errorMessages = error.details.map((detail) => detail.message);
     logger.error(`Error while validating request query : ${errorMessages}`);
     res.boom.badRequest(errorMessages);
+  }
+};
+
+/**
+ * Validates update requests based on their type.
+ * 
+ * @param {UpdateOnboardingExtensionRequest} req - Request object.
+ * @param {CustomResponse} res - Response object.
+ * @param {NextFunction} next - Next middleware if valid.
+ * @returns {Promise<void>} Resolves or sends errors.
+ */
+export const updateRequestValidator = async (
+  req: UpdateOnboardingExtensionRequest,
+  res: CustomResponse,
+  next: NextFunction
+  ): Promise<void> => {
+  const type = req.body.type;
+  switch (type) {
+      case REQUEST_TYPE.ONBOARDING:
+          await updateOnboardingExtensionRequestValidator(
+            req, 
+            res as OnboardingExtensionResponse, next);
+          break;
+      default:
+          return res.boom.badRequest("Invalid type");
   }
 };

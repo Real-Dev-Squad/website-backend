@@ -21,6 +21,7 @@ const photoVerificationModel = firestore.collection("photo-verification");
 const userData = require("../../fixtures/user/user");
 const addUser = require("../../utils/addUser");
 const { userState } = require("../../../constants/userStatus");
+const { usersData: abandonedUsersData } = require("../../fixtures/abandoned-tasks/departed-users");
 /**
  * Test the model functions and validate the data stored
  */
@@ -113,6 +114,72 @@ describe("users", function () {
       const githubUsername = "ankur";
       const { user } = await users.fetchUser({ githubUsername });
       expect(user).to.haveOwnProperty("github_created_at");
+    });
+
+    it("it should filter out the id field while updating profileDiff", async function () {
+      const userData = userDataArray[0];
+      const { userId } = await users.addOrUpdate(userData);
+      const profileDiff = { id: "random-id", diff: "random-diff" };
+      await users.addOrUpdate(profileDiff, userId);
+      const data = (await userModel.doc(userId).get()).data();
+      expect(data).to.haveOwnProperty("diff");
+      expect(data.id).not.equal("random-id");
+    });
+
+    it("it should update profileDiff even if it is deeply nested", async function () {
+      const userData = userDataArray[0];
+      const { userId } = await users.addOrUpdate(userData);
+      const profileDiffs = {
+        level1: {
+          level2: {
+            level3: {
+              level4: {
+                level5: {
+                  level6: {
+                    level7: {
+                      level8: {
+                        level9: {
+                          level10: "nested-random-diff",
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+      await users.addOrUpdate(profileDiffs, userId);
+      const data = (await userModel.doc(userId).get()).data();
+      expect(data)
+        .to.have.nested.property("level1.level2.level3.level4.level5.level6.level7.level8.level9.level10")
+        .that.equals("nested-random-diff");
+    });
+  });
+
+  describe("addOrUpdate-Dev Feature Flag", function () {
+    it("should update the user collection when userId is passed", async function () {
+      const userData1 = userDataArray[0];
+      const userData2 = userDataArray[1];
+      const updatedUserData = {};
+
+      Object.assign(updatedUserData, userData1, userData2);
+
+      // Add the user the first time
+      const { isNewUser, userId } = await users.addOrUpdate(userData1, null, true);
+
+      // Update the user with same data
+      const { isNewUser: updatedIsNewUserFlag } = await users.addOrUpdate(userData2, userId, true);
+
+      const data = (await userModel.doc(userId).get()).data();
+
+      Object.keys(updatedUserData).forEach((key) => {
+        expect(updatedUserData[key]).to.deep.equal(data[key]);
+      });
+
+      expect(isNewUser).to.equal(true);
+      expect(updatedIsNewUserFlag).to.equal(false);
     });
   });
 
@@ -525,6 +592,90 @@ describe("users", function () {
       expect(userDoc.user.disabled_roles.length).to.be.equal(2);
       expect(userDoc.user.roles.member).to.be.equal(false);
       expect(userDoc.user.roles.super_user).to.be.equal(false);
+    });
+  });
+
+  describe("fetchPaginatedUsers - Departed Users", function () {
+    beforeEach(async function () {
+      await cleanDb();
+
+      const userPromises = abandonedUsersData.map((user) => userModel.add(user));
+      await Promise.all(userPromises);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+      sinon.restore();
+    });
+
+    it("should fetch users not in discord server", async function () {
+      const result = await users.fetchPaginatedUsers({ departed: "true" });
+      expect(result.allUsers.length).to.be.equal(2);
+    });
+
+    it("should return no users if departed flag is false", async function () {
+      const result = await users.fetchPaginatedUsers({ departed: "false" });
+      expect(result.allUsers.length).to.be.equal(0);
+    });
+
+    it("should return an empty array if there are no departed users in the database", async function () {
+      await cleanDb();
+      const activeUser = abandonedUsersData[2];
+      await userModel.add(activeUser);
+
+      const result = await users.fetchPaginatedUsers({ departed: "true" });
+      expect(result.allUsers.length).to.be.equal(0);
+    });
+
+    it("should handle errors gracefully if the database query fails", async function () {
+      sinon.stub(users, "fetchPaginatedUsers").throws(new Error("Database query failed"));
+
+      try {
+        await users.fetchPaginatedUsers();
+        expect.fail("Expected function to throw an error");
+      } catch (error) {
+        expect(error.message).to.equal("Database query failed");
+      }
+    });
+  });
+
+  describe("fetchUsersNotInDiscordServer", function () {
+    beforeEach(async function () {
+      await cleanDb();
+
+      const taskPromises = abandonedUsersData.map((task) => userModel.add(task));
+      await Promise.all(taskPromises);
+    });
+
+    afterEach(async function () {
+      await cleanDb();
+      sinon.restore();
+    });
+
+    it("should fetch users not in discord server", async function () {
+      const usersNotInDiscordServer = await users.fetchUsersNotInDiscordServer();
+      expect(usersNotInDiscordServer.docs.length).to.be.equal(2);
+    });
+
+    it("should return an empty array if there are no users in the database", async function () {
+      await cleanDb();
+
+      const activeUser = abandonedUsersData[2];
+      await userModel.add(activeUser);
+
+      const usersNotInDiscordServer = await users.fetchUsersNotInDiscordServer();
+      expect(usersNotInDiscordServer.docs.length).to.be.equal(0);
+    });
+
+    it("should handle errors gracefully if the database query fails", async function () {
+      sinon.stub(users, "fetchUsersNotInDiscordServer").throws(new Error("Database query failed"));
+
+      try {
+        await users.fetchUsersNotInDiscordServer();
+        expect.fail("Expected function to throw an error");
+      } catch (error) {
+        expect(error.message).to.equal("Database query failed");
+      }
     });
   });
 });

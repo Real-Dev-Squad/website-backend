@@ -6,6 +6,7 @@ const discordRolesModel = require("../models/discordactions");
 const discordServices = require("../services/discordService");
 const { fetchAllUsers, fetchUser } = require("../models/users");
 const { generateCloudFlareHeaders } = require("../utils/discord-actions");
+const { addLog } = require("../models/logs");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 const discordMavenRoleId = config.get("discordMavenRoleId");
 
@@ -64,26 +65,106 @@ const createGroupRole = async (req, res) => {
 };
 
 /**
- * Gets all group-roles
+ * Controller function to handle the soft deletion of a group role.
  *
- * @param res {Object} - Express response object
+ * @param {Object} req - The request object
+ * @param {Object} res - The response object
+ * @returns {Promise<void>}
  */
+const deleteGroupRole = async (req, res) => {
+  const { groupId } = req.params;
 
-const getAllGroupRoles = async (req, res) => {
   try {
-    const { groups } = await discordRolesModel.getAllGroupRoles();
+    const { roleExists, existingRoles } = await discordRolesModel.isGroupRoleExists({ groupId });
+
+    if (!roleExists) {
+      return res.boom.notFound("Group role not found");
+    }
+
+    const roleData = existingRoles.data();
+
+    const discordDeletion = await discordServices.deleteGroupRoleFromDiscord(roleData.roleid);
+
+    if (!discordDeletion.success) {
+      return res.boom.badImplementation(discordDeletion.message);
+    }
+
+    const { isSuccess } = await discordRolesModel.deleteGroupRole(groupId, req.userData.id);
+
+    if (!isSuccess) {
+      logger.error(`Role deleted from Discord but failed to delete from database for groupId: ${groupId}`);
+      return res.boom.badImplementation("Group role deletion failed");
+    }
+
+    const groupDeletionLog = {
+      type: "group-role-deletion",
+      meta: {
+        userId: req.userData.id,
+      },
+      body: {
+        groupId: groupId,
+        roleName: roleData.rolename,
+        discordRoleId: roleData.roleid,
+        action: "delete",
+      },
+    };
+    await addLog(groupDeletionLog.type, groupDeletionLog.meta, groupDeletionLog.body);
+    return res.status(200).json({
+      message: "Group role deleted successfully",
+    });
+  } catch (error) {
+    logger.error(`Error while deleting group role: ${error}`);
+    return res.boom.badImplementation("Internal server error");
+  }
+};
+
+/**
+ * Fetches all group roles or provides paginated results when ?dev=true is passed.
+ *
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
+const getPaginatedAllGroupRoles = async (req, res) => {
+  try {
+    const { page = 0, size = 10, dev } = req.query;
+    const limit = parseInt(size, 10) || 10;
+    const offset = parseInt(page, 10) * limit;
+
+    if (limit < 1 || limit > 100) {
+      return res.boom.badRequest("Invalid size. Must be between 1 and 100.");
+    }
+
     const discordId = req.userData?.discordId;
+    if (dev === "true") {
+      const { roles, total } = await discordRolesModel.getPaginatedGroupRolesByPage({ offset, limit });
+      const groupsWithMembershipInfo = await discordRolesModel.enrichGroupDataWithMembershipInfo(discordId, roles);
+
+      const nextPage = offset + limit < total ? parseInt(page, 10) + 1 : null;
+      const prevPage = page > 0 ? parseInt(page, 10) - 1 : null;
+
+      const baseUrl = `${req.baseUrl}${req.path}`;
+      const next = nextPage !== null ? `${baseUrl}?page=${nextPage}&size=${limit}&dev=true` : null;
+      const prev = prevPage !== null ? `${baseUrl}?page=${prevPage}&size=${limit}&dev=true` : null;
+
+      return res.json({
+        message: "Roles fetched successfully!",
+        groups: groupsWithMembershipInfo,
+        links: { next, prev },
+      });
+    }
+
+    const { groups } = await discordRolesModel.getAllGroupRoles();
     const groupsWithMembershipInfo = await discordRolesModel.enrichGroupDataWithMembershipInfo(discordId, groups);
+
     return res.json({
       message: "Roles fetched successfully!",
       groups: groupsWithMembershipInfo,
     });
   } catch (err) {
-    logger.error(`Error while getting roles: ${err}`);
+    logger.error(`Error while fetching paginated group roles: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
-
 const getGroupsRoleId = async (req, res) => {
   try {
     const { discordId } = req.userData;
@@ -479,7 +560,7 @@ const getUserDiscordInvite = async (req, res) => {
 module.exports = {
   getGroupsRoleId,
   createGroupRole,
-  getAllGroupRoles,
+  getPaginatedAllGroupRoles,
   addGroupRoleToMember,
   deleteRole,
   updateDiscordImageForVerification,
@@ -491,4 +572,5 @@ module.exports = {
   setRoleToUsersWith31DaysPlusOnboarding,
   getUserDiscordInvite,
   generateInviteForUser,
+  deleteGroupRole,
 };

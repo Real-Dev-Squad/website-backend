@@ -41,7 +41,13 @@ const { userPhotoVerificationData } = require("../fixtures/user/photo-verificati
 const Sinon = require("sinon");
 const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../../constants/errorMessages");
 const photoVerificationModel = firestore.collection("photo-verification");
-
+const userModel = firestore.collection("users");
+const taskModel = firestore.collection("tasks");
+const {
+  usersData: abandonedUsersData,
+  tasksData: abandonedTasksData,
+} = require("../fixtures/abandoned-tasks/departed-users");
+const userService = require("../../services/users");
 chai.use(chaiHttp);
 
 describe("Users", function () {
@@ -903,6 +909,47 @@ describe("Users", function () {
           return done();
         });
     });
+
+    it("Should return the logged-in user's details when profile is true", function (done) {
+      chai
+        .request(app)
+        .get("/users?profile=true")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body).to.not.have.property("phone");
+          expect(res.body).to.not.have.property("email");
+          expect(res.body).to.not.have.property("chaincode");
+
+          return done();
+        });
+    });
+
+    it("Should return 401 if not logged in", function (done) {
+      chai
+        .request(app)
+        .get("/users?profile=true")
+        .set("cookie", `${cookieName}=invalid_token`)
+        .end((err, res) => {
+          if (err) {
+            return done();
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 401,
+            error: "Unauthorized",
+            message: "Unauthenticated User",
+          });
+
+          return done();
+        });
+    });
   });
 
   describe("GET /users/self", function () {
@@ -921,6 +968,11 @@ describe("Users", function () {
           expect(res.body).to.not.have.property("phone");
           expect(res.body).to.not.have.property("email");
           expect(res.body).to.not.have.property("chaincode");
+          expect(res).to.have.header(
+            "X-Deprecation-Warning",
+            "WARNING: This endpoint is deprecated and will be removed in the future. Please use /users?profile=true to get the updated profile details."
+          );
+
           return done();
         });
     });
@@ -1395,6 +1447,56 @@ describe("Users", function () {
     });
   });
 
+  describe("GET /users?departed", function () {
+    beforeEach(async function () {
+      await cleanDb();
+      const userPromises = abandonedUsersData.map((user) => userModel.doc(user.id).set(user));
+      await Promise.all(userPromises);
+
+      const taskPromises = abandonedTasksData.map((task) => taskModel.add(task));
+      await Promise.all(taskPromises);
+    });
+
+    afterEach(async function () {
+      Sinon.restore();
+      await cleanDb();
+    });
+
+    it("should return a list of users with abandoned tasks", async function () {
+      const res = await chai.request(app).get("/users?dev=true&departed=true");
+      expect(res).to.have.status(200);
+      expect(res.body).to.have.property("message").that.equals("Users with abandoned tasks fetched successfully");
+      expect(res.body).to.have.property("users").to.be.an("array").with.lengthOf(2);
+    });
+
+    it("should return an empty array when no users have abandoned tasks", async function () {
+      await cleanDb();
+      const user = abandonedUsersData[2];
+      await userModel.add(user);
+
+      const task = abandonedTasksData[3];
+      await taskModel.add(task);
+      const res = await chai.request(app).get("/users?dev=true&departed=true");
+
+      expect(res).to.have.status(204);
+    });
+
+    it("should fail if dev flag is not passed", async function () {
+      const res = await chai.request(app).get("/users?departed=true");
+      expect(res).to.have.status(404);
+      expect(res.body.message).to.be.equal("Route not found");
+    });
+
+    it("should handle errors gracefully if getUsersWithIncompleteTasks fails", async function () {
+      Sinon.stub(userService, "getUsersWithIncompleteTasks").rejects(new Error(INTERNAL_SERVER_ERROR));
+
+      const res = await chai.request(app).get("/users?departed=true&dev=true");
+
+      expect(res).to.have.status(500);
+      expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
+    });
+  });
+
   describe("PUT /users/self/intro", function () {
     let userStatusData;
 
@@ -1472,6 +1574,108 @@ describe("Users", function () {
           expect(res).to.have.status(400);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.be.equal('"firstName" is required');
+          return done();
+        });
+    });
+  });
+
+  describe("PUT /users/:userId/intro", function () {
+    let userStatusData;
+
+    beforeEach(async function () {
+      await userStatusModel.updateUserStatus(userId, userStatusDataAfterSignup);
+      const updateStatus = await userStatusModel.updateUserStatus(userId, userStatusDataAfterFillingJoinSection);
+      userStatusData = (await firestore.collection("usersStatus").doc(updateStatus.id).get()).data();
+    });
+
+    it("should return 409 if the data already present", function (done) {
+      addJoinData(joinData(userId)[3]);
+      chai
+        .request(app)
+        .put(`/users/${userId}/intro?dev=true`)
+        .set("Cookie", `${cookieName}=${jwt}`)
+        .send(joinData(userId)[3])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(409);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User data is already present!");
+          return done();
+        });
+    });
+
+    it("Should store the info in db", function (done) {
+      chai
+        .request(app)
+        .put(`/users/${userId}/intro?dev=true`)
+        .set("Cookie", `${cookieName}=${jwt}`)
+        .send(joinData()[2])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(201);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("User join data and newstatus data added and updated successfully");
+          expect(userStatusData).to.have.own.property("currentStatus");
+          expect(userStatusData).to.have.own.property("monthlyHours");
+          expect(userStatusData.currentStatus.state).to.equal("ONBOARDING");
+          expect(userStatusData.monthlyHours.committed).to.equal(40);
+          return done();
+        });
+    });
+
+    it("Should return 401 for Unauthenticated User Request", function (done) {
+      chai
+        .request(app)
+        .put(`/users/${userId}/intro?dev=true`)
+        .set("Cookie", `${cookieName}=""`)
+        .send(joinData()[2])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(401);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Unauthenticated User");
+          return done();
+        });
+    });
+
+    it("Should return 400 for invalid Data", function (done) {
+      chai
+        .request(app)
+        .put(`/users/${userId}/intro?dev=true`)
+        .set("Cookie", `${cookieName}=${jwt}`)
+        .send(joinData()[1])
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.be.equal('"firstName" is required');
+          return done();
+        });
+    });
+
+    it("Should return 403 for Forbidden access", function (done) {
+      const userId = "anotherUser123";
+      addJoinData(joinData(userId)[3]);
+
+      chai
+        .request(app)
+        .put(`/users/${userId}/intro?dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send(joinData(userId)[3])
+        .end((err, res) => {
+          if (err) return done(err);
+
+          expect(res).to.have.status(403);
+          expect(res.body).to.be.an("object");
+          expect(res.body.message).to.equal("Unauthorized access");
           return done();
         });
     });
@@ -1555,16 +1759,6 @@ describe("Users", function () {
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send({
           id: `${profileDiffsId}`,
-          first_name: "Ankur",
-          last_name: "Narkhede",
-          yoe: 0,
-          company: "",
-          designation: "AO",
-          github_id: "ankur1337",
-          linkedin_id: "ankurnarkhede",
-          twitter_id: "ankur909",
-          instagram_id: "",
-          website: "",
           message: "",
         })
         .end((err, res) => {
@@ -1588,9 +1782,9 @@ describe("Users", function () {
             return done(err);
           }
 
-          expect(res).to.have.status(401);
-          expect(res.body.error).to.be.equal("Unauthorized");
-          expect(res.body.message).to.be.equal("You are not authorized for this action.");
+          expect(res).to.have.status(400);
+          expect(res.body.error).to.be.equal("Bad Request");
+          expect(res.body.message).to.be.equal("Invalid Request.");
           return done();
         });
     });
@@ -1610,6 +1804,372 @@ describe("Users", function () {
             error: "Unauthorized",
             message: "Unauthenticated User",
           });
+          return done();
+        });
+    });
+  });
+
+  describe("PATCH /users/:userId?profile=true", function () {
+    beforeEach(function () {
+      fetchStub = Sinon.stub(global, "fetch");
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(getDiscordMembers),
+        })
+      );
+    });
+
+    afterEach(function () {
+      Sinon.restore();
+    });
+
+    it("Should update the user", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          first_name: "Test first_name",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(204);
+
+          return done();
+        });
+    });
+
+    it("Should update the user status", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          status: "ooo",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(204);
+
+          return done();
+        });
+    });
+
+    it("Should update the username with valid username", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          username: "validUsername123",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(204);
+
+          return done();
+        });
+    });
+
+    it("Should allow updating user role when in_discord is not present and is not developer", function (done) {
+      addUser(newUser).then((newUserId) => {
+        const newUserJwt = authService.generateAuthToken({ userId: newUserId });
+        chai
+          .request(app)
+          .patch(`/users/${newUserId}?profile=true&dev=true`)
+          .set("cookie", `${cookieName}=${newUserJwt}`)
+          .send({
+            roles: {
+              maven: true,
+            },
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(204);
+            return done();
+          });
+      });
+    });
+
+    it("Should not remove old roles when updating user roles", async function () {
+      const newUserId = await addUser(newUser);
+      const newUserJwt = authService.generateAuthToken({ userId: newUserId });
+
+      const getUserResponseBeforeUpdate = await chai
+        .request(app)
+        .get(`/users?profile=true`)
+        .set("cookie", `${cookieName}=${newUserJwt}`);
+
+      expect(getUserResponseBeforeUpdate).to.have.status(200);
+      expect(getUserResponseBeforeUpdate.body.roles).to.not.have.property("maven");
+      expect(getUserResponseBeforeUpdate.body.roles.in_discord).to.equal(false);
+
+      const updateRolesResponse = await chai
+        .request(app)
+        .patch(`/users/${newUserId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${newUserJwt}`)
+        .send({
+          roles: {
+            maven: true,
+          },
+        });
+
+      expect(updateRolesResponse).to.have.status(204);
+
+      const getUserResponseAfterUpdate = await chai
+        .request(app)
+        .get(`/users?profile=true`)
+        .set("cookie", `${cookieName}=${newUserJwt}`);
+
+      expect(getUserResponseAfterUpdate).to.have.status(200);
+      expect(getUserResponseAfterUpdate.body.roles).to.have.property("maven");
+      expect(getUserResponseAfterUpdate.body.roles.maven).to.equal(true);
+      expect(getUserResponseAfterUpdate.body.roles.in_discord).to.equal(false);
+    });
+
+    it("Should not update the user roles when user has in_discord and developer true", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          roles: {
+            maven: true,
+          },
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(403);
+
+          return done();
+        });
+    });
+
+    it("Should return 400 for invalid status value", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          status: "blah",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: "Bad Request",
+            message: '"status" must be one of [ooo, idle, active, onboarding]',
+          });
+
+          return done();
+        });
+    });
+
+    it("Should return 400 if required roles is missing", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          roles: {
+            in_discord: false,
+            developer: true,
+          },
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+
+          return done();
+        });
+    });
+
+    it("Should return 400 if invalid roles", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          roles: {
+            archived: "false",
+            in_discord: false,
+            developer: true,
+          },
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+
+          return done();
+        });
+    });
+
+    it("Should return 400 for invalid username", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          username: "@invalidUser-name",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: "Bad Request",
+            message: "Username must be between 4 and 32 characters long and contain only letters or numbers.",
+          });
+
+          return done();
+        });
+    });
+
+    it("Should update the social id with valid social id", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          twitter_id: "Valid_twitterId",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(204);
+          return done();
+        });
+    });
+
+    it("Should return 400 for invalid Twitter ID", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          twitter_id: "invalid@twitter_id",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: "Bad Request",
+            message: "Invalid Twitter ID. ID should not contain special character @ or spaces",
+          });
+
+          return done();
+        });
+    });
+
+    it("Should return 400 for invalid Linkedin ID", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          linkedin_id: "invalid@linkedin_id",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: "Bad Request",
+            message: "Invalid Linkedin ID. ID should not contain special character @ or spaces",
+          });
+
+          return done();
+        });
+    });
+
+    it("Should return 400 for invalid instagram ID", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          instagram_id: "invalid@instagram_id",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: "Bad Request",
+            message: "Invalid Instagram ID. ID should not contain special character @ or spaces",
+          });
+
+          return done();
+        });
+    });
+
+    it("Should return 400 is space is included in the social ID", function (done) {
+      chai
+        .request(app)
+        .patch(`/users/${userId}?profile=true&dev=true`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({
+          linkedin_id: "Linkedin 123",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body).to.be.an("object");
+          expect(res.body).to.eql({
+            statusCode: 400,
+            error: "Bad Request",
+            message: "Invalid Linkedin ID. ID should not contain special character @ or spaces",
+          });
+
           return done();
         });
     });

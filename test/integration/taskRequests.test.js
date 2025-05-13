@@ -106,6 +106,15 @@ describe("Task Requests", function () {
             return res;
           });
       });
+
+      it("should fetch the task request when some user field is missing", async function () {
+        const userId = await addUser(userData[19]);
+        const taskId = (await tasksModel.updateTask(taskData[0])).taskId;
+        await taskRequestsModel.addOrUpdate(taskId, userId);
+        const res = await chai.request(app).get(`/taskRequests`).set("cookie", `${cookieName}=${jwt}`);
+        expect(res).to.have.status(200);
+        expect(res.body.message).to.be.equal("Task requests returned successfully");
+      });
     });
 
     describe("When the user is not a super user", function () {
@@ -167,6 +176,22 @@ describe("Task Requests", function () {
           });
       });
 
+      it("should return 404 if the task request is not found for the given Id", function (done) {
+        chai
+          .request(app)
+          .get(`/taskRequests/1234`)
+          .set("cookie", `${cookieName}=${jwt}`)
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(404);
+            expect(res.body.message).to.be.equal("Task request not found");
+            return done();
+          });
+      });
+
       it("should return 404 if the resource is not found", function (done) {
         sinon.stub(taskRequestsModel, "fetchTaskRequestById").callsFake(() => []);
 
@@ -187,21 +212,26 @@ describe("Task Requests", function () {
     });
 
     describe("When the user is not a super user", function () {
+      let taskRequestId;
+
       before(async function () {
         userId = await addUser(member);
-        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId }));
-        jwt = authService.generateAuthToken({ userId });
+        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({
+          userId,
+        }));
+        jwt = authService.generateAuthToken({
+          userId,
+        });
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
-
         await userStatusModel.updateUserStatus(userId, idleUserStatus);
-        await taskRequestsModel.addOrUpdate(taskId, userId);
+        taskRequestId = (await taskRequestsModel.addOrUpdate(taskId, userId)).id;
       });
 
       it("should be successful when the user is not a super user", function (done) {
         chai
           .request(app)
-          .get(`/taskRequests/taskrequstid`)
+          .get(`/taskRequests/${taskRequestId}`)
           .set("cookie", `${cookieName}=${jwt}`)
           .end((err, res) => {
             if (err) {
@@ -1019,7 +1049,7 @@ describe("Task Requests", function () {
         .request(app)
         .post(url)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send(mockData.taskRequestData);
+        .send({ ...mockData.taskRequestData, userId });
       expect(res).to.have.status(201);
       expect(res.body.message).to.equal("Task request successful.");
     });
@@ -1031,7 +1061,7 @@ describe("Task Requests", function () {
         .request(app)
         .post(url)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send(mockData.taskRequestData);
+        .send({ ...mockData.taskRequestData, userId });
       expect(res).to.have.status(200);
       expect(res.body.message).to.equal("Task request successful.");
     });
@@ -1043,13 +1073,18 @@ describe("Task Requests", function () {
         .request(app)
         .post(url)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send(mockData.taskRequestData);
+        .send({ ...mockData.taskRequestData, userId });
       expect(res).to.have.status(409);
       expect(res.body.message).to.equal("Task exists for the given issue.");
     });
 
     it("should allow users to request the same task (Assignment)", async function () {
-      const requestData = { ...mockData.taskRequestData, requestType: TASK_REQUEST_TYPE.ASSIGNMENT, taskId: "abc" };
+      const requestData = {
+        ...mockData.taskRequestData,
+        requestType: TASK_REQUEST_TYPE.ASSIGNMENT,
+        taskId: "abc",
+        userId,
+      };
       fetchTaskStub.resolves({ taskData: { ...taskData, id: requestData.taskId } });
       createRequestStub.resolves({ id: "request123", taskRequest: mockData.existingTaskRequest, isCreate: false });
       const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
@@ -1061,6 +1096,7 @@ describe("Task Requests", function () {
       const requestData = {
         ...mockData.taskRequestData,
         externalIssueUrl: "https://api.github.com/repos/Real-Dev-Squad/website/atus/issues/1564672",
+        userId,
       };
       const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
       expect(res.body.message).to.equal("Issue does not exist");
@@ -1073,7 +1109,7 @@ describe("Task Requests", function () {
         .request(app)
         .post(url)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send(mockData.taskRequestData);
+        .send({ ...mockData.taskRequestData, userId });
       expect(res.body.message).to.equal("Issue does not exist");
       expect(res).to.have.status(400);
     });
@@ -1082,6 +1118,7 @@ describe("Task Requests", function () {
       const requestData = {
         ...mockData.taskRequestData,
         proposedStartDate: mockData.taskRequestData.proposedDeadline + 10000,
+        userId,
       };
       const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
       expect(res.body.message).to.equal("Task deadline cannot be before the start date");
@@ -1096,7 +1133,7 @@ describe("Task Requests", function () {
     });
 
     it("should handle user not found", async function () {
-      const requestData = { ...mockData.taskRequestData };
+      const requestData = { ...mockData.taskRequestData, userId };
       getUsernameStub.resolves(null);
       const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
       expect(res.body.message).to.equal("User not found");
@@ -1104,7 +1141,12 @@ describe("Task Requests", function () {
     });
 
     it("should handle task not found (Assignment)", async function () {
-      const requestData = { ...mockData.taskRequestData, taskId: "abc", requestType: TASK_REQUEST_TYPE.ASSIGNMENT };
+      const requestData = {
+        ...mockData.taskRequestData,
+        taskId: "abc",
+        requestType: TASK_REQUEST_TYPE.ASSIGNMENT,
+        userId,
+      };
       fetchTaskStub.resolves({ taskData: null });
       const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
       expect(res).to.have.status(400);
@@ -1119,7 +1161,11 @@ describe("Task Requests", function () {
         isCreate: true,
         alreadyRequesting: false,
       });
-      await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(mockData.taskRequestData);
+      await chai
+        .request(app)
+        .post(url)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send({ ...mockData.taskRequestData, userId });
       const logsRef = await logsModel.where("type", "==", "taskRequests").get();
       let taskRequestLogs;
       logsRef.forEach((data) => {

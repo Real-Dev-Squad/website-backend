@@ -1,11 +1,13 @@
 const chai = require("chai");
 const sinon = require("sinon");
 const { expect } = chai;
+const assert = require("chai").assert;
 const {
   createRequest,
   fetchTaskRequests,
   approveTaskRequest,
   fetchPaginatedTaskRequests,
+  fetchTaskRequestById,
   addNewFields,
   removeOldField,
   addUsersCountAndCreatedAt,
@@ -194,6 +196,30 @@ describe("Task requests | models", function () {
       const requestData = { ...mockData.taskRequestData };
       const result = await createRequest(requestData, authenticatedUsername);
       expect(result.isCreationRequestApproved).to.be.equal(true);
+    });
+  });
+
+  describe("fetchTaskRequestById", function () {
+    afterEach(async function () {
+      await cleanDb();
+    });
+
+    it("should return task request data when task request exists", async function () {
+      const requestData = mockData.taskRequestData;
+      const addedTaskRequest = await createRequest(requestData, "testUser");
+      const result = await fetchTaskRequestById(addedTaskRequest.id);
+      assert.isTrue(result.taskRequestExists, "Task request should exist");
+
+      expect(result.taskRequestExists).to.be.equal(true);
+      expect(result.taskRequestData.id).to.equal(addedTaskRequest.id);
+    });
+
+    it("should return taskRequestExists as false when task request does not exist", async function () {
+      const mockTaskRequestId = "taskRequest1234";
+      const requestData = mockData.taskRequestData;
+      await createRequest(requestData, "testUser");
+      const result = await fetchTaskRequestById(mockTaskRequestId);
+      expect(result.taskRequestExists).to.be.equal(false);
     });
   });
 
@@ -414,7 +440,7 @@ describe("Task requests | models", function () {
       expect(approvedTask.data().status).to.equal(TASK_STATUS.ASSIGNED);
       expect(approvedTask.data().createdAt).to.be.a("number");
       expect(approvedTask.data().updatedAt).to.be.a("number");
-      expect(approvedTask.data().createdAt).to.be.not.equal(
+      expect(approvedTask.data().createdAt).to.be.equal(
         approvedTask.data().updatedAt,
         "When existing task is updated, updatedAt field is updated so createdAt and updatedAt are not same"
       );

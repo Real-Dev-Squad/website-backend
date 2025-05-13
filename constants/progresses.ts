@@ -18,8 +18,11 @@ const TYPE_MAP = {
   task: "taskId",
 };
 const PROGRESS_VALID_SORT_FIELDS = ["date", "-date"];
-
+const PROGRESSES_SIZE = 20;
+const PROGRESSES_PAGE_SIZE = 0;
 const VALID_PROGRESS_TYPES = ["task", "user"];
+
+const UNAUTHORIZED_WRITE = "Unauthorized to write progress of task";
 
 module.exports = {
   PROGRESSES_RESPONSE_MESSAGES,
@@ -28,4 +31,7 @@ module.exports = {
   TYPE_MAP,
   VALID_PROGRESS_TYPES,
   PROGRESS_VALID_SORT_FIELDS,
+  PROGRESSES_SIZE,
+  PROGRESSES_PAGE_SIZE,
+  UNAUTHORIZED_WRITE,
 };

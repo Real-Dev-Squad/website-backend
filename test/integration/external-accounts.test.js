@@ -12,6 +12,7 @@ const externalAccountsModel = require("../../models/external-accounts");
 const { usersFromRds, getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
 const Sinon = require("sinon");
 const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
+const removeDiscordRoleUtils = require("../../utils/removeDiscordRoleFromUser");
 const firestore = require("../../utils/firestore");
 const userData = require("../fixtures/user/user")();
 const userModel = firestore.collection("users");
@@ -308,9 +309,9 @@ describe("External Accounts", function () {
     });
 
     it("Should Archive Users With Archived as False and Not in RDS Discord Server", async function () {
-      await userModel.add(usersFromRds[4]); // nonArchivedAndNotInDiscord
+      const doc = await userModel.add(usersFromRds[4]); // nonArchivedAndNotInDiscord
 
-      const userId = usersFromRds[4].id;
+      const userId = doc.id;
       const task1 = {
         assignee: userId,
         status: "ACTIVE",
@@ -537,6 +538,11 @@ describe("External Accounts", function () {
       expect(getUserResponseBeforeUpdate.body).to.not.have.property("discordId");
       expect(getUserResponseBeforeUpdate.body).to.not.have.property("discordJoinedAt");
 
+      const removeDiscordRoleStub = Sinon.stub(removeDiscordRoleUtils, "removeDiscordRoleFromUser").resolves({
+        success: true,
+        message: "Role deleted successfully",
+      });
+
       const response = await chai
         .request(app)
         .patch(`/external-accounts/link/${externalAccountData[2].token}`)
@@ -553,6 +559,86 @@ describe("External Accounts", function () {
       expect(updatedUserDetails.body.roles.in_discord).to.equal(true);
       expect(updatedUserDetails.body).to.have.property("discordId");
       expect(updatedUserDetails.body).to.have.property("discordJoinedAt");
+
+      removeDiscordRoleStub.restore();
+    });
+
+    it("Should return 500 when removeDiscordRole fails because role doesn't exist", async function () {
+      await externalAccountsModel.addExternalAccountData(externalAccountData[2]);
+
+      const removeDiscordRoleStub = Sinon.stub(removeDiscordRoleUtils, "removeDiscordRoleFromUser").resolves({
+        success: false,
+        message: "Role doesn't exist",
+      });
+
+      const response = await chai
+        .request(app)
+        .patch(`/external-accounts/link/${externalAccountData[2].token}`)
+        .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
+        .set("Cookie", `${cookieName}=${newUserJWT}`);
+
+      const unverifiedRoleRemovalResponse = await removeDiscordRoleStub();
+
+      expect(response).to.have.status(500);
+      expect(response.body).to.be.an("object");
+      expect(response.body).to.have.property("message");
+      expect(response.body.message).to.equal(
+        `User details updated but ${unverifiedRoleRemovalResponse.message}. Please contact admin`
+      );
+
+      removeDiscordRoleStub.restore();
+    });
+
+    it("Should return 500 when removeDiscordRole fails because role deletion from discord failed", async function () {
+      await externalAccountsModel.addExternalAccountData(externalAccountData[2]);
+
+      const removeDiscordRoleStub = Sinon.stub(removeDiscordRoleUtils, "removeDiscordRoleFromUser").resolves({
+        success: false,
+        message: "Role deletion from discord failed",
+      });
+
+      const response = await chai
+        .request(app)
+        .patch(`/external-accounts/link/${externalAccountData[2].token}`)
+        .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
+        .set("Cookie", `${cookieName}=${newUserJWT}`);
+
+      const unverifiedRoleRemovalResponse = await removeDiscordRoleStub();
+
+      expect(response).to.have.status(500);
+      expect(response.body).to.be.an("object");
+      expect(response.body).to.have.property("message");
+      expect(response.body.message).to.equal(
+        `User details updated but ${unverifiedRoleRemovalResponse.message}. Please contact admin`
+      );
+
+      removeDiscordRoleStub.restore();
+    });
+
+    it("Should return 500 when removeDiscordRole fails because role deletion from database failed", async function () {
+      await externalAccountsModel.addExternalAccountData(externalAccountData[2]);
+
+      const removeDiscordRoleStub = Sinon.stub(removeDiscordRoleUtils, "removeDiscordRoleFromUser").resolves({
+        success: false,
+        message: "Role deletion from database failed",
+      });
+
+      const response = await chai
+        .request(app)
+        .patch(`/external-accounts/link/${externalAccountData[2].token}`)
+        .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
+        .set("Cookie", `${cookieName}=${newUserJWT}`);
+
+      const unverifiedRoleRemovalResponse = await removeDiscordRoleStub();
+
+      expect(response).to.have.status(500);
+      expect(response.body).to.be.an("object");
+      expect(response.body).to.have.property("message");
+      expect(response.body.message).to.equal(
+        `User details updated but ${unverifiedRoleRemovalResponse.message}. Please contact admin`
+      );
+
+      removeDiscordRoleStub.restore();
     });
   });
 });

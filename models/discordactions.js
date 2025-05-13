@@ -28,6 +28,8 @@ const { FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
 const discordService = require("../services/discordService");
 const { buildTasksQueryForMissedUpdates } = require("../utils/tasks");
 const { buildProgressQueryForMissedUpdates } = require("../utils/progresses");
+const { getRequestByKeyValues } = require("./requests");
+const { REQUEST_TYPE, REQUEST_STATE } = require("../constants/requests");
 const allMavens = [];
 
 /**
@@ -43,6 +45,31 @@ const createNewRole = async (roleData) => {
   } catch (err) {
     logger.error("Error in creating role", err);
     throw err;
+  }
+};
+
+/**
+ * Soft deletes a group role by marking it as deleted in the database.
+ * This function updates the role document in Firestore, setting isDeleted to true
+ * and recording who deleted it and when.
+ *
+ * @param {string} groupId - The ID of the group role to be deleted
+ * @param {string} deletedBy - The ID of the user performing the deletion for logging purpose
+ * @returns {Promise<Object>} An object indicating whether the operation was successful
+ */
+const deleteGroupRole = async (groupId, deletedBy) => {
+  try {
+    const roleRef = admin.firestore().collection("discord-roles").doc(groupId);
+    await roleRef.update({
+      isDeleted: true,
+      deletedAt: admin.firestore.Timestamp.fromDate(new Date()),
+      deletedBy: deletedBy,
+    });
+
+    return { isSuccess: true };
+  } catch (error) {
+    logger.error(`Error in deleteGroupRole: ${error}`);
+    return { isSuccess: false };
   }
 };
 
@@ -75,6 +102,33 @@ const deleteRoleFromDatabase = async (roleId, discordId) => {
     logger.error(errorMessage);
   }
   return false;
+};
+
+/**
+ * Fetches paginated group roles by page and size.
+ *
+ * @param {Object} options - Pagination options
+ * @param {number} options.offset - Number of items to skip
+ * @param {number} options.limit - Maximum number of roles to fetch
+ * @returns {Promise<Object>} - Paginated roles and total count
+ */
+const getPaginatedGroupRolesByPage = async ({ offset, limit }) => {
+  try {
+    const snapshot = await discordRoleModel.orderBy("date", "desc").offset(offset).limit(limit).get();
+
+    const roles = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    const totalSnapshot = await discordRoleModel.get();
+    const total = totalSnapshot.size;
+
+    return { roles, total };
+  } catch (err) {
+    logger.error(`Error in getPaginatedGroupRolesByPage: ${err.message}`);
+    throw new Error("Database error while paginating group roles");
+  }
 };
 
 /**
@@ -133,16 +187,19 @@ const updateGroupRole = async (roleData, docId) => {
  *
  * @param options { Object }: Data of the new role
  * @param options.rolename String : name of the role
- * @param options.roleId String : id of the role
+ * @param options.roleid String : id of the role
  * @returns {Promise<discordRoleModel|Object>}
  */
 
 const isGroupRoleExists = async (options = {}) => {
   try {
-    const { rolename = null, roleid = null } = options;
+    const { groupId = null, rolename = null, roleid = null } = options;
 
     let existingRoles;
-    if (rolename && roleid) {
+    if (groupId) {
+      existingRoles = await discordRoleModel.doc(groupId).get();
+      return { roleExists: existingRoles.exists, existingRoles };
+    } else if (rolename && roleid) {
       existingRoles = await discordRoleModel
         .where("rolename", "==", rolename)
         .where("roleid", "==", roleid)
@@ -153,9 +210,8 @@ const isGroupRoleExists = async (options = {}) => {
     } else if (roleid) {
       existingRoles = await discordRoleModel.where("roleid", "==", roleid).limit(1).get();
     } else {
-      throw Error("Either rolename or roleId is required");
+      throw Error("Either rolename, roleId, or groupId is required");
     }
-
     return { roleExists: !existingRoles.empty, existingRoles };
   } catch (err) {
     logger.error("Error in getting all group-roles", err);
@@ -699,12 +755,59 @@ const updateIdle7dUsersOnDiscord = async (dev) => {
   };
 };
 
+/**
+ * Filters out onboarding users who have an approved onboarding extension request that is still valid.
+ *
+ * This function iterates through the given list of onboarding users and checks if each user has a valid
+ * approved onboarding extension request. If a valid extension request exists with a `newEndsOn`
+ * date greater than the current date, the user is skipped. Otherwise, the user is added to the
+ * returned list.
+ *
+ * @async
+ * @function skipOnboardingUsersHavingApprovedExtensionRequest
+ * @param {Array<Object>} [users=[]] - An array of user objects to be filtered. Each user object
+ *                                     must have an `id` property.
+ * @returns {Promise<Array<Object>>} A promise that resolves to an array of users who do not have
+ *                                   a valid approved onboarding extension request.
+ */
+const skipOnboardingUsersHavingApprovedExtensionRequest = async (users = []) => {
+  const currentTime = Date.now();
+
+  const results = await Promise.all(
+    users.map(async (user) => {
+      try {
+        const latestApprovedExtension = await getRequestByKeyValues({
+          type: REQUEST_TYPE.ONBOARDING,
+          state: REQUEST_STATE.APPROVED,
+          userId: user.id,
+        });
+
+        if (latestApprovedExtension && latestApprovedExtension.newEndsOn > currentTime) {
+          return null;
+        }
+
+        return user;
+      } catch (error) {
+        logger.error(`Error while fetching latest approved extension for user ${user.id}:`, error);
+        return null;
+      }
+    })
+  );
+
+  return results.filter(Boolean);
+};
+
 const updateUsersWith31DaysPlusOnboarding = async () => {
   try {
-    const allOnboardingUsers31DaysCompleted = await getUsersBasedOnFilter({
+    let allOnboardingUsers31DaysCompleted = await getUsersBasedOnFilter({
       state: userState.ONBOARDING,
       time: "31d",
     });
+
+    allOnboardingUsers31DaysCompleted = await skipOnboardingUsersHavingApprovedExtensionRequest(
+      allOnboardingUsers31DaysCompleted
+    );
+
     const discordMembers = await getDiscordMembers();
     const groupOnboardingRole = await getGroupRole("group-onboarding-31d+");
     const groupOnboardingRoleId = groupOnboardingRole.role.roleid;
@@ -916,7 +1019,7 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
         usersMap.set(taskAssignee, {
           tasksCount: 1,
           latestProgressCount: dateGap + 1,
-          isActive: false,
+          isOOO: false,
         });
       }
       const updateTasksIdMap = async () => {
@@ -935,10 +1038,7 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
     const userIdChunks = chunks(Array.from(usersMap.keys()), FIRESTORE_IN_CLAUSE_SIZE);
     const userStatusSnapshotPromise = userIdChunks.map(
       async (userIdList) =>
-        await userStatusModel
-          .where("currentStatus.state", "==", userState.ACTIVE)
-          .where("userId", "in", userIdList)
-          .get()
+        await userStatusModel.where("currentStatus.state", "==", userState.OOO).where("userId", "in", userIdList).get()
     );
     const userDetailsPromise = userIdChunks.map(
       async (userIdList) =>
@@ -952,7 +1052,7 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
 
     userStatusChunks.forEach((userStatusList) =>
       userStatusList.forEach((doc) => {
-        usersMap.get(doc.data().userId).isActive = true;
+        usersMap.get(doc.data().userId).isOOO = true;
       })
     );
 
@@ -994,7 +1094,7 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
       const isDiscordMember = !!discordUserData;
       const shouldAddRole =
         userData.latestProgressCount === 0 &&
-        userData.isActive &&
+        !userData.isOOO &&
         isDiscordMember &&
         discordUserData.isDeveloper &&
         !discordUserData.isMaven &&
@@ -1058,6 +1158,7 @@ module.exports = {
   createNewRole,
   removeMemberGroup,
   getGroupRolesForUser,
+  getPaginatedGroupRolesByPage,
   getAllGroupRoles,
   getGroupRoleByName,
   updateGroupRole,
@@ -1075,4 +1176,6 @@ module.exports = {
   getUserDiscordInvite,
   addInviteToInviteModel,
   groupUpdateLastJoinDate,
+  deleteGroupRole,
+  skipOnboardingUsersHavingApprovedExtensionRequest,
 };

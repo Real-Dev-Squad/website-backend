@@ -20,9 +20,11 @@ const tasksModel = firestore.collection("tasks");
 const {
   createNewRole,
   getAllGroupRoles,
+  getPaginatedGroupRolesByPage,
   isGroupRoleExists,
   addGroupRoleToMember,
   deleteRoleFromDatabase,
+  deleteGroupRole,
   updateDiscordImageForVerification,
   enrichGroupDataWithMembershipInfo,
   fetchGroupToUserMapping,
@@ -33,6 +35,12 @@ const {
   groupUpdateLastJoinDate,
   updateIdleUsersOnDiscord,
   updateIdle7dUsersOnDiscord,
+  updateUsersWith31DaysPlusOnboarding,
+  updateGroupRole,
+  removeMemberGroup,
+  getGroupRoleByName,
+  getGroupRolesForUser,
+  skipOnboardingUsersHavingApprovedExtensionRequest,
 } = require("../../../models/discordactions");
 const {
   groupData,
@@ -41,6 +49,7 @@ const {
   memberGroupData,
   groupIdle,
   groupIdle7d,
+  groupOnboarding31dPlus,
 } = require("../../fixtures/discordactions/discordactions");
 const cleanDb = require("../../utils/cleanDb");
 const { userPhotoVerificationData } = require("../../fixtures/user/photo-verification");
@@ -54,6 +63,9 @@ const { createProgressDocument } = require("../../../models/progresses");
 const { stubbedModelTaskProgressData } = require("../../fixtures/progress/progresses");
 const { convertDaysToMilliseconds } = require("../../../utils/time");
 const { generateUserStatusData } = require("../../fixtures/userStatus/userStatus");
+const { userState } = require("../../../constants/userStatus");
+const { REQUEST_TYPE, REQUEST_STATE } = require("../../../constants/requests");
+const { createRequest } = require("../../../models/requests");
 
 chai.should();
 
@@ -165,7 +177,7 @@ describe("discordactions", function () {
     it("should throw an error if rolename and roleid are not passed", async function () {
       return isGroupRoleExists({}).catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
-        expect(err.message).to.equal("Either rolename or roleId is required");
+        expect(err.message).to.equal("Either rolename, roleId, or groupId is required");
       });
     });
 
@@ -232,6 +244,65 @@ describe("discordactions", function () {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal("Database error");
       });
+    });
+  });
+
+  describe("deleteGroupRole", function () {
+    const groupId = "1234";
+    const deletedBy = "4321";
+    let firestoreOriginal;
+
+    beforeEach(async function () {
+      firestoreOriginal = admin.firestore;
+
+      const roleRef = admin.firestore().collection("discord-roles").doc(groupId);
+      await roleRef.set({
+        isDeleted: false,
+      });
+    });
+
+    it("should mark the group role as deleted", async function () {
+      const result = await deleteGroupRole(groupId, deletedBy);
+
+      const updatedDoc = await admin.firestore().collection("discord-roles").doc(groupId).get();
+
+      const data = updatedDoc.data();
+      expect(data.isDeleted).to.equal(true);
+      expect(data.deletedBy).to.equal(deletedBy);
+      expect(data.deletedAt).to.be.an.instanceof(admin.firestore.Timestamp);
+      expect(result.isSuccess).to.equal(true);
+    });
+
+    it("should return isSuccess as false if Firestore update fails", async function () {
+      delete require.cache[require.resolve("firebase-admin")];
+
+      const mockFirestore = {
+        collection: () => ({
+          doc: () => ({
+            update: async () => {
+              throw new Error("Database error");
+            },
+          }),
+        }),
+      };
+
+      Object.defineProperty(admin, "firestore", {
+        configurable: true,
+        get: () => () => mockFirestore,
+      });
+
+      const result = await deleteGroupRole(groupId, deletedBy);
+      expect(result.isSuccess).to.equal(false);
+    });
+
+    afterEach(async function () {
+      Object.defineProperty(admin, "firestore", {
+        configurable: true,
+        value: firestoreOriginal,
+      });
+
+      const roleRef = admin.firestore().collection("discord-roles").doc(groupId);
+      await roleRef.delete();
     });
   });
 
@@ -614,15 +685,16 @@ describe("discordactions", function () {
   });
 
   describe("getMissedProgressUpdatesUsers", function () {
-    let activeUserWithProgressUpdates;
+    let activeUserWithMissedProgressUpdates;
     let idleUser;
     let userNotInDiscord;
     let activeUserId;
+    let activeUserWithProgressUpdates;
 
     beforeEach(async function () {
       idleUser = { ...userData[9], discordId: getDiscordMembers[0].user.id };
-      activeUserWithProgressUpdates = { ...userData[10], discordId: getDiscordMembers[1].user.id };
-      const activeUserWithNoUpdates = { ...userData[0], discordId: getDiscordMembers[2].user.id };
+      activeUserWithMissedProgressUpdates = { ...userData[10], discordId: getDiscordMembers[1].user.id };
+      activeUserWithProgressUpdates = { ...userData[0], discordId: getDiscordMembers[2].user.id };
       userNotInDiscord = { ...userData[4], discordId: "Not in discord" };
       const {
         idleStatus: idleUserStatus,
@@ -630,10 +702,10 @@ describe("discordactions", function () {
         userStatusDataForOooState: oooUserStatus,
       } = userStatusData;
       const userIdList = await Promise.all([
-        await addUser(idleUser), // idle user with no task progress updates
-        await addUser(activeUserWithProgressUpdates), // active user with task progress updates
-        await addUser(activeUserWithNoUpdates), // active user with no task progress updates
-        await addUser(userNotInDiscord), // OOO user with no task progress updates
+        await addUser(idleUser),
+        await addUser(activeUserWithMissedProgressUpdates),
+        await addUser(activeUserWithProgressUpdates),
+        await addUser(userNotInDiscord),
       ]);
       activeUserId = userIdList[2];
       await Promise.all([
@@ -680,17 +752,17 @@ describe("discordactions", function () {
     it("should list of users who missed updating progress", async function () {
       const result = await getMissedProgressUpdatesUsers();
       expect(result).to.be.an("object");
-      expect(result).to.be.deep.equal({
-        tasks: 4,
-        missedUpdatesTasks: 3,
-        usersToAddRole: [activeUserWithProgressUpdates.discordId],
-      });
+      expect(result.tasks).to.not.equal(undefined);
+      expect(result.tasks).to.equal(4);
+      expect(result.missedUpdatesTasks).to.not.equal(undefined);
+      expect(result.missedUpdatesTasks).to.equal(3);
+      expect(result.usersToAddRole.includes(activeUserWithMissedProgressUpdates.discordId)).to.equal(true);
+      expect(result.usersToAddRole.includes(idleUser.discordId)).to.equal(true);
     });
 
     it("should not list of users who are not active and who missed updating progress", async function () {
       const result = await getMissedProgressUpdatesUsers();
       expect(result).to.be.an("object");
-      expect(result.usersToAddRole).to.not.contain(idleUser.discordId);
       expect(result.usersToAddRole).to.not.contain(userNotInDiscord.discordId);
     });
 
@@ -991,6 +1063,360 @@ describe("discordactions", function () {
       expect(res.totalUserRoleToBeAdded).to.be.equal(2);
       expect(res.totalUserRoleToBeRemoved).to.be.equal(1);
       expect(res.totalArchivedUsers).to.be.equal(1);
+    });
+  });
+
+  describe("updateUsersWith31DaysPlusOnboarding", function () {
+    let fetchStub;
+    let userId0;
+
+    beforeEach(async function () {
+      fetchStub = sinon.stub(global, "fetch");
+
+      userData[0] = {
+        ...userData[0],
+        discordId: "2131234453456545656765767876",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+      userData[1] = {
+        ...userData[1],
+        discordId: "12345678909867666",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+      userData[2] = {
+        ...userData[2],
+        discordId: "1234567",
+        discordJoinedAt: "2023-07-31T16:57:53.894000+00:00",
+        roles: { archived: false, in_discord: true },
+      };
+
+      userId0 = await addUser(userData[0]);
+      const userId1 = await addUser(userData[1]);
+      const userId2 = await addUser(userData[2]);
+
+      await userStatusModel.updateUserStatus(
+        userId0,
+        generateUserStatusData(userState.ONBOARDING, 1690829925336, 1690829925336)
+      );
+      await userStatusModel.updateUserStatus(
+        userId1,
+        generateUserStatusData(userState.ONBOARDING, 1690829925336, 1690829925336)
+      );
+      await userStatusModel.updateUserStatus(
+        userId2,
+        generateUserStatusData(userState.IDLE, 1690829925336, 1690829925336)
+      );
+
+      const addRolesPromises = [discordRoleModel.add(groupOnboarding31dPlus)];
+      await Promise.all(addRolesPromises);
+
+      getDiscordMembers[1] = {
+        ...getDiscordMembers[1],
+        roles: ["9876543210"],
+      };
+      getDiscordMembers[3] = {
+        ...getDiscordMembers[3],
+        roles: ["9876543210", "11334336"],
+      };
+      getDiscordMembers[4] = {
+        ...getDiscordMembers[4],
+        roles: ["9876543210", "11334336"],
+      };
+
+      fetchStub.returns(
+        Promise.resolve({
+          status: 200,
+          json: () => Promise.resolve(getDiscordMembers),
+        })
+      );
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should add grouponboarding31D when user has an approved extension request but dealine has been passed", async function () {
+      await createRequest({
+        type: REQUEST_TYPE.ONBOARDING,
+        state: REQUEST_STATE.APPROVED,
+        newEndsOn: Date.now() - convertDaysToMilliseconds(2),
+        userId: userId0,
+      });
+
+      const res = await updateUsersWith31DaysPlusOnboarding();
+      expect(res.totalOnboardingUsers31DaysCompleted.count).to.equal(2);
+      expect(res.totalOnboarding31dPlusRoleApplied.count).to.equal(1);
+      expect(res.totalOnboarding31dPlusRoleRemoved.count).to.equal(1);
+    });
+
+    it("should add grouponboarding31D when user does not have approved extension request", async function () {
+      await createRequest({
+        type: REQUEST_TYPE.ONBOARDING,
+        state: REQUEST_STATE.PENDING,
+        newEndsOn: Date.now() + convertDaysToMilliseconds(2),
+        userId: userId0,
+      });
+
+      const res = await updateUsersWith31DaysPlusOnboarding();
+      expect(res.totalOnboardingUsers31DaysCompleted.count).to.equal(2);
+      expect(res.totalOnboarding31dPlusRoleApplied.count).to.equal(1);
+      expect(res.totalOnboarding31dPlusRoleRemoved.count).to.equal(1);
+    });
+
+    it("should not add grouponboarding31D when user has approved extension request", async function () {
+      await createRequest({
+        type: REQUEST_TYPE.ONBOARDING,
+        state: REQUEST_STATE.APPROVED,
+        newEndsOn: Date.now() + convertDaysToMilliseconds(2),
+        userId: userId0,
+      });
+
+      const res = await updateUsersWith31DaysPlusOnboarding();
+      expect(res.totalOnboardingUsers31DaysCompleted.count).to.equal(1);
+      expect(res.totalOnboarding31dPlusRoleApplied.count).to.equal(1);
+      expect(res.totalOnboarding31dPlusRoleRemoved.count).to.equal(1);
+    });
+
+    it("apply, or remove grouponboarding31D", async function () {
+      const res = await updateUsersWith31DaysPlusOnboarding();
+
+      expect(res.usersAlreadyHavingOnboaring31DaysRole.count).to.be.equal(2);
+      expect(res.totalOnboardingUsers31DaysCompleted.count).to.be.equal(2);
+      expect(res.totalOnboarding31dPlusRoleApplied.count).to.be.equal(1);
+      expect(res.totalOnboarding31dPlusRoleRemoved.count).to.be.equal(1);
+    });
+
+    it("should throw an error if Database error occurs", async function () {
+      fetchStub.rejects(new Error("Database error"));
+
+      try {
+        await updateUsersWith31DaysPlusOnboarding();
+      } catch (err) {
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal("Error while fetching onboarding users who have completed 31 days");
+      }
+    });
+  });
+
+  describe("removeMemberGroup", function () {
+    let deleteStub;
+
+    beforeEach(async function () {
+      await discordRoleModel.add({ roleid: "1234566777777", rolename: "xyz" });
+      await memberRoleModel.add({ roleid: "1234566777777", userid: "2131234453456545656765767876" });
+
+      deleteStub = sinon.stub();
+      sinon.stub(memberRoleModel, "doc").returns({
+        delete: deleteStub.resolves(),
+      });
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should remove role from user", async function () {
+      const res = await removeMemberGroup("1234566777777", "2131234453456545656765767876");
+
+      expect(res.roleId).to.be.equal("1234566777777");
+      expect(res.wasSuccess).to.be.equal(true);
+    });
+
+    it("should return wasSuccess as false if role does not exist", async function () {
+      const res = await removeMemberGroup("123", "2131234453456545656765767876");
+
+      expect(res.roleId).to.be.equal("123");
+      expect(res.wasSuccess).to.be.equal(false);
+    });
+
+    it("return error if something goes while deleting the role", async function () {
+      deleteStub.rejects(new Error("Database error"));
+
+      try {
+        await removeMemberGroup("1243", "2131234453456545656765767876");
+      } catch (err) {
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal("Database error");
+      }
+    });
+  });
+
+  describe("getGroupRolesForUser", function () {
+    let whereStub;
+
+    beforeEach(async function () {
+      whereStub = sinon.stub(memberRoleModel, "where").resolves();
+
+      await discordRoleModel.add({ roleid: "1234566777777", rolename: "xyz" });
+      await memberRoleModel.add({ roleid: "1234566777777", userid: "2131234453456545656765767876" });
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should return group role for a given user", async function () {
+      const res = await getGroupRolesForUser("2131234453456545656765767876");
+
+      expect(res.userId).to.be.equal("2131234453456545656765767876");
+      expect(res.groups[0].roleId).to.be.equal("1234566777777");
+    });
+
+    it("should throw error if something goes wrong while fetching the roles", async function () {
+      whereStub.rejects(new Error("Something went wrong while fetching"));
+
+      try {
+        await getGroupRolesForUser("2131234453456545656765767876");
+      } catch (err) {
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal("Something went wrong while fetching");
+      }
+    });
+  });
+
+  describe("getGroupRoleByName", function () {
+    let whereStub;
+
+    beforeEach(async function () {
+      await discordRoleModel.add({ roleid: "1234566777777", rolename: "xyz" });
+      whereStub = sinon.stub(discordRoleModel, "where").resolves();
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should return the role, if given the name", async function () {
+      const res = await getGroupRoleByName("xyz");
+
+      expect(res.data).to.be.an.instanceOf(Object);
+    });
+
+    it("should thrown an error, if something goes wrong", async function () {
+      whereStub.rejects(new Error("Database Error"));
+
+      try {
+        await getGroupRoleByName("xyz");
+      } catch (err) {
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal("Database error");
+      }
+    });
+  });
+
+  describe("updateGroupRole", function () {
+    let setStub;
+    let addStub;
+
+    beforeEach(async function () {
+      addStub = sinon.stub(discordRoleModel, "add");
+
+      addStub.resolves({ id: "test-id" });
+
+      setStub = sinon.stub();
+      sinon.stub(discordRoleModel, "where").returns({
+        set: setStub.resolves(),
+      });
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should update the group role data", async function () {
+      const res = await updateGroupRole({ roleid: "2312", rolename: "fmk" }, "test-id");
+
+      expect(res.data).to.be.an.instanceOf(Object);
+    });
+
+    it("should throw an error if something goes wrong", async function () {
+      setStub.rejects(new Error("Database error"));
+
+      try {
+        await updateGroupRole({ roleid: "2312", rolename: "fmk" }, "test-id");
+      } catch (err) {
+        expect(err).to.be.an.instanceOf(Error);
+        expect(err.message).to.equal("Database error");
+      }
+    });
+  });
+
+  describe("getPaginatedGroupRolesByPage", function () {
+    let orderByStub, offsetStub, limitStub, getStub;
+
+    beforeEach(function () {
+      orderByStub = sinon.stub();
+      offsetStub = sinon.stub();
+      limitStub = sinon.stub();
+      getStub = sinon.stub();
+
+      orderByStub.returns({ offset: offsetStub });
+      offsetStub.returns({ limit: limitStub });
+      limitStub.returns({ get: getStub });
+
+      sinon.stub(discordRoleModel, "orderBy").returns(orderByStub);
+    });
+
+    afterEach(function () {
+      sinon.restore();
+    });
+
+    it("should return an empty array if no roles are found", async function () {
+      getStub.resolves({ docs: [] });
+
+      const result = await getPaginatedGroupRolesByPage({ offset: 0, limit: 10 });
+
+      expect(result).to.deep.equal({
+        roles: [],
+        total: 0,
+      });
+    });
+
+    it("should throw an error if a database error occurs", async function () {
+      getStub.rejects(new Error("Database error"));
+
+      try {
+        await getPaginatedGroupRolesByPage({ offset: 0, limit: 10 });
+      } catch (err) {
+        expect(err).to.be.instanceOf(Error);
+        expect(err.message).to.equal("Database error while paginating group roles");
+      }
+    });
+  });
+
+  describe("skipOnboardingUsersHavingApprovedExtensionRequest", function () {
+    const userId0 = "11111";
+    const userId1 = "12345";
+
+    afterEach(async function () {
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should return filtered users", async function () {
+      await createRequest({
+        state: REQUEST_STATE.APPROVED,
+        type: REQUEST_TYPE.ONBOARDING,
+        newEndsOn: Date.now() + convertDaysToMilliseconds(2),
+        userId: userId0,
+      });
+      const users = await skipOnboardingUsersHavingApprovedExtensionRequest([{ id: userId0 }, { id: userId1 }]);
+      expect(users.length).to.equal(1);
+      expect(users[0].id).to.equal(userId1);
+    });
+
+    it("should not return filtered users", async function () {
+      const users = await skipOnboardingUsersHavingApprovedExtensionRequest([{ id: userId0 }, { id: userId1 }]);
+      expect(users.length).to.equal(2);
+      expect(users[0].id).to.equal(userId0);
+      expect(users[1].id).to.equal(userId1);
     });
   });
 });

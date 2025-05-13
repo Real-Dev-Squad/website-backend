@@ -54,7 +54,6 @@ module.exports = () => {
       twitter_id: "whatifi",
       discordJoinedAt: "2023-04-06T01:47:34.488000+00:00",
       phone: "1234567891",
-      email: "abc1@gmail.com",
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
         url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
@@ -95,7 +94,7 @@ module.exports = () => {
       github_id: "sagarbajpai",
       github_display_name: "Sagar Bajpai",
       phone: "1234567890",
-      email: "abc@gmail.com",
+      email: "abc1@gmail.com",
       status: "active",
       tokens: {
         githubAccessToken: "githubAccessToken",
@@ -147,7 +146,7 @@ module.exports = () => {
       github_display_name: "Ankita Bannore",
       isMember: true,
       phone: "1234567890",
-      email: "abc@gmail.com",
+      email: "abc12@gmail.com",
       tokens: {
         githubAccessToken: "githubAccessToken",
       },
@@ -196,7 +195,7 @@ module.exports = () => {
       github_id: "ankur1234",
       github_display_name: "ankur-xyz",
       phone: "1234567890",
-      email: "abc@gmail.com",
+      email: "abc123@gmail.com",
     },
     {
       username: "ritvik",
@@ -427,7 +426,7 @@ module.exports = () => {
       github_display_name: "vinayak-trivedi",
       discordJoinedAt: "2023-04-06T01:47:34.488000+00:00",
       phone: "1234567890",
-      email: "abc@gmail.com",
+      email: "abcd123@gmail.com",
       status: "active",
       tokens: {
         githubAccessToken: "githubAccessToken",
@@ -440,6 +439,33 @@ module.exports = () => {
       picture: {
         publicId: "profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar",
         url: "https://res.cloudinary.com/realdevsquad/image/upload/v1667685133/profile/mtS4DhUvNYsKqI7oCWVB/aenklfhtjldc5ytei3ar.jpg",
+      },
+    },
+    {
+      username: "vikasinghdon",
+      first_name: "Vikas",
+      last_name: "Singh",
+      discordId: "yashu_yashu",
+      yoe: 10,
+      img: "./img.png",
+      linkedin_id: "destroyer",
+      github_id: "pickme",
+      github_display_name: "Vikas Singh",
+      phone: "1234567890",
+      email: "awesome@vikas.com",
+      joined_discord: "2024-07-16T18:21:09.278000+00:00",
+      status: "idle",
+      tokens: {
+        githubAccessToken: "githubAccessToken",
+      },
+      roles: {
+        super_user: false,
+        archived: false,
+        in_discord: true,
+      },
+      picture: {
+        publicId: "",
+        url: "",
       },
     },
   ];

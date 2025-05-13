@@ -198,6 +198,108 @@ describe("Logs", function () {
       expect(Array.from(uniqueTypes)[0]).to.equal("REQUEST_CREATED");
     });
 
+    it("Should throw error when start date is greater than end date in dev mode", async function () {
+      await cleanDb();
+
+      const startDate = Math.floor(Date.now() / 1000);
+      const endDate = startDate - 86400;
+
+      try {
+        await logsQuery.fetchAllLogs({
+          dev: "true",
+          startDate: startDate.toString(),
+          endDate: endDate.toString(),
+          size: 3,
+        });
+        throw new Error("Expected fetchAllLogs to throw an error, but it did not.");
+      } catch (error) {
+        expect(error).to.be.instanceOf(Error);
+        expect(error.message).to.equal("Start date cannot be greater than end date.");
+        expect(error).to.have.property("statusCode", 400);
+      }
+    });
+
+    it("Should return logs within the specified date range in dev mode", async function () {
+      await cleanDb();
+
+      const endDate = Math.floor(Date.now() / 1000);
+      const startDate = endDate - 86400 * 7;
+      const result = await logsQuery.fetchAllLogs({
+        dev: "true",
+        startDate: startDate.toString(),
+        endDate: endDate.toString(),
+        size: 3,
+      });
+
+      expect(result).to.have.property("allLogs");
+      if (result.allLogs.length > 0) {
+        result.allLogs.forEach((log) => {
+          expect(log).to.have.property("timestamp").that.is.a("number");
+          expect(log.timestamp).to.be.at.least(startDate);
+          expect(log.timestamp).to.be.at.most(endDate);
+        });
+      }
+    });
+
+    it("Should ignore date filters when not in dev mode", async function () {
+      const endDate = Math.floor(Date.now() / 1000);
+      const startDate = endDate - 86400 * 7;
+
+      const result = await logsQuery.fetchAllLogs({
+        dev: "false",
+        startDate: startDate.toString(),
+        endDate: endDate.toString(),
+        size: 3,
+      });
+
+      expect(result).to.have.property("allLogs");
+      expect(result).to.have.property("prev");
+      expect(result).to.have.property("next");
+      expect(result).to.have.property("page");
+    });
+
+    it("Should handle only start date filter in dev mode", async function () {
+      const startDate = Math.floor(Date.now() / 1000) - 86400 * 14;
+
+      const result = await logsQuery.fetchAllLogs({
+        dev: "true",
+        startDate: startDate.toString(),
+        size: 3,
+      });
+
+      expect(result).to.have.property("allLogs");
+      expect(result).to.have.property("prev");
+      expect(result).to.have.property("next");
+
+      if (result.allLogs.length > 0) {
+        result.allLogs.forEach((log) => {
+          expect(log).to.have.property("timestamp").that.is.a("number");
+          expect(log.timestamp).to.be.at.least(startDate);
+        });
+      }
+    });
+
+    it("Should handle only end date filter in dev mode", async function () {
+      const endDate = Math.floor(Date.now() / 1000);
+
+      const result = await logsQuery.fetchAllLogs({
+        dev: "true",
+        endDate: endDate.toString(),
+        size: 3,
+      });
+
+      expect(result).to.have.property("allLogs");
+      expect(result).to.have.property("prev");
+      expect(result).to.have.property("next");
+
+      if (result.allLogs.length > 0) {
+        result.allLogs.forEach((log) => {
+          expect(log).to.have.property("timestamp").that.is.a("number");
+          expect(log.timestamp).to.be.at.most(endDate);
+        });
+      }
+    });
+
     it("Should return null if no logs are presnet  the logs for specific types", async function () {
       await cleanDb();
       const result = await logsQuery.fetchAllLogs({});

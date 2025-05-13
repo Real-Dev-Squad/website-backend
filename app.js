@@ -29,12 +29,13 @@ app.use(function (req, res, next) {
 });
 
 // error handler
-app.use(function (err, req, res, next) {
+app.use(function (err, req, res, _next) {
   if (isMulterError(err)) {
-    multerErrorHandling(err, req, res);
-  } else {
-    res.boom.notFound(err);
+    return multerErrorHandling(err, req, res);
   }
+  return res.boom.boomify(err, {
+    statusCode: err.statusCode,
+  });
 });
 
 module.exports = app;
