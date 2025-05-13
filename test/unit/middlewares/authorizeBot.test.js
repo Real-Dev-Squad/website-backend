@@ -184,9 +184,7 @@ describe("Middleware | Authorize Bot", function () {
         },
       };
 
-      const response = {};
-
-      authorizeBot.verifyDiscordBot(request, response, nextSpy);
+      authorizeBot.verifyDiscordBot(request, {}, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(true);
     });
 
@@ -199,9 +197,7 @@ describe("Middleware | Authorize Bot", function () {
         },
       };
 
-      const response = {};
-
-      authorizeBot.verifyDiscordBot(request, response, nextSpy);
+      authorizeBot.verifyDiscordBot(request, {}, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(true);
     });
 
@@ -234,9 +230,7 @@ describe("Middleware | Authorize Bot", function () {
         },
       };
 
-      const response = {};
-
-      authorizeBot.verifyDiscordBot(request, response, nextSpy);
+      authorizeBot.verifyDiscordBot(request, {}, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(false);
     });
   });
