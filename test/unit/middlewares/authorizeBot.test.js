@@ -223,15 +223,20 @@ describe("Middleware | Authorize Bot", function () {
 
     it("should return unauthorized when token is valid but not for cloudflare worker", function () {
       const jwtToken = bot.generateToken({ name: "Invalid" });
-
       const request = {
         headers: {
           authorization: `Bearer ${jwtToken}`,
         },
       };
 
-      authorizeBot.verifyDiscordBot(request, {}, nextSpy);
+      const response = {
+        boom: {
+          unauthorized: sinon.spy(),
+        },
+      };
+      authorizeBot.verifyDiscordBot(request, response, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(false);
+      expect(response.boom.unauthorized.calledOnce).to.be.equal(true);
     });
   });
 });
