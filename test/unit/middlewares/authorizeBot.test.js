@@ -143,7 +143,6 @@ describe("Middleware | Authorize Bot", function () {
 
       const response = {
         boom: {
-          badRequest: boomBadRequestSpy,
           unauthorized: boomUnauthorizedSpy,
         },
       };
@@ -218,7 +217,7 @@ describe("Middleware | Authorize Bot", function () {
 
       authorizeBot.verifyDiscordBot(request, response, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(false);
-      expect(response.boom.unauthorized.calledOnce).to.be.equal(true);
+      expect(boomUnauthorizedSpy.calledOnce).to.be.equal(true);
     });
 
     it("should return unauthorized when token is valid but not for cloudflare worker", function () {
