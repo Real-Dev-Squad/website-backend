@@ -39,66 +39,75 @@ export const createOooRequestController = async (
   req: OooRequestCreateRequest,
   res: OooRequestResponse
 ): Promise<OooRequestResponse> => {
-
   const requestBody = req.body;
 
   const userId = req?.userData?.id;
   const { dev } = req.query;
   const isDev = dev === 'true';
   const stateStatus = isDev ? 'status' : 'state';
+
   if (!userId) {
     return res.boom.unauthorized();
   }
 
   try {
-    const latestOooRequest: OooStatusRequest = await getRequestByKeyValues({ requestedBy: userId, type: REQUEST_TYPE.OOO, [stateStatus]: REQUEST_STATE.PENDING });
+    const latestOooRequest: OooStatusRequest = await getRequestByKeyValues({
+      requestedBy: userId,
+      type: REQUEST_TYPE.OOO,
+      [stateStatus]: REQUEST_STATE.PENDING,
+    });
 
     if (latestOooRequest && latestOooRequest[stateStatus] === REQUEST_STATE.PENDING) {
       return res.boom.badRequest(REQUEST_ALREADY_PENDING);
-
-  const { id: userId, username } = req.userData;
-  const isUserPartOfDiscord = req.userData.roles.in_discord;
-  const dev = req.query.dev === "true";
-
-  if (!dev) return res.boom.notImplemented("Feature not implemented");
-
-  if (!isUserPartOfDiscord) {
-    return res.boom.forbidden(UNAUTHORIZED_TO_CREATE_OOO_REQUEST);
-  }
-
-  try {
-    const userStatus = await getUserStatus(userId);
-    const validationResponse = await validateUserStatus(userId, userStatus);
-
-    if (validationResponse) {
-      if (validationResponse.error === USER_STATUS_NOT_FOUND) {
-          return res.boom.notFound(validationResponse.error);
-      }
-      if (validationResponse.error === OOO_STATUS_ALREADY_EXIST) {
-          return res.boom.forbidden(validationResponse.error);
-      }
-
     }
 
-    const latestOooRequest: OooStatusRequest = await getRequestByKeyValues({
-        userId,
+    const { id: uId, username } = req.userData;
+    const isUserPartOfDiscord = req.userData.roles.in_discord;
+    const dev = req.query.dev === "true";
+
+    if (!dev) return res.boom.notImplemented("Feature not implemented");
+
+    if (!isUserPartOfDiscord) {
+      return res.boom.forbidden(UNAUTHORIZED_TO_CREATE_OOO_REQUEST);
+    }
+
+    try {
+      const userStatus = await getUserStatus(uId);
+      const validationResponse = await validateUserStatus(uId, userStatus);
+
+      if (validationResponse) {
+        if (validationResponse.error === USER_STATUS_NOT_FOUND) {
+          return res.boom.notFound(validationResponse.error);
+        }
+        if (validationResponse.error === OOO_STATUS_ALREADY_EXIST) {
+          return res.boom.forbidden(validationResponse.error);
+        }
+      }
+
+      const latestOoo: OooStatusRequest = await getRequestByKeyValues({
+        userId: uId,
         type: REQUEST_TYPE.OOO,
         status: REQUEST_STATE.PENDING,
-    });
+      });
 
-    if (latestOooRequest) {
-        await addLog(logType.PENDING_REQUEST_FOUND,
-            { userId, oooRequestId: latestOooRequest.id },
-            { message: REQUEST_ALREADY_PENDING }
+      if (latestOoo) {
+        await addLog(
+          logType.PENDING_REQUEST_FOUND,
+          { userId: uId, oooRequestId: latestOoo.id },
+          { message: REQUEST_ALREADY_PENDING }
         );
         return res.boom.conflict(REQUEST_ALREADY_PENDING);
+      }
+
+      await createOooRequest(requestBody, username, uId);
+
+      return res.status(201).json({
+        message: REQUEST_CREATED_SUCCESSFULLY,
+      });
+    } catch (err) {
+      logger.error(ERROR_WHILE_CREATING_REQUEST, err);
+      return res.boom.badImplementation(ERROR_WHILE_CREATING_REQUEST);
     }
-
-    await createOooRequest(requestBody, username, userId);
-
-    return res.status(201).json({
-      message: REQUEST_CREATED_SUCCESSFULLY,
-    });
   } catch (err) {
     logger.error(ERROR_WHILE_CREATING_REQUEST, err);
     return res.boom.badImplementation(ERROR_WHILE_CREATING_REQUEST);
@@ -139,7 +148,6 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
     await addLog(requestLog.type, requestLog.meta, requestLog.body);
     if (requestResult[stateStatus] === REQUEST_STATE.APPROVED) {
       const requestData = await getRequests({ id: requestId });
-
       if (requestData) {
         const { from, until, requestedBy, message } = requestData as any;
         const userFutureStatusData = {
