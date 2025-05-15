@@ -58,12 +58,15 @@ let testArchivedUserId: string;
 
 let stateStatus: string;
 
+
 before(async () => {
-    const flag = chai.request(app).get("/requests").query({ dev: true }) as any;
-    const { qs } = flag;
-    const isDev = qs.dev === "true";
-    const stateStatus = isDev ? 'status' : 'state';
+  const res = await chai.request(app).get("/requests").query({ dev: true });
+  const devValue = (res as any).request.qs.dev;
+  const isDev = devValue === true || devValue === "true";
+  stateStatus = isDev ? "status" : "state";
 });
+
+console.log("stateStatus in test file : ", stateStatus);
 
 describe("/requests OOO", function () {
 
