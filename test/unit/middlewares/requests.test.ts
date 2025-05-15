@@ -65,7 +65,11 @@ describe("Create Request Validators", function () {
           dev: "true",
         },
       };
-      res = {};
+      res = {
+        boom: {
+          badRequest: sinon.spy(),
+        },
+      };
       await updateRequestsMiddleware(req as any, res as any, nextSpy);
       expect(nextSpy.calledOnce).to.equal(true);
     });
@@ -90,7 +94,9 @@ describe("Create Request Validators", function () {
 
   describe("Get Request Validator", function () {
     it("Should pass validation for a valid get request", async function () {
-      req = {};
+      req = {
+        dev: true,
+      };
       res = {};
       await getRequestsMiddleware(req as any, res as any, nextSpy);
       expect(nextSpy.calledOnce).to.equal(true);

@@ -50,6 +50,8 @@ export const updateRequestsMiddleware = async (
   res: CustomResponse,
   next: NextFunction
 ) => {
+  const isDev = req?.query?.dev === "true";
+  const stateStatus = isDev? 'status' : 'state';
   const schema = joi
   .object()
   .strict()
@@ -58,7 +60,7 @@ export const updateRequestsMiddleware = async (
       .messages({
         "string.empty": "reason cannot be empty",
       }),
-    state: joi
+    [stateStatus]: joi
       .string()
       .valid(REQUEST_STATE.APPROVED, REQUEST_STATE.REJECTED)
       .required()
@@ -80,6 +82,8 @@ export const updateRequestsMiddleware = async (
 };
 
 export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: OooRequestResponse, next: NextFunction) => {
+  const isDev = req?.query?.dev === "true";
+  const stateStatus = isDev ? 'status' : 'state';
   const schema = joi.object().keys({
     dev: joi.bool().sensitive().optional(), // TODO: Remove this validator once feature is tested and ready to be used
     id: joi.string().optional(),
@@ -88,7 +92,7 @@ export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: O
       .valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION, REQUEST_TYPE.TASK, REQUEST_TYPE.ALL, REQUEST_TYPE.ONBOARDING)
       .optional(),
     requestedBy: joi.string().insensitive().optional(),
-    state: joi
+    [stateStatus]: joi
       .string()
       .valid(REQUEST_STATE.APPROVED, REQUEST_STATE.PENDING, REQUEST_STATE.REJECTED)
       .optional(),
