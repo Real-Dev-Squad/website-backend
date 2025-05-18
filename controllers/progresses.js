@@ -220,6 +220,8 @@ const getProgressRangeData = async (req, res) => {
  * @property {string} date - The iso format date of the query.
  */
 
+
+
 /**
  * @typedef {Object} ProgressDocument
  * @property {string} id - The id of the progress document.
