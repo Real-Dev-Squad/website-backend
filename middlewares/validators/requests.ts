@@ -65,7 +65,7 @@ export const updateRequestsMiddleware = async (
       .valid(REQUEST_STATE.APPROVED, REQUEST_STATE.REJECTED)
       .required()
       .messages({
-        "any.only": `{${stateStatus}} must be APPROVED or REJECTED`,
+        "any.only": "state must be APPROVED or REJECTED",
       }),
     type: joi.string().valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION, REQUEST_TYPE.ONBOARDING).required(),
     message: joi.string().optional()

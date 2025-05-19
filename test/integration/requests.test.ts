@@ -89,14 +89,6 @@ describe("/requests OOO", function () {
 
     const { id: approveOooId }: any = await updateRequest(oooRequestId, { [stateStatus]: REQUEST_STATE.APPROVED }, superUserId, REQUEST_TYPE.OOO);
     approvedOooRequestId = approveOooId;
-
-    const response = await updateRequest(
-      oooRequestId,
-      { [stateStatus]: REQUEST_STATE.APPROVED },
-      superUserId,
-      REQUEST_TYPE.OOO
-    );
-    approvedOooRequestId = response?.id;
     authToken = authService.generateAuthToken({ userId });
     superUserToken = authService.generateAuthToken({ userId: superUserId });
   });
@@ -581,6 +573,7 @@ describe("/requests OOO", function () {
     });
 
     it("should return 400 if request is already approved", function (done) {
+      console.log("approvedOooRequestId test : ", approvedOooRequestId);
       chai
         .request(app)
         .put(`/requests/${approvedOooRequestId}`)
@@ -590,6 +583,7 @@ describe("/requests OOO", function () {
           expect(res).to.have.status(400);
           expect(res.body).to.have.property("message");
           expect(res.body.message).to.equal(REQUEST_ALREADY_APPROVED);
+          console.log(res.body);
           done();
         });
     });
