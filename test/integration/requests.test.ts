@@ -66,7 +66,6 @@ before(async () => {
   stateStatus = isDev ? "status" : "state";
 });
 
-console.log("stateStatus in test file : ", stateStatus);
 
 describe("/requests OOO", function () {
 
@@ -93,7 +92,7 @@ describe("/requests OOO", function () {
 
     const response = await updateRequest(
       oooRequestId,
-      { state: REQUEST_STATE.APPROVED },
+      { [stateStatus]: REQUEST_STATE.APPROVED },
       superUserId,
       REQUEST_TYPE.OOO
     );
@@ -284,7 +283,7 @@ describe("/requests OOO", function () {
         .request(app)
         .post(requestsEndpoint)
         .set("cookie", `${cookieName}=${authToken}`)
-        .send({ ...validOooStatusRequests, [stateStatus]: REQUEST_STATE.APPROVED })
+        .send({ ...validOooStatusRequests, status: REQUEST_STATE.APPROVED })
         .end(function (err, res) {
           if (err) return done(err);
           expect(res).to.have.status(400);

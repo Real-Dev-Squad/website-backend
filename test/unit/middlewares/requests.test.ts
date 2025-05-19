@@ -15,9 +15,10 @@ import {
   invalidOooStatusUpdate,
 } from "../../fixtures/oooRequest/oooRequest";
 import { OooRequestCreateRequest, OooRequestResponse } from "../../../types/oooRequest";
-import { REQUEST_TYPE } from "../../../constants/requests";
+import { REQUEST_STATE, REQUEST_TYPE } from "../../../constants/requests";
 import { convertDaysToMilliseconds } from "../../../utils/time";
 import { updateOnboardingExtensionRequestValidator } from "../../../middlewares/validators/onboardingExtensionRequest";
+import app from "../../../app";
 
 describe("Create Request Validators", function () {
   let req: any;
@@ -59,10 +60,16 @@ describe("Create Request Validators", function () {
 
   describe("Update Request Validator", function () {
     it("Should pass validation for a valid update ooo request", async function () {
+      console.log("validOooStatusUpdate", validOooStatusUpdate);
       req = {
-        body: validOooStatusUpdate,
+        body: {
+          status: REQUEST_STATE.APPROVED,
+          reason: "Welcome back! Enjoy the conference.",
+          type: REQUEST_TYPE.OOO
+        },
         query: {
           dev: "true",
+          status: REQUEST_STATE.APPROVED,
         },
       };
       res = {
@@ -123,26 +130,26 @@ describe("Create Request Validators", function () {
 
 describe("updateRequestValidator", () => {
   let req, res, next: sinon.SinonSpy;
-  
+
   beforeEach(() => {
-      next = sinon.spy();
-      res = { boom: { badRequest: sinon.spy() } }
+    next = sinon.spy();
+    res = { boom: { badRequest: sinon.spy() } }
   });
 
   afterEach(() => {
-      sinon.restore();
+    sinon.restore();
   })
 
   it("should call next for correct type", async () => {
-      req = { body: { type: REQUEST_TYPE.ONBOARDING, newEndsOn: Date.now() + convertDaysToMilliseconds(2) } };
-      await updateRequestValidator(req, res, next);
-      expect(next.calledOnce).to.be.true;
+    req = { body: { type: REQUEST_TYPE.ONBOARDING, newEndsOn: Date.now() + convertDaysToMilliseconds(2) } };
+    await updateRequestValidator(req, res, next);
+    expect(next.calledOnce).to.be.true;
   })
 
   it("should not call next for incorrect type", async () => {
-      req = { body: { type: REQUEST_TYPE.OOO } };
-      await updateRequestValidator(req, res, next);
-      expect(next.notCalled).to.be.true;
+    req = { body: { type: REQUEST_TYPE.OOO } };
+    await updateRequestValidator(req, res, next);
+    expect(next.notCalled).to.be.true;
   })
 })
 
@@ -150,47 +157,47 @@ describe("updateOnboardingExtensionRequestValidator", () => {
   let req, res, next: sinon.SinonSpy;
 
   beforeEach(() => {
-      next = sinon.spy();
-      res = { boom: { badRequest: sinon.spy() } };
+    next = sinon.spy();
+    res = { boom: { badRequest: sinon.spy() } };
   });
 
   afterEach(() => {
-      sinon.restore();
+    sinon.restore();
   })
 
   it("should not call next for incorrect type ", async () => {
-      req = {
-          body: {
-              type: REQUEST_TYPE.OOO,
-              newEndsOn: Date.now() + convertDaysToMilliseconds(3)
-          }
+    req = {
+      body: {
+        type: REQUEST_TYPE.OOO,
+        newEndsOn: Date.now() + convertDaysToMilliseconds(3)
       }
+    }
 
-      await updateOnboardingExtensionRequestValidator(req, res, next);
-      expect(next.notCalled).to.be.true;
+    await updateOnboardingExtensionRequestValidator(req, res, next);
+    expect(next.notCalled).to.be.true;
   });
 
   it("should not call next for incorrect newEndsOn ", async () => {
-      req = {
-          body: {
-              type: REQUEST_TYPE.ONBOARDING,
-              newEndsOn: Date.now() - convertDaysToMilliseconds(1)
-          }
+    req = {
+      body: {
+        type: REQUEST_TYPE.ONBOARDING,
+        newEndsOn: Date.now() - convertDaysToMilliseconds(1)
       }
+    }
 
-      await updateOnboardingExtensionRequestValidator(req, res, next);
-      expect(next.notCalled).to.be.true;
+    await updateOnboardingExtensionRequestValidator(req, res, next);
+    expect(next.notCalled).to.be.true;
   });
 
   it("should call next for successful validaton", async () => {
-      req = {
-          body: {
-              type: REQUEST_TYPE.ONBOARDING,
-              newEndsOn: Date.now() + convertDaysToMilliseconds(3)
-          }
+    req = {
+      body: {
+        type: REQUEST_TYPE.ONBOARDING,
+        newEndsOn: Date.now() + convertDaysToMilliseconds(3)
       }
+    }
 
-      await updateOnboardingExtensionRequestValidator(req, res, next);
-      expect(next.calledOnce).to.be.true;
+    await updateOnboardingExtensionRequestValidator(req, res, next);
+    expect(next.calledOnce).to.be.true;
   });
 })

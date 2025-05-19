@@ -70,7 +70,7 @@ export const updateOooRejectedRequests = {
 };
 
 export const validOooStatusUpdate ={
-  status: REQUEST_STATE.APPROVED,
+  state: REQUEST_STATE.APPROVED, 
   reason: "Welcome back! Enjoy the conference.",
   type:REQUEST_TYPE.OOO
 }
