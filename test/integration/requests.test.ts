@@ -15,7 +15,7 @@ import {
   validOooStatusRequests,
   validOooStatusUpdate,
   createOooRequests2,
-  acknowledgeOooRequest,
+  testAcknowledgeOooRequest,
   createOooRequests3,
 } from "../fixtures/oooRequest/oooRequest";
 import { createRequest, updateRequest } from "../../models/requests";
@@ -30,7 +30,7 @@ import {
   REQUEST_REJECTED_SUCCESSFULLY,
   REQUEST_ALREADY_REJECTED,
   INVALID_REQUEST_TYPE,
-  // UNAUTHORIZED_TO_ACKNOWLEDGE_OOO_REQUEST,
+  UNAUTHORIZED_TO_UPDATE_REQUEST,
   UNAUTHORIZED_TO_CREATE_OOO_REQUEST,
   USER_STATUS_NOT_FOUND,
   OOO_STATUS_ALREADY_EXIST,
@@ -323,7 +323,7 @@ describe("/requests OOO", function () {
     });
   });
 
-  describe.skip("PATCH /requests/:id", function () {
+  describe("PATCH /requests/:id", function () {
     let testOooRequest;
     let onboardingRequest;
     let approvedOooRequest;
@@ -352,7 +352,7 @@ describe("/requests OOO", function () {
       chai
         .request(app)
         .patch(`/requests/${testOooRequest.id}?dev=true`)
-        .send(acknowledgeOooRequest)
+        .send(testAcknowledgeOooRequest)
         .end(function (err, res) {
           expect(res).to.have.status(401);
           expect(res.body.error).to.equal("Unauthorized");
@@ -366,7 +366,7 @@ describe("/requests OOO", function () {
         .request(app)
         .patch(`/requests/${testOooRequest.id}?dev=false`)
         .set("cookie", `${cookieName}=${superUserToken}`)
-        .send(acknowledgeOooRequest)
+        .send(testAcknowledgeOooRequest)
         .end(function (err, res) {
           if (err) {
             return done(err);
@@ -382,7 +382,7 @@ describe("/requests OOO", function () {
         .request(app)
         .patch(`/requests/11111111111111?dev=true`)
         .set("cookie", `${cookieName}=${superUserToken}`)
-        .send(acknowledgeOooRequest)
+        .send(testAcknowledgeOooRequest)
         .end(function (err, res) {
           if (err) {
             return done(err);
@@ -398,13 +398,13 @@ describe("/requests OOO", function () {
         .request(app)
         .patch(`/requests/${testOooRequest.id}?dev=true`)
         .set("cookie", `${cookieName}=${authToken}`)
-        .send(acknowledgeOooRequest)
+        .send(testAcknowledgeOooRequest)
         .end(function (err, res) {
           if (err) {
             return done(err);
           }
           expect(res.statusCode).to.equal(403);
-          // expect(res.body.message).to.equal(UNAUTHORIZED_TO_ACKNOWLEDGE_OOO_REQUEST);
+          expect(res.body.message).to.equal(UNAUTHORIZED_TO_UPDATE_REQUEST);
           done();
         });
     });
@@ -414,7 +414,7 @@ describe("/requests OOO", function () {
         .request(app)
         .patch(`/requests/${approvedOooRequest.id}?dev=true`)
         .set("cookie", `${cookieName}=${superUserToken}`)
-        .send(acknowledgeOooRequest)
+        .send(testAcknowledgeOooRequest)
         .end(function (err, res) {
           if (err) {
             return done(err);
@@ -430,7 +430,7 @@ describe("/requests OOO", function () {
         .request(app)
         .patch(`/requests/${rejectedOooRequest.id}?dev=true`)
         .set("cookie", `${cookieName}=${superUserToken}`)
-        .send(acknowledgeOooRequest)
+        .send(testAcknowledgeOooRequest)
         .end(function (err, res) {
           if (err) {
             return done(err);
@@ -446,7 +446,7 @@ describe("/requests OOO", function () {
         .request(app)
         .patch(`/requests/${onboardingRequest.id}?dev=true`)
         .set("cookie", `${cookieName}=${superUserToken}`)
-        .send(acknowledgeOooRequest)
+        .send(testAcknowledgeOooRequest)
         .end(function (err, res) {
           if (err) {
             return done(err);
@@ -462,7 +462,7 @@ describe("/requests OOO", function () {
         .request(app)
         .patch(`/requests/${testOooRequest.id}?dev=true`)
         .set("cookie", `${cookieName}=${superUserToken}`)
-        .send(acknowledgeOooRequest)
+        .send(testAcknowledgeOooRequest)
         .end(function (err, res) {
           if (err) {
             return done(err);
@@ -478,7 +478,7 @@ describe("/requests OOO", function () {
         .request(app)
         .patch(`/requests/${testOooRequest.id}?dev=true`)
         .set("cookie", `${cookieName}=${superUserToken}`)
-        .send({...acknowledgeOooRequest, status: REQUEST_STATE.REJECTED})
+        .send({...testAcknowledgeOooRequest, status: REQUEST_STATE.REJECTED})
         .end(function (err, res) {
           if (err) {
             return done(err);
@@ -495,7 +495,7 @@ describe("/requests OOO", function () {
         .request(app)
         .patch(`/requests/${testOooRequest.id}?dev=true`)
         .set("cookie", `${cookieName}=${superUserToken}`)
-        .send(acknowledgeOooRequest)
+        .send(testAcknowledgeOooRequest)
         .end(function (err, res) {
           if (err) return done(err);
           expect(res.statusCode).to.equal(500);
