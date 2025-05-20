@@ -545,7 +545,7 @@ describe("Tasks", function () {
     it("Should get tasks with COMPLETED status task when fetching task of status Done", async function () {
       await tasks.updateTask(
         {
-          status: "COMPLETED",
+          status: "DONE",
         },
         taskId2
       );
@@ -560,7 +560,7 @@ describe("Tasks", function () {
       const tasksData = res.body.tasks ?? [];
       let countCompletedTask = 0;
       tasksData.forEach((task, i) => {
-        if (task.status === "COMPLETED") {
+        if (task.status === "DONE") {
           countCompletedTask += 1;
         }
       });
@@ -605,7 +605,7 @@ describe("Tasks", function () {
 
   describe("GET /tasks/self", function () {
     it("Should return all the completed tasks of the user when query 'completed' is true", function (done) {
-      const { COMPLETED } = TASK_STATUS;
+      const { DONE } = TASK_STATUS;
       chai
         .request(app)
         .get("/tasks/self?completed=true")
@@ -620,7 +620,7 @@ describe("Tasks", function () {
             "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:username to get the task details."
           );
           expect(res.body).to.be.a("array");
-          expect(res.body[0].status).to.equal(COMPLETED);
+          expect(res.body[0].status).to.equal(DONE);
 
           return done();
         });
