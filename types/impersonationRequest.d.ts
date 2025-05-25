@@ -13,6 +13,7 @@ export type ImpersonationRequest={
     requestedFor:string;
     userId: string;
     reason: string;
+    message?:string;
     impersonatedUserId:string;
     createdAt:Timestamp;
     updatedAt:Timestamp;
@@ -35,6 +36,17 @@ export type CreateImpersonationRequestModelBody={
     impersonatedUserId:string;
 }
 
+export type UpdateImpersonationRequestDataBody={
+    startedAt?:Timestamp;
+    endedAt?:Timestamp;
+    isImpersonationAttempted?:boolean;
+}
+
+export type UpdateImpersonationRequestStatusBody={
+    status:REQUEST_STATUS.APPROVED | REQUEST_STATUS.REJECTED;
+    message?:string;
+}
+
 export type ImpersonationRequestQuery = RequestQuery & {
     dev?: string
 };
@@ -43,10 +55,6 @@ export type ImpersonationRequestResponse=Response & {
     boom : Boom
 };
 
-export type UpdateImpersonationRequestStatusBody={
-    status:REQUEST_STATUS.APPROVED | REQUEST_STATUS.REJECTED;
-    message?:string;
-}
 
 export type RequestParams={
     id:string;
@@ -59,9 +67,9 @@ export type CreateImpersonationRequest=Request & {
    query:ImpersonationRequestQuery
 };
 
-export type UpdateImpersonationRequest=Request&{
+export type UpdateImpersonationRequestStatus=Request&{
     userData:userData;
-    body:UpdateImpersonationRequestBody;
+    body:UpdateImpersonationRequestStatusBody;
     query:ImpersonationRequestQuery;
     params:RequestParams;
 }
