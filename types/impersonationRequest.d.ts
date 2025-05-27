@@ -1,83 +1,81 @@
 import { Request, Response } from "express";
-import { REQUEST_STATUS } from "../constants/impersonationRequests";
+import { REQUEST_STATE } from "../constants/requests";
 import { Boom } from "express-boom";
 import {RequestQuery } from "./requests";
 import { userData } from "./global";
+import { Timestamp } from "firebase-admin/firestore";
 
-
-export type ImpersonationRequest={
+export type ImpersonationRequest = {
     id: string;
-    status: REQUEST_STATUS;
-    isImpersonationAttempted:boolean;
-    requestedBy: string;
-    requestedFor:string;
+    status: REQUEST_STATE;
+    isImpersonationStarted: boolean;
+    createdBy: string;
+    createdFor: string;
     userId: string;
     reason: string;
-    message?:string;
-    impersonatedUserId:string;
-    createdAt:Timestamp;
-    updatedAt:Timestamp;
-    startedAt?:Timestamp;
-    endedAt?:TimeStamp;
+    message?: string;
+    impersonatedUserId: string;
+    createdAt: Timestamp;
+    updatedAt: Timestamp;
+    startedAt?: Timestamp;
+    endedAt?: Timestamp;
 }
 
-export type CreateImpersonationRequestBody={
-   impersonatedUserId:string;
-   reason:string;
+export type CreateImpersonationRequestBody = {
+   impersonatedUserId: string;
+   reason: string;
 };
 
-export type CreateImpersonationRequestModelBody={
-    status: REQUEST_STATUS;
-    isImpersonationAttempted:boolean;
-    requestedBy: string;
-    requestedFor: string;
+export type CreateImpersonationRequestModelBody = {
+    status: REQUEST_STATE;
+    isImpersonationStarted: boolean;
+    createdBy: string;
+    createdFor: string;
     userId: string;
     reason: string;
-    impersonatedUserId:string;
+    impersonatedUserId: string;
 }
 
-export type UpdateImpersonationRequestDataBody={
-    startedAt?:Timestamp;
-    endedAt?:Timestamp;
-    isImpersonationAttempted?:boolean;
+export type UpdateImpersonationRequestDataBody = {
+    startedAt?: Timestamp;
+    endedAt: Timestamp;
+    isImpersonationAttempted?: boolean;
 }
 
-export type UpdateImpersonationRequestStatusBody={
-    status:REQUEST_STATUS.APPROVED | REQUEST_STATUS.REJECTED;
-    message?:string;
+export type UpdateImpersonationRequestStatusBody = {
+    status: REQUEST_STATE.APPROVED | REQUEST_STATE.REJECTED;
+    message?: string;
 }
 
 export type ImpersonationRequestQuery = RequestQuery & {
-    dev?: string
+    dev?: string;
 };
 
-export type ImpersonationRequestResponse=Response & {
-    boom : Boom
+export type ImpersonationRequestResponse = Response & {
+    boom: Boom;
 };
 
-
-export type RequestParams={
-    id:string;
+export type RequestParams = {
+    id: string;
 }
 
-
-export type CreateImpersonationRequest=Request & {
+export type CreateImpersonationRequest = Request & {
    userData: userData;
-   body:CreateImpersonationRequestBody;
-   query:ImpersonationRequestQuery
+   body: CreateImpersonationRequestBody;
+   query: ImpersonationRequestQuery;
 };
 
-export type UpdateImpersonationRequestStatus=Request&{
-    userData:userData;
-    body:UpdateImpersonationRequestStatusBody;
-    query:ImpersonationRequestQuery;
-    params:RequestParams;
+export type UpdateImpersonationRequestStatus = Request & {
+    userData: userData;
+    body: UpdateImpersonationRequestStatusBody;
+    query: ImpersonationRequestQuery;
+    params: RequestParams;
 }
 
-export type PaginatedImpersonationRequests={
-    allRequests:ImpersonationRequest[];
-    next:string;
-    prev:string;
-    page:number;
-    count:number;
+export type PaginatedImpersonationRequests = {
+    allRequests: ImpersonationRequest[];
+    next: string;
+    prev: string;
+    page: number;
+    count: number;
 }

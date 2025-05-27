@@ -69,15 +69,8 @@ export const INVALID_REQUEST_DEADLINE = "New deadline of the request must be gre
 export const REQUEST_UPDATED_SUCCESSFULLY = "Request updated successfully";
 export const UNAUTHORIZED_TO_UPDATE_REQUEST = "Unauthorized to update request";
 
-export const FEATURE_NOT_IMPLEMENTED="Feature not implemented"
+export const FEATURE_NOT_IMPLEMENTED = "Feature not implemented";
 
-export const IMPERSONATION_NOT_COMPLETED = "Please complete impersonation, before creating a new request"
-export const USER_NOT_FOUND="User not found"
-export const UNAUTHORIZED_TO_UPDATE_IMPERSONATION_REQUEST = "You are not authorized to approve/reject this request"
-export const IMPERSONATION_ALREADY_ATTEMPTED="Impersonation has already been attempted"
-export const UNAUTHORIZED_TO_START_IMPERSONATION = "You are not the super-user who created this request"
-export const UNAUTHORIZED_TO_STOP_IMPERSONATION = "You are not authorized to stop this impersonation session"
-export const IMPERSONATION_REQUEST_NOT_APPROVED = "Impersonation request is not approved yet, please wait for approval before starting impersonation"
-export const ERROR_WHILE_STARTING_IMPERSONATION = "Error while starting impersonation";
-export const ERROR_WHILE_STOPPING_IMPERSONATION = "Error while stopping impersonation";
-export const ERROR_WHILE_HANDLING_IMPERSONATION_REQUEST = "Error while handling impersonation request";
+export const IMPERSONATION_NOT_COMPLETED = "Please complete impersonation before creating a new request";
+export const IMPERSONATION_ALREADY_ATTEMPTED = "No active request is available for impersonation";
+export const IMPERSONATION_REQUEST_NOT_APPROVED = "Awaiting approval for impersonation request";
