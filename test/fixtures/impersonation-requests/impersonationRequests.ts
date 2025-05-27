@@ -2,7 +2,7 @@ import { REQUEST_STATE } from "../../../constants/requests";
 
 export const createImpersonationRequestBody = {
   impersonatedUserId: "user123",
-  reason: "Debugging user issue"
+  reason: "Debugging user issue",
 };
 
 export const ImpersonationRequest1= {
@@ -12,7 +12,7 @@ export const ImpersonationRequest1= {
   createdFor: "suvidh-kaushik",
   userId: "userId123",
   reason: "He asked",
-  impersonatedUserId: "userId345"
+  impersonatedUserId: "userId345",
 };
 
 export const ImpersonationRequest2={
@@ -22,8 +22,8 @@ export const ImpersonationRequest2={
   createdFor: "suvidh-kaushik-2",
   userId: "userId124",
   reason: "He asked again",
-  impersonatedUserId: "userId445"
-}
+  impersonatedUserId: "userId445",
+};
 
 export const wrongCreateImpersonationRequestModelBody = {
   status: REQUEST_STATE.PENDING,
@@ -45,7 +45,7 @@ export const impersonationRequest = {
   reason: "Debugging user issue",
   impersonatedUserId: "user123",
   createdAt: 1716000000000,
-  updatedAt: 1716000000000
+  updatedAt: 1716000000000,
 };
 
 export const impersonationRequests = [
@@ -61,7 +61,7 @@ export const impersonationRequests = [
     createdAt: 1716100000000,
     updatedAt: 1716100000000,
     startedAt: 1716100001000,
-    endedAt: 1716100005000
+    endedAt: 1716100005000,
   },
   {
     id: "impReq2",
@@ -73,7 +73,7 @@ export const impersonationRequests = [
     reason: "Testing permissions",
     impersonatedUserId: "user789",
     createdAt: 1716200000000,
-    updatedAt: 1716200000000
+    updatedAt: 1716200000000,
   },
   {
     id: "impReq3",
@@ -85,7 +85,7 @@ export const impersonationRequests = [
     reason: "Investigating bug",
     impersonatedUserId: "user321",
     createdAt: 1716300000000,
-    updatedAt: 1716300000000
+    updatedAt: 1716300000000,
   },
    {
     id: "impReq4",
@@ -97,19 +97,19 @@ export const impersonationRequests = [
     reason: "Investigating bug",
     impersonatedUserId: "user322",
     createdAt: 1716300000000,
-    updatedAt: 1716300000000
+    updatedAt: 1716300000000,
   },
    {
     id: "impReq5",
     status: REQUEST_STATE.PENDING,
     isImpersonationAttempted: false,
-    createdBy: "admin222",
+    createdBy: "adminUsername",
     createdFor: "user321",
     userId: "admin222",
     reason: "Investigating bug",
     impersonatedUserId: "user321",
     createdAt: 1716300000000,
-    updatedAt: 1716300000000
+    updatedAt: 1716300000000,
   }
 ];
 

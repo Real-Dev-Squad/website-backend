@@ -16,6 +16,7 @@ import {
   impersonationRequests,
 } from "../../fixtures/impersonation-requests/impersonationRequests";
 import { REQUEST_STATE, REQUEST_DOES_NOT_EXIST } from "../../../constants/requests";
+import { Timestamp } from "firebase-admin/firestore";
 import addUser from "../../utils/addUser";
 import userDataFixture from "./../../fixtures/user/user";
 const userData = userDataFixture();
@@ -111,7 +112,6 @@ describe.skip("models/impersonationRequests", () => {
       expect(updatedRequest.status).to.equal(REQUEST_STATE.REJECTED);
     });
 
-
     it("should return error if request does not exist", async () => {
       const result = await updateImpersonationRequest(
         "randomId",
@@ -122,29 +122,29 @@ describe.skip("models/impersonationRequests", () => {
     });
 
     it("should change the startedAt,endedAt and isImpersonationAttempted fields on update", async () => {
-      const updatedBody={
+      const updatedBody = {
         isImpersonationAttempted: true,
-        startedAt: Date.now(),
-        endedAt: Date.now() + 1000,
-      }
+        startedAt: Timestamp.fromDate(new Date()),
+        endedAt: Timestamp.fromDate(new Date(Date.now() + 1000)),
+      };
       const result = await updateImpersonationRequest(
         impersonationRequest.id,
         updatedBody,
         impersonationRequest.userId
       );
       expect(result.isImpersonationAttempted).to.be.true;
-      expect(result.startedAt).to.be.greaterThan(0);
-      expect(result.endedAt).to.be.greaterThan(result.startedAt);
+      expect(Number(result.startedAt)).to.be.greaterThan(0);
+      expect(Number(result.endedAt)).to.be.greaterThan(Number(result.startedAt));
     });
 
     it("should change updatedAt timestamp on update", async () => {
-      const before = impersonationRequest.updatedAt;
-      const updated = await updateImpersonationRequest(
+      const before = Number(impersonationRequest.updatedAt);
+      const updatedRequest = await updateImpersonationRequest(
         impersonationRequest.id,
         updateImpersonationRequestApproved,
         impersonationRequest.impersonatedUserId
       );
-      expect(updated.updatedAt).to.be.greaterThan(before);
+      expect(Number(updatedRequest.updatedAt)).to.be.greaterThan(before);
     });
   });
 
@@ -157,29 +157,33 @@ describe.skip("models/impersonationRequests", () => {
       expect(requests.allRequests.length).to.be.greaterThan(0);
     });
 
-     it("Should return a list of all the requests with specified status - APPROVED", async () => {
-         const impersonationRequest = await createImpersonationRequest(ImpersonationRequest1);
-         await updateImpersonationRequest(impersonationRequest.id, updateImpersonationRequestApproved, impersonationRequest.impersonatedUserId);
-         const query = {status: REQUEST_STATE.APPROVED };
-         const impersonationRequestData = await getImpersonationRequests(query);
-         expect(impersonationRequestData.allRequests[0].status).to.be.equal(REQUEST_STATE.APPROVED);
-       });
+    it("Should return a list of all the requests with specified status - APPROVED", async () => {
+      const impersonationRequest = await createImpersonationRequest(ImpersonationRequest1);
+      await updateImpersonationRequest(
+        impersonationRequest.id,
+        updateImpersonationRequestApproved,
+        impersonationRequest.impersonatedUserId
+      );
+      const query = { status: REQUEST_STATE.APPROVED };
+      const impersonationRequestData = await getImpersonationRequests(query);
+      expect(impersonationRequestData.allRequests[0].status).to.be.equal(REQUEST_STATE.APPROVED);
+    });
 
     it("Should return a list of all the requests with specified status - PENDING", async () => {
-          await createImpersonationRequest(ImpersonationRequest1);
-          const query = {status: REQUEST_STATE.PENDING };
-          const impersonationRequestData = await getImpersonationRequests(query);
-          expect(impersonationRequestData.allRequests[0].status).to.be.equal(REQUEST_STATE.PENDING);
-      });
+      await createImpersonationRequest(ImpersonationRequest1);
+      const query = { status: REQUEST_STATE.PENDING };
+      const impersonationRequestData = await getImpersonationRequests(query);
+      expect(impersonationRequestData.allRequests[0].status).to.be.equal(REQUEST_STATE.PENDING);
+    });
 
     it("should filter requests by createdBy", async () => {
       await createImpersonationRequest(ImpersonationRequest1);
-      const query = {createdBy: ImpersonationRequest1.createdBy };
+      const query = { createdBy: ImpersonationRequest1.createdBy };
       const result = await getImpersonationRequests(query);
       expect(result.allRequests.every(r => r.createdBy === ImpersonationRequest1.createdBy)).to.be.true;
     });
-    
-     it("should filter requests by size", async () => {
+
+    it("should filter requests by size", async () => {
       await createImpersonationRequest(ImpersonationRequest1);
       await createImpersonationRequest(ImpersonationRequest2);
       const query = { size: 1 };
@@ -189,22 +193,22 @@ describe.skip("models/impersonationRequests", () => {
 
     it("should filter requests by createdFor", async () => {
       await createImpersonationRequest(ImpersonationRequest1);
-      const query = {createdFor: ImpersonationRequest1.createdFor};
+      const query = { createdFor: ImpersonationRequest1.createdFor };
       const result = await getImpersonationRequests(query);
       expect(result.allRequests.every(r => r.createdFor === ImpersonationRequest1.createdFor)).to.be.true;
     });
 
-      it("Should return empty array if no data is found", async () => {
-          const query = {status: REQUEST_STATE.PENDING };
-          const impersonationRequestData = await getImpersonationRequests(query);
-          expect(impersonationRequestData).to.be.equal(null);
-      });
+    it("Should return empty array if no data is found", async () => {
+      const query = { status: REQUEST_STATE.PENDING };
+      const impersonationRequestData = await getImpersonationRequests(query);
+      expect(impersonationRequestData).to.be.equal(null);
+    });
 
     it("should support pagination", async () => {
       for (let i = 0; i < 5; i++) {
         await createImpersonationRequest(impersonationRequests[i]);
       }
-      const query = {size: 2};
+      const query = { size: 2 };
       const result = await getImpersonationRequests(query);
       expect(result.allRequests.length).to.be.at.most(2);
       expect(result.next).to.exist;
@@ -212,21 +216,21 @@ describe.skip("models/impersonationRequests", () => {
       expect(result.count).to.be.equal(2);
     });
 
-     it("Should return a list of all the requests by page ", async () => {
-          await createImpersonationRequest(ImpersonationRequest1);
-          await createImpersonationRequest(ImpersonationRequest2);
-          const query = { page: 1 };
-          const impersonationRequestData = await getImpersonationRequests(query);
-          expect(impersonationRequestData.page).to.be.equal(2);
-        });
-    
-      it("Should return a list of all the requests by size ", async () => {
-          await createImpersonationRequest(ImpersonationRequest1);
-          await createImpersonationRequest(ImpersonationRequest2);
-          const query = { size: 1 };
-          const impersonationRequestData = await getImpersonationRequests(query);
-          expect(impersonationRequestData.allRequests).to.have.lengthOf(1);
-      });
+    it("Should return a list of all the requests by page ", async () => {
+      await createImpersonationRequest(ImpersonationRequest1);
+      await createImpersonationRequest(ImpersonationRequest2);
+      const query = { page: 1 };
+      const impersonationRequestData = await getImpersonationRequests(query);
+      expect(impersonationRequestData.page).to.be.equal(2);
+    });
+
+    it("Should return a list of all the requests by size ", async () => {
+      await createImpersonationRequest(ImpersonationRequest1);
+      await createImpersonationRequest(ImpersonationRequest2);
+      const query = { size: 1 };
+      const impersonationRequestData = await getImpersonationRequests(query);
+      expect(impersonationRequestData.allRequests).to.have.lengthOf(1);
+    });
 
     it("should return the next page of results using next cursor", async () => {
       for (let i = 0; i < 5; i++) {
@@ -255,7 +259,7 @@ describe.skip("models/impersonationRequests", () => {
 
   describe("getImpersonationRequestByKeyValues", () => {
     it("should return the request with the specified key value", async () => {
-      const impersonationRequestObj= {...ImpersonationRequest1, createdBy: userData[16].username,userId: testUserId};
+      const impersonationRequestObj = { ...ImpersonationRequest1, createdBy: userData[16].username, userId: testUserId };
       const impersonationRequest = await createImpersonationRequest(impersonationRequestObj);
       const request = await getImpersonationRequestByKeyValues({
         createdBy: userData[16].username,
