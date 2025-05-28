@@ -1,13 +1,13 @@
-import express from 'express';
+import config from 'config';
 import cookieParser from 'cookie-parser';
-import morgan from 'morgan';
+import cors from 'cors';
+import express from 'express';
 import boom from 'express-boom';
 import helmet from 'helmet';
-import cors from 'cors';
+import morgan from 'morgan';
 import passport from 'passport';
-import contentTypeCheck from './contentTypeCheck.js';
-import config from 'config';
 import logger from '../utils/logger.js';
+import contentTypeCheck from './contentTypeCheck.js';
 
 // import middlewares
 import './passport.js';
@@ -37,7 +37,14 @@ export const middleware = (app) => {
 
   app.use(
     cors({
-      origin: config.get("cors.allowedOrigins"),
+      origin: (origin, callback) => {
+        const allowedOrigins = config.get("cors.allowedOrigins") as RegExp;
+        if (!origin || allowedOrigins.test(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      },
       credentials: true,
       optionsSuccessStatus: 200,
     })

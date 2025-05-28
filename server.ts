@@ -1,15 +1,15 @@
 /**
  * Initialise globals
  */
-import * as http from "http";
 import config from "config";
-global.logger = logger;
+import * as http from "http";
+import app from "./app.js";
 import logger from "./utils/logger.js";
+
+// Set globals
+global.logger = logger;
 global.config = config;
 
-import app from "./app.js";
-
-// TODO fix newrelic
 // Initialise newrelic
 import "newrelic";
 
@@ -24,13 +24,11 @@ app.set("port", port);
 /**
  * Create HTTP server.
  */
-
 const server = http.createServer(app);
 
 /**
  * Listen on provided port, on all network interfaces.
  */
-
 server.listen(port);
 server.on("error", onError);
 server.on("listening", onListening);
@@ -38,7 +36,6 @@ server.on("listening", onListening);
 /**
  * Event listener for HTTP server "error" event.
  */
-
 function onError(error) {
   if (error.syscall !== "listen") {
     throw error;
@@ -68,7 +65,6 @@ function onError(error) {
 /**
  * Event listener for HTTP server "listening" event.
  */
-
 function onListening() {
   logger.info(`Express API running on port:${port} with environment:${process.env.NODE_ENV}`);
 }

@@ -7,6 +7,7 @@ const port = 3000;
 const localUrl = `http://localhost:${port}`;
 
 // @ts-ignore
+// eslint-disable-next-line import/no-commonjs
 module.exports = {
   port: port,
   enableFileLogs: false,

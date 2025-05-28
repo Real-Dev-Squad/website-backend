@@ -3,6 +3,7 @@
  * Defaults set from default.js
  */
 // @ts-ignore
+// eslint-disable-next-line import/no-commonjs
 module.exports = {
   discordUnverifiedRoleId: "1103047289330745386",
   discordDeveloperRoleId: "915490782939582485",
