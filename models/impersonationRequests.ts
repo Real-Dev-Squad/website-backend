@@ -1,15 +1,16 @@
 import firestore from "../utils/firestore";
-import { CreateImpersonationRequestModelBody, ImpersonationRequest, PaginatedImpersonationRequests, UpdateImpersonationRequestDataBody, UpdateImpersonationRequestStatusBody} from "../types/impersonationRequest";
-import { ERROR_WHILE_CREATING_REQUEST, ERROR_WHILE_FETCHING_REQUEST, ERROR_WHILE_UPDATING_REQUEST} from "../constants/requests";
+import { CreateImpersonationRequestModelBody, ImpersonationRequest, PaginatedImpersonationRequests, UpdateImpersonationRequestDataBody, UpdateImpersonationRequestStatusBody } from "../types/impersonationRequests";
+import { ERROR_WHILE_CREATING_REQUEST, ERROR_WHILE_FETCHING_REQUEST, ERROR_WHILE_UPDATING_REQUEST, REQUEST_DOES_NOT_EXIST} from "../constants/requests";
+import {Timestamp} from "firebase-admin/firestore";
+const logger = require("../utils/logger")
 const impersonationRequestModel=firestore.collection("impersonationRequests");
-
 const SIZE=5;
 
-export const createImpersonationRequest = async (body:CreateImpersonationRequestModelBody ) => {
+export const createImpersonationRequest = async (body:CreateImpersonationRequestModelBody ) : Promise<ImpersonationRequest> => {
   try {
     const requestBody: any = {
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
       ...body,
     };
     const result = await impersonationRequestModel.add(requestBody);
@@ -35,62 +36,62 @@ export const updateImpersonationRequest=async (id:string,body:UpdateImpersonatio
       };
     }
     const requestBody: any = {
-      updatedAt: Date.now(),
+      updatedAt: Timestamp.now(),
       lastModifiedBy,
       ...body,
     };
     await impersonationRequestModel.doc(id).update(requestBody);
 
-    return{
+    return {
       id,
       ...requestBody
-    }
+    };
 
-    }catch(error){
-       logger.error(ERROR_WHILE_UPDATING_REQUEST,error);
-       throw error;
-    }
+  }catch(error){
+     logger.error(ERROR_WHILE_UPDATING_REQUEST,error);
+     throw error;
+  }
 }
 
 interface KeyValues{
   [key:string]:string
 }
 
-export const getImpersonationRequestById=async(query:KeyValues):Promise<ImpersonationRequest> =>{
-   let {id}=query;
-   try{
-     let requestDoc = await impersonationRequestModel.doc(id).get();
-      if (!requestDoc.exists) {
-        return null;
-      }
-      const data=requestDoc.data() as ImpersonationRequest;
-      return {
-        id: requestDoc.id,
-        ...data
-      };
-   }catch(error){
-     logger.error(ERROR_WHILE_FETCHING_REQUEST, error);
+export const getImpersonationRequestById = async (query: KeyValues): Promise<ImpersonationRequest | null> => {
+  const { id } = query;
+  try {
+    const requestDoc = await impersonationRequestModel.doc(id).get();
+    if (!requestDoc.exists) {
+      return null;
+    }
+    const data = requestDoc.data() as ImpersonationRequest;
+    return {
+      id: requestDoc.id,
+      ...data
+    };
+  } catch (error) {
+    logger.error(ERROR_WHILE_FETCHING_REQUEST, error);
     throw error;
    }
 }
 
 
-export const getImpersonationRequests = async (query) :Promise<PaginatedImpersonationRequests> => {
-  let {createdBy,createdFor ,status, prev, next, page, size = SIZE } = query;
+export const getImpersonationRequests = async (query) :Promise<PaginatedImpersonationRequests | null> => {
+  let { createdBy, createdFor, status, prev, next, page, size = SIZE } = query;
 
-  size = parseInt(size);
+  size = Number.parseInt(size);
   page = parseInt(page);
   try {
     let requestQuery: any = impersonationRequestModel;
 
-    if(createdBy){
+    if (createdBy) {
       requestQuery = requestQuery.where("createdBy", "==", createdBy);
     }
     if (status) {
       requestQuery = requestQuery.where("status", "==", status);
     }
-    if(createdFor){
-      requestQuery=requestQuery.where("createdFor","==",createdFor);
+    if (createdFor) {
+      requestQuery = requestQuery.where("createdFor", "==", createdFor);
     }
 
     requestQuery = requestQuery.orderBy("createdAt", "desc");
@@ -106,7 +107,9 @@ export const getImpersonationRequests = async (query) :Promise<PaginatedImperson
     if (page) {
       const startAfter = (page - 1) * size;
       requestQueryDoc = requestQueryDoc.offset(startAfter);
-    } else if (next) {
+    }
+
+    if (next) {
       const doc = await impersonationRequestModel.doc(next).get();
       requestQueryDoc = requestQueryDoc.startAt(doc);
     } else if (prev) {
@@ -137,13 +140,13 @@ export const getImpersonationRequests = async (query) :Promise<PaginatedImperson
     if (allRequests.length === 0) {
       return null;
     }
-   let count=allRequests.length;
+   const count = allRequests.length;
     return {
       allRequests,
       prev: prevDoc.empty ? null : prevDoc.docs[0].id,
       next: nextDoc.empty ? null : nextDoc.docs[0].id,
       page: page ? page + 1 : null,
-      count: count,
+      count,
     };
   } catch (error) {
     logger.error(ERROR_WHILE_FETCHING_REQUEST, error);
@@ -152,7 +155,7 @@ export const getImpersonationRequests = async (query) :Promise<PaginatedImperson
 };
 
 
-export const getImpersonationRequestByKeyValues = async (keyValues: KeyValues) => {
+export const getImpersonationRequestByKeyValues = async (keyValues: KeyValues) : Promise<ImpersonationRequest | null> => {
   try {
     let requestQuery: any = impersonationRequestModel;
     Object.entries(keyValues).forEach(([key, value]) => {
@@ -163,14 +166,14 @@ export const getImpersonationRequestByKeyValues = async (keyValues: KeyValues) =
     if (requestQueryDoc.empty) {
       return null;
     }
-    let requests: any;
+    let request: any;
     requestQueryDoc.forEach((doc: any) => {
-      requests = {
+      request = {
         id: doc.id,
         ...doc.data(),
       };
     });
-    return requests;
+    return request;
   } catch (error) {
     logger.error(ERROR_WHILE_FETCHING_REQUEST, error);
     throw error;
