@@ -5,7 +5,7 @@ import _ from "lodash";
 import config from "config";
 import app from "../../server";
 import cleanDb from "../utils/cleanDb";
-import authService from "../../services/authService";
+import {generateAuthToken} from "../../services/authService";
 import userDataFixture from "../fixtures/user/user";
 import sinon from "sinon";
 const cookieName = config.get("userToken.cookieName");
@@ -35,12 +35,13 @@ import {
   USER_STATUS_NOT_FOUND,
   OOO_STATUS_ALREADY_EXIST,
 } from "../../constants/requests";
-import { updateTask } from "../../models/tasks";
+import updateTask  from "../../models/tasks";
 import { validTaskAssignmentRequest, validTaskCreqtionRequest } from "../fixtures/taskRequests/taskRequests";
 import { deleteUserStatus, updateUserStatus } from "../../models/userStatus";
 import * as requestsQuery from "../../models/requests";
 import { userState } from "../../constants/userStatus";
 import * as logUtils from "../../services/logService";
+import taskModel from "../../models/tasks.js";
 
 const userData = userDataFixture();
 chai.use(chaiHttp);
@@ -98,7 +99,7 @@ describe("/requests OOO", function () {
       const userIdPromises = [addUser(userData[16])];
       const [userId] = await Promise.all(userIdPromises);
 
-      authToken = authService.generateAuthToken({ userId });
+      authToken = generateAuthToken({ userId });
 
       const testUserStatus = {
         currentStatus: {
@@ -143,7 +144,7 @@ describe("/requests OOO", function () {
     });
 
     it("should return 403 if user is not part of discord", function (done) {
-      const authTokenForArchivedUserId = authService.generateAuthToken(
+      const authTokenForArchivedUserId = generateAuthToken(
         { userId: testArchivedUserId }
       );
       chai

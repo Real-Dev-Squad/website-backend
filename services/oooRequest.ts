@@ -1,16 +1,17 @@
-import { logType } from "../constants/logs";
-import { 
+import { logType } from "../constants/logs.js";
+import {
     LOG_ACTION,
     OOO_STATUS_ALREADY_EXIST,
     REQUEST_LOG_TYPE,
     REQUEST_STATE,
     USER_STATUS_NOT_FOUND,
-} from "../constants/requests";
-import { userState } from "../constants/userStatus";
-import { createRequest } from "../models/requests";
-import { OooStatusRequest, OooStatusRequestBody } from "../types/oooRequest";
-import { UserStatus } from "../types/userStatus";
-import { addLog } from "./logService";
+} from "../constants/requests.js";
+import { userState } from "../constants/userStatus.js";
+import { createRequest } from "../models/requests.js";
+import { OooStatusRequest, OooStatusRequestBody } from "../types/oooRequest.js";
+import { UserStatus } from "../types/userStatus.js";
+import logger from "../utils/logger.js";
+import { addLog } from "./logService.js";
 
 /**
  * Validates the user status.

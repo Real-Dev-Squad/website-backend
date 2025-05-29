@@ -1,28 +1,29 @@
+import { logType } from "../constants/logs.js";
 import {
-  REQUEST_LOG_TYPE,
-  LOG_ACTION,
-  REQUEST_CREATED_SUCCESSFULLY,
   ERROR_WHILE_CREATING_REQUEST,
+  ERROR_WHILE_UPDATING_REQUEST,
+  LOG_ACTION,
+  OOO_STATUS_ALREADY_EXIST,
+  REQUEST_ALREADY_PENDING,
+  REQUEST_APPROVED_SUCCESSFULLY,
+  REQUEST_CREATED_SUCCESSFULLY,
+  REQUEST_LOG_TYPE,
+  REQUEST_REJECTED_SUCCESSFULLY,
   REQUEST_STATE,
   REQUEST_TYPE,
-  ERROR_WHILE_UPDATING_REQUEST,
-  REQUEST_APPROVED_SUCCESSFULLY,
-  REQUEST_REJECTED_SUCCESSFULLY,
   UNAUTHORIZED_TO_CREATE_OOO_REQUEST,
-  REQUEST_ALREADY_PENDING,
   USER_STATUS_NOT_FOUND,
-  OOO_STATUS_ALREADY_EXIST,
-} from "../constants/requests";
-import { statusState } from "../constants/userStatus";
-import { logType } from "../constants/logs";
-import { addLog } from "../models/logs";
-import { getRequestByKeyValues, getRequests, updateRequest } from "../models/requests";
-import { createUserFutureStatus } from "../models/userFutureStatus";
-import { getUserStatus, addFutureStatus } from "../models/userStatus";
-import { createOooRequest, validateUserStatus } from "../services/oooRequest";
-import { CustomResponse } from "../typeDefinitions/global";
-import { OooRequestCreateRequest, OooRequestResponse, OooStatusRequest } from "../types/oooRequest";
-import { UpdateRequest } from "../types/requests";
+} from "../constants/requests.js";
+import { statusState } from "../constants/userStatus.js";
+import { addLog } from "../models/logs.js";
+import { getRequestByKeyValues, getRequests, updateRequest } from "../models/requests.js";
+import { createUserFutureStatus } from "../models/userFutureStatus.js";
+import { addFutureStatus, getUserStatus } from "../models/userStatus.js";
+import { createOooRequest, validateUserStatus } from "../services/oooRequest.js";
+import { CustomResponse } from "../typeDefinitions/global.js";
+import { OooRequestCreateRequest, OooRequestResponse, OooStatusRequest } from "../types/oooRequest.js";
+import { UpdateRequest } from "../types/requests.js";
+import logger from "../utils/logger.js";
 
 /**
  * Controller to handle the creation of OOO requests.
