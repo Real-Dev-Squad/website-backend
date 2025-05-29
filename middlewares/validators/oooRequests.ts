@@ -26,14 +26,14 @@ export const createOooStatusRequestValidator = async (
           "number.min": "until date must be greater than or equal to from date",
         })
         .required(),
-      message: joi.string().required().messages({
-        "any.required": "message is required",
-        "string.empty": "message cannot be empty",
+      reason: joi.string().required().messages({
+        "any.required": "reason is required",
+        "string.empty": "reason cannot be empty",
       }),
-      state: joi.string().valid(REQUEST_STATE.PENDING).required().messages({
-        "any.only": "state must be PENDING",
+      type: joi.string().valid(REQUEST_TYPE.OOO).required().messages({
+        "string.empty": "type cannot be empty",
+        "any.required": "type is required",
       }),
-      type: joi.string().valid(REQUEST_TYPE.OOO).required(),
     });
 
   await schema.validateAsync(req.body, { abortEarly: false });

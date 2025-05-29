@@ -1020,7 +1020,7 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
         usersMap.set(taskAssignee, {
           tasksCount: 1,
           latestProgressCount: dateGap + 1,
-          isActive: false,
+          isOOO: false,
         });
       }
       const updateTasksIdMap = async () => {
@@ -1039,10 +1039,7 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
     const userIdChunks = chunks(Array.from(usersMap.keys()), FIRESTORE_IN_CLAUSE_SIZE);
     const userStatusSnapshotPromise = userIdChunks.map(
       async (userIdList) =>
-        await userStatusModel
-          .where("currentStatus.state", "==", userState.ACTIVE)
-          .where("userId", "in", userIdList)
-          .get()
+        await userStatusModel.where("currentStatus.state", "==", userState.OOO).where("userId", "in", userIdList).get()
     );
     const userDetailsPromise = userIdChunks.map(
       async (userIdList) =>
@@ -1056,7 +1053,7 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
 
     userStatusChunks.forEach((userStatusList) =>
       userStatusList.forEach((doc) => {
-        usersMap.get(doc.data().userId).isActive = true;
+        usersMap.get(doc.data().userId).isOOO = true;
       })
     );
 
@@ -1098,7 +1095,7 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
       const isDiscordMember = !!discordUserData;
       const shouldAddRole =
         userData.latestProgressCount === 0 &&
-        userData.isActive &&
+        !userData.isOOO &&
         isDiscordMember &&
         discordUserData.isDeveloper &&
         !discordUserData.isMaven &&

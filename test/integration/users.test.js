@@ -9,32 +9,25 @@ import addUser from "../utils/addUser.js";
 import profileDiffs from "../../models/profileDiffs.js";
 import cleanDb from "../utils/cleanDb.js";
 // Import fixtures
-import userData from "../fixtures/user/user.js";
-import profileDiffData from "../fixtures/profileDiffs/profileDiffs.js";
-import searchParamValues from "../fixtures/user/search.js";
-import config from "config";
-import { getDiscordMembers } from "../fixtures/discordResponse/discord-response.js";
-import joinData from "../fixtures/user/join.js";
-import {
+const userData = require("../fixtures/user/user")();
+const tasksData = require("../fixtures/tasks/tasks")();
+const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
+const superUser = userData[4];
+const searchParamValues = require("../fixtures/user/search")();
+
+const config = require("config");
+const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
+const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
+const joinData = require("../fixtures/user/join");
+const {
   userStatusDataForNewUser,
   userStatusDataAfterSignup,
   userStatusDataAfterFillingJoinSection,
-} from "../fixtures/userStatus/userStatus.js";
-import { addJoinData, addOrUpdate } from "../../models/users.js";
-import userStatusModel from "../../models/userStatus.js";
-import { MAX_USERNAME_LENGTH } from "../../constants/users.js";
-import { userPhotoVerificationData } from "../fixtures/user/photo-verification.js";
-import { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } from "../../constants/errorMessages.js";
-import {
-  usersData as abandonedUsersData,
-  tasksData as abandonedTasksData,
-} from "../fixtures/abandoned-tasks/departed-users.js";
-import userService from "../../services/users.js";
-
-const { expect } = chai;
-const cookieName = config.get("userToken.cookieName");
-const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
-const superUser = userData[4];
+} = require("../fixtures/userStatus/userStatus");
+const { addJoinData, addOrUpdate } = require("../../models/users");
+const userStatusModel = require("../../models/userStatus");
+const { MAX_USERNAME_LENGTH } = require("../../constants/users.ts");
+const { TASK_STATUS } = require("../../constants/tasks");
 const userRoleUpdate = userData[4];
 const userRoleUnArchived = userData[13];
 const userAlreadyMember = userData[0];
@@ -43,7 +36,10 @@ const userAlreadyArchived = userData[5];
 const userAlreadyUnArchived = userData[4];
 const nonSuperUser = userData[0];
 const newUser = userData[18];
-
+const cookieName = config.get("userToken.cookieName");
+const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
+const Sinon = require("sinon");
+const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../../constants/errorMessages");
 const photoVerificationModel = firestore.collection("photo-verification");
 const userModel = firestore.collection("users");
 const taskModel = firestore.collection("tasks");
@@ -497,12 +493,18 @@ describe("Users", function () {
   });
 
   describe("GET /users", function () {
+    let userWithOverdueApprovedTask;
+
     beforeEach(async function () {
       const { userId } = await addOrUpdate(userData[0]);
       await userStatusModel.updateUserStatus(userId, userStatusDataForNewUser);
       await addOrUpdate(userData[1]);
       await addOrUpdate(userData[2]);
       await addOrUpdate(userData[3]);
+
+      const assigneeData = { ...userData[6], discordId: getDiscordMembers[0].user.id };
+      userWithOverdueApprovedTask = await addUser(assigneeData);
+      await taskModel.add({ ...tasksData[0], assignee: userWithOverdueApprovedTask, status: TASK_STATUS.APPROVED });
     });
 
     afterEach(async function () {
@@ -876,6 +878,24 @@ describe("Users", function () {
       expect(res).to.have.status(200);
       expect(res.body).to.be.a("object");
       expect(res.body.message).to.equal("User not found");
+    });
+
+    it("should return users who have overdue tasks with APPROVED status", function (done) {
+      chai
+        .request(app)
+        .get("/users?query=filterBy:overdue_tasks")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.an("object");
+          expect(res.body.users).to.be.an("array");
+          expect(res.body.users.length).to.equal(1);
+          expect(res.body.users[0].id).to.equal(userWithOverdueApprovedTask);
+
+          return done();
+        });
     });
 
     it("Should return user ID(s) with overdue tasks within the last 1 day", function (done) {
