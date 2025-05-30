@@ -31,14 +31,24 @@ const ROLES = require("../constants/roles");
 const { Services } = require("../constants/bot");
 const { verifyCronJob } = require("../middlewares/authorizeBot");
 const { authorizeAndAuthenticate } = require("../middlewares/authorizeUsersAndService");
+const { disableRoute } = require("../middlewares/shortCircuit");
 const router = express.Router();
 
 router.post("/groups", authenticate, checkIsVerifiedDiscord, validateGroupRoleBody, createGroupRole);
 router.get("/groups", authenticate, checkIsVerifiedDiscord, validateLazyLoadingParams, getPaginatedAllGroupRoles);
 router.delete("/groups/:groupId", authenticate, checkIsVerifiedDiscord, authorizeRoles([SUPERUSER]), deleteGroupRole);
 router.post("/roles", authenticate, checkIsVerifiedDiscord, validateMemberRoleBody, addGroupRoleToMember);
-router.get("/invite", authenticate, getUserDiscordInvite);
-router.post("/invite", authenticate, checkCanGenerateDiscordLink, generateInviteForUser);
+/**
+ * Short-circuit the GET method for this endpoint
+ * Refer https://github.com/Real-Dev-Squad/todo-action-items/issues/269 for more details.
+ */
+router.get("/invite", disableRoute, authenticate, getUserDiscordInvite);
+/**
+ * Short-circuit this POST method for this endpoint
+ * Refer https://github.com/Real-Dev-Squad/todo-action-items/issues/269 for more details.
+ */
+router.post("/invite", disableRoute, authenticate, checkCanGenerateDiscordLink, generateInviteForUser);
+
 router.delete("/roles", authenticate, checkIsVerifiedDiscord, deleteRole);
 router.get("/roles", authenticate, checkIsVerifiedDiscord, getGroupsRoleId);
 router.patch(
