@@ -2,7 +2,6 @@
  * This eslint rule is disabled because of https://github.com/nodesecurity/eslint-plugin-security/issues/21
  * It gives linting errors in testing the DB data with keys from fixtures
  */
-/* eslint-disable security/detect-object-injection */
 
 const chai = require("chai");
 const sinon = require("sinon");

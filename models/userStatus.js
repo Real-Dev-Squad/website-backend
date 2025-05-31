@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 const { Forbidden, NotFound } = require("http-errors");
 const admin = require("firebase-admin");
 const firestore = require("../utils/firestore");

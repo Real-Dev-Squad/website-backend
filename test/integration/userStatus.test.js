@@ -348,7 +348,6 @@ describe("UserStatus", function () {
     });
 
     // Skipping this as the users are not allowed to mark them as active or idle. Will remove the test while removing the feature flag.
-    // eslint-disable-next-line mocha/no-skipped-tests
     it.skip("Should update the User Status", function (done) {
       chai
         .request(app)
@@ -382,7 +381,6 @@ describe("UserStatus", function () {
     });
 
     // Skipping this as the users are not allowed to mark them as active or idle. Will remove the test while removing the feature flag.
-    // eslint-disable-next-line mocha/no-skipped-tests
     it.skip("Should update the User Status when requested by Super User", function (done) {
       chai
         .request(app)
