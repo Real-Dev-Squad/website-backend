@@ -843,7 +843,7 @@ describe("discordactions", function () {
     it("should add invite in the invite model for user", async function () {
       const inviteObject = { userId: "kfjkasdfl", inviteLink: "discord.gg/xyz" };
       const inviteId = await addInviteToInviteModel(inviteObject);
-      expect(inviteId).to.exist; // eslint-disable-line no-unused-expressions
+      expect(inviteId).to.exist;
     });
   });
 

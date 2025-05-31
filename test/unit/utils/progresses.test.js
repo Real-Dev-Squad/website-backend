@@ -139,7 +139,6 @@ describe("Utils | Progresses", function () {
       const query = progressesCollection.where("userId", "==", "nonExistentUser");
       const results = await getPaginatedProgressDocs(query, 1);
 
-      // eslint-disable-next-line no-unused-expressions
       expect(results).to.be.an("array").that.is.empty;
     });
 

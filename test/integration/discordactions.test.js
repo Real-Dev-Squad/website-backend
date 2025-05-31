@@ -218,7 +218,7 @@ describe("Discord actions", function () {
 
   describe("DELETE /discord-actions/groups/:groupId", function () {
     let groupId;
-    // eslint-disable-next-line mocha/no-setup-in-describe
+
     const roleData = groupData[0];
 
     beforeEach(async function () {
@@ -1009,7 +1009,6 @@ describe("Discord actions", function () {
       expect(res.body.message).to.be.equal("User should be super user to generate link for other users");
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
     it.skip("should return 403 if the user has discord id in their user object, which means user is already in discord", async function () {
       const res = await chai
         .request(app)
@@ -1020,7 +1019,6 @@ describe("Discord actions", function () {
       expect(res.body.message).to.be.equal("Only users who have never joined discord can generate invite link");
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
     it.skip("should return 403 if user has role archieved", async function () {
       archievedUserId = await addUser(archievedUser);
       archievedUserToken = authService.generateAuthToken({ userId: archievedUserId });
@@ -1033,7 +1031,6 @@ describe("Discord actions", function () {
       expect(res.body.message).to.be.equal("Archived users cannot generate invite");
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
     it.skip("should return 403 if the user doesn't have role designer, product_manager, or mavens", async function () {
       developerUserWithoutApprovedProfileStatusId = await addUser(developerUserWithoutApprovedProfileStatus);
       developerUserWithoutApprovedProfileStatusToken = authService.generateAuthToken({
@@ -1048,7 +1045,6 @@ describe("Discord actions", function () {
       expect(res.body.message).to.be.equal("Only selected roles can generate discord link directly");
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
     it.skip("should generate discord link if user is a product mananger", async function () {
       fetchStub.returns(
         Promise.resolve({
@@ -1069,7 +1065,6 @@ describe("Discord actions", function () {
       expect(res.body.inviteLink).to.be.equal("discord.gg/xyz");
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
     it.skip("should generate discord link if user is a designer", async function () {
       fetchStub.returns(
         Promise.resolve({
@@ -1090,7 +1085,6 @@ describe("Discord actions", function () {
       expect(res.body.inviteLink).to.be.equal("discord.gg/zlmfasd");
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
     it.skip("should generate discord link if user is a maven", async function () {
       fetchStub.returns(
         Promise.resolve({
@@ -1151,7 +1145,6 @@ describe("Discord actions", function () {
       );
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
     it.skip("should generate discord link if user has an approved application", async function () {
       sinon.stub(ApplicationModel, "getUserApplications").resolves([{ status: "accepted" }]);
       fetchStub.returns(
@@ -1316,7 +1309,7 @@ describe("Discord actions", function () {
           expect(res.body.message).to.equal("Roles fetched successfully!");
           expect(res.body.groups).to.be.an("array");
           expect(res.body.links).to.have.keys(["next", "prev"]);
-          // eslint-disable-next-line no-unused-expressions
+
           expect(res.body.links.next).to.be.null;
           expect(res.body.links.prev).to.equal(`/discord-actions/groups?page=${page - 1}&size=${size}&dev=true`);
           return done();
@@ -1348,10 +1341,10 @@ describe("Discord actions", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.an("object");
           expect(res.body.message).to.equal("Roles fetched successfully!");
-          // eslint-disable-next-line no-unused-expressions
+
           expect(res.body.groups).to.be.an("array").that.is.empty;
           expect(res.body.links).to.have.keys(["next", "prev"]);
-          // eslint-disable-next-line no-unused-expressions
+
           expect(res.body.links.next).to.be.null;
           expect(res.body.links.prev).to.equal(`/discord-actions/groups?page=${page - 1}&size=${size}&dev=true`);
           return done();
@@ -1365,7 +1358,6 @@ describe("Discord actions", function () {
         .request(app)
         .get("/discord-actions/groups?dev=true")
         .set("cookie", `${cookieName}=${userAuthToken}`)
-        // eslint-disable-next-line node/handle-callback-err
         .end((err, res) => {
           expect(res).to.have.status(500);
           expect(res.body).to.be.an("object");

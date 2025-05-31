@@ -129,7 +129,6 @@ describe("Filter Users", function () {
     await cleanDb();
   });
 
-  // eslint-disable-next-line mocha/no-skipped-tests
   describe("GET /users/search", function () {
     it("Should search users based on state", function (done) {
       chai
@@ -199,7 +198,7 @@ describe("Filter Users", function () {
             expect(res.body.links).to.have.property("prev");
           } else {
             expect(res.body.message).to.equal("No users found");
-            // eslint-disable-next-line no-unused-expressions
+
             expect(res.body.users).to.be.a("array").that.is.empty;
           }
 
@@ -275,7 +274,7 @@ describe("Filter Users", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.an("object");
           expect(res.body.message).to.equal("No users found");
-          // eslint-disable-next-line no-unused-expressions
+
           expect(res.body.users).to.be.an("array").that.is.empty;
           expect(res.body.links).to.have.property("next");
           expect(res.body.links).to.have.property("prev");
