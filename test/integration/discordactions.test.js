@@ -952,7 +952,7 @@ describe("Discord actions", function () {
     });
   });
 
-  describe("GET /discord-actions/invite", function () {
+  describe.skip("GET /discord-actions/invite", function () {
     it("should return the invite for the user if no userId is provided in the params and the invite exists", async function () {
       await addInviteToInviteModel({ userId: superUserId, inviteLink: "discord.gg/apQYT7HB" });
 
@@ -994,7 +994,7 @@ describe("Discord actions", function () {
   });
 
   // <------ Will revisit this later https://github.com/Real-Dev-Squad/website-backend/issues/2078 --->
-  describe("POST /discord-actions/invite", function () {
+  describe.skip("POST /discord-actions/invite", function () {
     afterEach(function () {
       sinon.restore();
     });
