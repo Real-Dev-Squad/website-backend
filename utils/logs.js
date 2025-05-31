@@ -104,7 +104,7 @@ function formatProfileDiffLogs(logsSnapshot, usersMap, type) {
   return {
     user: usersMap[meta.userId]?.username,
     message: body.message,
-
+    // eslint-disable-next-line security/detect-object-injection
     [actionKey]: usersMap[meta[actionKey]]?.username,
   };
 }
@@ -138,6 +138,7 @@ function flattenObject(obj, prefix = "") {
 function mapify(array, key) {
   const mappifiedObj = {};
   array.forEach((element) => {
+    // eslint-disable-next-line security/detect-object-injection
     mappifiedObj[element[key]] = element;
   });
   return mappifiedObj;

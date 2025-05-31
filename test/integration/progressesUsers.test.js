@@ -511,10 +511,10 @@ describe("Test Progress Updates API for Users", function () {
           expect(res).to.have.status(200);
           expect(res.body).to.be.an("object");
           expect(res.body.message).to.equal("Progress document retrieved successfully.");
-
+          // eslint-disable-next-line no-unused-expressions
           expect(res.body.data).to.be.an("array").that.is.empty;
           expect(res.body.links).to.have.keys(["next", "prev"]);
-
+          // eslint-disable-next-line no-unused-expressions
           expect(res.body.links.next).to.be.null;
           expect(res.body.links.prev).to.equal(`/progresses?type=user&page=${page - 1}&size=${size}&dev=true`);
           return done();

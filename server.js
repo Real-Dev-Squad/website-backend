@@ -54,13 +54,13 @@ function onError(error) {
     case "EACCES":
       logger.error(bind + " requires elevated privileges");
       process.exit(1);
-
+      // eslint-disable-next-line no-unreachable
       break;
 
     case "EADDRINUSE":
       logger.error(bind + " is already in use");
       process.exit(1);
-
+      // eslint-disable-next-line no-unreachable
       break;
 
     default:

@@ -46,7 +46,9 @@ const fetchLogs = async (query, param) => {
   try {
     let call = logsModel.where("type", "==", param);
     Object.keys(query).forEach((key) => {
+      // eslint-disable-next-line security/detect-object-injection
       if (key !== "limit" && key !== "lastDocId") {
+        // eslint-disable-next-line security/detect-object-injection
         call = call.where(key, "==", query[key]);
       }
     });

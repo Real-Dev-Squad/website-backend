@@ -150,7 +150,7 @@ describe("Logs", function () {
       expect(result.allLogs).to.have.lengthOf(3);
       expect(result).to.have.any.key("prev");
       expect(result).to.have.any.key("next");
-
+      // eslint-disable-next-line no-unused-expressions
       expect(result.next).to.not.be.null;
     });
 
@@ -171,12 +171,12 @@ describe("Logs", function () {
       expect(nextData.allLogs).to.have.lengthOf(4);
       expect(nextData).to.have.any.key("prev");
       expect(nextData).to.have.any.key("next");
-
+      // eslint-disable-next-line no-unused-expressions
       expect(nextData.prev).to.not.be.null;
       const prevData = await logsQuery.fetchAllLogs({ prev: nextData.prev });
       expect(prevData).to.have.any.key("prev");
       expect(prevData).to.have.any.key("next");
-
+      // eslint-disable-next-line no-unused-expressions
       expect(prevData.next).to.exist;
     });
 

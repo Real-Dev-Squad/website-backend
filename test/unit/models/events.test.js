@@ -166,6 +166,7 @@ describe("Events", function () {
     it("should get event codes", async function () {
       await eventQuery.createEvent(eventDataArray[1]);
 
+      // eslint-disable-next-line no-unused-vars
       const allEventCodesPromises = eventCodeDataArray[1].data.map(async (code) => {
         const eventCodeRef = await eventQuery.createEventCode(code);
         const eventCodeSnapshot = await eventCodeRef.get();

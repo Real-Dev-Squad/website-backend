@@ -210,7 +210,7 @@ describe("Members", function () {
             }
 
             expect(res).to.have.status(204);
-
+            /* eslint-disable no-unused-expressions */
             expect(res.body).to.be.a("object").to.be.empty;
 
             return done();
@@ -325,7 +325,7 @@ describe("Members", function () {
             }
 
             expect(res).to.have.status(204);
-
+            /* eslint-disable no-unused-expressions */
             expect(res.body).to.be.a("object").to.be.empty;
 
             return done();

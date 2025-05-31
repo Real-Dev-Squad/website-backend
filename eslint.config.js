@@ -32,13 +32,13 @@ export default [
       "no-console": "error",
 
       // Mocha rules
+      "mocha/no-pending-tests": "error",
       "mocha/no-exclusive-tests": "error",
 
       // Prettier for formatting
       "prettier/prettier": "error",
 
-      "no-unused-vars": "off",
+      "no-unused-vars": "warn",
     },
-    ignores: ["public/*", "dist/*"],
   },
 ];

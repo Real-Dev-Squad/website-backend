@@ -16,7 +16,7 @@ const getQualifiers = (query) => {
 
   combinations.forEach((combination) => {
     const [qualifier, value] = combination.split(":");
-
+    // eslint-disable-next-line security/detect-object-injection
     qualifiers[qualifier] = value;
   });
 

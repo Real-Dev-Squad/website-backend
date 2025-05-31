@@ -52,9 +52,10 @@ const getUsername = async (userId) => {
 const getFullName = async (userId) => {
   try {
     const {
+      // eslint-disable-next-line camelcase
       user: { first_name, last_name },
     } = await dataAccessLayer.retrieveUsers({ id: userId });
-
+    // eslint-disable-next-line camelcase
     return { first_name, last_name };
   } catch (error) {
     logger.error("Something went wrong", error);

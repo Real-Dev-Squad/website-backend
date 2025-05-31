@@ -44,7 +44,7 @@ const setInDiscordFalseScript = async () => {
   const updateUsersPromises = [];
   users.forEach((user) => {
     const id = user.id;
-
+    // eslint-disable-next-line security/detect-object-injection
     delete user[id];
     const userData = {
       ...user,
