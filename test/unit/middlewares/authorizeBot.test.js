@@ -230,12 +230,12 @@ describe("Middleware | Authorize Bot", function () {
 
       const response = {
         boom: {
-          unauthorized: sinon.spy(),
+          unauthorized: boomUnauthorizedSpy,
         },
       };
       authorizeBot.verifyDiscordBot(request, response, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(false);
-      expect(response.boom.unauthorized.calledOnce).to.be.equal(true);
+      expect(boomUnauthorizedSpy.calledOnce).to.be.equal(true);
     });
   });
 });
