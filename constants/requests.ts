@@ -68,3 +68,9 @@ export const INVALID_REQUEST_TYPE = "Invalid request type";
 export const INVALID_REQUEST_DEADLINE = "New deadline of the request must be greater than old deadline";
 export const REQUEST_UPDATED_SUCCESSFULLY = "Request updated successfully";
 export const UNAUTHORIZED_TO_UPDATE_REQUEST = "Unauthorized to update request";
+
+export const FEATURE_NOT_IMPLEMENTED = "Feature not implemented";
+
+export const IMPERSONATION_NOT_COMPLETED = "Please complete impersonation before creating a new request";
+export const IMPERSONATION_ALREADY_ATTEMPTED = "No active request is available for impersonation";
+export const IMPERSONATION_REQUEST_NOT_APPROVED = "Awaiting approval for impersonation request";
