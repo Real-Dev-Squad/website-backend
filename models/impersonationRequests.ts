@@ -1,24 +1,39 @@
+/**
+ * Model functions for managing impersonationRequests collection in Firestore.
+ * Includes create, update, get, getById, getByKeyValues functions.
+ *
+ * @module models/impersonationRequests
+ */
+
 import firestore from "../utils/firestore";
-import { CreateImpersonationRequestModelBody, ImpersonationRequest, PaginatedImpersonationRequests, UpdateImpersonationRequestDataBody, UpdateImpersonationRequestStatusBody } from "../types/impersonationRequests";
 import { ERROR_WHILE_CREATING_REQUEST, ERROR_WHILE_FETCHING_REQUEST, ERROR_WHILE_UPDATING_REQUEST, REQUEST_DOES_NOT_EXIST} from "../constants/requests";
 import {Timestamp} from "firebase-admin/firestore";
+import { CreateImpersonationRequestModelDto, ImpersonationRequest, PaginatedImpersonationRequests, UpdateImpersonationRequestModelDto} from "../types/impersonationRequest";
 const logger = require("../utils/logger")
 const impersonationRequestModel=firestore.collection("impersonationRequests");
 const SIZE=5;
 
-export const createImpersonationRequest = async (body:CreateImpersonationRequestModelBody ) : Promise<ImpersonationRequest> => {
+/**
+ * Creates a new impersonation request in Firestore.
+ * @param {CreateImpersonationRequestModelDto} body - The data for the new impersonation request.
+ * @returns {Promise<ImpersonationRequest>} The created impersonation request object.
+ * @throws Logs and rethrows any error encountered during creation.
+ */
+export const createImpersonationRequest = async (body:CreateImpersonationRequestModelDto  )=> {
   try {
-    const requestBody: any = {
+    const result = await impersonationRequestModel.add({
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
       ...body,
-    };
-    const result = await impersonationRequestModel.add(requestBody);
+    });
 
+    const doc= await result.get();
+    
     return {
       id: result.id,
-      ...requestBody,
+      ...doc.data(),
     };
+    
   } catch (error) {
     logger.error(ERROR_WHILE_CREATING_REQUEST, error);
     throw error;
@@ -26,25 +41,28 @@ export const createImpersonationRequest = async (body:CreateImpersonationRequest
 };
 
 
-export const updateImpersonationRequest=async (id:string,body:UpdateImpersonationRequestStatusBody | UpdateImpersonationRequestDataBody,lastModifiedBy:string) =>{
+/**
+ * Updates an existing impersonation request in Firestore.
+ * @param {UpdateImpersonationRequestModelDto} body - The update data for the impersonation request. Must include `id`, `lastModifiedBy`, and `updatingBody` (fields to update).
+ * @returns {Promise<object>} An object containing the updated fields and the request id.
+ * @throws {Error} Logs and rethrows any error encountered during update. Throws error if the request does not exist.
+ */
+export const updateImpersonationRequest=async (body:UpdateImpersonationRequestModelDto) =>{
     try{
-    const existingRequestDoc=await impersonationRequestModel.doc(id).get();
+    const existingRequestDoc=await impersonationRequestModel.doc(body.id).get();
     if(!existingRequestDoc.exists){
-      return {
-        type:"notFound",
-        error: REQUEST_DOES_NOT_EXIST,
-      };
+      throw new Error(REQUEST_DOES_NOT_EXIST);
     }
-    const requestBody: any = {
+
+    await impersonationRequestModel.doc(body.id).update({
       updatedAt: Timestamp.now(),
-      lastModifiedBy,
-      ...body,
-    };
-    await impersonationRequestModel.doc(id).update(requestBody);
+      lastModifiedBy: body.lastModifiedBy,
+      ...body.updatingBody
+    });
 
     return {
-      id,
-      ...requestBody
+      id: body.id,
+      ...body.updatingBody
     };
 
   }catch(error){
@@ -53,12 +71,13 @@ export const updateImpersonationRequest=async (id:string,body:UpdateImpersonatio
   }
 }
 
-interface KeyValues{
-  [key:string]:string
-}
-
-export const getImpersonationRequestById = async (query: KeyValues): Promise<ImpersonationRequest | null> => {
-  const { id } = query;
+/**
+ * Retrieves an impersonation request by its ID.
+ * @param {string} id - The ID of the impersonation request to retrieve.
+ * @returns {Promise<ImpersonationRequest|null>} The found impersonation request or null if not found.
+ * @throws {Error} Logs and rethrows any error encountered during fetch.
+ */
+export const getImpersonationRequestById = async (id:string): Promise<ImpersonationRequest | null> => {
   try {
     const requestDoc = await impersonationRequestModel.doc(id).get();
     if (!requestDoc.exists) {
@@ -76,11 +95,17 @@ export const getImpersonationRequestById = async (query: KeyValues): Promise<Imp
 }
 
 
+/**
+ * Retrieves a paginated list of impersonation requests based on query filters.
+ * @param {object} query - The query filters (createdBy, createdFor, status, prev, next, page, size).
+ * @returns {Promise<PaginatedImpersonationRequests|null>} The paginated impersonation requests or null if none found.
+ * @throws Logs and rethrows any error encountered during fetch.
+ */
 export const getImpersonationRequests = async (query) :Promise<PaginatedImpersonationRequests | null> => {
   let { createdBy, createdFor, status, prev, next, page, size = SIZE } = query;
 
   size = Number.parseInt(size);
-  page = parseInt(page);
+  page = Number.parseInt(page);
   try {
     let requestQuery: any = impersonationRequestModel;
 
@@ -154,7 +179,16 @@ export const getImpersonationRequests = async (query) :Promise<PaginatedImperson
   }
 };
 
+interface KeyValues{
+  [key:string]:string
+}
 
+/**
+ * Retrieves an impersonation request by key-value pairs.
+ * @param {KeyValues} keyValues - The key-value pairs to filter the request.
+ * @returns {Promise<ImpersonationRequest | null>} The found impersonation request or null if not found.
+ * @throws Logs and rethrows any error encountered during fetch.
+ */
 export const getImpersonationRequestByKeyValues = async (keyValues: KeyValues) : Promise<ImpersonationRequest | null> => {
   try {
     let requestQuery: any = impersonationRequestModel;
