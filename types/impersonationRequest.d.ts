@@ -8,7 +8,7 @@ import { Timestamp } from "firebase-admin/firestore";
 export type ImpersonationRequest = {
     id: string;
     status: REQUEST_STATE;
-    isImpersonationAttempted: boolean;
+    isImpersonationFinished: boolean;
     createdBy: string;
     createdFor: string;
     userId: string;
@@ -28,7 +28,7 @@ export type CreateImpersonationRequestBody = {
 
 export type CreateImpersonationRequestModelDto = {
     status: REQUEST_STATE;
-    isImpersonationAttempted: boolean;
+    isImpersonationFinished: boolean;
     createdBy: string;
     createdFor: string;
     userId: string;
@@ -38,8 +38,8 @@ export type CreateImpersonationRequestModelDto = {
 
 export type UpdateImpersonationRequestDataBody = {
     startedAt?: Timestamp;
-    endedAt?: Timestamp;
-    isImpersonationAttempted?: boolean;
+    endedAt: Timestamp;
+    isImpersonationFinished?: boolean;
 }
 
 export type UpdateImpersonationRequestModelDto = {
