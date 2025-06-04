@@ -23,16 +23,18 @@ const verifyDiscordBot = async (req, res, next) => {
 
     if (serviceName === DISCORD_SERVICE) {
       const data = botVerifcation.verifyDiscordService(token);
-      if (data.name !== DISCORD_SERVICE) {
-        return res.boom.unauthorized("Unauthorized Bot");
+      if (data.name === DISCORD_SERVICE) {
+        return next();
       }
+    }
+
+    const data = botVerifcation.verifyToken(token);
+
+    if (data.name === CLOUDFLARE_WORKER) {
       return next();
     }
-    const data = botVerifcation.verifyToken(token);
-    if (data.name !== CLOUDFLARE_WORKER) {
-      return res.boom.unauthorized("Unauthorized Bot");
-    }
-    return next();
+
+    return res.boom.unauthorized("Unauthorized Bot");
   } catch (error) {
     if (error.message === "invalid token") {
       return res.boom.unauthorized("Unauthorized Bot");
