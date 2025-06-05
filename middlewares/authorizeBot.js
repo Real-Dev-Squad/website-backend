@@ -21,15 +21,11 @@ const verifyDiscordBot = async (req, res, next) => {
     const token = req.headers.authorization.split(" ")[1];
     const serviceName = req.headers[HEADERS.SERVICE_NAME] || "";
 
-    if (serviceName === DISCORD_SERVICE) {
-      const data = botVerifcation.verifyDiscordService(token);
-      if (data.name === DISCORD_SERVICE) {
-        return next();
-      }
+    if (serviceName === DISCORD_SERVICE && botVerifcation.verifyDiscordService(token).name === DISCORD_SERVICE) {
+      return next();
     }
 
     const data = botVerifcation.verifyToken(token);
-
     if (data.name === CLOUDFLARE_WORKER) {
       return next();
     }
