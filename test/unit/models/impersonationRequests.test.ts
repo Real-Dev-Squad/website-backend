@@ -102,6 +102,7 @@ describe("models/impersonationRequests", () => {
 
       try {
         await impersonationModel.getImpersonationRequestById("");
+        expect.fail("Should throw error");
       } catch (err) {
         expect(loggerStub.calledWith(ERROR_WHILE_FETCHING_REQUEST, err)).to.be.true;
       }
@@ -180,6 +181,7 @@ describe("models/impersonationRequests", () => {
           updatingBody: { status: "APPROVED" },
           lastModifiedBy: impersonationRequest.impersonatedUserId,
         });
+        expect.fail("Should throw error");
       } catch (err) {
         expect(loggerStub.calledWith(ERROR_WHILE_UPDATING_REQUEST, err)).to.be.true;
       }
@@ -189,10 +191,11 @@ describe("models/impersonationRequests", () => {
   describe("getImpersonationRequests", () => {
     beforeEach(async () => {
       impersonationRequests = [];
-      for (let i = 0; i < 5; i++) {
-        const request = await impersonationModel.createImpersonationRequest(impersonationRequestsBodyData[i]);
-        impersonationRequests.push(request);
-      }
+      impersonationRequests = await Promise.all(
+        impersonationRequestsBodyData.slice(0, 5).map((data) =>
+          impersonationModel.createImpersonationRequest(data)
+        )
+      );
     });
 
     afterEach(async () => {
