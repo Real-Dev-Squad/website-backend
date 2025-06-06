@@ -10,7 +10,7 @@ const { addLog } = require("../models/logs");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 const discordMavenRoleId = config.get("discordMavenRoleId");
 
-const { setUserDiscordNickname, getDiscordMembers } = discordServices;
+const { setUserDiscordNickname, getDiscordMembers, updateGroupRoleInDiscord } = discordServices;
 
 /**
  * Creates a role
@@ -114,6 +114,67 @@ const deleteGroupRole = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while deleting group role: ${error}`);
+    return res.boom.badImplementation("Internal server error");
+  }
+};
+
+/**
+ * Updates a group's name or description
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+const updateGroupRoleDetails = async (req, res) => {
+  const { groupId } = req.params;
+  let { rolename, description } = req.body;
+  try {
+    const { roleExists, existingRoles } = await discordRolesModel.isGroupRoleExists({ groupId });
+    if (!roleExists) {
+      return res.boom.notFound("Group role not found");
+    }
+
+    const updateData = {};
+    if (rolename) {
+      if (!rolename.startsWith("group-")) {
+        rolename = `group-${rolename}`;
+      }
+
+      const { roleExists: nameExists, existingRoles: nameExistingRoles } =
+        await discordRolesModel.isGroupRoleExists({ rolename });
+      if (nameExists) {
+        const existingId = nameExistingRoles.docs[0].id;
+        if (existingId !== groupId) {
+          return res.status(409).json({ message: "Role already exists!" });
+        }
+      }
+
+      updateData.rolename = rolename;
+    }
+    if (description !== undefined) {
+      updateData.description = description;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ message: "Nothing to update" });
+    }
+
+    const roleData = existingRoles.data();
+
+    if (updateData.rolename) {
+      const discordUpdate = await updateGroupRoleInDiscord(
+        roleData.roleid,
+        rolename,
+        req.userData
+      );
+      if (!discordUpdate.success) {
+        return res.boom.badImplementation(discordUpdate.message);
+      }
+    }
+
+    await discordRolesModel.updateGroupRole(updateData, groupId);
+
+    return res.status(200).json({ message: "Group role updated successfully" });
+  } catch (error) {
+    logger.error(`Error while updating group role: ${error}`);
     return res.boom.badImplementation("Internal server error");
   }
 };
@@ -572,5 +633,6 @@ module.exports = {
   setRoleToUsersWith31DaysPlusOnboarding,
   getUserDiscordInvite,
   generateInviteForUser,
+  updateGroupRoleDetails,
   deleteGroupRole,
 };
