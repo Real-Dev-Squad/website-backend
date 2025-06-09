@@ -2,14 +2,13 @@ import chai from "chai";
 import sinon from "sinon";
 import { createImpersonationRequestValidator } from "../../../middlewares/validators/impersonationRequests";
 import { CreateImpersonationRequestBody } from "../../../types/impersonationRequest";
-import { impersonationRequestsBodyData } from "../../fixtures/impersonation-requests/impersonationRequests";
 const { expect } = chai;
 
 describe("Impersonation Request Validators", function () {
   let req: any;
   let res: any;
-  let requestBody: CreateImpersonationRequestBody = {
-    impersonatedUserId: "radnomId",
+  const requestBody: CreateImpersonationRequestBody = {
+    impersonatedUserId: "randomId",
     reason: "Testing purpose"
   };
   let nextSpy: sinon.SinonSpy;

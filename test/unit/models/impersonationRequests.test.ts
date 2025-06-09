@@ -13,7 +13,6 @@ const userData = userDataFixture();
 
 let testUserId: string;
 let requestBody: CreateImpersonationRequestModelDto;
-let impersonationRequests = [];
 
 describe("models/impersonationRequests", () => {
   let impersonationRequest;

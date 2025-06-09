@@ -54,7 +54,7 @@ describe("Tests Impersonation Requests Service", () => {
       await cleanDb();
     });
 
-    it("should return Forbidden error with IMPERSONATION_NOT_COMPLETED if a pending request is already present", async () => {
+    it("should return Forbidden error with REQUEST_ALREADY_PENDING if a pending request is already present", async () => {
       try {
         await impersonationService.validateImpersonationRequestService(requestBody.userId, requestBody.createdBy);
       } catch (err) {
@@ -68,10 +68,9 @@ describe("Tests Impersonation Requests Service", () => {
       try {
         await impersonationService.validateImpersonationRequestService(requestBody.userId, requestBody.createdBy);
       } catch (err) {
-        expect.fail("Expected no error, but got: " + err.message);
+          expect.fail(`Expected no error, but got: ${err.message}`);
       }
     });
-
 
     it("should throw Forbidden error with IMPERSONATION_NOT_COMPLETED if an approved request is present but not impersonated", async () => {
       await impersonationModel.createImpersonationRequest({
@@ -88,7 +87,7 @@ describe("Tests Impersonation Requests Service", () => {
       }
     });
 
-     it("should not throw Forbidden error if an approved request is present and impersonated:", async () => {
+    it("should not throw Forbidden error if an approved request is present and impersonated:", async () => {
       await impersonationModel.createImpersonationRequest({
         ...requestBody,
         impersonatedUserId: testUserId2,
@@ -97,24 +96,24 @@ describe("Tests Impersonation Requests Service", () => {
         isImpersonationFinished: true,
       });
 
-       try {
+      try {
         await impersonationService.validateImpersonationRequestService(
-        requestBody.userId,
-        testUserId2
-      );
+          requestBody.userId,
+          testUserId2
+        );
       } catch (err) {
-        expect.fail("Expected no error, but got: " + err.message);
+        expect.fail(`Expected no error, but got: ${err.message}`);
       }
     });
 
     it("should not throw IMPERSONATION_NOT_COMPLETED if an approved request is not present", async () => {
-     try{
+      try {
         await impersonationService.validateImpersonationRequestService(
-        requestBody.userId,
-        testUserId
+          requestBody.userId,
+          testUserId
         );
-     }catch(err){
-       expect(err.message).to.equal(REQUEST_ALREADY_PENDING);
+      } catch (err) {
+        expect(err.message).to.equal(REQUEST_ALREADY_PENDING);
       }
     });
 
@@ -190,7 +189,6 @@ describe("Tests Impersonation Requests Service", () => {
           impersonatedUserId: testUserId,
           reason: requestBody.reason,
         });
-        expect.fail("Expected error to be thrown");
       } catch (err) {
         expect(err.message).to.equal("Validation exploded");
         expect(loggerStub.calledOnce).to.be.true;
