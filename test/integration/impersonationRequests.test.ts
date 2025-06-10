@@ -1,5 +1,4 @@
 import chai from "chai";
-const { expect } = chai;
 import chaiHttp from "chai-http";
 import _ from "lodash";
 import config from "config";
@@ -8,14 +7,15 @@ import cleanDb from "../utils/cleanDb";
 import authService from "../../services/authService";
 import userDataFixture from "../fixtures/user/user";
 import sinon from "sinon";
-const cookieName = config.get("userToken.cookieName");
 import addUser from "../utils/addUser";
-import * as requestQuery from "../../models/impersonationRequests";
+import * as impersonationModel from "../../models/impersonationRequests";
 import * as validationService from "../../services/impersonationRequests";
-import { CreateImpersonationRequestBody } from "../../types/impersonationRequest";
+import { CreateImpersonationRequestBody, ImpersonationRequest } from "../../types/impersonationRequest";
 import { REQUEST_CREATED_SUCCESSFULLY, REQUEST_STATE } from "../../constants/requests";
 import { impersonationRequestsBodyData } from "../fixtures/impersonation-requests/impersonationRequests";
 
+const { expect } = chai;
+const cookieName = config.get("userToken.cookieName");
 const userData = userDataFixture();
 chai.use(chaiHttp);
 
@@ -48,12 +48,12 @@ describe("Impersonation Requests", () => {
       reason: "User assistance required for account debugging."
     };
 
-    await requestQuery.createImpersonationRequest({
+    await impersonationModel.createImpersonationRequest({
       ...impersonationRequestsBodyData[0],
       impersonatedUserId: testUserId2,
       userId: superUserId,
     });
-    await requestQuery.createImpersonationRequest({
+    await impersonationModel.createImpersonationRequest({
       ...impersonationRequestsBodyData[0],
       impersonatedUserId: testUserId3,
       userId: superUserId,
@@ -277,7 +277,7 @@ describe("Impersonation Requests", () => {
     });
 
     it("should return 500 response when creating Impersonation request fails", function (done) {
-      sinon.stub(requestQuery, "createImpersonationRequest").throws(new Error("Error while creating request"));
+      sinon.stub(impersonationModel, "createImpersonationRequest").throws(new Error("Error while creating request"));
 
       chai
         .request(app)
