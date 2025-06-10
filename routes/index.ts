@@ -41,6 +41,6 @@ app.use("/v1/notifications", require("./notify"));
 app.use("/goals", require("./goals"));
 app.use("/invites", require("./invites"));
 app.use("/requests", require("./requests"));
-app.use("/impersonation", require("./impersonation"))
+app.use("/impersonation", require("./impersonation"));
 app.use("/subscription", devFlagMiddleware, require("./subscription"));
 module.exports = app;

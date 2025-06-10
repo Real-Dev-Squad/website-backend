@@ -1,54 +1,72 @@
 import {
   ERROR_WHILE_CREATING_REQUEST,
-  FEATURE_NOT_IMPLEMENTED,
-  REQUEST_CREATED_SUCCESSFULLY
+  LOG_ACTION,
+  REQUEST_LOG_TYPE,
+  REQUEST_STATE,
+  TASK_REQUEST_MESSAGES
 } from "../constants/requests";
-import { createImpersonationRequestService } from "../services/impersonationRequests";
-import {
-  CreateImpersonationRequest,
-  CreateImpersonationRequestBody,
-  ImpersonationRequestResponse
-} from "../types/impersonationRequest";
+import { createImpersonationRequest } from "../models/impersonationRequests";
+import { fetchUser } from "../models/users";
+import { addLog } from "../services/logService";
+import { User } from "../typeDefinitions/users";
+import { NotFound } from "http-errors";
+import { CreateImpersonationRequestServiceBody } from "../types/impersonationRequest";
 const logger = require("../utils/logger");
-import { NextFunction } from "express";
 
 /**
- * Controller to handle creation of an impersonation request.
+ * Service to create a new impersonation request.
  *
- * @param {CreateImpersonationRequest} req - Express request object, extended with userData.
- * @param {ImpersonationRequestResponse} res - Express response object.
- * @param {NextFunction} next - Express next middleware function.
- * @returns {Promise<void>}
+ * Checks if the impersonated user exists, creates the request, and logs the action.
+ *
+ * @param {CreateImpersonationRequestServiceBody} body - The request body containing impersonation details.
+ * @returns {Promise<any>} The created impersonation request object.
+ * @throws {NotFound} If the impersonated user does not exist.
+ * @throws {Error} If there is an error during request creation.
  */
-export const createImpersonationRequestController = async (
-  req: CreateImpersonationRequest,
-  res: ImpersonationRequestResponse,
-  next: NextFunction
-): Promise<ImpersonationRequestResponse> => {
-  const dev = req.query.dev === "true";
-  if (!dev) return res.boom.notImplemented(FEATURE_NOT_IMPLEMENTED);
-
+export const createImpersonationRequestService = async (
+  body: CreateImpersonationRequestServiceBody
+) => {
   try {
-    const { impersonatedUserId, reason } = req.body as CreateImpersonationRequestBody;
-    const userId = req?.userData?.id;
-    const createdBy = req?.userData?.username;
+    const { userExists, user: impersonatedUser } = await fetchUser({ userId: body.impersonatedUserId });
+    if (!userExists) {
+      throw new NotFound(TASK_REQUEST_MESSAGES.USER_NOT_FOUND);
+    }
 
-    const impersonationRequest = await createImpersonationRequestService({
-      userId,
-      createdBy,
-      impersonatedUserId,
-      reason
+    const { username: createdFor } = impersonatedUser as User;
+
+    const impersonationRequest = await createImpersonationRequest({
+      status: REQUEST_STATE.PENDING,
+      userId: body.userId,
+      impersonatedUserId: body.impersonatedUserId,
+      isImpersonationFinished: false,
+      createdBy: body.createdBy,
+      createdFor: createdFor,
+      reason: body.reason,
     });
 
-    return res.status(201).json({
-      message: REQUEST_CREATED_SUCCESSFULLY,
-      data: {
-        id: impersonationRequest.id,
-        ...impersonationRequest
-      }
-    });
+    const impersonationRequestLog = {
+      type: REQUEST_LOG_TYPE.REQUEST_CREATED,
+      meta: {
+        requestId: impersonationRequest.id,
+        action: LOG_ACTION.CREATE,
+        userId: body.userId,
+        createdAt: Date.now(),
+      },
+      body: {
+        ...impersonationRequest,
+        isImpersonationFinished: impersonationRequest.isImpersonationFinished ? "true" : "false",
+      },
+    };
+
+    await addLog(
+      impersonationRequestLog.type,
+      impersonationRequestLog.meta,
+      impersonationRequestLog.body
+    );
+
+    return impersonationRequest;
   } catch (error) {
     logger.error(ERROR_WHILE_CREATING_REQUEST, error);
-    next(error);
+    throw error;
   }
 };

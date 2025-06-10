@@ -1,75 +1,66 @@
 import firestore from "../utils/firestore";
-import { ERROR_WHILE_CREATING_REQUEST, ERROR_WHILE_FETCHING_REQUEST } from "../constants/requests";
+import {
+  ERROR_WHILE_CREATING_REQUEST,
+  IMPERSONATION_NOT_COMPLETED,
+  REQUEST_ALREADY_PENDING,
+  REQUEST_STATE
+} from "../constants/requests";
 import { Timestamp } from "firebase-admin/firestore";
 import { CreateImpersonationRequestModelDto, ImpersonationRequest } from "../types/impersonationRequest";
+import { Forbidden } from "http-errors";
 const logger = require("../utils/logger");
+
 const impersonationRequestModel = firestore.collection("impersonationRequests");
-const SIZE = 5;
 
 /**
  * Creates a new impersonation request in Firestore.
- * @async
- * @function createImpersonationRequest
+ *
+ * Checks for existing requests with the same impersonatedUserId and userId that are either
+ * APPROVED or PENDING and not finished. Throws a Forbidden error if such a request exists.
+ *
  * @param {CreateImpersonationRequestModelDto} body - The data for the new impersonation request.
  * @returns {Promise<ImpersonationRequest>} The created impersonation request object.
- * @throws Will log and rethrow any error encountered during creation.
+ * @throws {Forbidden} If a similar request is already pending or not completed.
+ * @throws {Error} Logs and rethrows any error encountered during creation.
  */
 export const createImpersonationRequest = async (
   body: CreateImpersonationRequestModelDto
 ): Promise<ImpersonationRequest> => {
   try {
-    const result = await impersonationRequestModel.add({
+    const reqQuery = impersonationRequestModel
+      .where("impersonatedUserId", "==", body.impersonatedUserId)
+      .where("userId", "==", body.userId)
+      .where("status", "in", ["APPROVED", "PENDING"])
+      .where("isImpersonationFinished", "==", false);
+
+    const snapshot = await reqQuery.get();
+
+    if (!snapshot.empty) {
+      const request = snapshot.docs[0].data();
+
+      if (request.status === REQUEST_STATE.APPROVED && !request.isImpersonationFinished) {
+        throw new Forbidden(IMPERSONATION_NOT_COMPLETED);
+      }
+
+      if (request.status === REQUEST_STATE.PENDING && !request.isImpersonationFinished) {
+        throw new Forbidden(REQUEST_ALREADY_PENDING);
+      }
+    }
+
+    const requestBody = {
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now(),
       ...body,
-    });
-    const doc = (await result.get()).data() as ImpersonationRequest;
+    } as ImpersonationRequest;
+
+    const result = await impersonationRequestModel.add(requestBody);
+
     return {
       id: result.id,
-      ...doc,
+      ...requestBody,
     };
   } catch (error) {
     logger.error(ERROR_WHILE_CREATING_REQUEST, error);
     throw error;
   }
 };
-
-interface KeyValues {
-  [key: string]: string;
-}
-
-/**
- * Retrieves an impersonation request by key-value pairs.
- * @async
- * @function getImpersonationRequestByKeyValues
- * @param {KeyValues} keyValues - The key-value pairs to filter the request.
- * @returns {Promise<ImpersonationRequest | null>} The found impersonation request or null if not found.
- * @throws Will log and rethrow any error encountered during fetch.
- */
-export const getImpersonationRequestByKeyValues = async (
-  keyValues: KeyValues
-): Promise<ImpersonationRequest | null> => {
-  try {
-    let requestQuery: any = impersonationRequestModel;
-    Object.entries(keyValues).forEach(([key, value]) => {
-      requestQuery = requestQuery.where(key, "==", value);
-    });
-
-    const requestQueryDoc = await requestQuery.orderBy("createdAt", "desc").limit(1).get();
-    if (requestQueryDoc.empty) {
-      return null;
-    }
-    let request: any;
-    requestQueryDoc.forEach((doc: any) => {
-      request = {
-        id: doc.id,
-        ...doc.data(),
-      };
-    });
-
-    return request;
-  } catch (error) {
-    logger.error(ERROR_WHILE_FETCHING_REQUEST, error);
-    throw error;
-  }
-}
