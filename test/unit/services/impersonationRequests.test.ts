@@ -13,7 +13,7 @@ const userData = userDataFixture();
 describe("Tests Impersonation Requests Service", () => {
   let testUserId: string;
   let requestBody: CreateImpersonationRequestModelDto;
-  let userDetail: any;
+  let userDetail;
 
   beforeEach(async () => {
     await cleanDb();
@@ -46,7 +46,7 @@ describe("Tests Impersonation Requests Service", () => {
           impersonatedUserId: "randomImpersonatedId",
           reason: "He asked",
         });
-      } catch (err: any) {
+      } catch (err) {
         expect(err.name).to.equal("NotFoundError");
         expect(err.message).to.equal(TASK_REQUEST_MESSAGES.USER_NOT_FOUND);
       }

@@ -2,12 +2,13 @@ import chai from "chai";
 import sinon from "sinon";
 import { createImpersonationRequestValidator } from "../../../middlewares/validators/impersonationRequests";
 import { CreateImpersonationRequestBody } from "../../../types/impersonationRequest";
+
 const { expect } = chai;
 
 describe("Impersonation Request Validators", function () {
-  let req: any;
-  let res: any;
-  const requestBody: CreateImpersonationRequestBody = {
+  let req: { body: CreateImpersonationRequestBody };
+  let res: { boom: { badRequest: sinon.SinonSpy } };
+  const mockRequestBody: CreateImpersonationRequestBody = {
     impersonatedUserId: "randomId",
     reason: "Testing purpose"
   };
@@ -25,15 +26,15 @@ describe("Impersonation Request Validators", function () {
   describe("createImpersonationRequestValidator", function () {
     it("should validate for a valid create impersonation request", async function () {
       req = {
-        body: requestBody
+        body: mockRequestBody
       };
       await createImpersonationRequestValidator(req as any, res as any, nextSpy);
       expect(nextSpy.calledOnce).to.be.true;
     });
 
-    it("should not validate for an invalid impersonation request on missing impersonatedUserId", async function () {
+    it("should invalidate for impersonation request with missing impersonatedUserId", async function () {
       const req = {
-        body: { ...requestBody, impersonatedUserId: "" },
+        body: { ...mockRequestBody, impersonatedUserId: "" },
       };
       try {
         await createImpersonationRequestValidator(req as any, res as any, nextSpy);
@@ -44,7 +45,7 @@ describe("Impersonation Request Validators", function () {
 
     it("should not validate for an invalid impersonation request on missing reason", async function () {
       const req = {
-        body: { ...requestBody, reason: "" },
+        body: { ...mockRequestBody, reason: "" },
       };
       try {
         await createImpersonationRequestValidator(req as any, res as any, nextSpy);
