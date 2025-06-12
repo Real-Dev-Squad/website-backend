@@ -7,7 +7,6 @@ import { createImpersonationRequestService } from "../services/impersonationRequ
 import {
   CreateImpersonationRequest,
   CreateImpersonationRequestBody,
-  ImpersonationRequest,
   ImpersonationRequestResponse
 } from "../types/impersonationRequest";
 import { NextFunction } from "express";
@@ -16,18 +15,16 @@ const logger = require("../utils/logger");
 /**
  * Controller to handle creation of an impersonation request.
  *
- * Validates the dev flag, extracts request data, calls the service, and returns the result.
- *
  * @param {CreateImpersonationRequest} req - Express request object with user and body data.
  * @param {ImpersonationRequestResponse} res - Express response object.
  * @param {NextFunction} next - Express next middleware function.
- * @returns {Promise<any>}
+ * @returns {Promise<ImpersonationRequestResponse>}
  */
 export const createImpersonationRequestController = async (
   req: CreateImpersonationRequest,
   res: ImpersonationRequestResponse,
   next: NextFunction
-) => {
+) : Promise<ImpersonationRequestResponse> => {
   const dev = req.query.dev === "true";
   if (!dev) return res.boom.notImplemented(FEATURE_NOT_IMPLEMENTED);
 
@@ -46,7 +43,6 @@ export const createImpersonationRequestController = async (
     return res.status(201).json({
       message: REQUEST_CREATED_SUCCESSFULLY,
       data: {
-        id: impersonationRequest.id,
         ...impersonationRequest
       }
     });

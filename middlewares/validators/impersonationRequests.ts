@@ -29,8 +29,8 @@ export const createImpersonationRequestValidator = async (
   try {
     await schema.validateAsync(req.body, { abortEarly: false });
     next();
-  } catch (error: any) {
-    const errorMessages = error.details.map((detail: any) => detail.message);
+  } catch ( error ) {
+    const errorMessages = error.details.map((detail:{message: string}) => detail.message);
     logger.error(`Error while validating request payload : ${errorMessages}`);
     return res.boom.badRequest(errorMessages);
   }

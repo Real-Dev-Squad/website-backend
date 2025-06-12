@@ -42,12 +42,6 @@ export type UpdateImpersonationRequestDataBody = {
     isImpersonationFinished?: boolean;
 }
 
-export type UpdateImpersonationRequestModelDto = {
-    id: string;
-    updatingBody: UpdateImpersonationRequestDataBody | UpdateImpersonationRequestStatusBody;
-    lastModifiedBy: string;
-}
-
 export type UpdateImpersonationRequestStatusBody = {
     status: REQUEST_STATE.APPROVED | REQUEST_STATE.REJECTED;
     message?: string;

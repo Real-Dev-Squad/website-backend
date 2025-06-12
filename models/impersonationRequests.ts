@@ -37,12 +37,11 @@ export const createImpersonationRequest = async (
 
     if (!snapshot.empty) {
       const request = snapshot.docs[0].data();
-
-      if (request.status === REQUEST_STATE.APPROVED && !request.isImpersonationFinished) {
+      const { status, isImpersonationFinished } = request;
+      if (status === REQUEST_STATE.APPROVED && !isImpersonationFinished) {
         throw new Forbidden(IMPERSONATION_NOT_COMPLETED);
       }
-
-      if (request.status === REQUEST_STATE.PENDING && !request.isImpersonationFinished) {
+      if (status === REQUEST_STATE.PENDING) {
         throw new Forbidden(REQUEST_ALREADY_PENDING);
       }
     }

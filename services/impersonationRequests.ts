@@ -10,7 +10,7 @@ import { fetchUser } from "../models/users";
 import { addLog } from "./logService";
 import { User } from "../typeDefinitions/users";
 import { NotFound } from "http-errors";
-import { CreateImpersonationRequestServiceBody } from "../types/impersonationRequest";
+import { CreateImpersonationRequestServiceBody, ImpersonationRequest } from "../types/impersonationRequest";
 const logger = require("../utils/logger");
 
 /**
@@ -19,13 +19,13 @@ const logger = require("../utils/logger");
  * Checks if the impersonated user exists, creates the request, and logs the action.
  *
  * @param {CreateImpersonationRequestServiceBody} body - The request body containing impersonation details.
- * @returns {Promise<any>} The created impersonation request object.
+ * @returns {Promise<ImpersonationRequest>} The created impersonation request object.
  * @throws {NotFound} If the impersonated user does not exist.
  * @throws {Error} If there is an error during request creation.
  */
 export const createImpersonationRequestService = async (
   body: CreateImpersonationRequestServiceBody
-) => {
+) : Promise<ImpersonationRequest> => {
   try {
     const { userExists, user: impersonatedUser } = await fetchUser({ userId: body.impersonatedUserId });
     if (!userExists) {
