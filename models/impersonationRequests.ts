@@ -31,7 +31,7 @@ export const createImpersonationRequest = async (
       .where("impersonatedUserId", "==", body.impersonatedUserId)
       .where("userId", "==", body.userId)
       .where("status", "in", ["APPROVED", "PENDING"])
-      .where("isImpersonationFinished", "==", false);
+      .where("isImpersonationFinished", "==", false).orderBy("createdAt", "desc").limit(1);
 
     const snapshot = await reqQuery.get();
 

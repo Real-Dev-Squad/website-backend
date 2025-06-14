@@ -18,13 +18,13 @@ const logger = require("../utils/logger");
  * @param {CreateImpersonationRequest} req - Express request object with user and body data.
  * @param {ImpersonationRequestResponse} res - Express response object.
  * @param {NextFunction} next - Express next middleware function.
- * @returns {Promise<ImpersonationRequestResponse>}
+ * @returns {Promise<ImpersonationRequestResponse | void>}
  */
 export const createImpersonationRequestController = async (
   req: CreateImpersonationRequest,
   res: ImpersonationRequestResponse,
   next: NextFunction
-) : Promise<ImpersonationRequestResponse> => {
+) : Promise<ImpersonationRequestResponse | void> => {
   const dev = req.query.dev === "true";
   if (!dev) return res.boom.notImplemented(FEATURE_NOT_IMPLEMENTED);
 
