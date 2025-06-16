@@ -37,13 +37,8 @@ export const createImpersonationRequest = async (
 
     if (!snapshot.empty) {
       const request = snapshot.docs[0].data();
-      const { status, isImpersonationFinished } = request;
-      if (status === REQUEST_STATE.APPROVED && !isImpersonationFinished) {
-        throw new Forbidden(IMPERSONATION_NOT_COMPLETED);
-      }
-      if (status === REQUEST_STATE.PENDING) {
-        throw new Forbidden(REQUEST_ALREADY_PENDING);
-      }
+      const { status } = request;
+      throw new Forbidden(status === REQUEST_STATE.APPROVED ? IMPERSONATION_NOT_COMPLETED : REQUEST_ALREADY_PENDING)
     }
 
     const requestBody = {
@@ -59,7 +54,7 @@ export const createImpersonationRequest = async (
       ...requestBody,
     };
   } catch (error) {
-    logger.error(ERROR_WHILE_CREATING_REQUEST, error);
+    logger.error(ERROR_WHILE_CREATING_REQUEST, { error, requestData: body });
     throw error;
   }
 };

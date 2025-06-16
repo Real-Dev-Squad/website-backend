@@ -24,14 +24,11 @@ export const createImpersonationRequestController = async (
   req: CreateImpersonationRequest,
   res: ImpersonationRequestResponse,
   next: NextFunction
-) : Promise<ImpersonationRequestResponse | void> => {
-  const dev = req.query.dev === "true";
-  if (!dev) return res.boom.notImplemented(FEATURE_NOT_IMPLEMENTED);
-
+): Promise<ImpersonationRequestResponse | void> => {
   try {
     const { impersonatedUserId, reason } = req.body as CreateImpersonationRequestBody;
-    const userId = req?.userData?.id;
-    const createdBy = req?.userData?.username;
+    const userId = req.userData?.id;
+    const createdBy = req.userData?.username;
 
     const impersonationRequest = await createImpersonationRequestService({
       userId,
