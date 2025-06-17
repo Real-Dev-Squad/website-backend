@@ -29,7 +29,7 @@ describe("models/impersonationRequests", () => {
     await cleanDb();
   });
 
-  describe("createImpersonationRequest", () => {
+ describe("createImpersonationRequest", () => {
     it("should create a new impersonation request", async () => {
       impersonationRequest = await impersonationModel.createImpersonationRequest(requestBody);
       expect(impersonationRequest).to.have.property("id");
@@ -42,7 +42,7 @@ describe("models/impersonationRequests", () => {
     });
 
     it("should throw an error if there is an existing PENDING impersonation request", async () => {
-      await impersonationModel.createImpersonationRequest(requestBody);
+       await impersonationModel.createImpersonationRequest(requestBody);
       try {
         await impersonationModel.createImpersonationRequest(requestBody);
       } catch (error) {
@@ -51,14 +51,8 @@ describe("models/impersonationRequests", () => {
     });
 
     it("should create multiple requests for different users", async () => {
-      const request1 = await impersonationModel.createImpersonationRequest({
-        ...impersonationRequestsBodyData[0],
-        createdBy: "user1"
-      });
-      const request2 = await impersonationModel.createImpersonationRequest({
-        ...impersonationRequestsBodyData[1],
-        createdBy: "user2"
-      });
+      const request1 = await impersonationModel.createImpersonationRequest({ ...impersonationRequestsBodyData[0],createdBy: "user1" });
+      const request2 = await impersonationModel.createImpersonationRequest({ ...impersonationRequestsBodyData[1],createdBy: "user2" });
       expect(request1).to.have.property("id");
       expect(request1.createdBy).to.equal("user1");
       expect(request1.impersonatedUserId).to.equal(impersonationRequestsBodyData[0].impersonatedUserId);
@@ -78,16 +72,13 @@ describe("models/impersonationRequests", () => {
       }
     });
 
-    it("should throw forbidden error if an unimpersonated APPROVED request is present", async () => {
+    it("should throw forbidden error if an APPROVED request with isImpersonationFinished as false is present", async ()=>{
       try {
-        await impersonationModel.createImpersonationRequest({
-          ...impersonationRequestsBodyData[0],
-          status: REQUEST_STATE.APPROVED
-        });
+        await impersonationModel.createImpersonationRequest({...impersonationRequestsBodyData[0],status:REQUEST_STATE.APPROVED});
         await impersonationModel.createImpersonationRequest(impersonationRequestsBodyData[0]);
       } catch (error) {
         expect(error.message).to.include(IMPERSONATION_NOT_COMPLETED);
       }
-    });
+    })
   });
 });

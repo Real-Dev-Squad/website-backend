@@ -1,18 +1,24 @@
 import chai from "chai";
 import sinon from "sinon";
-import { createImpersonationRequestValidator } from "../../../middlewares/validators/impersonationRequests";
-import { CreateImpersonationRequestBody } from "../../../types/impersonationRequest";
+import {
+  createImpersonationRequestValidator
+} from "../../../middlewares/validators/impersonationRequests";
+import {
+  CreateImpersonationRequest,
+  CreateImpersonationRequestBody,
+  ImpersonationRequestResponse,
+} from "../../../types/impersonationRequest";
 
 const { expect } = chai;
 
 describe("Impersonation Request Validators", function () {
-  let req: { body: CreateImpersonationRequestBody };
-  let res: { boom: { badRequest: sinon.SinonSpy } };
-  const mockRequestBody: CreateImpersonationRequestBody = {
-    impersonatedUserId: "randomId",
-    reason: "Testing purpose"
-  };
+  let req: any;
+  let res: any;
   let nextSpy: sinon.SinonSpy;
+  const requestBody: CreateImpersonationRequestBody = {
+    impersonatedUserId: "randomId",
+    reason: "Testing purpose",
+  };
 
   beforeEach(function () {
     res = {
@@ -26,32 +32,40 @@ describe("Impersonation Request Validators", function () {
   describe("createImpersonationRequestValidator", function () {
     it("should validate for a valid create impersonation request", async function () {
       req = {
-        body: mockRequestBody
+        body: requestBody,
       };
-      await createImpersonationRequestValidator(req as any, res as any, nextSpy);
+      await createImpersonationRequestValidator(
+        req as CreateImpersonationRequest,
+        res as ImpersonationRequestResponse,
+        nextSpy
+      );
       expect(nextSpy.calledOnce).to.be.true;
     });
 
-    it("should invalidate for impersonation request with missing impersonatedUserId", async function () {
-      const req = {
-        body: { ...mockRequestBody, impersonatedUserId: "" },
+    it("should not validate for an invalid impersonation request on missing impersonatedUserId", async function () {
+      req = {
+        body: { ...requestBody, impersonatedUserId: "" },
       };
-      try {
-        await createImpersonationRequestValidator(req as any, res as any, nextSpy);
-      } catch (error) {
-        expect(error.details[0].message).to.equal("impersonatedUserId cannot be empty");
-      }
+      await createImpersonationRequestValidator(
+        req as CreateImpersonationRequest,
+        res as ImpersonationRequestResponse,
+        nextSpy
+      );
+      expect(res.boom.badRequest.calledOnce).to.be.true;
+      expect(nextSpy.called).to.be.false;
     });
 
     it("should not validate for an invalid impersonation request on missing reason", async function () {
-      const req = {
-        body: { ...mockRequestBody, reason: "" },
+      req = {
+        body: { ...requestBody, reason: "" },
       };
-      try {
-        await createImpersonationRequestValidator(req as any, res as any, nextSpy);
-      } catch (error) {
-        expect(error.details[0].message).to.equal("reason cannot be empty");
-      }
+      await createImpersonationRequestValidator(
+        req as CreateImpersonationRequest,
+        res as ImpersonationRequestResponse,
+        nextSpy
+      );
+      expect(res.boom.badRequest.calledOnce).to.be.true;
+      expect(nextSpy.called).to.be.false;
     });
   });
 });

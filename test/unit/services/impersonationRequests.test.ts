@@ -61,10 +61,10 @@ describe("Tests Impersonation Requests Service", () => {
       });
 
       expect(response).to.not.be.null;
-      expect(response.createdBy).to.be.equal(requestBody.createdBy);
+      expect(response.createdBy).to.equal(requestBody.createdBy);
       expect(response.id).to.not.be.null;
-      expect(response.userId).to.be.equal(requestBody.userId);
-      expect(response.impersonatedUserId).to.be.equal(testUserId);
+      expect(response.userId).to.equal(requestBody.userId);
+      expect(response.impersonatedUserId).to.equal(testUserId);
     });
   });
 });
