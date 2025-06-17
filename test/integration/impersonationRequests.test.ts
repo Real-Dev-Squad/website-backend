@@ -70,7 +70,7 @@ describe("Impersonation Requests", () => {
   });
 
   describe("POST /impersonation/requests", () => {
-    it("should return 501 and 'Feature not implemented' message when dev is false", function (done) {
+    it("should return 404 and 'Route not found' message when dev is false", function (done) {
       chai
         .request(app)
         .post("/impersonation/requests?dev=false")
@@ -78,34 +78,27 @@ describe("Impersonation Requests", () => {
         .send(impersonationRequestBody)
         .end(function (err, res) {
           if (err) return done(err);
-          try {
-            expect(res.statusCode).to.equal(501);
-            expect(res.body.message).to.equal("Feature not implemented");
-            done();
-          } catch (e) {
-            done(e);
-          }
+          expect(res.statusCode).to.equal(404);
+          expect(res.body.message).to.equal("Route not found");
+          done();
         });
     });
 
-    it("should return 501 and 'Feature not implemented' message when dev is missing", function (done) {
+    it("should return 404 and 'Route not found' message when dev is missing", function (done) {
       chai
         .request(app)
         .post("/impersonation/requests")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(impersonationRequestBody)
         .end(function (err, res) {
-          try {
-            expect(res.statusCode).to.equal(501);
-            expect(res.body.message).to.equal("Feature not implemented");
-            done();
-          } catch (e) {
-            done(e);
-          }
+          if (err) return done(err);
+          expect(res.statusCode).to.equal(404);
+          expect(res.body.message).to.equal("Route not found");
+          done();
         });
     });
 
-    it("should not return 501 and should create a new request if dev is present", function (done) {
+    it("should create a new request if dev is present", function (done) {
       chai
         .request(app)
         .post(requestsEndpoint)
@@ -113,15 +106,11 @@ describe("Impersonation Requests", () => {
         .send({ ...impersonationRequestBody })
         .end(function (err, res) {
           if (err) return done(err);
-          try {
-            expect(res).to.have.status(201);
-            expect(res.body).to.have.property("message");
-            expect(res.body.message).to.equal(REQUEST_CREATED_SUCCESSFULLY);
-            expect(res.body).to.have.property("data");
-            done();
-          } catch (e) {
-            done(e);
-          }
+          expect(res).to.have.status(201);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal(REQUEST_CREATED_SUCCESSFULLY);
+          expect(res.body).to.have.property("data");
+          done();
         });
     });
 
@@ -132,14 +121,10 @@ describe("Impersonation Requests", () => {
         .send(impersonationRequestBody)
         .end(function (err, res) {
           if (err) return done(err);
-          try {
-            expect(res).to.have.status(401);
-            expect(res.body.error).to.equal("Unauthorized");
-            expect(res.body.message).to.equal("Unauthenticated User");
-            done();
-          } catch (e) {
-            done(e);
-          }
+          expect(res).to.have.status(401);
+          expect(res.body.error).to.equal("Unauthorized");
+          expect(res.body.message).to.equal("Unauthenticated User");
+          done();
         });
     });
 
@@ -151,14 +136,10 @@ describe("Impersonation Requests", () => {
         .send(impersonationRequestBody)
         .end(function (err, res) {
           if (err) return done(err);
-          try {
-            expect(res).to.have.status(401);
-            expect(res.body.error).to.equal("Unauthorized");
-            expect(res.body.message).to.equal("You are not authorized for this action.");
-            done();
-          } catch (e) {
-            done(e);
-          }
+          expect(res).to.have.status(401);
+          expect(res.body.error).to.equal("Unauthorized");
+          expect(res.body.message).to.equal("You are not authorized for this action.");
+          done();
         });
     });
 
@@ -170,14 +151,10 @@ describe("Impersonation Requests", () => {
         .send(impersonationRequestBody)
         .end(function (err, res) {
           if (err) return done(err);
-          try {
-            expect(res).to.have.status(401);
-            expect(res.body.error).to.equal("Unauthorized");
-            expect(res.body.message).to.equal("Unauthenticated User");
-            done();
-          } catch (e) {
-            done(e);
-          }
+          expect(res).to.have.status(401);
+          expect(res.body.error).to.equal("Unauthorized");
+          expect(res.body.message).to.equal("Unauthenticated User");
+          done();
         });
     });
 
@@ -189,14 +166,10 @@ describe("Impersonation Requests", () => {
         .send(_.omit(impersonationRequestBody, "impersonatedUserId"))
         .end(function (err, res) {
           if (err) return done(err);
-          try {
-            expect(res).to.have.status(400);
-            expect(res.body.error).to.equal("Bad Request");
-            expect(res.body.message).to.equal("impersonatedUserId is required");
-            done();
-          } catch (e) {
-            done(e);
-          }
+          expect(res).to.have.status(400);
+          expect(res.body.error).to.equal("Bad Request");
+          expect(res.body.message).to.equal("impersonatedUserId is required");
+          done();
         });
     });
 
@@ -208,14 +181,10 @@ describe("Impersonation Requests", () => {
         .send(_.omit(impersonationRequestBody, "reason"))
         .end(function (err, res) {
           if (err) return done(err);
-          try {
-            expect(res).to.have.status(400);
-            expect(res.body.error).to.equal("Bad Request");
-            expect(res.body.message).to.equal("reason is required");
-            done();
-          } catch (e) {
-            done(e);
-          }
+          expect(res).to.have.status(400);
+          expect(res.body.error).to.equal("Bad Request");
+          expect(res.body.message).to.equal("reason is required");
+          done();
         });
     });
 
@@ -227,18 +196,14 @@ describe("Impersonation Requests", () => {
         .send({ ...impersonationRequestBody, impersonatedUserId: "nonexistentUserId" })
         .end(function (err, res) {
           if (err) return done(err);
-          try {
-            expect(res).to.have.status(404);
-            expect(res.body.error).to.equal("Not Found");
-            expect(res.body.message).to.equal("User not found");
-            done();
-          } catch (e) {
-            done(e);
-          }
+          expect(res).to.have.status(404);
+          expect(res.body.error).to.equal("Not Found");
+          expect(res.body.message).to.equal("User not found");
+          done();
         });
     });
 
-    it("should return 403 Forbidden if an approved impersonation request already exists", function (done) {
+    it("should return 403 Forbidden if an approved impersonation request already exists and isImpersonationFinished is false", function (done) {
       chai
         .request(app)
         .post(requestsEndpoint)
@@ -246,14 +211,10 @@ describe("Impersonation Requests", () => {
         .send({ ...impersonationRequestBody, impersonatedUserId: testUserId3 })
         .end(function (err, res) {
           if (err) return done(err);
-          try {
-            expect(res).to.have.status(403);
-            expect(res.body.error).to.equal("Forbidden");
-            expect(res.body.message).to.equal("Please complete impersonation before creating a new request");
-            done();
-          } catch (e) {
-            done(e);
-          }
+          expect(res).to.have.status(403);
+          expect(res.body.error).to.equal("Forbidden");
+          expect(res.body.message).to.equal("Please complete impersonation before creating a new request");
+          done();
         });
     });
 
@@ -265,14 +226,10 @@ describe("Impersonation Requests", () => {
         .send({ ...impersonationRequestBody, impersonatedUserId: testUserId2 })
         .end(function (err, res) {
           if (err) return done(err);
-          try {
-            expect(res).to.have.status(403);
-            expect(res.body.error).to.equal("Forbidden");
-            expect(res.body.message).to.equal("Request already exists please wait for approval or rejection");
-            done();
-          } catch (e) {
-            done(e);
-          }
+          expect(res).to.have.status(403);
+          expect(res.body.error).to.equal("Forbidden");
+          expect(res.body.message).to.equal("Request already exists please wait for approval or rejection");
+          done();
         });
     });
 
@@ -286,17 +243,13 @@ describe("Impersonation Requests", () => {
         .send(impersonationRequestBody)
         .end(function (err, res) {
           if (err) return done(err);
-          try {
-            expect(res.statusCode).to.equal(500);
-            expect(res.body.message).to.equal("An internal server error occurred");
-            done();
-          } catch (e) {
-            done(e);
-          }
+          expect(res.statusCode).to.equal(500);
+          expect(res.body.message).to.equal("An internal server error occurred");
+          done();
         });
     });
 
-    it("should return 500 if an error occurs while validating the request", function (done) {
+    it("should return 500 if an unexpected error occurs", function (done) {
       sinon.stub(validationService, "createImpersonationRequestService").throws(new Error("Error while creating request"));
       chai
         .request(app)
@@ -305,13 +258,9 @@ describe("Impersonation Requests", () => {
         .send({ ...impersonationRequestBody, impersonatedUserId: testUserId3 })
         .end(function (err, res) {
           if (err) return done(err);
-          try {
-            expect(res).to.have.status(500);
-            expect(res.body.message).to.equal("An internal server error occurred");
-            done();
-          } catch (e) {
-            done(e);
-          }
+          expect(res).to.have.status(500);
+          expect(res.body.message).to.equal("An internal server error occurred");
+          done();
         });
     });
   });
