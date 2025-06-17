@@ -3,8 +3,13 @@ const sinon = require("sinon");
 const expect = require("chai").expect;
 const bot = require("../../utils/generateBotToken");
 const jwt = require("jsonwebtoken");
-const { HEADERS } = require("../../../constants/constants");
-const { BAD_TOKEN, CLOUDFLARE_WORKER, CRON_JOB_HANDLER, DISCORD_SERVICE } = require("../../../constants/bot");
+const {
+  BAD_TOKEN,
+  CLOUDFLARE_WORKER,
+  CRON_JOB_HANDLER,
+  DISCORD_SERVICE,
+  DiscordServiceHeader,
+} = require("../../../constants/bot");
 
 describe("Middleware | Authorize Bot", function () {
   describe("Check authorization of bot", function (done) {
@@ -137,7 +142,7 @@ describe("Middleware | Authorize Bot", function () {
       const request = {
         headers: {
           authorization: `Bearer ${BAD_TOKEN}`,
-          [HEADERS.SERVICE_NAME]: DISCORD_SERVICE,
+          [DiscordServiceHeader.name]: DISCORD_SERVICE,
         },
       };
 
@@ -159,7 +164,7 @@ describe("Middleware | Authorize Bot", function () {
       const request = {
         headers: {
           authorization: `Bearer BAD_TOKEN`,
-          [HEADERS.SERVICE_NAME]: DISCORD_SERVICE,
+          [DiscordServiceHeader.name]: DISCORD_SERVICE,
         },
       };
 
@@ -179,7 +184,7 @@ describe("Middleware | Authorize Bot", function () {
       const request = {
         headers: {
           authorization: `Bearer ${jwtToken}`,
-          [HEADERS.SERVICE_NAME]: DISCORD_SERVICE,
+          [DiscordServiceHeader.name]: DISCORD_SERVICE,
         },
       };
 
@@ -204,7 +209,7 @@ describe("Middleware | Authorize Bot", function () {
       const request = {
         headers: {
           authorization: `Bearer ${jwtToken}`,
-          [HEADERS.SERVICE_NAME]: DISCORD_SERVICE,
+          [DiscordServiceHeader.name]: DISCORD_SERVICE,
         },
       };
 

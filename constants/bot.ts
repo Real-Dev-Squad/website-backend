@@ -8,4 +8,8 @@ const Services = {
   CRON_JOB_HANDLER: CRON_JOB_HANDLER,
 };
 
-module.exports = { CLOUDFLARE_WORKER, BAD_TOKEN, CRON_JOB_HANDLER, Services, DISCORD_SERVICE };
+const DiscordServiceHeader = {
+  name: "x-service-name"
+}
+
+module.exports = { CLOUDFLARE_WORKER, BAD_TOKEN, CRON_JOB_HANDLER, Services, DISCORD_SERVICE, DiscordServiceHeader };
