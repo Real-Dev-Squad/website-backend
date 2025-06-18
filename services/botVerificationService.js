@@ -11,6 +11,16 @@ const verifyToken = (token) => {
 };
 
 /**
+ * Verifies if the JWT for Discord Service is valid. Throws error in case of signature error or expiry
+ *
+ * @param token {String} - JWT to be verified
+ * @return {Object} - Decode value of JWT
+ */
+const verifyDiscordService = (token) => {
+  return jwt.verify(token, config.get("discordService.publicKey"), { algorithms: ["RS256"] });
+};
+
+/**
  * Verifies if the JWT is valid. Throws error in case of signature error or expiry
  *
  * @param token {String} - JWT to be verified
@@ -20,4 +30,4 @@ const verifyCronJob = (token) => {
   return jwt.verify(token, config.get("cronJobHandler.publicKey"), { algorithms: ["RS256"] });
 };
 
-module.exports = { verifyToken, verifyCronJob };
+module.exports = { verifyToken, verifyCronJob, verifyDiscordService };
