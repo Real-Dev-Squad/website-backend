@@ -18,7 +18,7 @@ export const getImpersonationRequestsValidator = async (
 ) => {
   const schema = joi.object().keys({
     dev: joi.bool().sensitive().optional(), // TODO: Remove this validator once feature is tested and ready to be used
-    id: joi.string().optional(),
+    id: joi.string().max(100).pattern(/^[a-zA-Z0-9-_]+$/).optional(),
     createdBy: joi.string().insensitive().optional(),
     createdFor: joi.string().insensitive().optional(),
     status: joi
@@ -42,7 +42,7 @@ export const getImpersonationRequestsValidator = async (
   });
 
   try {
-    await schema.validateAsync(req.query, { abortEarly: false });
+    await schema.validate(req.query, { abortEarly: false });
     next();
   } catch (error: any) {
     const errorMessages = error.details.map((detail: { message: string }) => detail.message);

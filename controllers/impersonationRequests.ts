@@ -1,23 +1,22 @@
 import { ERROR_WHILE_FETCHING_REQUEST, FEATURE_NOT_IMPLEMENTED, REQUEST_FETCHED_SUCCESSFULLY } from "../constants/requests";
 import { getImpersonationRequestById, getImpersonationRequests } from "../models/impersonationRequests";
+import { GetImpersonationControllerRequest, ImpersonationRequestResponse } from "../types/impersonationRequest";
 import { getPaginatedLink } from "../utils/helper";
 const logger = require("../utils/logger");
 
 /**
- * Controller to handle fetching impersonation requests.
+ * Controller to fetch impersonation requests.
  *
- * @param {any} req - Express request object.
- * @param {any} res - Express response object.
- * @returns {Promise<void>}
+ * @param {GetImpersonationRequest} req - Express request object with query parameters.
+ * @param {ImpersonationRequestResponse} res - Express response object.
+ * @returns {Promise<ImpersonationRequestResponse>} Returns 200 with data or 204 if no records found.
  */
-export const getImpersonationRequestsController = async (req: any, res: any): Promise<void> => {
-  const { query } = req;
+export const getImpersonationRequestsController = async (
+  req: GetImpersonationControllerRequest,
+  res: ImpersonationRequestResponse
+): Promise<ImpersonationRequestResponse> => {
   try {
-    const dev = query.dev === "true";
-    if (!dev) {
-      return res.boom.notImplemented(FEATURE_NOT_IMPLEMENTED);
-    }
-
+    const { query } = req;
     if (query.id) {
       const request = await getImpersonationRequestById(query.id);
       if (!request) {
@@ -30,15 +29,11 @@ export const getImpersonationRequestsController = async (req: any, res: any): Pr
     }
 
     const requests = await getImpersonationRequests(query);
-    if (!requests) {
+    if (!requests || requests.allRequests.length === 0) {
       return res.status(204).send();
     }
 
     const { allRequests, next, prev, page } = requests;
-    if (allRequests.length === 0) {
-      return res.status(204).send();
-    }
-
     const count = allRequests.length;
 
     if (page) {
@@ -52,36 +47,35 @@ export const getImpersonationRequestsController = async (req: any, res: any): Pr
         message: REQUEST_FETCHED_SUCCESSFULLY,
         data: allRequests,
         page: pageLink,
-        count: count,
+        count,
       });
     }
 
     let nextUrl = null;
     let prevUrl = null;
     if (next) {
-      const nextLink = getPaginatedLink({
+      nextUrl = getPaginatedLink({
         endpoint: "/impersonation/requests",
         query,
         cursorKey: "next",
         docId: next,
       });
-      nextUrl = nextLink;
     }
     if (prev) {
-      const prevLink = getPaginatedLink({
+      prevUrl = getPaginatedLink({
         endpoint: "/impersonation/requests",
         query,
         cursorKey: "prev",
         docId: prev,
       });
-      prevUrl = prevLink;
     }
+
     return res.status(200).json({
       message: REQUEST_FETCHED_SUCCESSFULLY,
       data: allRequests,
       next: nextUrl,
       prev: prevUrl,
-      count: count,
+      count,
     });
   } catch (err) {
     logger.error(ERROR_WHILE_FETCHING_REQUEST, err);

@@ -79,3 +79,7 @@ export type PaginatedImpersonationRequests = {
     page: number;
     count: number;
 }
+
+export type GetImpersonationControllerRequest = Request & {
+    query: ImpersonationRequestQuery
+}
