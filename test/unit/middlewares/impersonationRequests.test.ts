@@ -12,8 +12,8 @@ import {
 const { expect } = chai;
 
 describe("Impersonation Request Validators", function () {
-  let req: any;
-  let res: any;
+  let req;
+  let res;
   let nextSpy: sinon.SinonSpy;
   const requestBody: CreateImpersonationRequestBody = {
     impersonatedUserId: "randomId",
