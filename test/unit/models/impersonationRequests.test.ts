@@ -8,20 +8,16 @@ import userDataFixture from "../../fixtures/user/user";
 import sinon from "sinon";
 import { CreateImpersonationRequestModelDto } from "../../../types/impersonationRequest";
 
-const userData = userDataFixture();
-
-let testUserId: string;
-let requestBody: CreateImpersonationRequestModelDto;
 
 describe("models/impersonationRequests", () => {
   let impersonationRequest;
+  let mockRequestBody = impersonationRequestsBodyData[0];
+  let testUserId:string;
+  const userData = userDataFixture();
 
   beforeEach(async () => {
     await cleanDb();
-    const userIdPromises = [addUser(userData[16])];
-    const [userId] = await Promise.all(userIdPromises);
-    testUserId = userId;
-    requestBody = impersonationRequestsBodyData[0];
+    testUserId = await addUser(userData[16]);
   });
 
   afterEach(async () => {
@@ -31,20 +27,20 @@ describe("models/impersonationRequests", () => {
 
  describe("createImpersonationRequest", () => {
     it("should create a new impersonation request", async () => {
-      impersonationRequest = await impersonationModel.createImpersonationRequest(requestBody);
+      impersonationRequest = await impersonationModel.createImpersonationRequest(mockRequestBody);
       expect(impersonationRequest).to.have.property("id");
       expect(impersonationRequest).to.include({
-        createdBy: requestBody.createdBy,
-        impersonatedUserId: requestBody.impersonatedUserId,
-        createdFor: requestBody.createdFor,
+        createdBy: mockRequestBody.createdBy,
+        impersonatedUserId: mockRequestBody.impersonatedUserId,
+        createdFor: mockRequestBody.createdFor,
         status: REQUEST_STATE.PENDING,
       });
     });
 
     it("should throw an error if there is an existing PENDING impersonation request", async () => {
-       await impersonationModel.createImpersonationRequest(requestBody);
+       await impersonationModel.createImpersonationRequest(mockRequestBody);
       try {
-        await impersonationModel.createImpersonationRequest(requestBody);
+        await impersonationModel.createImpersonationRequest(mockRequestBody);
       } catch (error) {
         expect(error.message).to.include(REQUEST_ALREADY_PENDING);
       }

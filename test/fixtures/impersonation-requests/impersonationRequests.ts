@@ -65,11 +65,3 @@ export const impersonationRequestsBodyData = [
     impersonatedUserId: "rejectedUserId",
   }
 ];
-
-export const updateImpersonationRequestApproved = {
-  status: REQUEST_STATE.APPROVED,
-};
-
-export const updateImpersonationRequestRejected = {
-  status: REQUEST_STATE.REJECTED,
-};

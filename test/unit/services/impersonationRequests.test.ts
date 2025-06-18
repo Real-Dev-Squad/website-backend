@@ -8,18 +8,16 @@ import cleanDb from "../../utils/cleanDb";
 import { impersonationRequestsBodyData } from "../../fixtures/impersonation-requests/impersonationRequests";
 import { CreateImpersonationRequestModelDto } from "../../../types/impersonationRequest";
 
-const userData = userDataFixture();
 
 describe("Tests Impersonation Requests Service", () => {
   let testUserId: string;
-  let requestBody: CreateImpersonationRequestModelDto;
+  let mockRequestBody: CreateImpersonationRequestModelDto;
   let userDetail;
+  const userData = userDataFixture();
 
   beforeEach(async () => {
     await cleanDb();
-    const userIdPromises = [addUser(userData[20])];
-    const [userId1] = await Promise.all(userIdPromises);
-    testUserId = userId1;
+    testUserId = await addUser(userData[20]);
     userDetail = userData[20];
   });
 
@@ -30,7 +28,7 @@ describe("Tests Impersonation Requests Service", () => {
 
   describe("createImpersonationRequestService", () => {
     beforeEach(async () => {
-      requestBody = impersonationRequestsBodyData[0];
+      mockRequestBody = impersonationRequestsBodyData[0];
     });
 
     afterEach(async () => {
@@ -54,16 +52,16 @@ describe("Tests Impersonation Requests Service", () => {
 
     it("should successfully create a new impersonation Request", async () => {
       const response = await impersonationService.createImpersonationRequestService({
-        userId: requestBody.userId,
-        createdBy: requestBody.createdBy,
+        userId: mockRequestBody.userId,
+        createdBy: mockRequestBody.createdBy,
         impersonatedUserId: testUserId,
-        reason: requestBody.reason,
+        reason: mockRequestBody.reason,
       });
 
       expect(response).to.not.be.null;
-      expect(response.createdBy).to.equal(requestBody.createdBy);
+      expect(response.createdBy).to.equal(mockRequestBody.createdBy);
       expect(response.id).to.not.be.null;
-      expect(response.userId).to.equal(requestBody.userId);
+      expect(response.userId).to.equal(mockRequestBody.userId);
       expect(response.impersonatedUserId).to.equal(testUserId);
     });
   });
