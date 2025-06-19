@@ -40,7 +40,6 @@ export const createRequestController = async (
 
 export const updateRequestController = async (req: UpdateRequest, res: CustomResponse) => {
   const type = req.body.type;
-  console.log("reached main controller")
   switch (type) {
     case REQUEST_TYPE.OOO:
       return await updateOooRequestController(req as UpdateRequest, res as ExtensionRequestResponse);

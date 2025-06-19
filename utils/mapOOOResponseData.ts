@@ -13,7 +13,7 @@ export const mapOOOResponseData = (data: OooStatusRequest[]) => {
     type: item.type,
     message: item.reason,
     state: item.status,
-    reason: item.reason,
+    reason: item.comment,
     createdAt: item.createdAt,
     updatedAt: item.updatedAt,
     requestedBy: item.userId,

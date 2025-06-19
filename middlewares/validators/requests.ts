@@ -67,6 +67,7 @@ export const updateRequestsMiddleware = async (
       }),
     type: joi.string().valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION, REQUEST_TYPE.ONBOARDING).required(),
     comment: joi.string().optional(),
+    message: joi.string().optional(),
     status: joi.string().valid(REQUEST_STATE.APPROVED, REQUEST_STATE.REJECTED).optional(),
   });
 

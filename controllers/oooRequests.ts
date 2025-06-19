@@ -50,11 +50,9 @@ export const createOooRequestController = async (
   if (!isUserPartOfDiscord) {
     return res.boom.forbidden(UNAUTHORIZED_TO_CREATE_OOO_REQUEST);
   }
-  console.log("userStatus", isUserPartOfDiscord);
   try {
     const userStatus = await getUserStatus(userId);
     const validationResponse = await validateUserStatus(userId, userStatus);
-    console.log("validationResponse", validationResponse);
     if (validationResponse) {
       if (validationResponse.error === USER_STATUS_NOT_FOUND) {
           return res.boom.notFound(validationResponse.error);
@@ -90,7 +88,6 @@ export const createOooRequestController = async (
 };
 
 export const updateOooRequestController = async (req: UpdateRequest, res: CustomResponse) => {
-  console.log("reached ooo request controller")
   const requestBody = req.body;
   const userId = req?.userData?.id;
   const requestId = req.params.id;
