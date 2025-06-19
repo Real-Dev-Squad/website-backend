@@ -1,18 +1,18 @@
 import joi from "joi";
 import { NextFunction } from "express";
-import { CreateImpersonationRequest, ImpersonationRequestResponse } from "../../types/impersonationRequest";
+import { CreateImpersonationRequest, GetImpersonationControllerRequest, ImpersonationRequestResponse } from "../../types/impersonationRequest";
 import { REQUEST_STATE } from "../../constants/requests";
 const logger = require("../../utils/logger");
 
 /**
  * Middleware to validate query parameters for fetching impersonation requests.
  *
- * @param {CreateImpersonationRequest} req - Express request object.
+ * @param {GetImpersonationControllerRequest} req - Express request object.
  * @param {ImpersonationRequestResponse} res - Express response object.
  * @param {NextFunction} next - Express next middleware function.
  */
 export const getImpersonationRequestsValidator = async (
-  req: CreateImpersonationRequest,
+  req: GetImpersonationControllerRequest,
   res: ImpersonationRequestResponse,
   next: NextFunction
 ) => {

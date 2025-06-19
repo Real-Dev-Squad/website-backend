@@ -8,7 +8,6 @@ const router = express.Router();
 
 router.get(
   "/requests",
-  devFlagMiddleware,
   authenticate,
   getImpersonationRequestsValidator,
   getImpersonationRequestsController
