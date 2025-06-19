@@ -12,26 +12,21 @@ import userDataFixture from "./../../fixtures/user/user";
 import sinon from "sinon";
 import { CreateImpersonationRequestModelDto } from "../../../types/impersonationRequest";
 
-const userData = userDataFixture();
-let testUserId: string;
-let requestBody: CreateImpersonationRequestModelDto;
-let impersonationRequests = [];
+
 
 describe("models/impersonationRequests", () => {
   let impersonationRequest;
+  const userData = userDataFixture();
+  let testUserId: string;
+  let requestBody: CreateImpersonationRequestModelDto;
+  let impersonationRequests = [];
 
   beforeEach(async () => {
     await cleanDb();
-    const userIdPromises = [addUser(userData[16])];
-    const [userId] = await Promise.all(userIdPromises);
-    testUserId = userId;
+    testUserId = await addUser(userData[16]);
     requestBody = impersonationRequestsBodyData[0];
   });
 
-  afterEach(async () => {
-    sinon.restore();
-    await cleanDb();
-  });
 
   describe("getImpersonationRequestById", () => {
     it("should return the impersonation request by id", async () => {
