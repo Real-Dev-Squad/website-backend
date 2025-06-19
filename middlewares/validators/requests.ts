@@ -66,11 +66,13 @@ export const updateRequestsMiddleware = async (
         "any.only": "state must be APPROVED or REJECTED",
       }),
     type: joi.string().valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION, REQUEST_TYPE.ONBOARDING).required(),
-    message: joi.string().optional()
+    comment: joi.string().optional(),
+    status: joi.string().valid(REQUEST_STATE.APPROVED, REQUEST_STATE.REJECTED).optional(),
   });
 
   try {
     await schema.validateAsync(req.body, { abortEarly: false });
+    console.log("it is going to next")
     next();
   } catch (error) {
     const errorMessages = error.details.map((detail:any) => detail.message);

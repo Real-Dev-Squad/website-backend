@@ -677,6 +677,7 @@ const cancelOooStatus = async (userId) => {
 
 const addFutureStatus = async (futureStatusData) => {
   try {
+    console.log("reached add future status");
     const userStatusDocs = await userStatusModel.where("userId", "==", futureStatusData.userId).limit(1).get();
     const [userStatusDoc] = userStatusDocs.docs;
     let docId;
@@ -698,6 +699,7 @@ const addFutureStatus = async (futureStatusData) => {
       futureStatus: futureStatusData,
     };
     await userStatusModel.doc(docId).update(newStatusData);
+    console.log("updated future status");
     return { id: docId, userStatusExists: true, data: newStatusData };
   } catch (error) {
     logger.error(`error in updating User Status Document ${error}`);
