@@ -42,7 +42,7 @@ export const getImpersonationRequestsValidator = async (
   });
 
   try {
-    await schema.validate(req.query, { abortEarly: false });
+    await schema.validateAsync(req.query, { abortEarly: false });
     next();
   } catch (error: any) {
     const errorMessages = error.details.map((detail: { message: string }) => detail.message);

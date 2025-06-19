@@ -7,9 +7,11 @@ const logger = require("../utils/logger");
 /**
  * Controller to fetch impersonation requests.
  *
- * @param {GetImpersonationRequest} req - Express request object with query parameters.
+ * @async
+ * @function getImpersonationRequestsController
+ * @param {GetImpersonationControllerRequest} req - Express request object containing query parameters.
  * @param {ImpersonationRequestResponse} res - Express response object.
- * @returns {Promise<ImpersonationRequestResponse>} Returns 200 with data or 204 if no records found.
+ * @returns {Promise<ImpersonationRequestResponse>} Returns one of the following responses.
  */
 export const getImpersonationRequestsController = async (
   req: GetImpersonationControllerRequest,
@@ -17,6 +19,7 @@ export const getImpersonationRequestsController = async (
 ): Promise<ImpersonationRequestResponse> => {
   try {
     const { query } = req;
+
     if (query.id) {
       const request = await getImpersonationRequestById(query.id);
       if (!request) {

@@ -1,5 +1,5 @@
 import { ERROR_WHILE_FETCHING_REQUEST } from "../constants/requests";
-import { ImpersonationRequest, PaginatedImpersonationRequests } from "../types/impersonationRequest";
+import { ImpersonationRequest, ImpersonationRequestQuery, PaginatedImpersonationRequests } from "../types/impersonationRequest";
 import firestore from "../utils/firestore";
 import { Query, CollectionReference } from '@google-cloud/firestore';
 const impersonationRequestModel = firestore.collection("impersonationRequests");
@@ -39,25 +39,19 @@ export const getImpersonationRequestById = async (
  * @param {string} [query.status] - Filter by request status (e.g., "APPROVED", "PENDING", "REJECTED").
  * @param {string} [query.prev] - Document ID to use as the ending point for backward pagination.
  * @param {string} [query.next] - Document ID to use as the starting point for forward pagination.
- * @param {number|string} [query.page] - Page number for offset-based pagination.
- * @param {number|string} [query.size] - Number of results per page.
+ * @param {string} [query.page] - Page number for offset-based pagination.
+ * @param {string} [query.size] - Number of results per page.
  * @returns {Promise<PaginatedImpersonationRequests|null>} The paginated impersonation requests or null if none found.
  * @throws Logs and rethrows any error encountered during fetch.
  */
 export const getImpersonationRequests = async (
-  query: {
-    createdBy?: string;
-    createdFor?: string;
-    status?: string;
-    prev?: string;
-    next?: string;
-    page?: number;
-    size?: number;
-  }
+  query
 ): Promise<PaginatedImpersonationRequests | null> => {
+  
   let { createdBy, createdFor, status, prev, next, page, size = DEFAULT_PAGE_SIZE } = query;
-  size = Number.parseInt(size as any);
-  page = Number.parseInt(page as any);
+
+  size = Number.parseInt(size);
+  page = Number.parseInt(page);
 
   try {
     let requestQuery: Query<ImpersonationRequest> = impersonationRequestModel as CollectionReference<ImpersonationRequest>;
@@ -84,9 +78,7 @@ export const getImpersonationRequests = async (
     if (page) {
       const startAfter = (page - 1) * size;
       requestQueryDoc = requestQueryDoc.offset(startAfter);
-    }
-
-    if (next) {
+    } else if (next) {
       const doc = await impersonationRequestModel.doc(next).get();
       requestQueryDoc = requestQueryDoc.startAt(doc);
     } else if (prev) {
