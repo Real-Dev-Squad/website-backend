@@ -130,7 +130,7 @@ describe("models/impersonationRequests", () => {
       expect(result.page).to.be.equal(2);
     });
 
-    it("Should return empty array if no data is found", async () => {
+    it("Should return null if no data is found", async () => {
       await cleanDb();
       const query = { status: REQUEST_STATE.PENDING };
       const impersonationRequestData = await impersonationModel.getImpersonationRequests(query);
@@ -154,11 +154,14 @@ describe("models/impersonationRequests", () => {
     });
 
     it("should return the next page of results using next cursor", async () => {
-      const firstPage = await impersonationModel.getImpersonationRequests({ size: 2 });
-      expect(firstPage.next).to.exist;
-      const nextPage = await impersonationModel.getImpersonationRequests({ size: 2, next: firstPage.next });
-      expect(nextPage.allRequests.length).to.be.at.most(2);
-      expect(nextPage.allRequests[0].id).to.not.equal(firstPage.allRequests[0].id);
+      const first = await impersonationModel.getImpersonationRequests({ size: 2 });
+      expect(first.next).to.exist;
+      const next = await impersonationModel.getImpersonationRequests({ size: 2, next: first.next });
+      expect(next.allRequests.length).to.be.at.most(2);
+      expect(next.nextPage).to.not.exist;
+      expect(next.next).to.not.equal(null);
+      expect(next.prev).to.not.equal(null);
+      expect(next.allRequests[0].id).to.not.equal(first.allRequests[0].id);
     });
 
     it("should return the previous page of results using prev cursor", async () => {
