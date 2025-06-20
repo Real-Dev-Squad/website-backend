@@ -2,9 +2,9 @@ import { expect } from "chai";
 import sinon from "sinon";
 import * as impersonationService from "../../../services/impersonationRequests";
 import * as impersonationModel from "../../../models/impersonationRequests";
-import { REQUEST_STATE, TASK_REQUEST_MESSAGES } from "../../../constants/requests";
+import * as logService from "../../../services/logService";
+import {TASK_REQUEST_MESSAGES } from "../../../constants/requests";
 import userDataFixture from "../../fixtures/user/user";
-import addUser from "../../utils/addUser";
 import cleanDb from "../../utils/cleanDb";
 import { impersonationRequestsBodyData } from "../../fixtures/impersonation-requests/impersonationRequests";
 import { CreateImpersonationRequestModelDto } from "../../../types/impersonationRequest";
@@ -12,17 +12,10 @@ import { Timestamp } from "firebase-admin/firestore";
 const userQuery = require("../../../models/users");
 
 describe("Tests Impersonation Requests Service", () => {
-  let testUserId: string;
   let mockRequestBody: CreateImpersonationRequestModelDto = impersonationRequestsBodyData[0];
   const userData = userDataFixture();
 
-  beforeEach(async () => {
-    await cleanDb();
-    testUserId = await addUser(userData[20]);
-  });
-
   afterEach(async () => {
-    await cleanDb();
     sinon.restore();
   });
 
@@ -47,15 +40,19 @@ describe("Tests Impersonation Requests Service", () => {
       sinon.stub(impersonationModel, "createImpersonationRequest").returns(Promise.resolve({
         id: "123",
         ...mockRequestBody,
-        impersonatedUserId: testUserId,
+        impersonatedUserId: userData[20].id,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now()
       }));
+      
+       sinon.stub(userQuery, "fetchUser").returns({ userExists: true, user:userData[20] });
+
+       sinon.stub(logService, "addLog").resolves();
 
       const response = await impersonationService.createImpersonationRequestService({
         userId: mockRequestBody.userId,
         createdBy: mockRequestBody.createdBy,
-        impersonatedUserId: testUserId,
+        impersonatedUserId: userData[20].id,
         reason: mockRequestBody.reason,
       });
 
@@ -63,7 +60,7 @@ describe("Tests Impersonation Requests Service", () => {
       expect(response.createdBy).to.equal(mockRequestBody.createdBy);
       expect(response.id).to.not.be.null;
       expect(response.userId).to.equal(mockRequestBody.userId);
-      expect(response.impersonatedUserId).to.equal(testUserId);
+      expect(response.impersonatedUserId).to.equal(userData[20].id);
     });
 
     it("should throw error when createImpersonationRequestService fails", async () => {
@@ -72,7 +69,7 @@ describe("Tests Impersonation Requests Service", () => {
         await impersonationService.createImpersonationRequestService({
           userId: mockRequestBody.userId,
           createdBy: mockRequestBody.createdBy,
-          impersonatedUserId: testUserId,
+          impersonatedUserId: "112",
           reason: mockRequestBody.reason,
         });
       } catch (error) {

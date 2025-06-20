@@ -46,15 +46,15 @@ describe("models/impersonationRequests", () => {
       }
     });
 
-    it("should create multiple requests for different users", async () => {
+    it("should allow different super users to create requests for same user", async () => {
       const request1 = await impersonationModel.createImpersonationRequest({ ...impersonationRequestsBodyData[0],createdBy: "user1" });
-      const request2 = await impersonationModel.createImpersonationRequest({ ...impersonationRequestsBodyData[1],createdBy: "user2" });
+      const request2 = await impersonationModel.createImpersonationRequest({ ...impersonationRequestsBodyData[0],createdBy: "user2", userId:"122" });
       expect(request1).to.have.property("id");
       expect(request1.createdBy).to.equal("user1");
       expect(request1.impersonatedUserId).to.equal(impersonationRequestsBodyData[0].impersonatedUserId);
       expect(request2).to.have.property("id");
       expect(request2.createdBy).to.equal("user2");
-      expect(request2.impersonatedUserId).to.equal(impersonationRequestsBodyData[1].impersonatedUserId);
+      expect(request2.impersonatedUserId).to.equal(impersonationRequestsBodyData[0].impersonatedUserId);
     });
 
     it("should fail if required fields are missing", async () => {
