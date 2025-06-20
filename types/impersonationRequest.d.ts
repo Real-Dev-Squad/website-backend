@@ -76,7 +76,7 @@ export type PaginatedImpersonationRequests = {
     allRequests: ImpersonationRequest[];
     next: string;
     prev: string;
-    page: number;
+    nextPage: number;
     count: number;
 }
 

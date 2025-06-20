@@ -36,20 +36,20 @@ export const getImpersonationRequestsController = async (
       return res.status(204).send();
     }
 
-    const { allRequests, next, prev, page } = requests;
+    const { allRequests, next, prev, nextPage } = requests;
     const count = allRequests.length;
 
-    if (page) {
+    if (nextPage) {
       const pageLink = getPaginatedLink({
         endpoint: "/impersonation/requests",
         query,
         cursorKey: "page",
-        docId: page,
+        docId: nextPage,
       });
       return res.status(200).json({
         message: REQUEST_FETCHED_SUCCESSFULLY,
         data: allRequests,
-        page: pageLink,
+        nextPage: pageLink,
         count,
       });
     }

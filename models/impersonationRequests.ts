@@ -50,8 +50,9 @@ export const getImpersonationRequests = async (
   
   let { createdBy, createdFor, status, prev, next, page, size = DEFAULT_PAGE_SIZE } = query;
 
-  size = Number.parseInt(size);
-  page = Number.parseInt(page);
+  size = size ? Number.parseInt(size) : DEFAULT_PAGE_SIZE;
+  page = page ? Number.parseInt(page) : null;
+
 
   try {
     let requestQuery: Query<ImpersonationRequest> = impersonationRequestModel as CollectionReference<ImpersonationRequest>;
@@ -113,7 +114,7 @@ export const getImpersonationRequests = async (
       allRequests,
       prev: prevDoc && !prevDoc.empty ? prevDoc.docs[0].id : null,
       next: nextDoc && !nextDoc.empty ? nextDoc.docs[0].id : null,
-      page: page ? page + 1 : null,
+      nextPage: page ? page + 1 : null,
       count,
     };
   } catch (error) {
