@@ -104,36 +104,29 @@ describe("Impersonation Requests", () => {
       });
     });
 
-    it("should return 501 and 'Feature not implemented' message when dev is false", function (done) {
+       it("should return 404 and 'Route not found' message when dev is false", function (done) {
       chai
         .request(app)
         .get("/impersonation/requests?dev=false")
         .set("cookie", `${cookieName}=${authToken}`)
         .end(function (err, res) {
-          if (err) return done(err);
-          try {
-            expect(res.statusCode).to.equal(501);
-            expect(res.body.message).to.equal("Feature not implemented");
+            if (err) return done(err);
+            expect(res.statusCode).to.equal(404);
+            expect(res.body.message).to.equal("Route not found");
             done();
-          } catch (e) {
-            done(e);
-          }
         });
     });
 
-    it("should return 501 and 'Feature not implemented' message when dev is missing", function (done) {
+    it("should return 404 and 'Route not found' message when dev is missing", function (done) {
       chai
         .request(app)
         .get("/impersonation/requests")
         .set("cookie", `${cookieName}=${authToken}`)
         .end(function (err, res) {
-          try {
-            expect(res.statusCode).to.equal(501);
-            expect(res.body.message).to.equal("Feature not implemented");
+            if(err) return done(err);
+            expect(res.statusCode).to.equal(404);
+            expect(res.body.message).to.equal("Route not found");
             done();
-          } catch (e) {
-            done(e);
-          }
         });
     });
 
@@ -148,11 +141,7 @@ describe("Impersonation Requests", () => {
           expect(res.body.data).to.be.an("array");
           expect(res.body.data.length).to.be.equal(4);
           expect(res.body.data[0]).to.include.all.keys(
-            "id",
-            "createdBy",
-            "userId",
-            "impersonatedUserId",
-            "createdFor"
+            "id", "createdBy", "userId", "impersonatedUserId", "createdFor"
           );
           done();
         });
@@ -200,7 +189,7 @@ describe("Impersonation Requests", () => {
         });
     });
 
-    it("should return empty array if no data found", function (done) {
+    it("should return 204 with empty response body when no data found", function (done) {
       chai
         .request(app)
         .get(`${requestsEndpoint}&createdBy=testUserRandom`)
@@ -272,7 +261,7 @@ describe("Impersonation Requests", () => {
         });
     });
 
-    it("should return a page link when page param is provided", function (done) {
+    it("should return the nextPage link when page param is provided", function (done) {
       chai
         .request(app)
         .get(`${requestsEndpoint}&page=1&size=2`)
@@ -280,8 +269,8 @@ describe("Impersonation Requests", () => {
         .end(function (err, res) {
           if (err) return done(err);
           expect(res).to.have.status(200);
-          expect(res.body).to.have.property("page");
-          expect(res.body.page).to.be.equal("/impersonation/requests?dev=true&size=2&page=2");
+          expect(res.body).to.have.property("nextPage");
+          expect(res.body.nextPage).to.be.equal("/impersonation/requests?dev=true&size=2&page=2");
           expect(res.body).to.have.property("data");
           expect(res.body).to.have.property("count").to.equal(2);
           done();
