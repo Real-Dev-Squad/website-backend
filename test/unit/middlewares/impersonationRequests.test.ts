@@ -8,12 +8,15 @@ import {
   CreateImpersonationRequestBody,
   ImpersonationRequestResponse,
 } from "../../../types/impersonationRequest";
+import { Request, Response } from "express";
 
 const { expect } = chai;
 
 describe("Impersonation Request Validators", function () {
-  let req;
-  let res;
+  let req: Partial<Request>;
+  let res: Partial<Response> & {
+    boom: { badRequest: sinon.SinonSpy };
+  };
   let nextSpy: sinon.SinonSpy;
   const requestBody: CreateImpersonationRequestBody = {
     impersonatedUserId: "randomId",
@@ -27,6 +30,10 @@ describe("Impersonation Request Validators", function () {
       },
     };
     nextSpy = sinon.spy();
+  });
+
+  afterEach(() => {
+    sinon.restore();
   });
 
   describe("createImpersonationRequestValidator", function () {
