@@ -28,7 +28,7 @@ export const getImpersonationRequestsValidator = async (
     page: joi.number().integer().min(0).when("next", {
       is: joi.exist(),
       then: joi.forbidden().messages({
-        "any.only": "next is not allowed when using page",
+        "any.only": "page is not allowed when using next",
       }),
     }).when("prev", {
       is: joi.exist(),
