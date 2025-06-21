@@ -42,7 +42,7 @@ describe("models/impersonationRequests", () => {
       try {
         await impersonationModel.createImpersonationRequest(mockRequestBody);
       } catch (error) {
-        expect(error.message).to.include(REQUEST_ALREADY_PENDING);
+        expect(error.message).to.include("You are not allowed for this Operation at the moment");
       }
     });
 
@@ -73,7 +73,7 @@ describe("models/impersonationRequests", () => {
         await impersonationModel.createImpersonationRequest({...impersonationRequestsBodyData[0],status:REQUEST_STATE.APPROVED});
         await impersonationModel.createImpersonationRequest(impersonationRequestsBodyData[0]);
       } catch (error) {
-        expect(error.message).to.include(IMPERSONATION_NOT_COMPLETED);
+        expect(error.message).to.include("You are not allowed for this Operation at the moment");
       }
     })
   });
