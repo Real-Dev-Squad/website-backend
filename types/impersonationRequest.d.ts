@@ -26,7 +26,7 @@ export type CreateImpersonationRequestBody = {
    reason: string;
 };
 
-export type CreateImpersonationRequestModelBody = {
+export type CreateImpersonationRequestModelDto = {
     status: REQUEST_STATE;
     isImpersonationFinished: boolean;
     createdBy: string;
@@ -49,6 +49,14 @@ export type UpdateImpersonationRequestStatusBody = {
 
 export type ImpersonationRequestQuery = RequestQuery & {
     dev?: string;
+    createdBy?: string;
+    createdFor?: string;
+    status?: keyof typeof REQUEST_STATE;
+    id?: string;
+    prev?: string;
+    next?: string;
+    page?: number;
+    size?: number;
 };
 
 export type ImpersonationRequestResponse = Response & {
@@ -78,4 +86,11 @@ export type PaginatedImpersonationRequests = {
     prev: string;
     page: number;
     count: number;
+}
+
+export type CreateImpersonationRequestServiceBody={
+   userId: string;
+   createdBy: string;
+   impersonatedUserId: string;
+   reason: string;
 }
