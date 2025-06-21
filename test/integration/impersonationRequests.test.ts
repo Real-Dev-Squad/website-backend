@@ -213,7 +213,7 @@ describe("Impersonation Requests", () => {
           if (err) return done(err);
           expect(res).to.have.status(403);
           expect(res.body.error).to.equal("Forbidden");
-          expect(res.body.message).to.equal("Please complete impersonation before creating a new request");
+          expect(res.body.message).to.equal("You are not allowed for this Operation at the moment");
           done();
         });
     });
@@ -228,7 +228,7 @@ describe("Impersonation Requests", () => {
           if (err) return done(err);
           expect(res).to.have.status(403);
           expect(res.body.error).to.equal("Forbidden");
-          expect(res.body.message).to.equal("Request already exists please wait for approval or rejection");
+          expect(res.body.message).to.equal("You are not allowed for this Operation at the moment");
           done();
         });
     });
