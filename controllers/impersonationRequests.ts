@@ -28,9 +28,6 @@ export const updateImpersonationRequestStatusController = async (
   next: NextFunction
 ): Promise<ImpersonationRequestResponse> => {
   try {
-    const dev = req.query.dev === "true";
-    if (!dev) return res.boom.notImplemented(FEATURE_NOT_IMPLEMENTED);
-
     const requestId = req.params.id;
     const lastModifiedBy = req.userData.id;
     const requestBody = req.body as UpdateImpersonationRequestStatusBody;
