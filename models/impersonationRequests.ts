@@ -36,9 +36,7 @@ export const createImpersonationRequest = async (
     const snapshot = await reqQuery.get();
 
     if (!snapshot.empty) {
-      const request = snapshot.docs[0].data();
-      const { status } = request;
-      throw new Forbidden(status === REQUEST_STATE.APPROVED ? IMPERSONATION_NOT_COMPLETED : REQUEST_ALREADY_PENDING)
+      throw new Forbidden("You are not allowed for this Operation at the moment");
     }
 
     const requestBody = {
