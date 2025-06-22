@@ -3,7 +3,7 @@ import {
   ERROR_WHILE_UPDATING_REQUEST,
   REQUEST_CREATED_SUCCESSFULLY
 } from "../constants/requests";
-import { createImpersonationRequestService, updateImpersonationRequestServie, validateUpdateImpersonationRequestService, } from "../services/impersonationRequests";
+import { createImpersonationRequestService, updateImpersonationRequestService, validateUpdateImpersonationRequestService, } from "../services/impersonationRequests";
 import {
   CreateImpersonationRequest,
   CreateImpersonationRequestBody,
@@ -67,10 +67,10 @@ export const updateImpersonationRequestStatusController = async (
   try {
     const requestId = req.params.id;
     const lastModifiedBy = req.userData.id;
-    const requestBody = req.body as UpdateImpersonationRequestStatusBody;
+    const requestBody: UpdateImpersonationRequestStatusBody = req.body;
 
     await validateUpdateImpersonationRequestService(requestId, lastModifiedBy);
-    const { returnMessage, updatedRequest: response } = await updateImpersonationRequestServie({
+    const { returnMessage, updatedRequest: response } = await updateImpersonationRequestService({
       id: requestId,
       updatingBody: requestBody,
       lastModifiedBy,
@@ -79,7 +79,6 @@ export const updateImpersonationRequestStatusController = async (
     return res.status(200).json({
       message: returnMessage,
       data: {
-        id: response.id,
         ...response,
       },
     });

@@ -10,6 +10,7 @@ import {
   REQUEST_DOES_NOT_EXIST,
   REQUEST_REJECTED_SUCCESSFULLY,
   UNAUTHORIZED_TO_UPDATE_REQUEST,
+  ERROR_WHILE_UPDATING_REQUEST,
 } from "../constants/requests";
 import { createImpersonationRequest, updateImpersonationRequest, getImpersonationRequestById } from "../models/impersonationRequests";
 import { fetchUser } from "../models/users";
@@ -118,12 +119,12 @@ export const validateUpdateImpersonationRequestService = async (
 /**
  * Updates an impersonation request and logs the update action.
  * @async
- * @function updateImpersonationRequestServie
+ * @function updateImpersonationRequestService
  * @param {UpdateImpersonationRequestModelDto} body - The update data for the impersonation request.
  * @returns {Promise<{ returnMessage: string, updatedRequest: UpdateImpersonationStatusModelResponse }>} The update result and message.
  * @throws {Error} If the update or logging fails.
  */
-export const updateImpersonationRequestServie = async (
+export const updateImpersonationRequestService = async (
   body: UpdateImpersonationRequestModelDto
 ) => {
   try {
@@ -152,7 +153,7 @@ export const updateImpersonationRequestServie = async (
 
     return response;
   } catch (error) {
-    logger.error(ERROR_WHILE_CREATING_REQUEST, error);
+    logger.error(ERROR_WHILE_UPDATING_REQUEST, error);
     throw error;
   }
 }

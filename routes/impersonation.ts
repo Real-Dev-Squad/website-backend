@@ -6,7 +6,6 @@ const router = express.Router();
 const authorizeRoles = require("../middlewares/authorizeRoles");
 const { SUPERUSER } = require("../constants/roles");
 
-
 router.post(
   "/requests",
   authenticate,

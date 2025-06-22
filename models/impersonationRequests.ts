@@ -75,7 +75,7 @@ export const updateImpersonationRequest = async ( body: UpdateImpersonationReque
       ...body.updatingBody
     };
   } catch (error) {
-    logger.error(ERROR_WHILE_UPDATING_REQUEST, error);
+    logger.error(`${ERROR_WHILE_UPDATING_REQUEST} for document ID: ${body.id}`, error);
     throw error;
   }
 };
