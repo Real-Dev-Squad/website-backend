@@ -2,11 +2,11 @@ import { expect } from "chai";
 import cleanDb from "../../utils/cleanDb";
 import * as impersonationModel from "../../../models/impersonationRequests";
 import { impersonationRequestsBodyData } from "../../fixtures/impersonation-requests/impersonationRequests";
-import { REQUEST_STATE, ERROR_WHILE_CREATING_REQUEST, REQUEST_ALREADY_PENDING, IMPERSONATION_NOT_COMPLETED } from "../../../constants/requests";
+import { REQUEST_STATE, ERROR_WHILE_CREATING_REQUEST } from "../../../constants/requests";
 import addUser from "../../utils/addUser";
 import userDataFixture from "../../fixtures/user/user";
 import sinon from "sinon";
-import { CreateImpersonationRequestModelDto } from "../../../types/impersonationRequest";
+
 
 
 describe("models/impersonationRequests", () => {
@@ -116,13 +116,10 @@ describe("models/impersonationRequests", () => {
     });
 
     it("Should return a list of all the requests with specified status - APPROVED", async () => {
+      await cleanDb();
       await Promise.all(
-        impersonationRequests.map((request) =>
-          impersonationModel.updateImpersonationRequest({
-            id: request.id,
-            updatingBody: {status:REQUEST_STATE.APPROVED},
-            lastModifiedBy: request.impersonatedUserId,
-          })
+        impersonationRequestsBodyData.slice(0, 5).map((data) =>
+          impersonationModel.createImpersonationRequest({...data,status:"APPROVED"})
         )
       );
       const query = { status: REQUEST_STATE.APPROVED };
@@ -139,13 +136,10 @@ describe("models/impersonationRequests", () => {
     });
 
     it("Should return a list of all the requests with specified status - REJECTED", async () => {
+      await cleanDb();
       await Promise.all(
-        impersonationRequests.map((request) =>
-          impersonationModel.updateImpersonationRequest({
-            id: request.id,
-            updatingBody: {status:"REJECTED"},
-            lastModifiedBy: request.impersonatedUserId,
-          })
+        impersonationRequestsBodyData.slice(0, 5).map((data) =>
+          impersonationModel.createImpersonationRequest({...data,status:"REJECTED"})
         )
       );
       const query = { status: REQUEST_STATE.REJECTED };
