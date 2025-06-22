@@ -1,9 +1,25 @@
 import express from "express";
-const router = express.Router();
+import { createImpersonationRequestValidator, updateImpersonationRequestValidator } from "../middlewares/validators/impersonationRequests";
 import authenticate from "../middlewares/authenticate";
-import { updateImpersonationRequestValidator } from "../middlewares/validators/impersonationRequests";
-import { updateImpersonationRequestStatusController } from "../controllers/impersonationRequests";
+import { createImpersonationRequestController, updateImpersonationRequestStatusController } from "../controllers/impersonationRequests";
+const router = express.Router();
+const authorizeRoles = require("../middlewares/authorizeRoles");
+const { SUPERUSER } = require("../constants/roles");
 
-router.patch("/requests/:id", authenticate,updateImpersonationRequestValidator,updateImpersonationRequestStatusController);
+
+router.post(
+  "/requests",
+  authenticate,
+  authorizeRoles([SUPERUSER]),
+  createImpersonationRequestValidator,
+  createImpersonationRequestController
+);
+
+router.patch(
+  "/requests/:id",
+  authenticate,
+  updateImpersonationRequestValidator,
+  updateImpersonationRequestStatusController
+);
 
 module.exports = router;
