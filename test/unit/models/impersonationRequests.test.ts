@@ -13,6 +13,7 @@ describe("models/impersonationRequests", () => {
   let impersonationRequest;
   let mockRequestBody = impersonationRequestsBodyData[0];
   let testUserId:string;
+  let impersonationRequests=[];
   const userData = userDataFixture();
 
   beforeEach(async () => {
@@ -80,7 +81,7 @@ describe("models/impersonationRequests", () => {
   
   describe("getImpersonationRequestById", () => {
     it("should return the impersonation request by id", async () => {
-      const impersonationRequest = await impersonationModel.createImpersonationRequest(requestBody);
+      const impersonationRequest = await impersonationModel.createImpersonationRequest(impersonationRequestsBodyData[0]);
       const request = await impersonationModel.getImpersonationRequestById(impersonationRequest.id);
       expect(request).to.not.be.null;
       expect(request.id).to.equal(impersonationRequest.id);
@@ -119,7 +120,7 @@ describe("models/impersonationRequests", () => {
         impersonationRequests.map((request) =>
           impersonationModel.updateImpersonationRequest({
             id: request.id,
-            updatingBody: updateImpersonationRequestApproved,
+            updatingBody: {status:REQUEST_STATE.APPROVED},
             lastModifiedBy: request.impersonatedUserId,
           })
         )
@@ -142,7 +143,7 @@ describe("models/impersonationRequests", () => {
         impersonationRequests.map((request) =>
           impersonationModel.updateImpersonationRequest({
             id: request.id,
-            updatingBody: updateImpersonationRequestRejected,
+            updatingBody: {status:"REJECTED"},
             lastModifiedBy: request.impersonatedUserId,
           })
         )
@@ -177,7 +178,7 @@ describe("models/impersonationRequests", () => {
       const query = { page: 1, size: 2 };
       const result = await impersonationModel.getImpersonationRequests(query);
       expect(result.allRequests.length).to.be.equal(2);
-      expect(result.page).to.be.equal(2);
+      expect(result.nextPage).to.be.equal(2);
     });
 
     it("Should return null if no data is found", async () => {
@@ -200,7 +201,7 @@ describe("models/impersonationRequests", () => {
       const query = { page: 1 };
       const impersonationRequestData = await impersonationModel.getImpersonationRequests(query);
       expect(impersonationRequestData.allRequests.length).to.be.equal(5);
-      expect(impersonationRequestData.page).to.be.equal(2);
+      expect(impersonationRequestData.nextPage).to.be.equal(2);
     });
 
     it("should return the next page of results using next cursor", async () => {
