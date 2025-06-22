@@ -1,9 +1,12 @@
 import chai from "chai";
 import sinon from "sinon";
 import {
-  updateImpersonationRequestValidator,
+  createImpersonationRequestValidator,
+  updateImpersonationRequestValidator
 } from "../../../middlewares/validators/impersonationRequests";
 import {
+  CreateImpersonationRequest,
+  CreateImpersonationRequestBody,
   ImpersonationRequestResponse,
   UpdateImpersonationRequest,
   UpdateImpersonationRequestStatusBody,
@@ -18,7 +21,12 @@ describe("Impersonation Request Validators", function () {
     boom: { badRequest: sinon.SinonSpy };
   };
   let nextSpy: sinon.SinonSpy;
-  const updateRequestBody: UpdateImpersonationRequestStatusBody = {
+  const requestBody: CreateImpersonationRequestBody = {
+    impersonatedUserId: "randomId",
+    reason: "Testing purpose",
+  };
+
+    const updateRequestBody: UpdateImpersonationRequestStatusBody = {
     status: "APPROVED",
     message: "Testing",
   };
@@ -34,6 +42,46 @@ describe("Impersonation Request Validators", function () {
 
   afterEach(() => {
     sinon.restore();
+  });
+
+  describe("createImpersonationRequestValidator", function () {
+    it("should validate for a valid create impersonation request", async function () {
+      req = {
+        body: requestBody,
+      };
+      await createImpersonationRequestValidator(
+        req as CreateImpersonationRequest,
+        res as ImpersonationRequestResponse,
+        nextSpy
+      );
+      expect(nextSpy.calledOnce).to.be.true;
+    });
+
+    it("should not validate for an invalid impersonation request on missing impersonatedUserId", async function () {
+      req = {
+        body: { ...requestBody, impersonatedUserId: "" },
+      };
+      await createImpersonationRequestValidator(
+        req as CreateImpersonationRequest,
+        res as ImpersonationRequestResponse,
+        nextSpy
+      );
+      expect(res.boom.badRequest.calledOnce).to.be.true;
+      expect(nextSpy.called).to.be.false;
+    });
+
+    it("should not validate for an invalid impersonation request on missing reason", async function () {
+      req = {
+        body: { ...requestBody, reason: "" },
+      };
+      await createImpersonationRequestValidator(
+        req as CreateImpersonationRequest,
+        res as ImpersonationRequestResponse,
+        nextSpy
+      );
+      expect(res.boom.badRequest.calledOnce).to.be.true;
+      expect(nextSpy.called).to.be.false;
+    });
   });
 
   describe("updateImpersonationRequestValidator", function () {
