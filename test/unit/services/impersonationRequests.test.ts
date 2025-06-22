@@ -26,8 +26,11 @@ const logger = require("../../../utils/logger");
 describe("Tests Impersonation Requests Service", () => {
   let mockRequestBody: CreateImpersonationRequestModelDto = impersonationRequestsBodyData[0];
   const userData = userDataFixture();
+  let impersonationRequest;
+  let testUserId;
 
   afterEach(async () => {
+    await cleanDb();
     sinon.restore();
   });
 
@@ -121,7 +124,7 @@ describe("Tests Impersonation Requests Service", () => {
         updatedAt: Timestamp.now()
       }));
       try {
-        const dummyRequest = await createImpersonationRequest({ ...impersonationRequestsBodyData[1], impersonatedUserId: testUserId, status: REQUEST_STATE.APPROVED });
+        const dummyRequest = await impersonationModel.createImpersonationRequest({ ...impersonationRequestsBodyData[1], impersonatedUserId: testUserId, status: REQUEST_STATE.APPROVED });
         await impersonationService.validateUpdateImpersonationRequestService(dummyRequest.id, testUserId);
       }
       catch (err) {
@@ -150,7 +153,7 @@ describe("Tests Impersonation Requests Service", () => {
           createdAt: Timestamp.now(),
           updatedAt: Timestamp.now()
         }));
-        const dummyRequest = await createImpersonationRequest({ ...impersonationRequestsBodyData[1], impersonatedUserId: testUserId, status: REQUEST_STATE.REJECTED });
+        const dummyRequest = await impersonationModel.createImpersonationRequest({ ...impersonationRequestsBodyData[1], impersonatedUserId: testUserId, status: REQUEST_STATE.REJECTED });
         await impersonationService.validateUpdateImpersonationRequestService(dummyRequest.id, testUserId);
       }
       catch (err) {
@@ -178,7 +181,7 @@ describe("Tests Impersonation Requests Service", () => {
         updatedAt: Timestamp.now(),
       }));
       try {
-        const dummyRequest = await createImpersonationRequest({ ...impersonationRequestsBodyData[1], impersonatedUserId: testUserId });
+        const dummyRequest = await impersonationModel.createImpersonationRequest({ ...impersonationRequestsBodyData[1], impersonatedUserId: testUserId });
         await impersonationService.validateUpdateImpersonationRequestService(dummyRequest.id, "dummyId");
       }
       catch (err) {
@@ -198,23 +201,18 @@ describe("Tests Impersonation Requests Service", () => {
         updatedAt: Timestamp.now()
       }));
       const response = await impersonationService.validateUpdateImpersonationRequestService("123", "testUserId");
-      expect(response).to.undefined;
+      expect(response).to.be.undefined;
     });
   });
 
-  describe("updateImpersonationRequestServie", () => {
+  describe("updateImpersonationRequestService", () => {
     beforeEach(async () => {
-      impersonationRequest = await createImpersonationRequest({ ...impersonationRequestsBodyData[0], impersonatedUserId: testUserId });
       testUserId = await userData[20];
-    });
-
-    afterEach(async () => {
-      await sinon.restore();
-      await cleanDb();
+      impersonationRequest = await impersonationModel.createImpersonationRequest({ ...impersonationRequestsBodyData[0], impersonatedUserId: testUserId });
     });
 
     it("should successfully update an impersonation request status to approved", async () => {
-      const response = await impersonationService.updateImpersonationRequestServie({
+      const response = await impersonationService.updateImpersonationRequestService({
         id: impersonationRequest.id,
         updatingBody: { status: REQUEST_STATE.APPROVED, message: "Testing" },
         lastModifiedBy: testUserId
@@ -228,7 +226,7 @@ describe("Tests Impersonation Requests Service", () => {
     });
 
     it("should successfully update an impersonation request status to rejected", async () => {
-      const response = await impersonationService.updateImpersonationRequestServie({
+      const response = await impersonationService.updateImpersonationRequestService({
         id: impersonationRequest.id,
         updatingBody: { status: REQUEST_STATE.REJECTED, message: "Testing" },
         lastModifiedBy: testUserId
@@ -241,7 +239,7 @@ describe("Tests Impersonation Requests Service", () => {
       expect(response.updatedRequest.message).to.equal("Testing");
     });
 
-    it("should log and throw error if updateImpersonationRequest throws in updateImpersonationRequestServie", async () => {
+    it("should log and throw error if updateImpersonationRequest throws in updateImpersonationRequestService", async () => {
       const error = new Error("Some update error");
       const loggerStub = sinon.stub(logger, "error");
       sinon.stub(impersonationModel, "updateImpersonationRequest").rejects(error);
@@ -253,12 +251,11 @@ describe("Tests Impersonation Requests Service", () => {
       };
 
       try {
-        await impersonationService.updateImpersonationRequestServie(body);
+        await impersonationService.updateImpersonationRequestService(body);
         expect.fail("Should throw error");
       } catch (err) {
         expect(loggerStub.calledWith(ERROR_WHILE_CREATING_REQUEST, err)).to.true;
       }
-
       sinon.restore();
     });
   });

@@ -91,7 +91,7 @@ describe("models/impersonationRequests", () => {
     it("should approve an impersonation request", async () => {
       const updatedRequest = await impersonationModel.updateImpersonationRequest({
         id: impersonationRequest.id,
-        updatingBody: updateImpersonationRequestApproved,
+        updatingBody: {status:"APPROVED"},
         lastModifiedBy: impersonationRequest.impersonatedUserId,
       }) as UpdateImpersonationRequestStatusBody;
       expect(updatedRequest.status).to.equal(REQUEST_STATE.APPROVED);
@@ -100,7 +100,7 @@ describe("models/impersonationRequests", () => {
     it("should reject an impersonation request", async () => {
       const updatedRequest = await impersonationModel.updateImpersonationRequest({
         id: impersonationRequest.id,
-        updatingBody: updateImpersonationRequestRejected,
+        updatingBody: {status:"REJECTED"},
         lastModifiedBy: impersonationRequest.impersonatedUserId,
       }) as UpdateImpersonationRequestStatusBody;
       expect(updatedRequest.status).to.equal(REQUEST_STATE.REJECTED);
@@ -127,7 +127,7 @@ describe("models/impersonationRequests", () => {
       const before = Number(impersonationRequest.updatedAt);
       const updated = await impersonationModel.updateImpersonationRequest({
         id: impersonationRequest.id,
-        updatingBody: updateImpersonationRequestApproved,
+        updatingBody: {status:"APPROVED"},
         lastModifiedBy: impersonationRequest.impersonatedUserId,
       });
       const result = await impersonationModel.getImpersonationRequestById(impersonationRequest.id);
