@@ -366,7 +366,8 @@ describe("Impersonation Requests", () => {
           if (err) return done(err);
           expect(res).to.have.status(200);
           expect(res.body.data).to.be.an("array");
-          expect(res.body.data.every((r: any) => r.userId === testSuperUserId)).to.be.true;
+          expect(res.body.data.every((r) => r.userId === testSuperUserId)).to.be.true;
+          expect(res.body.data.every((r)=>r.createdBy === userData[4].username)).to.be.true;
           done();
         });
     });
@@ -380,7 +381,8 @@ describe("Impersonation Requests", () => {
           if (err) return done(err);
           expect(res).to.have.status(200);
           expect(res.body.data).to.be.an("array");
-          expect(res.body.data.every((r: any) => r.createdFor === userData[19].username)).to.be.true;
+          expect(res.body.data.every((r) => r.createdFor === userData[19].username)).to.be.true;
+          expect(res.body.data.length).to.equal(1);
           done();
         });
     });
@@ -411,7 +413,7 @@ describe("Impersonation Requests", () => {
         });
     });
 
-    it("should return requests filtered by valid status", function (done) {
+    it("should return requests filtered by status APPROVED", function (done) {
       chai
         .request(app)
         .get(`${requestsEndpoint}&status=APPROVED`)
@@ -420,7 +422,7 @@ describe("Impersonation Requests", () => {
           if (err) return done(err);
           expect(res).to.have.status(200);
           expect(res.body.data).to.be.an("array");
-          expect(res.body.data.every((r: any) => r.status === "APPROVED")).to.be.true;
+          expect(res.body.data.every((r) => r.status === "APPROVED")).to.be.true;
           done();
         });
     });
