@@ -87,7 +87,7 @@ describe("Impersonation Requests", () => {
     sinon.restore();
   });
 
-    describe("POST /impersonation/requests", () => {
+  describe("POST /impersonation/requests", () => {
     it("should return 404 and 'Route not found' message when dev is false", function (done) {
       chai
         .request(app)
@@ -503,6 +503,7 @@ describe("Impersonation Requests", () => {
         .set("cookie", `${cookieName}=${tempAuthToken}`)
         .send({ status: "APPROVED" })
         .end(function (err, res) {
+          if (err) return done(err);
           expect(res).to.have.status(500);
           expect(res.body.message).to.equal("An internal server error occurred");
           sinon.restore();
@@ -517,6 +518,7 @@ describe("Impersonation Requests", () => {
         .send({ status: "APPROVED" })
         .set("cookie", `${cookieName}=${authToken}`)
         .end(function (err, res) {
+          if (err) return done(err);
           expect(res).to.have.status(403);
           expect(res.body.error).to.equal("Forbidden");
           expect(res.body.message).to.equal(UNAUTHORIZED_TO_UPDATE_REQUEST);
