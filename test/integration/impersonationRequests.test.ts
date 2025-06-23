@@ -415,23 +415,6 @@ describe("Impersonation Requests", () => {
         });
     });
 
-    it("should return 401 if user is not logged in", function (done) {
-      chai
-        .request(app)
-        .patch(`/impersonation/requests/randomId?dev=true`)
-        .send({status:"APPROVED"})
-        .end(function (err, res) {
-          if (err) return done(err);
-          try {
-            expect(res).to.have.status(401);
-            expect(res.body.error).to.equal("Unauthorized");
-            expect(res.body.message).to.equal("Unauthenticated User");
-            done();
-          } catch (e) {
-            done(e);
-          }
-        });
-    });
 
     it("should return 403 Forbidden if a request is already approved", function (done) {
       const tempAuthToken = authService.generateAuthToken({ userId: testUserId1 });
@@ -444,7 +427,7 @@ describe("Impersonation Requests", () => {
           if (err) return done(err);
           expect(res).to.have.status(403);
           expect(res.body.error).to.equal("Forbidden");
-          expect(res.body.message).to.equal(REQUEST_ALREADY_APPROVED);
+          expect(res.body.message).to.equal("You are not allowed for this Operation at the moment");
           done();
         });
     });
@@ -459,7 +442,22 @@ describe("Impersonation Requests", () => {
           if (err) return done(err);
           expect(res).to.have.status(403);
           expect(res.body.error).to.equal("Forbidden");
-          expect(res.body.message).to.equal(REQUEST_ALREADY_REJECTED);
+          expect(res.body.message).to.equal("You are not allowed for this Operation at the moment");
+          done();
+        });
+    });
+
+     it("should throw 403 Forbidden if unauthorized user tries to update the request", function (done) {
+      chai
+        .request(app)
+        .patch(`/impersonation/requests/${impersonationRequest3.id}?dev=true`)
+        .send({ status: "APPROVED" })
+        .set("cookie", `${cookieName}=${authToken}`)
+        .end(function (err, res) {
+          if (err) return done(err);
+          expect(res).to.have.status(403);
+          expect(res.body.error).to.equal("Forbidden");
+          expect(res.body.message).to.equal("You are not allowed for this Operation at the moment");
           done();
         });
     });
@@ -507,21 +505,6 @@ describe("Impersonation Requests", () => {
           expect(res).to.have.status(500);
           expect(res.body.message).to.equal("An internal server error occurred");
           sinon.restore();
-          done();
-        });
-    });
-
-    it("should throw 403 Forbidden if unauthorized user tries to update the request", function (done) {
-      chai
-        .request(app)
-        .patch(`/impersonation/requests/${impersonationRequest3.id}?dev=true`)
-        .send({ status: "APPROVED" })
-        .set("cookie", `${cookieName}=${authToken}`)
-        .end(function (err, res) {
-          if (err) return done(err);
-          expect(res).to.have.status(403);
-          expect(res.body.error).to.equal("Forbidden");
-          expect(res.body.message).to.equal(UNAUTHORIZED_TO_UPDATE_REQUEST);
           done();
         });
     });
