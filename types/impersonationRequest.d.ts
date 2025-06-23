@@ -50,7 +50,7 @@ export type UpdateImpersonationRequestStatusBody = {
 
 export type UpdateImpersonationRequestModelDto = {
     id: string;
-    updatingBody: UpdateImpersonationRequestDataBody | UpdateImpersonationRequestStatusBody;
+    updatePayload: UpdateImpersonationRequestDataBody | UpdateImpersonationRequestStatusBody;
     lastModifiedBy: string;
 }
 
@@ -65,7 +65,7 @@ export type ImpersonationRequestQuery = RequestQuery & {
     dev?: string;
     createdBy?: string;
     createdFor?: string;
-    status?: REQUEST_STATE.APPROVED | REQUEST_STATE.PENDING | REQUEST_STATE.REJECTED;
+    status?: keyof typeof REQUEST_STATE;
     id?: string;
     prev?: string;
     next?: string;

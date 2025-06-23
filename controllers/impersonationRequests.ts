@@ -68,11 +68,10 @@ export const updateImpersonationRequestStatusController = async (
     const requestId = req.params.id;
     const lastModifiedBy = req.userData.id;
     const requestBody: UpdateImpersonationRequestStatusBody = req.body;
-
-    await validateUpdateImpersonationRequestService(requestId, lastModifiedBy);
+    
     const { returnMessage, updatedRequest: response } = await updateImpersonationRequestService({
       id: requestId,
-      updatingBody: requestBody,
+      updatePayload: requestBody,
       lastModifiedBy,
     });
 

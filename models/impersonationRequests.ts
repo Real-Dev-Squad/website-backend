@@ -66,13 +66,13 @@ export const updateImpersonationRequest = async ( body: UpdateImpersonationReque
     await impersonationRequestModel.doc(body.id).update({
       updatedAt: Timestamp.now(),
       lastModifiedBy: body.lastModifiedBy,
-      ...body.updatingBody,
+      ...body.updatePayload,
     });
 
     return {
       id:body.id,
       lastModifiedBy: body.lastModifiedBy,
-      ...body.updatingBody
+      ...body.updatePayload
     };
   } catch (error) {
     logger.error(`${ERROR_WHILE_UPDATING_REQUEST} for document ID: ${body.id}`, error);

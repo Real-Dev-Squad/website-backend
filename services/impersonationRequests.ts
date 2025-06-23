@@ -94,22 +94,7 @@ export const validateUpdateImpersonationRequestService = async (
   lastModifiedBy: string
 ) => {
   try {
-    const request = await getImpersonationRequestById(requestId);
-    if (!request) {
-      throw new NotFound(REQUEST_DOES_NOT_EXIST);
-    }
-
-    if (request.status === REQUEST_STATE.APPROVED) {
-      throw new Forbidden(REQUEST_ALREADY_APPROVED);
-    }
-
-    if (request.status === REQUEST_STATE.REJECTED) {
-      throw new Forbidden(REQUEST_ALREADY_REJECTED);
-    }
-
-    if (request.impersonatedUserId !== lastModifiedBy) {
-      throw new Forbidden(UNAUTHORIZED_TO_UPDATE_REQUEST);
-    }
+    
   } catch (error) {
     logger.error("Error while validating update request", error);
     throw error;
@@ -117,7 +102,7 @@ export const validateUpdateImpersonationRequestService = async (
 };
 
 /**
- * Updates an impersonation request and logs the update action.
+ * Validates and Updates an impersonation request and logs the update action.
  * @async
  * @function updateImpersonationRequestService
  * @param {UpdateImpersonationRequestModelDto} body - The update data for the impersonation request.
@@ -128,6 +113,16 @@ export const updateImpersonationRequestService = async (
   body: UpdateImpersonationRequestModelDto
 ) => {
   try {
+   const request = await getImpersonationRequestById(body.id);
+   
+    if (!request) {
+      throw new NotFound(REQUEST_DOES_NOT_EXIST);
+    }
+
+    if (request.impersonatedUserId !== body.lastModifiedBy || request.status !== REQUEST_STATE.PENDING) {
+      throw new Forbidden("You are not allowed for this Operation at the moment");
+    }
+    
     const updatedRequest = await updateImpersonationRequest(body) as UpdateImpersonationStatusModelResponse;
 
     const [logType, returnMessage] = updatedRequest.status === REQUEST_STATE.APPROVED
