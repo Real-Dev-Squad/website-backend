@@ -80,28 +80,6 @@ export const createImpersonationRequestService = async (
 };
 
 /**
- * Validates whether an impersonation request can be updated by the given user.
- * @async
- * @function validateUpdateImpersonationRequestService
- * @param {string} requestId - The ID of the impersonation request to validate.
- * @param {string} lastModifiedBy - The user ID attempting the update.
- * @throws {NotFound} If the request does not exist.
- * @throws {Forbidden} If the request is already approved, rejected, or the user is unauthorized.
- * @throws {Error} For any other error during validation.
- */
-export const validateUpdateImpersonationRequestService = async (
-  requestId: string,
-  lastModifiedBy: string
-) => {
-  try {
-    
-  } catch (error) {
-    logger.error("Error while validating update request", error);
-    throw error;
-  }
-};
-
-/**
  * Validates and Updates an impersonation request and logs the update action.
  * @async
  * @function updateImpersonationRequestService

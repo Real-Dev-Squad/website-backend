@@ -3,7 +3,7 @@ import {
   ERROR_WHILE_UPDATING_REQUEST,
   REQUEST_CREATED_SUCCESSFULLY
 } from "../constants/requests";
-import { createImpersonationRequestService, updateImpersonationRequestService, validateUpdateImpersonationRequestService, } from "../services/impersonationRequests";
+import { createImpersonationRequestService, updateImpersonationRequestService } from "../services/impersonationRequests";
 import {
   CreateImpersonationRequest,
   CreateImpersonationRequestBody,
