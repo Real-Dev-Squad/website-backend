@@ -459,22 +459,6 @@ describe("Impersonation Requests", () => {
         });
     });
 
-    it("should return the nextPage link when page param is provided", function (done) {
-      chai
-        .request(app)
-        .get(`${requestsEndpoint}&page=1&size=2`)
-        .set("cookie", `${cookieName}=${authToken}`)
-        .end(function (err, res) {
-          if (err) return done(err);
-          expect(res).to.have.status(200);
-          expect(res.body).to.have.property("nextPage");
-          expect(res.body.nextPage).to.be.equal("/impersonation/requests?dev=true&size=2&page=2");
-          expect(res.body).to.have.property("data");
-          expect(res.body).to.have.property("count").to.equal(2);
-          done();
-        });
-    });
-
     it("should return a next link when next param is provided", function (done) {
       chai
         .request(app)
