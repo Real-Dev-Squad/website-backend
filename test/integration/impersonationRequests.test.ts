@@ -374,7 +374,7 @@ describe("Impersonation Requests", () => {
         });
     });
 
-    it("should return 204 with empty response body when no data found", function (done) {
+    it("should return 204 with no response body when no data found", function (done) {
       chai
         .request(app)
         .get(`${requestsEndpoint}&createdBy=testUserRandom`)
@@ -382,7 +382,7 @@ describe("Impersonation Requests", () => {
         .end(function (err, res) {
           if (err) return done(err);
           expect(res).to.have.status(204);
-          expect(res.body).to.deep.equal({});
+          expect(res.body).to.deep.equal(null);
           done();
         });
     });
@@ -553,7 +553,7 @@ describe("Impersonation Requests", () => {
         });
     });
     
-    it("should return 404 and 'Route not found' message when route is not found", function (done) {
+    it("should return 404 and 'Route not found' message when request ID is not found", function (done) {
       chai
         .request(app)
         .get(`/impersonation/requests/randomId?dev=true`)
