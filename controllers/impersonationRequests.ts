@@ -2,7 +2,8 @@ import {
   ERROR_WHILE_CREATING_REQUEST,
   ERROR_WHILE_FETCHING_REQUEST,
   REQUEST_FETCHED_SUCCESSFULLY,
-  REQUEST_CREATED_SUCCESSFULLY
+  REQUEST_CREATED_SUCCESSFULLY,
+  REQUEST_DOES_NOT_EXIST
 } from "../constants/requests";
 import { createImpersonationRequestService } from "../services/impersonationRequests";
 import { getImpersonationRequestById, getImpersonationRequests } from "../models/impersonationRequests";
@@ -10,7 +11,8 @@ import {
   CreateImpersonationRequest,
   CreateImpersonationRequestBody,
   ImpersonationRequestResponse,
-  GetImpersonationControllerRequest
+  GetImpersonationControllerRequest,
+  GetImpersonationRequestByIdRequest
 } from "../types/impersonationRequest";
 import { getPaginatedLink } from "../utils/helper";
 import { NextFunction } from "express";
@@ -22,7 +24,7 @@ const logger = require("../utils/logger");
  * @param {CreateImpersonationRequest} req - Express request object with user and body data.
  * @param {ImpersonationRequestResponse} res - Express response object.
  * @param {NextFunction} next - Express next middleware function.
- * @returns {Promise<ImpersonationRequestResponse | void>}
+ * @returns {Promise<ImpersonationRequestResponse | void>} Returns the created request or passes error to next middleware.
  */
 export const createImpersonationRequestController = async (
   req: CreateImpersonationRequest,
@@ -54,13 +56,37 @@ export const createImpersonationRequestController = async (
 };
 
 /**
- * Controller to fetch impersonation requests.
+ * Controller to fetch an impersonation request by its ID.
  *
- * @async
- * @function getImpersonationRequestsController
+ * @param {GetImpersonationRequestByIdRequest} req - Express request object containing `id` parameter.
+ * @param {ImpersonationRequestResponse} res - Express response object.
+ * @returns {Promise<ImpersonationRequestResponse>} Returns the request if found, or 404 if it doesn't exist.
+ */
+export const getImpersonationRequestByIdController = async (
+  req: GetImpersonationRequestByIdRequest,
+  res: ImpersonationRequestResponse
+): Promise<ImpersonationRequestResponse> => {
+  const id = req.params.id;
+  const request = await getImpersonationRequestById(id);
+
+  if (!request) {
+    return res.status(404).json({
+      message: REQUEST_DOES_NOT_EXIST,
+    });
+  }
+
+  return res.status(200).json({
+    message: REQUEST_FETCHED_SUCCESSFULLY,
+    data: request,
+  });
+};
+
+/**
+ * Controller to fetch impersonation requests with optional filtering and pagination.
+ *
  * @param {GetImpersonationControllerRequest} req - Express request object containing query parameters.
  * @param {ImpersonationRequestResponse} res - Express response object.
- * @returns {Promise<ImpersonationRequestResponse>} Returns one of the following responses.
+ * @returns {Promise<ImpersonationRequestResponse>} Returns paginated impersonation request data or 204 if none found.
  */
 export const getImpersonationRequestsController = async (
   req: GetImpersonationControllerRequest,
@@ -68,17 +94,6 @@ export const getImpersonationRequestsController = async (
 ): Promise<ImpersonationRequestResponse> => {
   try {
     const { query } = req;
-
-    if (query.id) {
-      const request = await getImpersonationRequestById(query.id);
-      if (!request) {
-        return res.status(204).send();
-      }
-      return res.status(200).json({
-        message: REQUEST_FETCHED_SUCCESSFULLY,
-        data: request,
-      });
-    }
 
     const requests = await getImpersonationRequests(query);
     if (!requests || requests.allRequests.length === 0) {
