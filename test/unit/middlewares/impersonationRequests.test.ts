@@ -2,6 +2,7 @@ import chai from "chai";
 import sinon from "sinon";
 import {
   createImpersonationRequestValidator,
+  getImpersonationRequestByIdValidator,
   getImpersonationRequestsValidator
 } from "../../../middlewares/validators/impersonationRequests";
 import {
@@ -9,8 +10,10 @@ import {
   CreateImpersonationRequestBody,
   ImpersonationRequestResponse,
   GetImpersonationControllerRequest,
+  GetImpersonationRequestByIdRequest,
 } from "../../../types/impersonationRequest";
 import { Request, Response } from "express";
+import { getImpersonationRequestById } from "../../../models/impersonationRequests";
 
 const { expect } = chai;
 
@@ -77,6 +80,56 @@ describe("Impersonation Request Validators", function () {
       expect(nextSpy.called).to.be.false;
     });
   });
+
+  describe("getImpersonationRequestByIdValidator", function () {
+    it("should validate for a valid get by id impersonation request", async function () {
+      req = {
+        params:{
+          id:"cuJ7lKT1DFybHNwaMJHu",
+          dev:"true"
+        }
+      }
+      await getImpersonationRequestByIdValidator(
+        req as GetImpersonationRequestByIdRequest,
+        res as ImpersonationRequestResponse,
+        nextSpy
+      );
+      expect(nextSpy.calledOnce).to.be.true;
+    })
+
+    it("should not validate for a request without dev flag", async function (){
+      req = {
+        params:{
+          id:"192sjsj/dhid"
+        }
+      }
+      await getImpersonationRequestByIdValidator(
+        req as GetImpersonationRequestByIdRequest,
+        res as ImpersonationRequestResponse,
+        nextSpy
+      );
+
+      expect(res.boom.badRequest.calledOnce).to.be.true;
+      expect(nextSpy.called).to.be.false;
+    })
+
+    it("should not validate for a request with missing id", async function(){
+      req = {
+        params:{
+          id:"",
+          dev:"true"
+        }
+      }
+      await getImpersonationRequestByIdValidator(
+        req as GetImpersonationRequestByIdRequest,
+        res as ImpersonationRequestResponse,
+        nextSpy
+      );
+
+      expect(res.boom.badRequest.calledOnce).to.be.true;
+      expect(nextSpy.called).to.be.false;
+    })
+  })
 
   describe("getImpersonationRequestsValidator", function () {
     it("should validate for a valid get impersonation requests query", async function () {
