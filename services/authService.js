@@ -12,6 +12,13 @@ const generateAuthToken = (payload) => {
   });
 };
 
+const generateImpersonationAuthToken = (payload) => {
+  return jwt.sign(payload, config.get("userToken.privateKey"), {
+    algorithm: "RS256",
+    expiresIn: config.get("impersonationTtl"),
+  });
+};
+
 /**
  * Verifies if the JWT is valid. Throws error in case of signature error or expiry
  *
@@ -36,4 +43,5 @@ module.exports = {
   generateAuthToken,
   verifyAuthToken,
   decodeAuthToken,
+  generateImpersonationAuthToken,
 };

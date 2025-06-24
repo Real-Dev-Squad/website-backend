@@ -1,6 +1,6 @@
 import joi from "joi";
 import { NextFunction } from "express";
-import { CreateImpersonationRequest, ImpersonationRequestResponse } from "../../types/impersonationRequest";
+import { CreateImpersonationRequest, ImpersonationRequestResponse, ImpersonationSessionRequest } from "../../types/impersonationRequest";
 const logger = require("../../utils/logger");
 
 /**
@@ -35,3 +35,28 @@ export const createImpersonationRequestValidator = async (
     return res.boom.badRequest(errorMessages);
   }
 };
+
+
+export const impersonationSessionValidator = async (req:ImpersonationSessionRequest,res:ImpersonationRequestResponse,next:NextFunction) => {
+  const querySchema = joi
+              .object()
+              .strict()
+              .keys({
+                action: joi
+                        .string()
+                        .valid("START","STOP")
+                        .required()
+                        .messages({
+                           "any.only": "action must be START or STOP",
+                         }),
+                 dev: joi.string().optional()
+              });
+    try{
+      await querySchema.validateAsync(req.query, {abortEarly: false});
+      next();
+    }catch (error) {
+      const errorMessages = error.details.map((detail:any) => detail.message);
+      logger.error(`Error while validating request payload : ${errorMessages}`);
+      res.boom.badRequest(errorMessages);
+    }
+}

@@ -42,16 +42,38 @@ export type UpdateImpersonationRequestDataBody = {
     isImpersonationFinished?: boolean;
 }
 
+export type UpdateImpersonationRequestDataResponse = {
+    id:string;
+    lastModifiedBy:string;
+    startedAt?: Timestamp;
+    endedAt: Timestamp;
+    isImpersonationFinished?: boolean;
+}
+
 export type UpdateImpersonationRequestStatusBody = {
     status: REQUEST_STATE.APPROVED | REQUEST_STATE.REJECTED;
     message?: string;
+}
+
+
+export type UpdateImpersonationRequestModelDto = {
+    id: string;
+    updatingBody: UpdateImpersonationRequestDataBody | UpdateImpersonationRequestStatusBody;
+    lastModifiedBy: string;
+}
+
+export type UpdateImpersonationStatusModelResponse = {
+    status: REQUEST_STATE.APPROVED | REQUEST_STATE.REJECTED;
+    message?: string;
+    id: string;
+    lastModifiedBy: string;
 }
 
 export type ImpersonationRequestQuery = RequestQuery & {
     dev?: string;
     createdBy?: string;
     createdFor?: string;
-    status?: keyof typeof REQUEST_STATE;
+    status?: REQUEST_STATE.APPROVED | REQUEST_STATE.PENDING | REQUEST_STATE.REJECTED;
     id?: string;
     prev?: string;
     next?: string;
@@ -73,7 +95,7 @@ export type CreateImpersonationRequest = Request & {
    query: ImpersonationRequestQuery;
 };
 
-export type UpdateImpersonationRequestStatus = Request & {
+export type UpdateImpersonationRequest = Request & {
     userData: userData;
     body: UpdateImpersonationRequestStatusBody;
     query: ImpersonationRequestQuery;
@@ -84,8 +106,12 @@ export type PaginatedImpersonationRequests = {
     allRequests: ImpersonationRequest[];
     next: string;
     prev: string;
-    page: number;
+    nextPage: number;
     count: number;
+}
+
+export type GetImpersonationControllerRequest = Request & {
+    query: ImpersonationRequestQuery
 }
 
 export type CreateImpersonationRequestServiceBody={
@@ -93,4 +119,21 @@ export type CreateImpersonationRequestServiceBody={
    createdBy: string;
    impersonatedUserId: string;
    reason: string;
+}
+
+export type ImpersonationSessionQuery = RequestQuery & {
+  dev?:string;
+  action:string;
+}
+
+export type ImpersonationSessionRequest = Request & {
+    userData: userData;
+    query: ImpersonationSessionQuery;
+    params: RequestParams;
+    isImpersonating: boolean;
+}
+
+export type ImpersonationSessionServiceBody = {
+    requestId: string;
+    userId: string;
 }
