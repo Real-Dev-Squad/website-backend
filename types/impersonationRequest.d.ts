@@ -55,7 +55,6 @@ export type ImpersonationRequestQuery = RequestQuery & {
     id?: string;
     prev?: string;
     next?: string;
-    page?: number;
     size?: number;
 };
 
@@ -84,7 +83,6 @@ export type PaginatedImpersonationRequests = {
     allRequests: ImpersonationRequest[];
     next: string;
     prev: string;
-    nextPage: number;
     count: number;
 }
 
