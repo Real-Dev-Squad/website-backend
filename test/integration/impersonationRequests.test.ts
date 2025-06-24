@@ -11,7 +11,7 @@ import addUser from "../utils/addUser";
 import * as impersonationModel from "../../models/impersonationRequests";
 import * as validationService from "../../services/impersonationRequests";
 import { CreateImpersonationRequestBody, ImpersonationRequest } from "../../types/impersonationRequest";
-import { REQUEST_CREATED_SUCCESSFULLY, REQUEST_STATE } from "../../constants/requests";
+import { REQUEST_CREATED_SUCCESSFULLY, REQUEST_DOES_NOT_EXIST, REQUEST_STATE } from "../../constants/requests";
 import { impersonationRequestsBodyData } from "../fixtures/impersonation-requests/impersonationRequests";
 
 const { expect } = chai;
@@ -300,7 +300,7 @@ describe("Impersonation Requests", () => {
       });
     });
 
-       it("should return 404 and 'Route not found' message when dev is false", function (done) {
+    it("should return 404 and 'Route not found' message when dev is false", function (done) {
       chai
         .request(app)
         .get("/impersonation/requests?dev=false")
@@ -343,19 +343,6 @@ describe("Impersonation Requests", () => {
         });
     });
 
-    it("should return request by specific ID", function (done) {
-      chai
-        .request(app)
-        .get(`${requestsEndpoint}&id=${impersonationRequest1.id}`)
-        .set("cookie", `${cookieName}=${authToken}`)
-        .end(function (err, res) {
-          if (err) return done(err);
-          expect(res).to.have.status(200);
-          expect(res.body.data).to.be.an("object");
-          expect(res.body.data.id).to.equal(impersonationRequest1.id);
-          done();
-        });
-    });
 
     it("should return all requests created by a specific user", function (done) {
       chai
@@ -400,19 +387,6 @@ describe("Impersonation Requests", () => {
         });
     });
 
-    it("should return 204 if request with given ID does not exist", function (done) {
-      chai
-        .request(app)
-        .get(`${requestsEndpoint}&id=randomId123`)
-        .set("cookie", `${cookieName}=${authToken}`)
-        .end(function (err, res) {
-          if (err) return done(err);
-          expect(res).to.have.status(204);
-          expect(res.body).to.deep.equal({});
-          done();
-        });
-    });
-
     it("should return requests filtered by status APPROVED", function (done) {
       chai
         .request(app)
@@ -437,24 +411,6 @@ describe("Impersonation Requests", () => {
           expect(res).to.have.status(400);
           expect(res.body.error).to.equal("Bad Request");
           expect(res.body.message).to.equal(`"status" must be one of [APPROVED, PENDING, REJECTED]`);
-          done();
-        });
-    });
-
-    it("should return a request filtered by valid id, createdBy and status (done case)", function (done) {
-      chai
-        .request(app)
-        .get(
-          `${requestsEndpoint}&id=${impersonationRequest1.id}&createdBy=${impersonationRequest1.createdBy}&status=${impersonationRequest1.status}`
-        )
-        .set("cookie", `${cookieName}=${authToken}`)
-        .end(function (err, res) {
-          if (err) return done(err);
-          expect(res).to.have.status(200);
-          expect(res.body.data).to.be.an("object");
-          expect(res.body.data.id).to.equal(impersonationRequest1.id);
-          expect(res.body.data.createdBy).to.equal(impersonationRequest1.createdBy);
-          expect(res.body.data.status).to.equal(impersonationRequest1.status);
           done();
         });
     });
@@ -556,4 +512,72 @@ describe("Impersonation Requests", () => {
         });
     });
   });
+  describe("GET /impersonation/requests/:id", function () {
+     it("should return 404 and 'Route not found' message when dev is false", function (done) {
+      chai
+        .request(app)
+        .get("/impersonation/requests/randomId?dev=false")
+        .set("cookie", `${cookieName}=${authToken}`)
+        .end(function (err, res) {
+            if (err) return done(err);
+            expect(res.statusCode).to.equal(404);
+            expect(res.body.message).to.equal("Route not found");
+            done();
+        });
+    });
+
+    it("should return 404 and 'Route not found' message when dev is missing", function (done) {
+      chai
+        .request(app)
+        .get("/impersonation/requests/randomId")
+        .set("cookie", `${cookieName}=${authToken}`)
+        .end(function (err, res) {
+            if(err) return done(err);
+            expect(res.statusCode).to.equal(404);
+            expect(res.body.message).to.equal("Route not found");
+            done();
+        });
+    });
+
+    it("should return request by specific ID", function (done) {
+      chai
+        .request(app)
+        .get(`/impersonation/requests/${impersonationRequest1.id}?dev=true`)
+        .set("cookie", `${cookieName}=${authToken}`)
+        .end(function (err, res) {
+          if (err) return done(err);
+          expect(res).to.have.status(200);
+          expect(res.body.data).to.be.an("object");
+          expect(res.body.data.id).to.equal(impersonationRequest1.id);
+          done();
+        });
+    });
+    
+    it("should return 404 and 'Route not found' message when route is not found", function (done) {
+      chai
+        .request(app)
+        .get(`/impersonation/requests/randomId?dev=true`)
+        .set("cookie", `${cookieName}=${authToken}`)
+        .end(function (err, res) {
+            if(err) return done(err);
+            expect(res.statusCode).to.equal(404);
+            expect(res.body.message).to.equal(REQUEST_DOES_NOT_EXIST);
+            done();
+        });
+    });
+
+    it("should return 400 and 'Bad Request' message when validator check fails", function (done) {
+      chai
+        .request(app)
+        .get(`/impersonation/requests/4&8828**?dev=true`)
+        .set("cookie", `${cookieName}=${authToken}`)
+        .end(function (err, res) {
+            if(err) return done(err);
+            expect(res.statusCode).to.equal(400);
+            expect(res.body.message).to.equal('"id" with value "4&8828**" fails to match the required pattern: /^[a-zA-Z0-9-_]+$/');
+            done();
+        });
+    });
+
+  }) 
 });
