@@ -67,18 +67,24 @@ export const getImpersonationRequestByIdController = async (
   res: ImpersonationRequestResponse
 ): Promise<ImpersonationRequestResponse> => {
   const id = req.params.id;
-  const request = await getImpersonationRequestById(id);
+  try {
+    const request = await getImpersonationRequestById(id);
 
-  if (!request) {
-    return res.status(404).json({
-      message: REQUEST_DOES_NOT_EXIST,
+    if (!request) {
+      return res.status(404).json({
+        message: REQUEST_DOES_NOT_EXIST,
+      });
+    }
+
+    return res.status(200).json({
+      message: REQUEST_FETCHED_SUCCESSFULLY,
+      data: request,
     });
-  }
 
-  return res.status(200).json({
-    message: REQUEST_FETCHED_SUCCESSFULLY,
-    data: request,
-  });
+  } catch (error) {
+    logger.error(ERROR_WHILE_FETCHING_REQUEST, error);
+    return res.boom.badImplementation(ERROR_WHILE_FETCHING_REQUEST);
+  }
 };
 
 /**

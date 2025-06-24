@@ -87,7 +87,7 @@ export const getImpersonationRequestByIdValidator = async (
 ): Promise<void> => {
   const schema = joi.object().keys({
     dev: joi.string().optional(),
-    id: joi.string().max(100).pattern(/^[a-zA-Z0-9-_]+$/).optional(),
+    id: joi.string().max(100).pattern(/^[a-zA-Z0-9-_]+$/).required(),
   });
 
   try {
