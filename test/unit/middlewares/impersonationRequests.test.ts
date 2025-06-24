@@ -87,7 +87,7 @@ describe("Impersonation Request Validators", function () {
         },
       };
       await getImpersonationRequestsValidator(
-        req as any,
+        req as GetImpersonationControllerRequest,
         res as ImpersonationRequestResponse,
         nextSpy
       );
@@ -101,7 +101,7 @@ describe("Impersonation Request Validators", function () {
         },
       };
       await getImpersonationRequestsValidator(
-        req as any,
+        req as GetImpersonationControllerRequest,
         res as ImpersonationRequestResponse,
         nextSpy
       );

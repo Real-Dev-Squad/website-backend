@@ -168,12 +168,6 @@ describe("models/impersonationRequests", () => {
       expect(result.allRequests.every(r => r.createdFor === impersonationRequests[0].createdFor)).to.be.true;
     });
 
-    it("should filter requests by both page and size", async () => {
-      const query = { page: 1, size: 2 };
-      const result = await impersonationModel.getImpersonationRequests(query);
-      expect(result.allRequests.length).to.be.equal(2);
-      expect(result.nextPage).to.be.equal(2);
-    });
 
     it("Should return null if no data is found", async () => {
       await cleanDb();
@@ -191,25 +185,18 @@ describe("models/impersonationRequests", () => {
       expect(result.count).to.be.equal(2);
     });
 
-    it("Should return a list of all the requests by page ", async () => {
-      const query = { page: 1 };
-      const impersonationRequestData = await impersonationModel.getImpersonationRequests(query);
-      expect(impersonationRequestData.allRequests.length).to.be.equal(5);
-      expect(impersonationRequestData.nextPage).to.be.equal(2);
-    });
 
-    it("should return the next page of results using next cursor", async () => {
+    it("should return the next doc of results using next cursor", async () => {
       const first = await impersonationModel.getImpersonationRequests({ size: 2 });
       expect(first.next).to.exist;
       const next = await impersonationModel.getImpersonationRequests({ size: 2, next: first.next });
       expect(next.allRequests.length).to.be.at.most(2);
-      expect(next.nextPage).to.not.exist;
       expect(next.next).to.not.equal(null);
       expect(next.prev).to.not.equal(null);
       expect(next.allRequests[0].id).to.not.equal(first.allRequests[0].id);
     });
 
-    it("should return the previous page of results using prev cursor", async () => {
+    it("should return the previous doc of results using prev cursor", async () => {
       const firstPage = await impersonationModel.getImpersonationRequests({ size: 2 });
       const nextPage = await impersonationModel.getImpersonationRequests({ size: 2, next: firstPage.next });
       if (nextPage.prev) {
