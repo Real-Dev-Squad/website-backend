@@ -382,7 +382,7 @@ describe("Impersonation Requests", () => {
         .end(function (err, res) {
           if (err) return done(err);
           expect(res).to.have.status(204);
-          expect(res.body).to.deep.equal(null);
+          expect(res.body).to.deep.equal({});
           done();
         });
     });
