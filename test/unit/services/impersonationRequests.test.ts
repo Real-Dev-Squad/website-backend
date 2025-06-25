@@ -235,7 +235,6 @@ describe("Tests Impersonation Requests Service", () => {
   describe("generateImpersonationTokenService", () => {
     it("should return 404 NotFound if a request does not exist", async () => {
       sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve(null));
-
       try {
         await impersonationService.generateImpersonationTokenService("123", "START");
       } catch (err) {
