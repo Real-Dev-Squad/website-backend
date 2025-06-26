@@ -73,11 +73,9 @@ export type ImpersonationRequestQuery = RequestQuery & {
     dev?: string;
     createdBy?: string;
     createdFor?: string;
-    status?: REQUEST_STATE.APPROVED | REQUEST_STATE.PENDING | REQUEST_STATE.REJECTED;
-    id?: string;
+    status?: keyof typeof REQUEST_STATE;
     prev?: string;
     next?: string;
-    page?: number;
     size?: number;
 };
 
@@ -106,8 +104,12 @@ export type PaginatedImpersonationRequests = {
     allRequests: ImpersonationRequest[];
     next: string;
     prev: string;
-    nextPage: number;
     count: number;
+}
+
+export type GetImpersonationRequestByIdRequest = Request & {
+    dev:string;
+    params: RequestParams;
 }
 
 export type GetImpersonationControllerRequest = Request & {
@@ -119,6 +121,10 @@ export type CreateImpersonationRequestServiceBody={
    createdBy: string;
    impersonatedUserId: string;
    reason: string;
+}
+
+export type GetImpersonationControllerRequest = Request & {
+    query: ImpersonationRequestQuery
 }
 
 export type ImpersonationSessionQuery = RequestQuery & {
