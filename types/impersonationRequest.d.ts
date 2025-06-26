@@ -52,10 +52,8 @@ export type ImpersonationRequestQuery = RequestQuery & {
     createdBy?: string;
     createdFor?: string;
     status?: keyof typeof REQUEST_STATE;
-    id?: string;
     prev?: string;
     next?: string;
-    page?: number;
     size?: number;
 };
 
@@ -84,8 +82,12 @@ export type PaginatedImpersonationRequests = {
     allRequests: ImpersonationRequest[];
     next: string;
     prev: string;
-    page: number;
     count: number;
+}
+
+export type GetImpersonationRequestByIdRequest = Request & {
+    dev:string;
+    params: RequestParams;
 }
 
 export type CreateImpersonationRequestServiceBody={
@@ -93,4 +95,8 @@ export type CreateImpersonationRequestServiceBody={
    createdBy: string;
    impersonatedUserId: string;
    reason: string;
+}
+
+export type GetImpersonationControllerRequest = Request & {
+    query: ImpersonationRequestQuery
 }
