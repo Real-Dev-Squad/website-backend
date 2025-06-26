@@ -102,26 +102,39 @@ export const getImpersonationRequestByIdValidator = async (
 
 
 
-export const impersonationSessionValidator = async (req:ImpersonationSessionRequest,res:ImpersonationRequestResponse,next:NextFunction) => {
+/**
+ * Middleware to validate query parameters for impersonation session actions.
+ *
+ * @param {ImpersonationSessionRequest} req - Express request object containing query params
+ * @param {ImpersonationRequestResponse} res - Express response object used to send validation errors
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>} - Resolves if validation succeeds, otherwise sends an error response
+ */
+export const impersonationSessionValidator = async (
+  req: ImpersonationSessionRequest,
+  res: ImpersonationRequestResponse,
+  next: NextFunction
+): Promise<void> => {
   const querySchema = joi
-              .object()
-              .strict()
-              .keys({
-                action: joi
-                        .string()
-                        .valid("START","STOP")
-                        .required()
-                        .messages({
-                           "any.only": "action must be START or STOP",
-                         }),
-                 dev: joi.string().optional()
-              });
-    try{
-      await querySchema.validateAsync(req.query, {abortEarly: false});
-      next();
-    }catch (error) {
-      const errorMessages = error.details.map((detail:any) => detail.message);
-      logger.error(`Error while validating request payload : ${errorMessages}`);
-      res.boom.badRequest(errorMessages);
-    }
-}
+    .object()
+    .strict()
+    .keys({
+      action: joi
+        .string()
+        .valid("START", "STOP")
+        .required()
+        .messages({
+          "any.only": "action must be START or STOP",
+        }),
+      dev: joi.string().optional(),
+    });
+
+  try {
+    await querySchema.validateAsync(req.query, { abortEarly: false });
+    next();
+  } catch (error) {
+    const errorMessages = error.details.map((detail: { message: string }) => detail.message);
+    logger.error(`Error while validating request payload: ${errorMessages}`);
+    return res.boom.badRequest(errorMessages);
+  }
+};

@@ -123,13 +123,9 @@ export type CreateImpersonationRequestServiceBody={
    reason: string;
 }
 
-export type GetImpersonationControllerRequest = Request & {
-    query: ImpersonationRequestQuery
-}
-
 export type ImpersonationSessionQuery = RequestQuery & {
   dev?:string;
-  action:string;
+  action:"START" | "STOP";
 }
 
 export type ImpersonationSessionRequest = Request & {

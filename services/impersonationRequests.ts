@@ -174,7 +174,7 @@ export const stopImpersonationService = async (
       meta: {
         requestId: body.requestId,
         action: "STOP",
-        startedBy: body.userId,
+        stoppedBy: body.userId,
       },
       body: {
         ...updatedRequest,
