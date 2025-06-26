@@ -6,9 +6,10 @@ import { REQUEST_STATE, ERROR_WHILE_CREATING_REQUEST, ERROR_WHILE_UPDATING_REQUE
 import addUser from "../../utils/addUser";
 import userDataFixture from "../../fixtures/user/user";
 import sinon from "sinon";
-import { UpdateImpersonationRequestStatusBody } from "../../../types/impersonationRequest";
+import { UpdateImpersonationRequestStatusBody, UpdateImpersonationRequestDataResponse } from "../../../types/impersonationRequest";
 import { Timestamp } from "firebase-admin/firestore";
 import firestore from "../../../utils/firestore";
+
 const userData = userDataFixture();
 const logger = require("../../../utils/logger");
 
@@ -232,7 +233,7 @@ describe("models/impersonationRequests", () => {
       expect(updatedRequest.status).to.equal(REQUEST_STATE.REJECTED);
     });
 
-    it("should change the startedAt, endedAt and isImpersonationFinished fields on update", async () => {
+        it("should change the startedAt,endedAt and isImpersonationFinished fields on update", async () => {
       const updatedBody = {
         isImpersonationFinished: true,
         startedAt: Timestamp.fromDate(new Date(Date.now())),
@@ -242,16 +243,15 @@ describe("models/impersonationRequests", () => {
         id: impersonationRequest.id,
         updatePayload: updatedBody,
         lastModifiedBy: impersonationRequest.userId,
-      });
-      const result = await impersonationModel.getImpersonationRequestById(impersonationRequest.id);
-      expect(result.isImpersonationFinished).to.be.true;
-      expect(Number(result.startedAt)).to.be.greaterThan(0);
-      expect(Number(result.endedAt)).to.be.greaterThan(Number(result.startedAt));
+      }) as UpdateImpersonationRequestDataResponse;
+      expect(updatedRequest.isImpersonationFinished).to.be.true;
+      expect(Number(updatedRequest.startedAt)).to.be.greaterThan(0);
+      expect(Number(updatedRequest.endedAt)).to.be.greaterThan(Number(updatedRequest.startedAt));
     });
 
     it("should change updatedAt timestamp on update", async () => {
       const before = Number(impersonationRequest.updatedAt);
-      const updated = await impersonationModel.updateImpersonationRequest({
+      const updatedRequest = await impersonationModel.updateImpersonationRequesT({
         id: impersonationRequest.id,
         updatePayload: { status: "APPROVED" },
         lastModifiedBy: impersonationRequest.impersonatedUserId,
@@ -265,7 +265,6 @@ describe("models/impersonationRequests", () => {
       const error = new Error(ERROR_WHILE_UPDATING_REQUEST);
       const loggerStub = sinon.stub(logger, "error");
 
-      // Stub Firestore collection and doc chain
       const docUpdateStub = sinon.stub().rejects(error);
       const docStub = sinon.stub().returns({ update: docUpdateStub });
       const collectionStub = sinon.stub().returns({ doc: docStub });

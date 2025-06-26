@@ -261,7 +261,7 @@ describe("Tests Impersonation Requests Service", () => {
         await impersonationService.updateImpersonationRequestService(body);
         expect.fail("Should throw error");
       } catch (err) {
-        expect(loggerStub.calledWith(ERROR_WHILE_UPDATING_REQUEST, err)).to.true;
+        expect(loggerStub.calledWith(ERROR_WHILE_UPDATING_REQUEST, err)).to.be.true;
       }
     });
   });

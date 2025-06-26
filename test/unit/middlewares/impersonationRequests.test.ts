@@ -31,7 +31,7 @@ describe("Impersonation Request Validators", function () {
     reason: "Testing purpose",
   };
 
-    const updateRequestBody: UpdateImpersonationRequestStatusBody = {
+  const updateRequestBody: UpdateImpersonationRequestStatusBody = {
     status: "APPROVED",
     message: "Testing",
   };
@@ -212,16 +212,14 @@ describe("Impersonation Request Validators", function () {
       expect(nextSpy.called).to.be.false;
     });
 
-    it("should invalidate if status field is not of correct type", async function () {
+      it("should invalidate if status field is not of correct type", async function () {
       req = {
         body: { ...updateRequestBody, status: "ACTIVE" },
       };
-      await updateImpersonationRequestValidator(
-        req as UpdateImpersonationRequest,
-        res as ImpersonationRequestResponse,
-        nextSpy
-      );
+      await updateImpersonationRequestValidator(req as UpdateImpersonationRequest,res as ImpersonationRequestResponse, nextSpy);
+      const errorMessageArg = res.boom.badRequest.firstCall.args[0];
       expect(res.boom.badRequest.calledOnce).to.be.true;
+      expect(errorMessageArg).to.include("status must be APPROVED or REJECTED");
       expect(nextSpy.called).to.be.false;
     });
   });
