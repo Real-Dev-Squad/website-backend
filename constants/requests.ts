@@ -74,6 +74,8 @@ export const FEATURE_NOT_IMPLEMENTED = "Feature not implemented";
 export const IMPERSONATION_NOT_COMPLETED = "Please complete impersonation before creating a new request";
 export const IMPERSONATION_ALREADY_ATTEMPTED = "No active request is available for impersonation";
 export const IMPERSONATION_REQUEST_NOT_APPROVED = "Awaiting approval for impersonation request";
+export const INVALID_ACTION_PARAM = "Invalid 'action' parameter: must be either 'START' or 'STOP'";
+
 
 
 export const IMPERSONATION_LOG_TYPE = {

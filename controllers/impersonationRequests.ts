@@ -163,30 +163,32 @@ export const impersonationController = async (
   const { action } = req.query;
   const requestId = req.params.id;
   const userId = req.userData?.id;
-
-  let body;
+  let authCookie;
   let response;
-
   try {
+
     if (action === "START") {
+      authCookie = await generateImpersonationTokenService(requestId, action);
       response = await startImpersonationService({ requestId, userId });
-      body = await generateImpersonationTokenService(requestId, action);
-    } else if (action === "STOP" && req?.isImpersonating) {
-      response = await stopImpersonationService({ requestId, userId });
-      body = await generateImpersonationTokenService(requestId, action);
-    } else {
-      throw new Forbidden("Invalid impersonation session");
     }
 
-    res.clearCookie(body.name);
-    res.cookie(body.name, body.value, body.options);
+    if (action === "STOP") {
+      if (!req.isImpersonating) {
+        throw new Forbidden("Cannot stop impersonation: no active impersonation session");
+      }
+      authCookie = await generateImpersonationTokenService(requestId, action);
+      response = await stopImpersonationService({ requestId, userId });
+    }
+
+    res.clearCookie(authCookie.name);
+    res.cookie(authCookie.name, authCookie.value, authCookie.options);
 
     return res.status(200).json({
       message: response?.returnMessage,
       data: response.updatedRequest
     });
   } catch (error) {
-    logger.error("Error while handling impersonation request", error);
+    logger.error(`Failed to process impersonation ${action} for requestId=${requestId}, userId=${userId}`, error);
     next(error);
   }
 };

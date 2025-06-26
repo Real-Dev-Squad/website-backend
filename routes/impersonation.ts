@@ -5,6 +5,7 @@ const authorizeRoles = require("../middlewares/authorizeRoles");
 const { SUPERUSER } = require("../constants/roles");
 import authenticate from "../middlewares/authenticate";
 import { createImpersonationRequestController, getImpersonationRequestByIdController, getImpersonationRequestsController, impersonationController } from "../controllers/impersonationRequests";
+import { addAuthorizationForImpersonation } from "../middlewares/addAuthorizationForImpersonation";
 
 router.post(
   "/requests",
@@ -28,7 +29,12 @@ router.get(
    getImpersonationRequestByIdController
 );
 
-
-router.patch("/:id",authenticate,impersonationSessionValidator,impersonationController)
+router.patch(
+    "/:id",
+    authenticate,
+    impersonationSessionValidator,
+    addAuthorizationForImpersonation,
+    impersonationController
+);
 
 module.exports = router;

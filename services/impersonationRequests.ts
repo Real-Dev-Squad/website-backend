@@ -1,6 +1,7 @@
 import {
   ERROR_WHILE_CREATING_REQUEST,
   IMPERSONATION_LOG_TYPE,
+  INVALID_ACTION_PARAM,
   LOG_ACTION,
   REQUEST_DOES_NOT_EXIST,
   REQUEST_LOG_TYPE,
@@ -11,7 +12,7 @@ import { createImpersonationRequest, getImpersonationRequestById, updateImperson
 import { fetchUser } from "../models/users";
 import { addLog } from "./logService";
 import { User } from "../typeDefinitions/users";
-import { NotFound, Forbidden } from "http-errors";
+import { NotFound, Forbidden, BadRequest } from "http-errors";
 import { CreateImpersonationRequestServiceBody, ImpersonationRequest, ImpersonationSessionServiceBody, UpdateImpersonationRequestDataResponse } from "../types/impersonationRequest";
 import { Timestamp } from "firebase-admin/firestore";
 import config from "config";
@@ -158,7 +159,7 @@ export const stopImpersonationService = async (
       throw new NotFound(REQUEST_DOES_NOT_EXIST);
     }
     if (impersonationRequest.impersonatedUserId !== body.userId) {
-      throw new Forbidden("You are not authorized for this action");
+      throw new Forbidden("You are not allowed for this operation at the moment");
     }
 
     const newBody = { endedAt: Timestamp.now() };
@@ -207,22 +208,30 @@ export const generateImpersonationTokenService = async (
   requestId: string,
   action: string
 ): Promise<{ name: string, value: string, options: object }> => {
-  try {
+    try {
     const request = await getImpersonationRequestById(requestId);
     if (!request) {
       throw new NotFound(REQUEST_DOES_NOT_EXIST);
     }
-    const impersonatedUserId = request.impersonatedUserId;
-    const userId = request.userId;
-    const cookieName = config.get("userToken.cookieName") as string;
-    const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
+
+    const { userId, impersonatedUserId } = request;
+    const cookieName = config.get<string>("userToken.cookieName");
+    const rdsUiUrl = new URL(config.get<string>("services.rdsUi.baseUrl"));
+    const ttlInSeconds = Number(config.get("userToken.ttl"));
+
     let token: string;
-    if (action === "START") {
-      token = await authService.generateImpersonationAuthToken({ userId, impersonatedUserId });
-    } else if (action === "STOP") {
-      token = await authService.generateAuthToken({ userId });
-    } else {
-      throw new Forbidden("Action can be only START/STOP");
+
+    switch (action) {
+      case "START":
+        token = await authService.generateImpersonationAuthToken({ userId, impersonatedUserId });
+        break;
+
+      case "STOP":
+        token = await authService.generateAuthToken({ userId });
+        break;
+
+      default:
+        throw new BadRequest(INVALID_ACTION_PARAM);
     }
 
     return {
@@ -230,14 +239,17 @@ export const generateImpersonationTokenService = async (
       value: token,
       options: {
         domain: rdsUiUrl.hostname,
-        expires: new Date(Date.now() + Number(config.get("userToken.ttl")) * 1000),
+        expires: new Date(Date.now() + ttlInSeconds * 1000),
         httpOnly: true,
         secure: true,
         sameSite: "lax",
-      }
+      },
     };
   } catch (error) {
-    logger.error("Error while generating impersonation token", error);
+    logger.error(
+      `Error generating impersonation token for requestId=${requestId}, action=${action}`,
+      error
+    );
     throw error;
   }
 };

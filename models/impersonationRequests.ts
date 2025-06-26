@@ -4,11 +4,12 @@ import {
   IMPERSONATION_NOT_COMPLETED,
   REQUEST_ALREADY_PENDING,
   REQUEST_STATE,
-  ERROR_WHILE_FETCHING_REQUEST
+  ERROR_WHILE_FETCHING_REQUEST,
+  ERROR_WHILE_UPDATING_REQUEST
 } from "../constants/requests";
 import { Timestamp } from "firebase-admin/firestore";
 import { Query, CollectionReference } from '@google-cloud/firestore';
-import { CreateImpersonationRequestModelDto, ImpersonationRequest, PaginatedImpersonationRequests,ImpersonationRequestQuery} from "../types/impersonationRequest";
+import { CreateImpersonationRequestModelDto, ImpersonationRequest, PaginatedImpersonationRequests,ImpersonationRequestQuery, UpdateImpersonationRequestModelDto} from "../types/impersonationRequest";
 import { Forbidden } from "http-errors";
 const logger = require("../utils/logger");
 const impersonationRequestModel = firestore.collection("impersonationRequests");

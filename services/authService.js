@@ -15,7 +15,7 @@ const generateAuthToken = (payload) => {
 const generateImpersonationAuthToken = (payload) => {
   return jwt.sign(payload, config.get("userToken.privateKey"), {
     algorithm: "RS256",
-    expiresIn: config.get("impersonationTtl"),
+    expiresIn: config.get("userToken.impersonationTtl"),
   });
 };
 

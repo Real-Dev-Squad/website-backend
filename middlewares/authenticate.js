@@ -25,7 +25,7 @@ const checkRestricted = async (req, res, next) => {
       req.query.action === "STOP";
 
     if (req.method !== "GET" && !isStopImpersonationRoute) {
-      return res.boom.forbidden("Only viewing is permitted during impersonation");
+      return res.boom.forbidden("You are not allowed for this operation at the moment");
     }
   }
 
