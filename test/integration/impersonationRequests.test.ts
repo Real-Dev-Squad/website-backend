@@ -646,6 +646,7 @@ describe("Impersonation Requests", () => {
         .send({status:"APPROVED"})
         .set("cookie", `${cookieName}=${authToken}`)
         .end(function (err, res) {
+          if (err) return done(err);
           try {
             expect(res.statusCode).to.equal(404);
             expect(res.body.message).to.equal("Route not found");
@@ -755,7 +756,7 @@ describe("Impersonation Requests", () => {
         });
     });
 
-     it("should throw 403 Forbidden if unauthorized user tries to update the request", function (done) {
+    it("should throw 403 Forbidden if unauthorized user tries to update the request", function (done) {
       chai
         .request(app)
         .patch(`/impersonation/requests/${impersonationRequest3.id}?dev=true`)
