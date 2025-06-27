@@ -8,12 +8,11 @@ import userDataFixture from "../../fixtures/user/user";
 import { impersonationRequestsBodyData } from "../../fixtures/impersonation-requests/impersonationRequests";
 import { CreateImpersonationRequestModelDto } from "../../../types/impersonationRequest";
 import { Timestamp } from "firebase-admin/firestore";
-
 const authService = require("../../../services/authService");
 const userQuery = require("../../../models/users");
 
 describe("Tests Impersonation Requests Service", () => {
-  let mockRequestBody: CreateImpersonationRequestModelDto = impersonationRequestsBodyData[0];
+  const mockRequestBody: CreateImpersonationRequestModelDto = impersonationRequestsBodyData[0];
   const userData = userDataFixture();
 
   afterEach(() => {

@@ -11,11 +11,10 @@ import {
   CreateImpersonationRequestBody,
   ImpersonationRequestResponse,
   GetImpersonationControllerRequest,
+  ImpersonationSessionRequest,
   GetImpersonationRequestByIdRequest,
 } from "../../../types/impersonationRequest";
 import { Request, Response } from "express";
-import { getImpersonationRequestById } from "../../../models/impersonationRequests";
-import { ImpersonationRequestResponse, ImpersonationSessionRequest } from "../../../types/impersonationRequest";
 
 const { expect } = chai;
 
