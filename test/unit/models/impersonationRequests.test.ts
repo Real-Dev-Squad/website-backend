@@ -251,7 +251,7 @@ describe("models/impersonationRequests", () => {
 
     it("should change updatedAt timestamp on update", async () => {
       const before = Number(impersonationRequest.updatedAt);
-      const updatedRequest = await impersonationModel.updateImpersonationRequesT({
+      const updatedRequest = await impersonationModel.updateImpersonationRequest({
         id: impersonationRequest.id,
         updatePayload: { status: "APPROVED" },
         lastModifiedBy: impersonationRequest.impersonatedUserId,

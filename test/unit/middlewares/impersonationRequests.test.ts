@@ -199,6 +199,15 @@ describe("Impersonation Request Validators", function () {
       expect(nextSpy.calledOnce).to.be.true;
     });
 
+    
+     it("should validate an update request even with missing message field", async function() {
+      req = {
+        body: {status:"APPROVED"}
+      }
+      await updateImpersonationRequestValidator(req as UpdateImpersonationRequest,res as ImpersonationRequestResponse, nextSpy);
+      expect(nextSpy.calledOnce).to.be.true;
+     })
+
     it("should not validate for an invalid update impersonation request on missing status", async function () {
       req = {
         body: { ...updateRequestBody, status: "" },
