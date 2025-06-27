@@ -158,25 +158,13 @@ describe("Tests Impersonation Requests Service", () => {
           createdAt: Timestamp.now(),
           updatedAt: Timestamp.now(),
         }));
-        sinon.stub(impersonationModel, "createImpersonationRequest").returns(Promise.resolve({
-          id: "123",
-          ...impersonationRequestsBodyData[1],
-          reason: "He asked",
-          status: "REJECTED",
-          impersonatedUserId: "testUserId",
-          createdAt: Timestamp.now(),
-          updatedAt: Timestamp.now()
-        }));
-        await impersonationModel.createImpersonationRequest({
-          ...impersonationRequestsBodyData[1],
-          impersonatedUserId: testUserId,
-          status: REQUEST_STATE.REJECTED
-        });
+        
         await impersonationService.updateImpersonationRequestService({
           id: "123",
           lastModifiedBy: "testUserId",
           updatePayload: { status: "REJECTED" }
         });
+        
       } catch (err) {
         expect(err).to.not.be.undefined;
         expect(err.name).to.equal("ForbiddenError");
@@ -208,7 +196,7 @@ describe("Tests Impersonation Requests Service", () => {
         });
         await impersonationService.updateImpersonationRequestService({
           id: "123",
-          lastModifiedBy: "testUserId1",
+          lastModifiedBy: "unauthorizedUserId",
           updatePayload: { status: "APPROVED" }
         });
       } catch (err) {
