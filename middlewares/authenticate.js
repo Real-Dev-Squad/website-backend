@@ -1,18 +1,19 @@
 const authService = require("../services/authService");
 const dataAccess = require("../services/dataAccessLayer");
+const logger = require("../utils/logger");
 
 /**
- * Middleware to check if the authenticated user has restricted permissions.
+ * Middleware to check if the user is restricted or in an impersonation session.
  *
- * - If the user is impersonating, restrict to only `GET` and `PATCH` requests with `action=STOP`.
- * - If the user has a `restricted` role, disallow all non-GET requests.
+ * - If the user is impersonating, only GET requests and the STOP impersonation route are allowed.
+ * - If the user is restricted (based on roles), only GET requests are permitted.
  *
- * This middleware must be invoked after successful authentication.
- *
- * @param {Object} req - Express request object. Expects `userData` and `isImpersonating` to be set.
- * @param {Object} res - Express response object.
- * @param {Function} next - Express next middleware function.
- * @returns {Object|void} Responds with `403 Forbidden` if action is not permitted; otherwise calls `next()`.
+ * @async
+ * @function checkRestricted
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @param {Function} next - Express next middleware function
+ * @returns {void}
  */
 const checkRestricted = async (req, res, next) => {
   const { roles } = req.userData;
@@ -25,7 +26,7 @@ const checkRestricted = async (req, res, next) => {
       req.query.action === "STOP";
 
     if (req.method !== "GET" && !isStopImpersonationRoute) {
-      return res.boom.forbidden("You are not allowed for this operation at the moment");
+      return res.boom.forbidden("Only viewing is permitted during impersonation");
     }
   }
 
@@ -37,39 +38,38 @@ const checkRestricted = async (req, res, next) => {
 };
 
 /**
- * Authentication Middleware
+ * Authentication middleware that:
+ * 1. Verifies JWT token from cookies (or headers in non-production).
+ * 2. Handles impersonation if applicable.
+ * 3. Refreshes token if it's expired but still within the refresh TTL window.
+ * 4. Attaches user data to `req.userData` for downstream use.
  *
- * 1. Verifies the user's JWT (from cookie or Bearer header in non-production).
- * 2. If the token is valid, attaches user info to `req.userData`.
- * 3. If impersonation is active, uses the impersonated user for `req.userData`.
- * 4. If the JWT is expired but within `refreshTtl`, issues a new token and continues.
- * 5. Applies role-based restrictions via `checkRestricted()`.
- *
- * @todo Add test cases to validate JWT refresh logic by simulating token expiry and TTL.
- *
- * @param {Object} req - Express request object.
- * @param {Object} res - Express response object.
- * @param {Function} next - Express next middleware function.
- * @returns {Object|void} - Returns `401 Unauthorized` if the user is unauthenticated; otherwise continues to `checkRestricted`.
+ * @async
+ * @function
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @param {Function} next - Express next middleware function
+ * @returns {Promise<void>} - Calls `next()` on successful authentication or returns an error response.
  */
 module.exports = async (req, res, next) => {
   try {
     let token = req.cookies[config.get("userToken.cookieName")];
 
-    // Allow Bearer token in non-production (e.g., for Swagger UI)
+    /**
+     * Enable Bearer Token authentication for NON-PRODUCTION environments.
+     * Useful for Swagger or manual testing where cookies are not easily managed.
+     */
     if (process.env.NODE_ENV !== "production" && !token) {
       token = req.headers.authorization?.split(" ")[1];
     }
 
     const { userId, impersonatedUserId } = authService.verifyAuthToken(token);
+    // `req.isImpersonating` keeps track of the impersonation session
     req.isImpersonating = Boolean(impersonatedUserId);
 
-    let userData;
-    if (impersonatedUserId) {
-      userData = await dataAccess.retrieveUsers({ id: impersonatedUserId });
-    } else {
-      userData = await dataAccess.retrieveUsers({ id: userId });
-    }
+    const userData = impersonatedUserId
+      ? await dataAccess.retrieveUsers({ id: impersonatedUserId })
+      : await dataAccess.retrieveUsers({ id: userId });
 
     req.userData = userData.user;
     return checkRestricted(req, res, next);
@@ -83,7 +83,7 @@ module.exports = async (req, res, next) => {
       const newToken = authService.generateAuthToken({ userId });
       const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
 
-      // Refresh token if within allowed refresh window
+      // add new JWT to the response if it satisfies the refreshTtl time
       if (Math.floor(Date.now() / 1000) - iat <= refreshTtl) {
         res.cookie(config.get("userToken.cookieName"), newToken, {
           domain: rdsUiUrl.hostname,
@@ -93,13 +93,13 @@ module.exports = async (req, res, next) => {
           sameSite: "lax",
         });
 
-        req.userData = await dataAccess.retrieveUsers({ id: userId });
+        const userData = await dataAccess.retrieveUsers({ id: userId });
+        req.userData = userData.user;
+
         return checkRestricted(req, res, next);
-      } else {
-        return res.boom.unauthorized("Unauthenticated User");
       }
-    } else {
       return res.boom.unauthorized("Unauthenticated User");
     }
+    return res.boom.unauthorized("Unauthenticated User");
   }
 };

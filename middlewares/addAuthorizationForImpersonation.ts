@@ -7,7 +7,7 @@ import { INVALID_ACTION_PARAM } from "../constants/requests";
 /**
  * Middleware to authorize impersonation based on the 'action' query param.
  * - START → Requires SUPERUSER role.
- * - END → Allows without additional checks.
+ * - STOP → Allows without additional checks.
  * - Invalid or missing action → Responds with 400 Bad Request.
  */
 export const addAuthorizationForImpersonation = async (
