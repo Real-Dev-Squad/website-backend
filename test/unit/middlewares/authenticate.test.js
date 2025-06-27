@@ -113,4 +113,88 @@ describe("Authentication Middleware", function () {
       expect(nextSpy.notCalled).to.equal(true);
     });
   });
+
+  describe("Impersonation and Refresh Logic", function () {
+    it("should allow impersonation and set userData of impersonated user", async function () {
+      const user = { id: "user123", roles: { restricted: false } };
+
+      const verifyAuthTokenStub = Sinon.stub(authService, "verifyAuthToken").returns({
+        userId: "admin",
+        impersonatedUserId: user.id,
+      });
+
+      const retrieveUsersStub = Sinon.stub(dataAccess, "retrieveUsers").resolves({ user });
+
+      req.cookies = {
+        [config.get("userToken.cookieName")]: "validToken",
+      };
+
+      req.method = "GET";
+      req.baseUrl = "/impersonation";
+      req.path = "/abc123";
+      req.query = {};
+
+      await authMiddleware(req, res, nextSpy);
+
+      expect(verifyAuthTokenStub.calledOnce).to.equal(true);
+      expect(retrieveUsersStub.calledOnce).to.equal(true);
+
+      expect(req.userData.id).to.equal(user.id);
+      expect(req.isImpersonating).to.equal(true);
+      expect(nextSpy.calledOnce).to.equal(true);
+      expect(res.boom.unauthorized.notCalled).to.equal(true);
+      expect(res.boom.forbidden.notCalled).to.equal(true);
+    });
+
+    it("should forbid write requests during impersonation (non-STOP)", async function () {
+      req.method = "POST";
+      req.baseUrl = "/impersonation";
+      req.path = "/abc123";
+      req.query = {};
+
+      Sinon.stub(authService, "verifyAuthToken").returns({ userId: "admin", impersonatedUserId: "impUser" });
+      Sinon.stub(dataAccess, "retrieveUsers").resolves({ user: { id: "impUser", roles: {} } });
+
+      await authMiddleware(req, res, nextSpy);
+
+      expect(req.isImpersonating).to.equal(true);
+      expect(res.boom.forbidden.calledOnce).to.equal(true);
+      expect(res.boom.forbidden.firstCall.args[0]).to.include("Only viewing is permitted");
+    });
+
+    it("should allow PATCH STOP request during impersonation", async function () {
+      req.method = "PATCH";
+      req.baseUrl = "/impersonation";
+      req.path = "/randomId";
+      req.query = { action: "STOP" };
+
+      Sinon.stub(authService, "verifyAuthToken").returns({ userId: "admin", impersonatedUserId: "impUser" });
+      Sinon.stub(dataAccess, "retrieveUsers").resolves({ user: { id: "impUser", roles: {} } });
+
+      await authMiddleware(req, res, nextSpy);
+
+      expect(req.isImpersonating).to.equal(true);
+      expect(nextSpy.calledOnce).to.equal(true);
+    });
+
+    it("should refresh token if expired and within TTL", async function () {
+      const now = Math.floor(Date.now() / 1000);
+      req.cookies[config.get("userToken.cookieName")] = "expiredToken";
+
+      Sinon.stub(authService, "verifyAuthToken").throws({ name: "TokenExpiredError" });
+      Sinon.stub(authService, "decodeAuthToken").returns({
+        userId: "user123",
+        impersonatedUserId: "impUserId",
+        iat: now - 10,
+      });
+      Sinon.stub(authService, "generateAuthToken").returns("newToken");
+      Sinon.stub(dataAccess, "retrieveUsers").resolves({ user: { id: "user123", roles: {} } });
+
+      await authMiddleware(req, res, nextSpy);
+
+      expect(res.cookie.calledOnce).to.equal(true);
+      expect(res.cookie.firstCall.args[1]).to.equal("newToken");
+      expect(nextSpy.calledOnce).to.equal(true);
+    });
+  });
 });
