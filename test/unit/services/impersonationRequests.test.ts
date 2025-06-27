@@ -149,22 +149,21 @@ describe("Tests Impersonation Requests Service", () => {
     });
 
     it("should throw forbidden error if request is already rejected", async () => {
+      sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve({
+        ...impersonationRequestsBodyData[1],
+        impersonatedUserId: "testUserId",
+        id: "123",
+        status: "REJECTED",
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      }));
       try {
-        sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve({
-          ...impersonationRequestsBodyData[1],
-          impersonatedUserId: "testUserId",
-          id: "123",
-          status: "REJECTED",
-          createdAt: Timestamp.now(),
-          updatedAt: Timestamp.now(),
-        }));
-        
         await impersonationService.updateImpersonationRequestService({
           id: "123",
           lastModifiedBy: "testUserId",
           updatePayload: { status: "REJECTED" }
         });
-        
+        expect.fail("Should have thrown an error");
       } catch (err) {
         expect(err).to.not.be.undefined;
         expect(err.name).to.equal("ForbiddenError");

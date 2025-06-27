@@ -81,7 +81,8 @@ describe("models/impersonationRequests", () => {
         expect(error.message).to.include("You are not allowed for this Operation at the moment");
       }
     });
-});
+  });
+
   describe("getImpersonationRequestById", () => {
     it("should return the impersonation request by id", async () => {
       const impersonationRequest = await impersonationModel.createImpersonationRequest(impersonationRequestsBodyData[0]);
@@ -210,7 +211,7 @@ describe("models/impersonationRequests", () => {
     });
   });
   
- describe("updateImpersonationRequest", () => {
+  describe("updateImpersonationRequest", () => {
     beforeEach(async () => {
       impersonationRequest = await impersonationModel.createImpersonationRequest(impersonationRequestsBodyData[0]);
     });
