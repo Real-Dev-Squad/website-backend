@@ -2,17 +2,20 @@ import {
   ERROR_WHILE_CREATING_REQUEST,
   ERROR_WHILE_FETCHING_REQUEST,
   REQUEST_FETCHED_SUCCESSFULLY,
-  REQUEST_CREATED_SUCCESSFULLY,
-  REQUEST_DOES_NOT_EXIST
+  REQUEST_DOES_NOT_EXIST,
+  ERROR_WHILE_UPDATING_REQUEST,
+  REQUEST_CREATED_SUCCESSFULLY
 } from "../constants/requests";
-import { createImpersonationRequestService } from "../services/impersonationRequests";
+import { createImpersonationRequestService, updateImpersonationRequestService } from "../services/impersonationRequests";
 import { getImpersonationRequestById, getImpersonationRequests } from "../models/impersonationRequests";
 import {
   CreateImpersonationRequest,
   CreateImpersonationRequestBody,
+  UpdateImpersonationRequest,
+  UpdateImpersonationRequestStatusBody,
   ImpersonationRequestResponse,
   GetImpersonationControllerRequest,
-  GetImpersonationRequestByIdRequest
+  GetImpersonationRequestByIdRequest,
 } from "../types/impersonationRequest";
 import { getPaginatedLink } from "../utils/helper";
 import { NextFunction } from "express";
@@ -138,5 +141,42 @@ export const getImpersonationRequestsController = async (
   } catch (err) {
     logger.error(ERROR_WHILE_FETCHING_REQUEST, err);
     return res.boom.badImplementation(ERROR_WHILE_FETCHING_REQUEST);
+  }
+};
+
+
+/**
+ * Controller to  Update the status of an impersonation request.
+ *
+ * @param {UpdateImpersonationRequest} req - Express request with params, body, and user data.
+ * @param {ImpersonationRequestResponse} res - Express response object.
+ * @param {NextFunction} next - Express middleware `next` function.
+ * @returns {Promise<ImpersonationRequestResponse>} Returns updated request data or passes error to `next`.
+ */
+export const updateImpersonationRequestStatusController = async (
+  req: UpdateImpersonationRequest,
+  res: ImpersonationRequestResponse,
+  next: NextFunction
+): Promise<ImpersonationRequestResponse> => {
+  try {
+    const requestId = req.params.id;
+    const lastModifiedBy = req.userData.id;
+    const requestBody: UpdateImpersonationRequestStatusBody = req.body;
+    
+    const { returnMessage, updatedRequest: response } = await updateImpersonationRequestService({
+      id: requestId,
+      updatePayload: requestBody,
+      lastModifiedBy,
+    });
+
+    return res.status(200).json({
+      message: returnMessage,
+      data: {
+        ...response,
+      },
+    });
+  } catch (error) {
+    logger.error(ERROR_WHILE_UPDATING_REQUEST, error);
+    next(error);
   }
 };
