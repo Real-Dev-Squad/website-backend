@@ -42,6 +42,14 @@ export type UpdateImpersonationRequestDataBody = {
     isImpersonationFinished?: boolean;
 }
 
+export type UpdateImpersonationRequestDataResponse = {
+    id:string;
+    lastModifiedBy:string;
+    startedAt?: Timestamp;
+    endedAt: Timestamp;
+    isImpersonationFinished?: boolean;
+}
+
 export type UpdateImpersonationRequestStatusBody = {
     status: REQUEST_STATE.APPROVED | REQUEST_STATE.REJECTED;
     message?: string;
