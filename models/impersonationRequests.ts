@@ -1,11 +1,11 @@
 import firestore from "../utils/firestore";
 import {
   ERROR_WHILE_CREATING_REQUEST,
-  IMPERSONATION_NOT_COMPLETED,
   REQUEST_ALREADY_PENDING,
   REQUEST_STATE,
   ERROR_WHILE_FETCHING_REQUEST,
-  ERROR_WHILE_UPDATING_REQUEST
+  ERROR_WHILE_UPDATING_REQUEST,
+  OPERATION_NOT_ALLOWED
 } from "../constants/requests";
 import { Timestamp } from "firebase-admin/firestore";
 import { Query, CollectionReference } from '@google-cloud/firestore';
@@ -39,7 +39,7 @@ export const createImpersonationRequest = async (
     const snapshot = await reqQuery.get();
 
     if (!snapshot.empty) {
-      throw new Forbidden("You are not allowed for this Operation at the moment");
+      throw new Forbidden(OPERATION_NOT_ALLOWED);
     }
 
     const requestBody = {

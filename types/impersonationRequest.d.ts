@@ -124,7 +124,7 @@ export type CreateImpersonationRequestServiceBody={
 }
 
 export type ImpersonationSessionQuery = RequestQuery & {
-  dev:string;
+  dev?:string;
   action:"START" | "STOP";
 }
 

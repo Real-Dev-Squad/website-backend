@@ -73,7 +73,7 @@ export const FEATURE_NOT_IMPLEMENTED = "Feature not implemented";
 
 export const INVALID_ACTION_PARAM = "Invalid 'action' parameter: must be either 'START' or 'STOP'";
 
-
+export const OPERATION_NOT_ALLOWED = "You are not allowed for this operation at the moment";
 
 export const IMPERSONATION_LOG_TYPE = {
   SESSION_STARTED:"SESSION_STARTED",

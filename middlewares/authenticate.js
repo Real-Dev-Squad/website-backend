@@ -8,6 +8,11 @@ const logger = require("../utils/logger");
  * - If the user is impersonating, only GET requests and the STOP impersonation route are allowed.
  * - If the user is restricted (based on roles), only GET requests are permitted.
  *
+ * Note: This requires that user is authenticated hence must be called after
+ * the user authentication middleware. We are calling it from within the
+ * `authenticate` middleware itself to avoid explicitly adding this middleware
+ * while defining routes.
+ *
  * @async
  * @function checkRestricted
  * @param {import('express').Request} req - Express request object

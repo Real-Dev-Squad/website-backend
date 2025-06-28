@@ -3,6 +3,7 @@ import {
   IMPERSONATION_LOG_TYPE,
   INVALID_ACTION_PARAM,
   LOG_ACTION,
+  OPERATION_NOT_ALLOWED,
   REQUEST_DOES_NOT_EXIST,
   REQUEST_LOG_TYPE,
   REQUEST_STATE,
@@ -100,7 +101,7 @@ export const startImpersonationService = async (
       impersonationRequest.status !== REQUEST_STATE.APPROVED ||
       impersonationRequest.isImpersonationFinished === true
     ) {
-      throw new Forbidden("You are not allowed for this operation at the moment");
+      throw new Forbidden(OPERATION_NOT_ALLOWED);
     }
 
     const updatePayload = {
@@ -111,7 +112,7 @@ export const startImpersonationService = async (
 
     const updatedRequest = await updateImpersonationRequest({
       id: body.requestId,
-      updatingBody: updatePayload,
+      updatePayload: updatePayload,
       lastModifiedBy: body.userId
     }) as UpdateImpersonationRequestDataResponse;
 
@@ -158,14 +159,14 @@ export const stopImpersonationService = async (
     if (!impersonationRequest) {
       throw new NotFound(REQUEST_DOES_NOT_EXIST);
     }
-    if (impersonationRequest.impersonatedUserId !== body.userId) {
-      throw new Forbidden("You are not allowed for this operation at the moment");
+    if ( body.userId !== impersonationRequest.impersonatedUserId ) {
+      throw new Forbidden(OPERATION_NOT_ALLOWED);
     }
 
     const newBody = { endedAt: Timestamp.now() };
     const updatedRequest = await updateImpersonationRequest({
       id: body.requestId,
-      updatingBody: newBody,
+      updatePayload: newBody,
       lastModifiedBy: body.userId
     }) as UpdateImpersonationRequestDataResponse;
 

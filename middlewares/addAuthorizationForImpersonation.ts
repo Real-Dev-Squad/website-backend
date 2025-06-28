@@ -1,8 +1,9 @@
 import { NextFunction } from "express";
 import authorizeRoles from "./authorizeRoles";
 const { SUPERUSER } = require("../constants/roles");
+import { Forbidden } from "http-errors";
 import { ImpersonationRequestResponse, ImpersonationSessionRequest } from "../types/impersonationRequest";
-import { INVALID_ACTION_PARAM } from "../constants/requests";
+import { INVALID_ACTION_PARAM, OPERATION_NOT_ALLOWED } from "../constants/requests";
 
 /**
  * Middleware to authorize impersonation based on the 'action' query param.
@@ -22,6 +23,9 @@ export const addAuthorizationForImpersonation = async (
   }
 
   if (action === "STOP") {
+    if (!req.isImpersonating) {
+      throw new Forbidden(OPERATION_NOT_ALLOWED);
+    }
     return next();
   }
 

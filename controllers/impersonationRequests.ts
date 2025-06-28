@@ -3,7 +3,8 @@ import {
   ERROR_WHILE_FETCHING_REQUEST,
   REQUEST_FETCHED_SUCCESSFULLY,
   REQUEST_CREATED_SUCCESSFULLY,
-  REQUEST_DOES_NOT_EXIST
+  REQUEST_DOES_NOT_EXIST,
+  OPERATION_NOT_ALLOWED
 } from "../constants/requests";
 import { createImpersonationRequestService, generateImpersonationTokenService, startImpersonationService, stopImpersonationService } from "../services/impersonationRequests";
 import { getImpersonationRequestById, getImpersonationRequests } from "../models/impersonationRequests";
@@ -16,7 +17,6 @@ import {
   ImpersonationSessionRequest
 } from "../types/impersonationRequest";
 import { getPaginatedLink } from "../utils/helper";
-import { Forbidden } from "http-errors";
 import { NextFunction } from "express";
 const logger = require("../utils/logger");
 
@@ -173,9 +173,6 @@ export const impersonationController = async (
     }
 
     if (action === "STOP") {
-      if (!req.isImpersonating) {
-        throw new Forbidden("Cannot stop impersonation: no active impersonation session");
-      }
       authCookie = await generateImpersonationTokenService(requestId, action);
       response = await stopImpersonationService({ requestId, userId });
     }
@@ -184,7 +181,7 @@ export const impersonationController = async (
     res.cookie(authCookie.name, authCookie.value, authCookie.options);
 
     return res.status(200).json({
-      message: response?.returnMessage,
+      message: response.returnMessage,
       data: response.updatedRequest
     });
   } catch (error) {
