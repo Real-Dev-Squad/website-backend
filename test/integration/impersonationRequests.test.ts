@@ -39,8 +39,8 @@ let testUserId4: string;
 let testUserId5: string;
 let testSuperUserId: string;
 let impersonationRequestBody: CreateImpersonationRequestBody;
-let impersonationRequest1: ImpersonationRequest;
-let impersonationRequest2: ImpersonationRequest;
+let unapprovedImpersonationRequest: ImpersonationRequest;
+let approvedImpersonationRequest: ImpersonationRequest;
 
 describe("Impersonation Requests", () => {
   requestsEndpoint = "/impersonation/requests?dev=true";
@@ -68,7 +68,7 @@ describe("Impersonation Requests", () => {
       reason: "User assistance required for account debugging."
     };
 
-    impersonationRequest1 = await impersonationModel.createImpersonationRequest({
+    unapprovedImpersonationRequest = await impersonationModel.createImpersonationRequest({
       ...impersonationRequestsBodyData[0],
       impersonatedUserId: testUserId2,
       createdFor: userData[19].username,
@@ -76,7 +76,7 @@ describe("Impersonation Requests", () => {
       createdBy: userData[4].username
     });
 
-    impersonationRequest2 = await impersonationModel.createImpersonationRequest({
+    approvedImpersonationRequest = await impersonationModel.createImpersonationRequest({
       ...impersonationRequestsBodyData[0],
       impersonatedUserId: testUserId3,
       createdFor: userData[12].username,
@@ -553,13 +553,13 @@ describe("Impersonation Requests", () => {
     it("should return request by specific ID", function (done) {
       chai
         .request(app)
-        .get(`/impersonation/requests/${impersonationRequest1.id}?dev=true`)
+        .get(`/impersonation/requests/${unapprovedImpersonationRequest.id}?dev=true`)
         .set("cookie", `${cookieName}=${authToken}`)
         .end(function (err, res) {
           if (err) return done(err);
           expect(res).to.have.status(200);
           expect(res.body.data).to.be.an("object");
-          expect(res.body.data.id).to.equal(impersonationRequest1.id);
+          expect(res.body.data.id).to.equal(unapprovedImpersonationRequest.id);
           done();
         });
     });
@@ -596,14 +596,14 @@ describe("Impersonation Requests", () => {
     let impersonationRequest3;
 
     beforeEach(async () => {
-      impersonationRequest1 = await impersonationModel.createImpersonationRequest({
+      approvedImpersonationRequest = await impersonationModel.createImpersonationRequest({
         ...impersonationRequestsBodyData[0],
         impersonatedUserId: testUserId1,
         createdBy: userData[16].username,
         status: REQUEST_STATE.APPROVED
       });
 
-      impersonationRequest2 = await impersonationModel.createImpersonationRequest({
+      unapprovedImpersonationRequest = await impersonationModel.createImpersonationRequest({
         ...impersonationRequestsBodyData[1],
         impersonatedUserId: testUserId3,
         createdFor: userData[12].username
@@ -624,7 +624,7 @@ describe("Impersonation Requests", () => {
     it("should return 404 and 'Route not found' message when dev is false", function (done) {
       chai
         .request(app)
-        .patch(`/impersonation/requests/${impersonationRequest1.id}?dev=false`)
+        .patch(`/impersonation/requests/${unapprovedImpersonationRequest.id}?dev=false`)
         .send({status:"APPROVED"})
         .set("cookie", `${cookieName}=${authToken}`)
         .end(function (err, res) {
@@ -642,7 +642,7 @@ describe("Impersonation Requests", () => {
     it("should return 404 and 'Route not found' message when dev is missing", function (done) {
       chai
         .request(app)
-        .patch(`/impersonation/requests/${impersonationRequest1.id}`)
+        .patch(`/impersonation/requests/${unapprovedImpersonationRequest.id}`)
         .send({status:"APPROVED"})
         .set("cookie", `${cookieName}=${authToken}`)
         .end(function (err, res) {
@@ -661,15 +661,15 @@ describe("Impersonation Requests", () => {
       const tempAuthToken = authService.generateAuthToken({ userId: testUserId3 });
       chai
         .request(app)
-        .patch(`/impersonation/requests/${impersonationRequest2.id}?dev=true`)
+        .patch(`/impersonation/requests/${approvedImpersonationRequest.id}?dev=true`)
         .send({status:"APPROVED"})
         .set("cookie", `${cookieName}=${tempAuthToken}`)
         .end(function (err, res) {
           if (err) return done(err);
           expect(res.statusCode).to.equal(200);
           expect(res.body.message).to.equal(REQUEST_APPROVED_SUCCESSFULLY);
-          expect(res.body.data.id).to.equal(impersonationRequest2.id);
-          expect(res.body.data.lastModifiedBy).to.equal(impersonationRequest2.impersonatedUserId);
+          expect(res.body.data.id).to.equal(approvedImpersonationRequest.id);
+          expect(res.body.data.lastModifiedBy).to.equal(approvedImpersonationRequest.impersonatedUserId);
           done();
         });
     });
@@ -694,7 +694,7 @@ describe("Impersonation Requests", () => {
     it("should return 401 if user is not logged in", function (done) {
       chai
         .request(app)
-        .patch(`/impersonation/requests/${impersonationRequest2.id}?dev=true`)
+        .patch(`/impersonation/requests/${unapprovedImpersonationRequest.id}?dev=true`)
         .send({status:"APPROVED"})
         .end(function (err, res) {
           if (err) return done(err);
@@ -729,7 +729,7 @@ describe("Impersonation Requests", () => {
       const tempAuthToken = authService.generateAuthToken({ userId: testUserId1 });
       chai
         .request(app)
-        .patch(`/impersonation/requests/${impersonationRequest1.id}?dev=true`)
+        .patch(`/impersonation/requests/${approvedImpersonationRequest.id}?dev=true`)
         .set("cookie", `${cookieName}=${tempAuthToken}`)
         .send({status:"APPROVED"})
         .end(function (err, res) {
@@ -774,7 +774,7 @@ describe("Impersonation Requests", () => {
     it("should return 400 if status is not provided", function (done) {
       chai
         .request(app)
-        .patch(`/impersonation/requests/${impersonationRequest1.id}?dev=true`)
+        .patch(`/impersonation/requests/${unapprovedImpersonationRequest.id}?dev=true`)
         .set("cookie", `${cookieName}=${authToken}`)
         .send({ status: "" })
         .end(function (err, res) {
@@ -789,7 +789,7 @@ describe("Impersonation Requests", () => {
     it("should return 400 if status is not APPROVED/REJECTED", function (done) {
       chai
         .request(app)
-        .patch(`/impersonation/requests/${impersonationRequest1.id}?dev=true`)
+        .patch(`/impersonation/requests/${unapprovedImpersonationRequest.id}?dev=true`)
         .set("cookie", `${cookieName}=${authToken}`)
         .send({ status: "ACTIVE" })
         .end(function (err, res) {
@@ -839,7 +839,7 @@ describe("Impersonation Requests", () => {
    it("should return 404 and 'Route not Found' message when dev is false", function (done) {
     chai
       .request(app)
-      .patch(`/impersonation/${impersonationRequest1.id}?dev=false&action=START`)
+      .patch(`/impersonation/${unapprovedImpersonationRequest.id}?dev=false&action=START`)
       .set("cookie", `${cookieName}=${authToken}`)
       .end(function (err, res) {
         if (err) return done(err);
@@ -856,7 +856,7 @@ describe("Impersonation Requests", () => {
    it("should return 404 and 'Route not Found' message when dev is missing", function (done) {
     chai
       .request(app)
-      .patch(`/impersonation/${impersonationRequest1.id}`)
+      .patch(`/impersonation/${unapprovedImpersonationRequest.id}`)
       .set("cookie", `${cookieName}=${authToken}`)
       .end(function (err, res) {
         try {
@@ -869,10 +869,10 @@ describe("Impersonation Requests", () => {
       });
    });
 
-   it("should return 400 BadRequest if the action is neither START/STOP", function (done) {
+   it("should return 400 when action type is invalid (other than START, STOP)", function (done) {
     chai
       .request(app)
-      .patch(`/impersonation/${impersonationRequest2.id}?dev=true&action=ACTIVE`)
+      .patch(`/impersonation/${unapprovedImpersonationRequest.id}?dev=true&action=ACTIVE`)
       .set("cookie", `${cookieName}=${superUserToken}`)
       .end(function (err, res) {
         try {
@@ -885,20 +885,34 @@ describe("Impersonation Requests", () => {
       });
     });
 
-   it("should successfully start the impersonation when action is START", function (done) {
-    chai
-      .request(app)
-      .patch(`/impersonation/${impersonationRequest2.id}?dev=true&action=START`)
-      .send({ status: "APPROVED" })
-      .set("cookie", `${cookieName}=${superUserToken}`)
-      .end(function (err, res) {
-        if (err) return done(err);
-        expect(res.statusCode).to.equal(200);
-        expect(res.body.message).to.equal("Impersonation session has started.");
-        expect(res.body.data.id).to.equal(impersonationRequest2.id);
-        done();
-      });
+ it("should successfully start the impersonation when action is START", function (done) {
+  chai
+    .request(app)
+    .patch(`/impersonation/${approvedImpersonationRequest.id}?dev=true&action=START`)
+    .send({ status: "APPROVED" })
+    .set("cookie", `${cookieName}=${superUserToken}`)
+    .end(function (err, res) {
+      if (err) return done(err);
+
+      expect(res.statusCode).to.equal(200);
+      expect(res.body.message).to.equal("Impersonation session has started.");
+      expect(res.body.data.id).to.equal(approvedImpersonationRequest.id);
+
+      const setCookieHeader = res.header["set-cookie"];
+      expect(setCookieHeader).to.be.an("array");
+      const tokenCookie = setCookieHeader.find((cookieStr) =>
+        cookieStr.startsWith(`${cookieName}=`)
+      );
+      expect(tokenCookie).to.exist;
+
+      const tokenValue = tokenCookie.split(";")[0].split("=")[1];
+      const decoded = authService.decodeAuthToken(tokenValue);
+      expect(decoded.userId).to.equal(approvedImpersonationRequest.impersonatedUserId);
+
+      done();
     });
+});
+
 
    it("should successfully stop the impersonation when action is STOP", function (done) {
     const impersonationToken = authService.generateImpersonationAuthToken({
@@ -908,25 +922,21 @@ describe("Impersonation Requests", () => {
 
     chai
       .request(app)
-      .patch(`/impersonation/${impersonationRequest2.id}?dev=true&action=STOP`)
+      .patch(`/impersonation/${approvedImpersonationRequest.id}?dev=true&action=STOP`)
       .set("cookie", `${cookieName}=${impersonationToken}`)
       .end(function (err, res) {
         if (err) return done(err);
-        try {
           expect(res.statusCode).to.equal(200);
           expect(res.body.message).to.equal("Impersonation session has been stopped.");
-          expect(res.body.data.id).to.equal(impersonationRequest2.id);
+          expect(res.body.data.id).to.equal(approvedImpersonationRequest.id);
           done();
-        } catch (e) {
-          done(e);
-        }
       });
     });
 
    it("should return 403 if impersonation request is not approved", function (done) {
     chai
       .request(app)
-      .patch(`/impersonation/${impersonationRequest1.id}?dev=true&action=START`)
+      .patch(`/impersonation/${unapprovedImpersonationRequest.id}?dev=true&action=START`)
       .set("cookie", `${cookieName}=${superUserToken}`)
       .end(function (err, res) {
         if (err) return done(err);
@@ -936,7 +946,7 @@ describe("Impersonation Requests", () => {
       });
    });
 
-   it("should return 403 if user trying to STOP is not the impersonated user", function (done) {
+   it("should return 403 if a user other than the impersonated user tries to STOP the session", function (done) {
     const fakeImpersonationToken = authService.generateImpersonationAuthToken({
       userId: testSuperUserId,
       impersonatedUserId: testUserId5, // wrong impersonated user
@@ -944,7 +954,7 @@ describe("Impersonation Requests", () => {
 
     chai
       .request(app)
-      .patch(`/impersonation/${impersonationRequest2.id}?dev=true&action=STOP`)
+      .patch(`/impersonation/${approvedImpersonationRequest.id}?dev=true&action=STOP`)
       .set("cookie", `${cookieName}=${fakeImpersonationToken}`)
       .end(function (err, res) {
         expect(res.statusCode).to.equal(403);
@@ -953,14 +963,14 @@ describe("Impersonation Requests", () => {
       });
    });
 
-   it("should return 403 if action is STOP but user is not impersonating", function (done) {
+   it("should return 403 if a user who is not currently impersonating attempts to stop an impersonation session", function (done) {
     const normalToken = authService.generateAuthToken({
       userId: testSuperUserId,
     });
 
     chai
       .request(app)
-      .patch(`/impersonation/${impersonationRequest2.id}?dev=true&action=STOP`)
+      .patch(`/impersonation/${approvedImpersonationRequest.id}?dev=true&action=STOP`)
       .set("cookie", `${cookieName}=${normalToken}`)
       .end(function (err, res) {
         if (err) return done(err);
