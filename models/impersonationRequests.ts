@@ -1,14 +1,12 @@
 import firestore from "../utils/firestore";
 import {
   ERROR_WHILE_CREATING_REQUEST,
-  IMPERSONATION_NOT_COMPLETED,
-  REQUEST_ALREADY_PENDING,
-  REQUEST_STATE,
+  ERROR_WHILE_UPDATING_REQUEST,
   ERROR_WHILE_FETCHING_REQUEST
 } from "../constants/requests";
 import { Timestamp } from "firebase-admin/firestore";
 import { Query, CollectionReference } from '@google-cloud/firestore';
-import { CreateImpersonationRequestModelDto, ImpersonationRequest, PaginatedImpersonationRequests,ImpersonationRequestQuery} from "../types/impersonationRequest";
+import { CreateImpersonationRequestModelDto, ImpersonationRequest, UpdateImpersonationRequestModelDto, PaginatedImpersonationRequests,ImpersonationRequestQuery} from "../types/impersonationRequest";
 import { Forbidden } from "http-errors";
 const logger = require("../utils/logger");
 const impersonationRequestModel = firestore.collection("impersonationRequests");
@@ -169,3 +167,28 @@ export const getImpersonationRequests = async (
     throw error;
   }
 }
+
+/**
+ * Updates an existing impersonation request in Firestore.
+ * @param {UpdateImpersonationRequestModelDto} body - The update data for the impersonation request. Must include `id`, `lastModifiedBy`, and `updatingBody` (fields to update).
+ * @returns {Promise<object>} An object containing the updated fields and the request id.
+ * @throws {Error} Logs and rethrows any error encountered during update. Throws error if the request does not exist.
+ */
+export const updateImpersonationRequest = async ( body: UpdateImpersonationRequestModelDto ) => {
+  try {
+    await impersonationRequestModel.doc(body.id).update({
+      updatedAt: Timestamp.now(),
+      lastModifiedBy: body.lastModifiedBy,
+      ...body.updatePayload,
+    });
+
+    return {
+      id:body.id,
+      lastModifiedBy: body.lastModifiedBy,
+      ...body.updatePayload
+    };
+  } catch (error) {
+    logger.error(`${ERROR_WHILE_UPDATING_REQUEST} for document ID: ${body.id}`, error);
+    throw error;
+  }
+};

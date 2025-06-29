@@ -42,9 +42,31 @@ export type UpdateImpersonationRequestDataBody = {
     isImpersonationFinished?: boolean;
 }
 
+export type UpdateImpersonationRequestDataResponse = {
+    id:string;
+    lastModifiedBy:string;
+    startedAt?: Timestamp;
+    endedAt: Timestamp;
+    isImpersonationFinished?: boolean;
+}
+
 export type UpdateImpersonationRequestStatusBody = {
     status: REQUEST_STATE.APPROVED | REQUEST_STATE.REJECTED;
     message?: string;
+}
+
+
+export type UpdateImpersonationRequestModelDto = {
+    id: string;
+    updatePayload: UpdateImpersonationRequestDataBody | UpdateImpersonationRequestStatusBody;
+    lastModifiedBy: string;
+}
+
+export type UpdateImpersonationStatusModelResponse = {
+    status: REQUEST_STATE.APPROVED | REQUEST_STATE.REJECTED;
+    message?: string;
+    id: string;
+    lastModifiedBy: string;
 }
 
 export type ImpersonationRequestQuery = RequestQuery & {
@@ -71,7 +93,7 @@ export type CreateImpersonationRequest = Request & {
    query: ImpersonationRequestQuery;
 };
 
-export type UpdateImpersonationRequestStatus = Request & {
+export type UpdateImpersonationRequest = Request & {
     userData: userData;
     body: UpdateImpersonationRequestStatusBody;
     query: ImpersonationRequestQuery;
@@ -88,6 +110,10 @@ export type PaginatedImpersonationRequests = {
 export type GetImpersonationRequestByIdRequest = Request & {
     dev:string;
     params: RequestParams;
+}
+
+export type GetImpersonationControllerRequest = Request & {
+    query: ImpersonationRequestQuery
 }
 
 export type CreateImpersonationRequestServiceBody={
