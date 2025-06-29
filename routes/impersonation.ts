@@ -1,7 +1,7 @@
 import express from "express";
 import { createImpersonationRequestValidator, getImpersonationRequestByIdValidator, getImpersonationRequestsValidator, updateImpersonationRequestValidator, impersonationSessionValidator } from "../middlewares/validators/impersonationRequests";
 import authenticate from "../middlewares/authenticate";
-import { createImpersonationRequestController, getImpersonationRequestByIdController, getImpersonationRequestsController, updateImpersonationRequestStatusController } from "../controllers/impersonationRequests";
+import { createImpersonationRequestController, getImpersonationRequestByIdController, getImpersonationRequestsController, impersonationController, updateImpersonationRequestStatusController } from "../controllers/impersonationRequests";
 import { addAuthorizationForImpersonation } from "../middlewares/addAuthorizationForImpersonation";
 const router = express.Router();
 const authorizeRoles = require("../middlewares/authorizeRoles");
