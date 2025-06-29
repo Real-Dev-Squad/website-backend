@@ -3,14 +3,22 @@ import {
   LOG_ACTION,
   REQUEST_LOG_TYPE,
   REQUEST_STATE,
-  TASK_REQUEST_MESSAGES
+  TASK_REQUEST_MESSAGES,
+  REQUEST_ALREADY_APPROVED,
+  REQUEST_ALREADY_REJECTED,
+  REQUEST_APPROVED_SUCCESSFULLY,
+  REQUEST_DOES_NOT_EXIST,
+  REQUEST_REJECTED_SUCCESSFULLY,
+  UNAUTHORIZED_TO_UPDATE_REQUEST,
+  ERROR_WHILE_UPDATING_REQUEST,
 } from "../constants/requests";
-import { createImpersonationRequest } from "../models/impersonationRequests";
+import { createImpersonationRequest, updateImpersonationRequest, getImpersonationRequestById } from "../models/impersonationRequests";
 import { fetchUser } from "../models/users";
 import { addLog } from "./logService";
 import { User } from "../typeDefinitions/users";
-import { NotFound } from "http-errors";
-import { CreateImpersonationRequestServiceBody, ImpersonationRequest } from "../types/impersonationRequest";
+import { NotFound, Forbidden } from "http-errors";
+import { CreateImpersonationRequestServiceBody, ImpersonationRequest,   UpdateImpersonationRequestModelDto,
+  UpdateImpersonationStatusModelResponse, } from "../types/impersonationRequest";
 const logger = require("../utils/logger");
 
 /**
@@ -70,3 +78,55 @@ export const createImpersonationRequestService = async (
     throw error;
   }
 };
+
+/**
+ * Validates and Updates an impersonation request and logs the update action.
+ * @async
+ * @function updateImpersonationRequestService
+ * @param {UpdateImpersonationRequestModelDto} body - The update data for the impersonation request.
+ * @returns {Promise<{ returnMessage: string, updatedRequest: UpdateImpersonationStatusModelResponse }>} The update result and message.
+ * @throws {Error} If the update or logging fails.
+ */
+export const updateImpersonationRequestService = async (
+  body: UpdateImpersonationRequestModelDto
+) => {
+  try {
+   const request = await getImpersonationRequestById(body.id);
+   
+    if (!request) {
+      throw new NotFound(REQUEST_DOES_NOT_EXIST);
+    }
+
+    if (request.impersonatedUserId !== body.lastModifiedBy || request.status !== REQUEST_STATE.PENDING) {
+      throw new Forbidden("You are not allowed for this Operation at the moment");
+    }
+    
+    const updatedRequest = await updateImpersonationRequest(body) as UpdateImpersonationStatusModelResponse;
+
+    const [logType, returnMessage] = updatedRequest.status === REQUEST_STATE.APPROVED
+      ? [REQUEST_LOG_TYPE.REQUEST_APPROVED, REQUEST_APPROVED_SUCCESSFULLY]
+      : [REQUEST_LOG_TYPE.REQUEST_REJECTED, REQUEST_REJECTED_SUCCESSFULLY];
+
+    const requestLog = {
+      type: logType,
+      meta: {
+        requestId: body.id,
+        action: LOG_ACTION.UPDATE,
+        createdBy: body.lastModifiedBy,
+      },
+      body: updatedRequest,
+    };
+
+    await addLog(requestLog.type, requestLog.meta, requestLog.body);
+
+    const response = {
+      returnMessage,
+      updatedRequest,
+    };
+
+    return response;
+  } catch (error) {
+    logger.error(ERROR_WHILE_UPDATING_REQUEST, error);
+    throw error;
+  }
+}
