@@ -123,6 +123,19 @@ export type CreateImpersonationRequestServiceBody={
    reason: string;
 }
 
-export type GetImpersonationControllerRequest = Request & {
-    query: ImpersonationRequestQuery
+export type ImpersonationSessionQuery = RequestQuery & {
+  dev?:string;
+  action:"START" | "STOP";
+}
+
+export type ImpersonationSessionRequest = Request & {
+    userData: userData;
+    query: ImpersonationSessionQuery;
+    params: RequestParams;
+    isImpersonating: boolean;
+}
+
+export type ImpersonationSessionServiceBody = {
+    requestId: string;
+    userId: string;
 }

@@ -87,6 +87,7 @@ module.exports = {
     cookieV2Name: `rds-session-v2-${NODE_ENV}`,
     ttl: 30 * 24 * 60 * 60, // in seconds
     refreshTtl: 180 * 24 * 60 * 60, // in seconds
+    impersonationTtl: 15 * 60, // in seconds
     publicKey:
       "-----BEGIN PUBLIC KEY-----\n" +
       "MIGeMA0GCSqGSIb3DQEBAQUAA4GMADCBiAKBgHo6sGbw8qk+XU9sBVa4w2aEq01i\n" +

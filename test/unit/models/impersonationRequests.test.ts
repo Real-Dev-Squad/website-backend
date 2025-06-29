@@ -2,7 +2,7 @@ import { expect } from "chai";
 import cleanDb from "../../utils/cleanDb";
 import * as impersonationModel from "../../../models/impersonationRequests";
 import { impersonationRequestsBodyData } from "../../fixtures/impersonation-requests/impersonationRequests";
-import { REQUEST_STATE, ERROR_WHILE_CREATING_REQUEST, ERROR_WHILE_UPDATING_REQUEST } from "../../../constants/requests";
+import { REQUEST_STATE, ERROR_WHILE_CREATING_REQUEST, ERROR_WHILE_UPDATING_REQUEST, OPERATION_NOT_ALLOWED } from "../../../constants/requests";
 import addUser from "../../utils/addUser";
 import userDataFixture from "../../fixtures/user/user";
 import sinon from "sinon";
@@ -47,7 +47,7 @@ describe("models/impersonationRequests", () => {
       try {
         await impersonationModel.createImpersonationRequest(mockRequestBody);
       } catch (error) {
-        expect(error.message).to.include("You are not allowed for this Operation at the moment");
+        expect(error.message).to.include(OPERATION_NOT_ALLOWED);
       }
     });
 
@@ -78,7 +78,7 @@ describe("models/impersonationRequests", () => {
         await impersonationModel.createImpersonationRequest({ ...impersonationRequestsBodyData[0], status: REQUEST_STATE.APPROVED });
         await impersonationModel.createImpersonationRequest(impersonationRequestsBodyData[0]);
       } catch (error) {
-        expect(error.message).to.include("You are not allowed for this Operation at the moment");
+        expect(error.message).to.include(OPERATION_NOT_ALLOWED);
       }
     });
   });
