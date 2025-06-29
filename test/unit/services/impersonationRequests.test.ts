@@ -13,19 +13,29 @@ import {
   OPERATION_NOT_ALLOWED
 } from "../../../constants/requests";
 import userDataFixture from "../../fixtures/user/user";
-import cleanDb from "../../utils/cleanDb";
 import { impersonationRequestsBodyData } from "../../fixtures/impersonation-requests/impersonationRequests";
-import { CreateImpersonationRequestModelDto } from "../../../types/impersonationRequest";
+import { CreateImpersonationRequestModelDto, ImpersonationRequest } from "../../../types/impersonationRequest";
 import { Timestamp } from "firebase-admin/firestore";
 import addUser from "../../utils/addUser";
+import cleanDb from "../../utils/cleanDb";
+import config from "config";
+const authService = require("../../../services/authService");
 const userQuery = require("../../../models/users");
 const userData = userDataFixture();
 const logger = require("../../../utils/logger");
 
 describe("Tests Impersonation Requests Service", () => {
-  let mockRequestBody: CreateImpersonationRequestModelDto = impersonationRequestsBodyData[0];
+  const mockRequestBody: CreateImpersonationRequestModelDto = impersonationRequestsBodyData[0];
   let impersonationRequest;
   let testUserId;
+  const dummyImpersonationRequest:ImpersonationRequest = {
+      id: "123",
+      ...impersonationRequestsBodyData[2],
+      reason: "He asked",
+      userId: "testUserId",
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now()
+    }
 
   afterEach(async () => {
     await cleanDb();
@@ -35,6 +45,7 @@ describe("Tests Impersonation Requests Service", () => {
   describe("createImpersonationRequestService", () => {
     it("should return NotFound error with USER_NOT_FOUND if userId does not exist", async () => {
       sinon.stub(userQuery, "fetchUser").returns({ userExists: false });
+
       try {
         await impersonationService.createImpersonationRequestService({
           userId: "randomIs",
@@ -77,6 +88,7 @@ describe("Tests Impersonation Requests Service", () => {
 
     it("should throw error when createImpersonationRequestService fails", async () => {
       sinon.stub(userQuery, "fetchUser").throws(new Error("error"));
+
       try {
         await impersonationService.createImpersonationRequestService({
           userId: mockRequestBody.userId,
@@ -253,4 +265,166 @@ describe("Tests Impersonation Requests Service", () => {
       }
     });
   });
+
+  describe("startImpersonationService", () => {
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  it("should return 403 Forbidden if an unauthorized user tries to start the impersonation session", async () => {
+    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve(dummyImpersonationRequest));
+
+    try {
+      await impersonationService.startImpersonationService({ userId: "randomId", requestId: "123" });
+    } catch (err) {
+      expect(err).to.not.be.undefined;
+      expect(err.name).to.equal("ForbiddenError");
+      expect(err.message).to.equal("You are not allowed for this operation at the moment");
+    }
+  });
+
+  it("should return 403 Forbidden if a request has already been impersonated", async () => {
+    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve(dummyImpersonationRequest));
+
+    try {
+      await impersonationService.startImpersonationService({ userId: "randomId", requestId: "123" });
+    } catch (err) {
+      expect(err).to.not.be.undefined;
+      expect(err.name).to.equal("ForbiddenError");
+      expect(err.message).to.equal(OPERATION_NOT_ALLOWED);
+    }
+  });
+
+  it("should return 403 Forbidden if a request has not been APPROVED", async () => {
+    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve(dummyImpersonationRequest));
+
+    try {
+      await impersonationService.startImpersonationService({ userId: "randomId", requestId: "123" });
+    } catch (err) {
+      expect(err).to.not.be.undefined;
+      expect(err.name).to.equal("ForbiddenError");
+      expect(err.message).to.equal(OPERATION_NOT_ALLOWED);
+    }
+  });
+
+  it("should successfully update the request body with startedAt, endedAt and isImpersonation as true", async () => {
+    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve({...dummyImpersonationRequest,status:"APPROVED"}));
+
+    sinon.stub(impersonationModel, "updateImpersonationRequest").resolves({
+      id: "123",
+      lastModifiedBy: "testUserId",
+      startedAt: Timestamp.now(),
+      endedAt: Timestamp.now(),
+      isImpersonationFinished: true
+    });
+
+    const response = await impersonationService.startImpersonationService({ userId: "testUserId", requestId: "123" });
+    expect(response).to.not.be.null;
+    expect(response.updatedRequest.isImpersonationFinished).to.equal(true);
+    expect(response.updatedRequest.startedAt).to.not.be.null;
+    expect(response.updatedRequest.endedAt).to.not.be.null;
+  });
+
+  it("should throw 404 NotFound error if a request does not exist", async () => {
+    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve(null));
+
+    try {
+      await impersonationService.startImpersonationService({ userId: "randomId", requestId: "123" });
+    } catch (err) {
+      expect(err).to.not.be.undefined;
+      expect(err.name).to.equal("NotFoundError");
+      expect(err.message).to.equal(REQUEST_DOES_NOT_EXIST);
+    }
+  });
+});
+
+describe("stopImpersonationService", () => {
+  it("should throw 404 NotFound error if a request does not exist", async () => {
+    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve(null));
+
+    try {
+      await impersonationService.stopImpersonationService({ userId: "randomId", requestId: "123" });
+    } catch (err) {
+      expect(err).to.not.be.undefined;
+      expect(err.name).to.equal("NotFoundError");
+      expect(err.message).to.equal(REQUEST_DOES_NOT_EXIST);
+    }
+  });
+
+  it("should throw 403 Forbidden if an unauthorized user tries to stop impersonation", async () => {
+    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve(dummyImpersonationRequest));
+
+    try {
+      await impersonationService.stopImpersonationService({ userId: "randomId", requestId: "123" });
+    } catch (err) {
+      expect(err).to.not.be.undefined;
+      expect(err.name).to.equal("ForbiddenError");
+      expect(err.message).to.equal(OPERATION_NOT_ALLOWED);
+    }
+  });
+
+  it("should successfully update the request body with endedAt and lastModifiedBy", async () => {
+    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve({...dummyImpersonationRequest,status:"APPROVED",impersonatedUserId:"testUserId"}));
+
+    sinon.stub(impersonationModel, "updateImpersonationRequest").resolves({
+      id: "123",
+      lastModifiedBy: "testUserId",
+      endedAt: Timestamp.now()
+    });
+
+    const response = await impersonationService.stopImpersonationService({ userId: "testUserId", requestId: "123" });
+    expect(response).to.not.be.null;
+    expect(response.updatedRequest.lastModifiedBy).to.equal("testUserId");
+    expect(response.updatedRequest.endedAt).to.not.be.null;
+    expect(response.updatedRequest.id).to.equal("123");
+  });
+});
+
+describe("generateImpersonationTokenService", () => {
+  it("should return 404 NotFound if a request does not exist", async () => {
+    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve(null));
+
+    try {
+      await impersonationService.generateImpersonationTokenService("123", "START");
+    } catch (err) {
+      expect(err).to.not.be.undefined;
+      expect(err.name).to.equal("NotFoundError");
+      expect(err.message).to.equal(REQUEST_DOES_NOT_EXIST);
+    }
+  });
+
+  it("should generate jwt token for impersonation when the action is START", async () => {
+    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve(dummyImpersonationRequest));
+
+    sinon.stub(authService, "generateImpersonationAuthToken").resolves("mockToken123");
+
+    const response = await impersonationService.generateImpersonationTokenService("123", "START");
+
+    expect(response.name).to.equal(config.get("userToken.cookieName"));
+    expect(response.value).to.equal("mockToken123");
+  });
+
+  it("should generate jwt token for stopping impersonation when the action is STOP", async () => {
+    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve(dummyImpersonationRequest));
+
+    sinon.stub(authService, "generateAuthToken").resolves("mockToken123");
+
+    const response = await impersonationService.generateImpersonationTokenService("123", "STOP");
+
+    expect(response.name).to.equal(config.get("userToken.cookieName"));
+    expect(response.value).to.equal("mockToken123");
+  });
+
+  it("should return 403 Forbidden if invalid action type is passed", async () => {
+    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve(dummyImpersonationRequest));
+
+    try {
+      await impersonationService.generateImpersonationTokenService("123", "ACTIVE");
+    } catch (err) {
+      expect(err).to.not.be.undefined;
+      expect(err.name).to.equal("BadRequestError");
+      expect(err.message).to.equal("Invalid 'action' parameter: must be either 'START' or 'STOP'");
+    }
+  });
+ });
 });
