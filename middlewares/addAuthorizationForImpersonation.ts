@@ -5,10 +5,17 @@ import { ImpersonationRequestResponse, ImpersonationSessionRequest } from "../ty
 import { INVALID_ACTION_PARAM, OPERATION_NOT_ALLOWED } from "../constants/requests";
 
 /**
- * Middleware to authorize impersonation based on the 'action' query param.
- * - START → Requires SUPERUSER role.
- * - STOP → Allows without additional checks.
- * - Invalid or missing action → Responds with 400 Bad Request.
+ * Middleware to authorize impersonation actions based on the `action` query parameter.
+ *
+ * - If `action=START`: Only users with the SUPERUSER role are authorized.
+ * - If `action=STOP`: Only allowed if the user is currently impersonating someone (`req.isImpersonating === true`).
+ * - If `action` is missing or has an invalid value: Responds with 400 Bad Request.
+ *
+ * @param {ImpersonationSessionRequest} req - Express request object, extended to include impersonation context.
+ * @param {ImpersonationRequestResponse} res - Express response object with Boom error handling.
+ * @param {NextFunction} next - Express callback to pass control to the next middleware.
+ *
+ * @returns {void}
  */
 export const addAuthorizationForImpersonation = async (
   req: ImpersonationSessionRequest,
