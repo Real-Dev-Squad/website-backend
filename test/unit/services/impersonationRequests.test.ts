@@ -18,6 +18,7 @@ import { CreateImpersonationRequestModelDto, ImpersonationRequest } from "../../
 import { Timestamp } from "firebase-admin/firestore";
 import addUser from "../../utils/addUser";
 import cleanDb from "../../utils/cleanDb";
+import config from "config";
 const authService = require("../../../services/authService");
 const userQuery = require("../../../models/users");
 const userData = userDataFixture();
@@ -290,7 +291,7 @@ describe("Tests Impersonation Requests Service", () => {
     } catch (err) {
       expect(err).to.not.be.undefined;
       expect(err.name).to.equal("ForbiddenError");
-      expect(err.message).to.equal("You are not allowed for this operation at the moment");
+      expect(err.message).to.equal(OPERATION_NOT_ALLOWED);
     }
   });
 
@@ -302,12 +303,12 @@ describe("Tests Impersonation Requests Service", () => {
     } catch (err) {
       expect(err).to.not.be.undefined;
       expect(err.name).to.equal("ForbiddenError");
-      expect(err.message).to.equal("You are not allowed for this operation at the moment");
+      expect(err.message).to.equal(OPERATION_NOT_ALLOWED);
     }
   });
 
   it("should successfully update the request body with startedAt, endedAt and isImpersonation as true", async () => {
-    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve(dummyImpersonationRequest));
+    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve({...dummyImpersonationRequest,status:"APPROVED"}));
 
     sinon.stub(impersonationModel, "updateImpersonationRequest").resolves({
       id: "123",
@@ -318,7 +319,6 @@ describe("Tests Impersonation Requests Service", () => {
     });
 
     const response = await impersonationService.startImpersonationService({ userId: "testUserId", requestId: "123" });
-
     expect(response).to.not.be.null;
     expect(response.updatedRequest.isImpersonationFinished).to.equal(true);
     expect(response.updatedRequest.startedAt).to.not.be.null;
@@ -359,12 +359,12 @@ describe("stopImpersonationService", () => {
     } catch (err) {
       expect(err).to.not.be.undefined;
       expect(err.name).to.equal("ForbiddenError");
-      expect(err.message).to.equal("You are not authorized for this action");
+      expect(err.message).to.equal(OPERATION_NOT_ALLOWED);
     }
   });
 
   it("should successfully update the request body with endedAt and lastModifiedBy", async () => {
-    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve(dummyImpersonationRequest));
+    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve({...dummyImpersonationRequest,status:"APPROVED",impersonatedUserId:"testUserId"}));
 
     sinon.stub(impersonationModel, "updateImpersonationRequest").resolves({
       id: "123",
@@ -373,7 +373,6 @@ describe("stopImpersonationService", () => {
     });
 
     const response = await impersonationService.stopImpersonationService({ userId: "testUserId", requestId: "123" });
-
     expect(response).to.not.be.null;
     expect(response.updatedRequest.lastModifiedBy).to.equal("testUserId");
     expect(response.updatedRequest.endedAt).to.not.be.null;
@@ -423,8 +422,8 @@ describe("generateImpersonationTokenService", () => {
       await impersonationService.generateImpersonationTokenService("123", "ACTIVE");
     } catch (err) {
       expect(err).to.not.be.undefined;
-      expect(err.name).to.equal("ForbiddenError");
-      expect(err.message).to.equal("Action can be only START/STOP");
+      expect(err.name).to.equal("BadRequestError");
+      expect(err.message).to.equal("Invalid 'action' parameter: must be either 'START' or 'STOP'");
     }
   });
  });
