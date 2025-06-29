@@ -1,11 +1,11 @@
 import express from "express";
-import { createImpersonationRequestValidator, getImpersonationRequestByIdValidator, getImpersonationRequestsValidator, impersonationSessionValidator } from "../middlewares/validators/impersonationRequests";
+import { createImpersonationRequestValidator, getImpersonationRequestByIdValidator, getImpersonationRequestsValidator, updateImpersonationRequestValidator, impersonationSessionValidator } from "../middlewares/validators/impersonationRequests";
+import authenticate from "../middlewares/authenticate";
+import { createImpersonationRequestController, getImpersonationRequestByIdController, getImpersonationRequestsController, updateImpersonationRequestStatusController } from "../controllers/impersonationRequests";
+import { addAuthorizationForImpersonation } from "../middlewares/addAuthorizationForImpersonation";
 const router = express.Router();
 const authorizeRoles = require("../middlewares/authorizeRoles");
 const { SUPERUSER } = require("../constants/roles");
-import authenticate from "../middlewares/authenticate";
-import { createImpersonationRequestController, getImpersonationRequestByIdController, getImpersonationRequestsController, impersonationController } from "../controllers/impersonationRequests";
-import { addAuthorizationForImpersonation } from "../middlewares/addAuthorizationForImpersonation";
 
 router.post(
   "/requests",
@@ -27,6 +27,13 @@ router.get(
    authenticate,
    getImpersonationRequestByIdValidator,
    getImpersonationRequestByIdController
+);
+
+router.patch(
+  "/requests/:id",
+  authenticate,
+  updateImpersonationRequestValidator,
+  updateImpersonationRequestStatusController
 );
 
 router.patch(

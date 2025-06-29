@@ -1,6 +1,6 @@
 import joi from "joi";
 import { NextFunction } from "express";
-import { CreateImpersonationRequest,GetImpersonationControllerRequest,GetImpersonationRequestByIdRequest,ImpersonationRequestResponse, ImpersonationSessionRequest } from "../../types/impersonationRequest";
+import { CreateImpersonationRequest,GetImpersonationControllerRequest,GetImpersonationRequestByIdRequest,ImpersonationRequestResponse, UpdateImpersonationRequest, ImpersonationSessionRequest } from "../../types/impersonationRequest";
 import { REQUEST_STATE } from "../../constants/requests";
 const logger = require("../../utils/logger");
 
@@ -99,6 +99,37 @@ export const getImpersonationRequestByIdValidator = async (
     return res.boom.badRequest(errorMessages);
   }
 };
+
+
+
+export const updateImpersonationRequestValidator=async (
+    req:UpdateImpersonationRequest,
+    res:ImpersonationRequestResponse,
+    next:NextFunction
+)=>{
+  const schema = joi
+    .object()
+    .strict()
+    .keys({
+      status: joi
+        .string()
+        .valid(REQUEST_STATE.APPROVED, REQUEST_STATE.REJECTED)
+        .required()
+        .messages({
+          "any.only": "status must be APPROVED or REJECTED",
+        }),
+      message: joi.string().optional()
+    });
+  
+    try {
+      await schema.validateAsync(req.body, { abortEarly: false });
+      next();
+    } catch (error) {
+     const errorMessages = error.details.map((detail:{message: string}) => detail.message);
+     logger.error(`Error while validating request payload : ${errorMessages}`);
+     return res.boom.badRequest(errorMessages);
+    }
+}
 
 
 

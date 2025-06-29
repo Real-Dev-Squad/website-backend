@@ -58,7 +58,7 @@ export type UpdateImpersonationRequestStatusBody = {
 
 export type UpdateImpersonationRequestModelDto = {
     id: string;
-    updatingBody: UpdateImpersonationRequestDataBody | UpdateImpersonationRequestStatusBody;
+    updatePayload: UpdateImpersonationRequestDataBody | UpdateImpersonationRequestStatusBody;
     lastModifiedBy: string;
 }
 
