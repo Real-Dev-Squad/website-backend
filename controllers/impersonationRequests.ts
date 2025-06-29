@@ -4,9 +4,10 @@ import {
   REQUEST_FETCHED_SUCCESSFULLY,
   REQUEST_DOES_NOT_EXIST,
   ERROR_WHILE_UPDATING_REQUEST,
-  REQUEST_CREATED_SUCCESSFULLY
+  REQUEST_CREATED_SUCCESSFULLY,
+  OPERATION_NOT_ALLOWED
 } from "../constants/requests";
-import { createImpersonationRequestService, updateImpersonationRequestService } from "../services/impersonationRequests";
+import { createImpersonationRequestService, updateImpersonationRequestService, generateImpersonationTokenService, startImpersonationService, stopImpersonationService } from "../services/impersonationRequests";
 import { getImpersonationRequestById, getImpersonationRequests } from "../models/impersonationRequests";
 import {
   CreateImpersonationRequest,
@@ -16,6 +17,7 @@ import {
   ImpersonationRequestResponse,
   GetImpersonationControllerRequest,
   GetImpersonationRequestByIdRequest,
+  ImpersonationSessionRequest
 } from "../types/impersonationRequest";
 import { getPaginatedLink } from "../utils/helper";
 import { NextFunction } from "express";
@@ -178,5 +180,52 @@ export const updateImpersonationRequestStatusController = async (
   } catch (error) {
     logger.error(ERROR_WHILE_UPDATING_REQUEST, error);
     next(error);
+  }
+};
+
+
+
+/**
+ * Controller to handle impersonation session actions (START or STOP).
+ *
+ * @param {ImpersonationSessionRequest} req - Express request object containing user data, query params, and impersonation flag.
+ * @param {ImpersonationRequestResponse} res - Express response object used to send the response.
+ * @param {NextFunction} next - Express next middleware function for error handling.
+ * @returns {Promise<ImpersonationRequestResponse>} Sends a JSON response with updated request data and sets authentication cookies based on action.
+ *
+ * @throws {Forbidden} If the action is invalid or STOP is requested without an active impersonation session.
+ */
+export const impersonationController = async (
+  req: ImpersonationSessionRequest,
+  res: ImpersonationRequestResponse,
+  next: NextFunction
+): Promise<ImpersonationRequestResponse | void> => {
+  const { action } = req.query;
+  const requestId = req.params.id;
+  const userId = req.userData?.id;
+  let authCookie;
+  let response;
+  try {
+
+    if (action === "START") {
+      authCookie = await generateImpersonationTokenService(requestId, action);
+      response = await startImpersonationService({ requestId, userId });
+    }
+
+    if (action === "STOP") {
+      authCookie = await generateImpersonationTokenService(requestId, action);
+      response = await stopImpersonationService({ requestId, userId });
+    }
+
+    res.clearCookie(authCookie.name);
+    res.cookie(authCookie.name, authCookie.value, authCookie.options);
+
+    return res.status(200).json({
+      message: response.returnMessage,
+      data: response.updatedRequest
+    });
+  } catch (error) {
+    logger.error(`Failed to process impersonation ${action} for requestId=${requestId}, userId=${userId}`, error);
+    return next(error);
   }
 };

@@ -1,6 +1,6 @@
 import joi from "joi";
 import { NextFunction } from "express";
-import { CreateImpersonationRequest,GetImpersonationControllerRequest,GetImpersonationRequestByIdRequest,ImpersonationRequestResponse, UpdateImpersonationRequest } from "../../types/impersonationRequest";
+import { CreateImpersonationRequest,GetImpersonationControllerRequest,GetImpersonationRequestByIdRequest,ImpersonationRequestResponse, UpdateImpersonationRequest, ImpersonationSessionRequest } from "../../types/impersonationRequest";
 import { REQUEST_STATE } from "../../constants/requests";
 const logger = require("../../utils/logger");
 
@@ -130,3 +130,42 @@ export const updateImpersonationRequestValidator=async (
      return res.boom.badRequest(errorMessages);
     }
 }
+
+
+
+/**
+ * Middleware to validate query parameters for impersonation session actions.
+ *
+ * @param {ImpersonationSessionRequest} req - Express request object containing query params
+ * @param {ImpersonationRequestResponse} res - Express response object used to send validation errors
+ * @param {NextFunction} next - Express next middleware function
+ * @returns {Promise<void>} - Resolves if validation succeeds, otherwise sends an error response
+ */
+export const impersonationSessionValidator = async (
+  req: ImpersonationSessionRequest,
+  res: ImpersonationRequestResponse,
+  next: NextFunction
+): Promise<void> => {
+  const querySchema = joi
+    .object()
+    .strict()
+    .keys({
+      action: joi
+        .string()
+        .valid("START", "STOP")
+        .required()
+        .messages({
+          "any.only": "action must be START or STOP",
+        }),
+      dev: joi.string().optional(),
+    });
+
+  try {
+    await querySchema.validateAsync(req.query, { abortEarly: false });
+    next();
+  } catch (error) {
+    const errorMessages = error.details.map((detail: { message: string }) => detail.message);
+    logger.error(`Error while validating request payload: ${errorMessages}`);
+    return res.boom.badRequest(errorMessages);
+  }
+};

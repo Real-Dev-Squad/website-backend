@@ -8,8 +8,9 @@ import {
   REQUEST_DOES_NOT_EXIST,
   REQUEST_REJECTED_SUCCESSFULLY,
   REQUEST_STATE,
- TASK_REQUEST_MESSAGES,
-  ERROR_WHILE_UPDATING_REQUEST
+  TASK_REQUEST_MESSAGES,
+  ERROR_WHILE_UPDATING_REQUEST,
+  OPERATION_NOT_ALLOWED
 } from "../../../constants/requests";
 import userDataFixture from "../../fixtures/user/user";
 import { impersonationRequestsBodyData } from "../../fixtures/impersonation-requests/impersonationRequests";
@@ -155,7 +156,7 @@ describe("Tests Impersonation Requests Service", () => {
       } catch (err) {
         expect(err).to.not.be.undefined;
         expect(err.name).to.equal("ForbiddenError");
-        expect(err.message).to.equal("You are not allowed for this Operation at the moment");
+        expect(err.message).to.equal(OPERATION_NOT_ALLOWED);
       }
     });
 
@@ -178,7 +179,7 @@ describe("Tests Impersonation Requests Service", () => {
       } catch (err) {
         expect(err).to.not.be.undefined;
         expect(err.name).to.equal("ForbiddenError");
-        expect(err.message).to.equal("You are not allowed for this Operation at the moment");
+        expect(err.message).to.equal(OPERATION_NOT_ALLOWED);
       }
     });
 
@@ -212,7 +213,7 @@ describe("Tests Impersonation Requests Service", () => {
       } catch (err) {
         expect(err).to.not.be.undefined;
         expect(err.name).to.equal("ForbiddenError");
-        expect(err.message).to.equal("You are not allowed for this Operation at the moment");
+        expect(err.message).to.equal(OPERATION_NOT_ALLOWED);
       }
     });
 
