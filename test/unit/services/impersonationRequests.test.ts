@@ -6,7 +6,7 @@ import * as logService from "../../../services/logService";
 import { REQUEST_DOES_NOT_EXIST, TASK_REQUEST_MESSAGES } from "../../../constants/requests";
 import userDataFixture from "../../fixtures/user/user";
 import { impersonationRequestsBodyData } from "../../fixtures/impersonation-requests/impersonationRequests";
-import { CreateImpersonationRequestModelDto } from "../../../types/impersonationRequest";
+import { CreateImpersonationRequestModelDto, ImpersonationRequest } from "../../../types/impersonationRequest";
 import { Timestamp } from "firebase-admin/firestore";
 const authService = require("../../../services/authService");
 const userQuery = require("../../../models/users");
@@ -14,6 +14,14 @@ const userQuery = require("../../../models/users");
 describe("Tests Impersonation Requests Service", () => {
   const mockRequestBody: CreateImpersonationRequestModelDto = impersonationRequestsBodyData[0];
   const userData = userDataFixture();
+  const dummyImpersonationRequest:ImpersonationRequest = {
+      id: "123",
+      ...impersonationRequestsBodyData[2],
+      reason: "He asked",
+      userId: "testUserId",
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now()
+    }
 
   afterEach(() => {
     sinon.restore();
@@ -84,14 +92,7 @@ describe("startImpersonationService", () => {
   });
 
   it("should return 403 Forbidden if an unauthorized user tries to start the impersonation session", async () => {
-    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve({
-      id: "123",
-      ...impersonationRequestsBodyData[2],
-      reason: "He asked",
-      userId: "testUserId",
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now()
-    }));
+    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve(dummyImpersonationRequest));
 
     try {
       await impersonationService.startImpersonationService({ userId: "randomId", requestId: "123" });
@@ -103,16 +104,7 @@ describe("startImpersonationService", () => {
   });
 
   it("should return 403 Forbidden if a request has already been impersonated", async () => {
-    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve({
-      id: "123",
-      ...impersonationRequestsBodyData[2],
-      reason: "He asked",
-      userId: "testUserId",
-      isImpersonationFinished: true,
-      status: "APPROVED",
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now()
-    }));
+    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve(dummyImpersonationRequest));
 
     try {
       await impersonationService.startImpersonationService({ userId: "randomId", requestId: "123" });
@@ -124,16 +116,7 @@ describe("startImpersonationService", () => {
   });
 
   it("should return 403 Forbidden if a request has not been APPROVED", async () => {
-    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve({
-      id: "123",
-      ...impersonationRequestsBodyData[2],
-      reason: "He asked",
-      userId: "testUserId",
-      isImpersonationFinished: false,
-      status: "REJECTED",
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now()
-    }));
+    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve(dummyImpersonationRequest));
 
     try {
       await impersonationService.startImpersonationService({ userId: "randomId", requestId: "123" });
@@ -145,15 +128,7 @@ describe("startImpersonationService", () => {
   });
 
   it("should successfully update the request body with startedAt, endedAt and isImpersonation as true", async () => {
-    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve({
-      id: "123",
-      ...impersonationRequestsBodyData[2],
-      reason: "He asked",
-      userId: "testUserId",
-      status: "APPROVED",
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now()
-    }));
+    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve(dummyImpersonationRequest));
 
     sinon.stub(impersonationModel, "updateImpersonationRequest").resolves({
       id: "123",
@@ -198,14 +173,7 @@ describe("stopImpersonationService", () => {
   });
 
   it("should throw 403 Forbidden if an unauthorized user tries to stop impersonation", async () => {
-    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve({
-      id: "123",
-      ...impersonationRequestsBodyData[2],
-      reason: "He asked",
-      userId: "testUserId",
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now()
-    }));
+    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve(dummyImpersonationRequest));
 
     try {
       await impersonationService.stopImpersonationService({ userId: "randomId", requestId: "123" });
@@ -217,14 +185,7 @@ describe("stopImpersonationService", () => {
   });
 
   it("should successfully update the request body with endedAt and lastModifiedBy", async () => {
-    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve({
-      id: "123",
-      ...impersonationRequestsBodyData[2],
-      reason: "He asked",
-      impersonatedUserId: "testUserId",
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now()
-    }));
+    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve(dummyImpersonationRequest));
 
     sinon.stub(impersonationModel, "updateImpersonationRequest").resolves({
       id: "123",
@@ -254,16 +215,8 @@ describe("generateImpersonationTokenService", () => {
     }
   });
 
-  it("should generate a jwt token when the action is START", async () => {
-    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve({
-      id: "123",
-      ...impersonationRequestsBodyData[2],
-      reason: "He asked",
-      userId: "testUserId",
-      impersonatedUserId: "testUserId2",
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now()
-    }));
+  it("should generate jwt token for impersonation when the action is START", async () => {
+    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve(dummyImpersonationRequest));
 
     sinon.stub(authService, "generateImpersonationAuthToken").resolves("mockToken123");
 
@@ -273,16 +226,8 @@ describe("generateImpersonationTokenService", () => {
     expect(response.value).to.equal("mockToken123");
   });
 
-  it("should generate a jwt token when the action is STOP", async () => {
-    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve({
-      id: "123",
-      ...impersonationRequestsBodyData[2],
-      reason: "He asked",
-      userId: "testUserId",
-      impersonatedUserId: "testUserId2",
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now()
-    }));
+  it("should generate jwt token for stopping impersonation when the action is STOP", async () => {
+    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve(dummyImpersonationRequest));
 
     sinon.stub(authService, "generateAuthToken").resolves("mockToken123");
 
@@ -292,15 +237,8 @@ describe("generateImpersonationTokenService", () => {
     expect(response.value).to.equal("mockToken123");
   });
 
-  it("should return 403 Forbidden if action is neither START nor STOP", async () => {
-    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve({
-      id: "123",
-      ...impersonationRequestsBodyData[2],
-      reason: "He asked",
-      userId: "testUserId",
-      createdAt: Timestamp.now(),
-      updatedAt: Timestamp.now()
-    }));
+  it("should return 403 Forbidden if invalid action type is passed", async () => {
+    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve(dummyImpersonationRequest));
 
     try {
       await impersonationService.generateImpersonationTokenService("123", "ACTIVE");

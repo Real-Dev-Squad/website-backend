@@ -146,7 +146,7 @@ describe("Authentication Middleware", function () {
       expect(res.boom.forbidden.notCalled).to.equal(true);
     });
 
-    it("should forbid write requests during impersonation (non-STOP)", async function () {
+    it("should retirct all write/update type requests during impersonation", async function () {
       req.method = "POST";
       req.baseUrl = "/impersonation";
       req.path = "/abc123";

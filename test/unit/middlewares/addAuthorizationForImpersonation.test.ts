@@ -1,8 +1,9 @@
 import { expect } from "chai";
 import sinon from "sinon";
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Response } from "express";
 import { addAuthorizationForImpersonation } from "../../../middlewares/addAuthorizationForImpersonation";
 import { ImpersonationRequestResponse, ImpersonationSessionRequest } from "../../../types/impersonationRequest";
+import { INVALID_ACTION_PARAM, OPERATION_NOT_ALLOWED } from "../../../constants/requests";
 
 describe("addAuthorizationForImpersonation", () => {
   let req;
@@ -10,14 +11,19 @@ describe("addAuthorizationForImpersonation", () => {
     boom: {
       badRequest: sinon.SinonSpy;
       unauthorized: sinon.SinonSpy;
+      forbidden: sinon.SinonSpy;
       badImplementation: sinon.SinonSpy;
     };
   };
   let next: sinon.SinonSpy;
   let boomBadRequest: sinon.SinonSpy;
+  let boomForbidden: sinon.SinonSpy;
+  let boomUnauthorized: sinon.SinonSpy;
 
   beforeEach(() => {
     boomBadRequest = sinon.spy();
+    boomForbidden = sinon.spy();
+    boomUnauthorized = sinon.spy();
 
     req = {
       query: {},
@@ -32,14 +38,15 @@ describe("addAuthorizationForImpersonation", () => {
       boom: {
         badRequest: boomBadRequest,
         badImplementation: sinon.spy(),
-        unauthorized: sinon.spy(),
+        forbidden: boomForbidden,
+        unauthorized: boomUnauthorized,
       },
     };
 
     next = sinon.spy();
   });
 
-  it("should call next when user has SUPERUSER role and action is START", () => {
+  it("should call next when user has super_user role and action is START", () => {
     req.query = { action: "START" };
 
     addAuthorizationForImpersonation(
@@ -52,7 +59,7 @@ describe("addAuthorizationForImpersonation", () => {
     expect(boomBadRequest.notCalled).to.be.true;
   });
 
-  it("should not call next if user lacks SUPERUSER role", () => {
+  it("should not call next if user doesn't have super_user role", () => {
     req.query = { action: "START" };
     req.userData = { roles: {} };
 
@@ -62,12 +69,13 @@ describe("addAuthorizationForImpersonation", () => {
       next
     );
 
-    expect(res.boom.unauthorized.calledOnce).to.be.true;
+    expect(boomUnauthorized.calledOnce).to.be.true;
     expect(next.notCalled).to.be.true;
   });
 
-  it("should call next directly for action=END", () => {
-    req.query = { action: "END" };
+  it("should call next directly for action=STOP if an impersonation session is in progress", () => {
+    req.query = { action: "STOP" };
+    req.isImpersonating = true;
 
     addAuthorizationForImpersonation(
       req as ImpersonationSessionRequest,
@@ -76,6 +84,20 @@ describe("addAuthorizationForImpersonation", () => {
     );
 
     expect(next.calledOnce).to.be.true;
+  });
+
+  it("should return 403 Forbidden if action=STOP and an impersonation session is not in progress", () => {
+    req.query = { action: "STOP" };
+    req.isImpersonating = false;
+
+    addAuthorizationForImpersonation(
+      req as ImpersonationSessionRequest,
+      res as ImpersonationRequestResponse,
+      next
+    );
+
+    expect(boomForbidden.calledOnce).to.be.true;
+    expect(next.notCalled).to.be.true;
   });
 
   it("should call badRequest for invalid action", () => {
@@ -88,7 +110,7 @@ describe("addAuthorizationForImpersonation", () => {
     );
 
     expect(boomBadRequest.calledOnce).to.be.true;
-    expect(boomBadRequest.firstCall.args[0]).to.equal("Invalid or missing action");
+    expect(boomBadRequest.firstCall.args[0]).to.equal(INVALID_ACTION_PARAM);
     expect(next.notCalled).to.be.true;
   });
 
@@ -102,7 +124,7 @@ describe("addAuthorizationForImpersonation", () => {
     );
 
     expect(boomBadRequest.calledOnce).to.be.true;
-    expect(boomBadRequest.firstCall.args[0]).to.equal("Invalid or missing action");
+    expect(boomBadRequest.firstCall.args[0]).to.equal(INVALID_ACTION_PARAM);
     expect(next.notCalled).to.be.true;
   });
 });
