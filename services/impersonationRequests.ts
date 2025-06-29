@@ -104,7 +104,7 @@ export const updateImpersonationRequestService = async (
     }
 
     if (request.impersonatedUserId !== body.lastModifiedBy || request.status !== REQUEST_STATE.PENDING) {
-      throw new Forbidden("You are not allowed for this Operation at the moment");
+      throw new Forbidden(OPERATION_NOT_ALLOWED);
     }
     
     const updatedRequest = await updateImpersonationRequest(body) as UpdateImpersonationStatusModelResponse;

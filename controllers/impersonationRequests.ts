@@ -199,7 +199,7 @@ export const impersonationController = async (
   req: ImpersonationSessionRequest,
   res: ImpersonationRequestResponse,
   next: NextFunction
-): Promise<ImpersonationRequestResponse> => {
+): Promise<ImpersonationRequestResponse | void> => {
   const { action } = req.query;
   const requestId = req.params.id;
   const userId = req.userData?.id;
@@ -226,6 +226,6 @@ export const impersonationController = async (
     });
   } catch (error) {
     logger.error(`Failed to process impersonation ${action} for requestId=${requestId}, userId=${userId}`, error);
-    next(error);
+    return next(error);
   }
 };
