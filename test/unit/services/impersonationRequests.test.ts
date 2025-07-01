@@ -49,7 +49,6 @@ describe("Tests Impersonation Requests Service", () => {
       try {
         await impersonationService.createImpersonationRequestService({
           userId: "randomIs",
-          createdBy: "randomName",
           impersonatedUserId: "randomImpersonatedId",
           reason: "He asked",
         });
@@ -74,13 +73,11 @@ describe("Tests Impersonation Requests Service", () => {
 
       const response = await impersonationService.createImpersonationRequestService({
         userId: mockRequestBody.userId,
-        createdBy: mockRequestBody.createdBy,
         impersonatedUserId: userData[20].id,
         reason: mockRequestBody.reason,
       });
 
       expect(response).to.not.be.null;
-      expect(response.createdBy).to.equal(mockRequestBody.createdBy);
       expect(response.id).to.not.be.null;
       expect(response.userId).to.equal(mockRequestBody.userId);
       expect(response.impersonatedUserId).to.equal(userData[20].id);
@@ -92,7 +89,6 @@ describe("Tests Impersonation Requests Service", () => {
       try {
         await impersonationService.createImpersonationRequestService({
           userId: mockRequestBody.userId,
-          createdBy: mockRequestBody.createdBy,
           impersonatedUserId: "112",
           reason: mockRequestBody.reason,
         });

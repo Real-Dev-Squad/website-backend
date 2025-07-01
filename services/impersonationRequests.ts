@@ -41,20 +41,17 @@ export const createImpersonationRequestService = async (
   body: CreateImpersonationRequestServiceBody
 ): Promise<ImpersonationRequest> => {
   try {
-    const { userExists, user: impersonatedUser } = await fetchUser({ userId: body.impersonatedUserId });
+    const { userExists } = await fetchUser({ userId: body.impersonatedUserId });
     if (!userExists) {
       throw new NotFound(TASK_REQUEST_MESSAGES.USER_NOT_FOUND);
     }
 
-    const { username: createdFor } = impersonatedUser as User;
 
     const impersonationRequest = await createImpersonationRequest({
       status: REQUEST_STATE.PENDING,
       userId: body.userId,
       impersonatedUserId: body.impersonatedUserId,
       isImpersonationFinished: false,
-      createdBy: body.createdBy,
-      createdFor: createdFor,
       reason: body.reason,
     });
 

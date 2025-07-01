@@ -110,13 +110,13 @@ export const getImpersonationRequests = async (
     let requestQuery: Query<ImpersonationRequest> = impersonationRequestModel as CollectionReference<ImpersonationRequest>;
 
     if (createdBy) {
-      requestQuery = requestQuery.where("createdBy", "==", createdBy);
+      requestQuery = requestQuery.where("userId", "==", createdBy);
     }
     if (status) {
       requestQuery = requestQuery.where("status", "==", status);
     }
     if (createdFor) {
-      requestQuery = requestQuery.where("createdFor", "==", createdFor);
+      requestQuery = requestQuery.where("impersonatedUserId", "==", createdFor);
     }
 
     requestQuery = requestQuery.orderBy("createdAt", "desc");

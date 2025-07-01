@@ -35,9 +35,8 @@ describe("models/impersonationRequests", () => {
       impersonationRequest = await impersonationModel.createImpersonationRequest(mockRequestBody);
       expect(impersonationRequest).to.have.property("id");
       expect(impersonationRequest).to.include({
-        createdBy: mockRequestBody.createdBy,
         impersonatedUserId: mockRequestBody.impersonatedUserId,
-        createdFor: mockRequestBody.createdFor,
+        userId: mockRequestBody.userId,
         status: REQUEST_STATE.PENDING,
       });
     });
@@ -52,13 +51,13 @@ describe("models/impersonationRequests", () => {
     });
 
     it("should allow different super users to create requests for same user", async () => {
-      const request1 = await impersonationModel.createImpersonationRequest({ ...impersonationRequestsBodyData[0], createdBy: "user1" });
-      const request2 = await impersonationModel.createImpersonationRequest({ ...impersonationRequestsBodyData[0], createdBy: "user2", userId: "122" });
+      const request1 = await impersonationModel.createImpersonationRequest({ ...impersonationRequestsBodyData[0], userId: "121" });
+      const request2 = await impersonationModel.createImpersonationRequest({ ...impersonationRequestsBodyData[0], userId: "122" });
       expect(request1).to.have.property("id");
-      expect(request1.createdBy).to.equal("user1");
+      expect(request1.userId).to.equal("121");
       expect(request1.impersonatedUserId).to.equal(impersonationRequestsBodyData[0].impersonatedUserId);
       expect(request2).to.have.property("id");
-      expect(request2.createdBy).to.equal("user2");
+      expect(request2.userId).to.equal("122");
       expect(request2.impersonatedUserId).to.equal(impersonationRequestsBodyData[0].impersonatedUserId);
     });
 
@@ -153,10 +152,10 @@ describe("models/impersonationRequests", () => {
     });
 
     it("should filter requests by createdBy", async () => {
-      const query = { createdBy: impersonationRequests[0].createdBy };
+      const query = { createdBy: impersonationRequests[0].userId };
       const result = await impersonationModel.getImpersonationRequests(query);
       expect(result.allRequests.length).to.be.equal(1);
-      expect(result.allRequests.every(r => r.createdBy === impersonationRequests[0].createdBy)).to.be.true;
+      expect(result.allRequests.every(r => r.userId === impersonationRequests[0].userId)).to.be.true;
     });
 
     it("should return requests by size", async () => {
@@ -166,10 +165,10 @@ describe("models/impersonationRequests", () => {
     });
 
     it("should filter requests by createdFor", async () => {
-      const query = { createdFor: impersonationRequests[0].createdFor };
+      const query = { createdFor: impersonationRequests[0].impersonatedUserId };
       const result = await impersonationModel.getImpersonationRequests(query);
       expect(result.allRequests.length).to.be.equal(1);
-      expect(result.allRequests.every(r => r.createdFor === impersonationRequests[0].createdFor)).to.be.true;
+      expect(result.allRequests.every(r => r.impersonatedUserId === impersonationRequests[0].impersonatedUserId)).to.be.true;
     });
 
 

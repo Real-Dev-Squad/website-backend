@@ -9,8 +9,6 @@ export type ImpersonationRequest = {
     id: string;
     status: REQUEST_STATE;
     isImpersonationFinished: boolean;
-    createdBy: string;
-    createdFor: string;
     userId: string;
     reason: string;
     message?: string;
@@ -29,8 +27,6 @@ export type CreateImpersonationRequestBody = {
 export type CreateImpersonationRequestModelDto = {
     status: REQUEST_STATE;
     isImpersonationFinished: boolean;
-    createdBy: string;
-    createdFor: string;
     userId: string;
     reason: string;
     impersonatedUserId: string;
@@ -118,7 +114,6 @@ export type GetImpersonationControllerRequest = Request & {
 
 export type CreateImpersonationRequestServiceBody={
    userId: string;
-   createdBy: string;
    impersonatedUserId: string;
    reason: string;
 }

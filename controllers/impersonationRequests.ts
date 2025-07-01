@@ -39,11 +39,9 @@ export const createImpersonationRequestController = async (
   try {
     const { impersonatedUserId, reason } = req.body as CreateImpersonationRequestBody;
     const userId = req.userData?.id;
-    const createdBy = req.userData?.username;
 
     const impersonationRequest = await createImpersonationRequestService({
       userId,
-      createdBy,
       impersonatedUserId,
       reason
     });

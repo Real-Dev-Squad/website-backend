@@ -76,16 +76,12 @@ describe("Impersonation Requests", () => {
     unapprovedImpersonationRequest = await impersonationModel.createImpersonationRequest({
       ...impersonationRequestsBodyData[0],
       impersonatedUserId: testUserId2,
-      createdFor: userData[19].username,
       userId: testSuperUserId,
-      createdBy: userData[4].username
     });
 
     approvedImpersonationRequest = await impersonationModel.createImpersonationRequest({
       ...impersonationRequestsBodyData[0],
       impersonatedUserId: testUserId3,
-      createdFor: userData[12].username,
-      createdBy: userData[4].username,
       userId: testSuperUserId,
       status: REQUEST_STATE.APPROVED
     });
@@ -300,19 +296,15 @@ describe("Impersonation Requests", () => {
       await impersonationModel.createImpersonationRequest({
         ...impersonationRequestsBodyData[3],
         impersonatedUserId: testUserId4,
-        createdFor: userData[0].username,
         userId: testSuperUserId,
         status: REQUEST_STATE.REJECTED,
-        createdBy: userData[4].username
       });
 
       await impersonationModel.createImpersonationRequest({
         ...impersonationRequestsBodyData[4],
         impersonatedUserId: testUserId5,
-        createdFor: userData[1].username,
         userId: testSuperUserId,
-        status: REQUEST_STATE.REJECTED,
-        createdBy: userData[4].username
+        status: REQUEST_STATE.REJECTED
       });
     });
 
@@ -353,7 +345,7 @@ describe("Impersonation Requests", () => {
           expect(res.body.data).to.be.an("array");
           expect(res.body.data.length).to.be.equal(4);
           expect(res.body.data[0]).to.include.all.keys(
-            "id", "createdBy", "userId", "impersonatedUserId", "createdFor"
+            "id", "userId", "impersonatedUserId"
           );
           done();
         });
@@ -363,14 +355,13 @@ describe("Impersonation Requests", () => {
     it("should return all requests created by a specific user", function (done) {
       chai
         .request(app)
-        .get(`${requestsEndpoint}&createdBy=${userData[4].username}`)
+        .get(`${requestsEndpoint}&createdBy=${testSuperUserId}`)
         .set("cookie", `${cookieName}=${authToken}`)
         .end(function (err, res) {
           if (err) return done(err);
           expect(res).to.have.status(200);
           expect(res.body.data).to.be.an("array");
           expect(res.body.data.every((r) => r.userId === testSuperUserId)).to.be.true;
-          expect(res.body.data.every((r)=>r.createdBy === userData[4].username)).to.be.true;
           done();
         });
     });
@@ -378,13 +369,13 @@ describe("Impersonation Requests", () => {
     it("should return all requests created for a specific user", function (done) {
       chai
         .request(app)
-        .get(`${requestsEndpoint}&createdFor=${userData[19].username}`)
+        .get(`${requestsEndpoint}&createdFor=${testUserId2}`)
         .set("cookie", `${cookieName}=${authToken}`)
         .end(function (err, res) {
           if (err) return done(err);
           expect(res).to.have.status(200);
           expect(res.body.data).to.be.an("array");
-          expect(res.body.data.every((r) => r.createdFor === userData[19].username)).to.be.true;
+          expect(res.body.data.every((r) => r.impersonatedUserId === testUserId2)).to.be.true;
           expect(res.body.data.length).to.equal(1);
           done();
         });
@@ -601,14 +592,12 @@ describe("Impersonation Requests", () => {
       approvedImpersonationRequest = await impersonationModel.createImpersonationRequest({
         ...impersonationRequestsBodyData[0],
         impersonatedUserId: testUserId1,
-        createdBy: userData[16].username,
         status: REQUEST_STATE.APPROVED
       });
 
       unapprovedImpersonationRequest = await impersonationModel.createImpersonationRequest({
         ...impersonationRequestsBodyData[1],
         impersonatedUserId: testUserId3,
-        createdFor: userData[12].username
       });
 
       unapprovedImpersonationRequest2 = await impersonationModel.createImpersonationRequest({
@@ -827,11 +816,9 @@ describe("Impersonation Requests", () => {
     finishedImpersonationRequest = await impersonationModel.createImpersonationRequest({
       ...impersonationRequestsBodyData[0],
       impersonatedUserId: testUserId4,
-      createdFor: userData[0].username,
       userId: testSuperUserId,
       status: "APPROVED",
       isImpersonationFinished: true,
-      createdBy: userData[4].username,
     });
   });
 
