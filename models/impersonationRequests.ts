@@ -31,8 +31,8 @@ export const createImpersonationRequest = async (
 ): Promise<ImpersonationRequest> => {
   try {
     const reqQuery = impersonationRequestModel
-      .where("impersonatedUserId", "==", body.impersonatedUserId)
-      .where("userId", "==", body.userId)
+      .where("createdFor", "==", body.createdFor)
+      .where("createdBy", "==", body.createdBy)
       .where("status", "in", ["APPROVED", "PENDING"])
       .where("isImpersonationFinished", "==", false).orderBy("createdAt", "desc").limit(1);
 
@@ -110,13 +110,13 @@ export const getImpersonationRequests = async (
     let requestQuery: Query<ImpersonationRequest> = impersonationRequestModel as CollectionReference<ImpersonationRequest>;
 
     if (createdBy) {
-      requestQuery = requestQuery.where("userId", "==", createdBy);
+      requestQuery = requestQuery.where("createdBy", "==", createdBy);
     }
     if (status) {
       requestQuery = requestQuery.where("status", "==", status);
     }
     if (createdFor) {
-      requestQuery = requestQuery.where("impersonatedUserId", "==", createdFor);
+      requestQuery = requestQuery.where("createdFor", "==", createdFor);
     }
 
     requestQuery = requestQuery.orderBy("createdAt", "desc");

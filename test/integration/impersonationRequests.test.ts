@@ -1,4 +1,4 @@
-import chai from "chai";
+import chai, { use } from "chai";
 import chaiHttp from "chai-http";
 import _ from "lodash";
 import config from "config";
@@ -23,6 +23,7 @@ import {
   OPERATION_NOT_ALLOWED
  } from "../../constants/requests";
 import { impersonationRequestsBodyData } from "../fixtures/impersonation-requests/impersonationRequests";
+import user from "../fixtures/user/user";
 
 const { expect } = chai;
 chai.use(chaiHttp);
@@ -69,20 +70,20 @@ describe("Impersonation Requests", () => {
     ] = await Promise.all(userIdPromises);
 
     impersonationRequestBody = {
-      impersonatedUserId: testUserId1,
+      createdFor: testUserId1,
       reason: "User assistance required for account debugging."
     };
 
     unapprovedImpersonationRequest = await impersonationModel.createImpersonationRequest({
       ...impersonationRequestsBodyData[0],
-      impersonatedUserId: testUserId2,
-      userId: testSuperUserId,
+      createdFor: testUserId2,
+      createdBy: testSuperUserId,
     });
 
     approvedImpersonationRequest = await impersonationModel.createImpersonationRequest({
       ...impersonationRequestsBodyData[0],
-      impersonatedUserId: testUserId3,
-      userId: testSuperUserId,
+      createdFor: testUserId3,
+      createdBy: testSuperUserId,
       status: REQUEST_STATE.APPROVED
     });
 
@@ -184,17 +185,17 @@ describe("Impersonation Requests", () => {
         });
     });
 
-    it("should return 400 if impersonatedUserId is not provided", function (done) {
+    it("should return 400 if createdFor is not provided", function (done) {
       chai
         .request(app)
         .post(requestsEndpoint)
         .set("cookie", `${cookieName}=${superUserToken}`)
-        .send(_.omit(impersonationRequestBody, "impersonatedUserId"))
+        .send(_.omit(impersonationRequestBody, "createdFor"))
         .end(function (err, res) {
           if (err) return done(err);
           expect(res).to.have.status(400);
           expect(res.body.error).to.equal("Bad Request");
-          expect(res.body.message).to.equal("impersonatedUserId is required");
+          expect(res.body.message).to.equal("createdFor is required");
           done();
         });
     });
@@ -219,7 +220,7 @@ describe("Impersonation Requests", () => {
         .request(app)
         .post(requestsEndpoint)
         .set("cookie", `${cookieName}=${superUserToken}`)
-        .send({ ...impersonationRequestBody, impersonatedUserId: "nonexistentUserId" })
+        .send({ ...impersonationRequestBody, createdFor: "nonexistentUserId" })
         .end(function (err, res) {
           if (err) return done(err);
           expect(res).to.have.status(404);
@@ -234,7 +235,7 @@ describe("Impersonation Requests", () => {
         .request(app)
         .post(requestsEndpoint)
         .set("cookie", `${cookieName}=${superUserToken}`)
-        .send({ ...impersonationRequestBody, impersonatedUserId: testUserId3 })
+        .send({ ...impersonationRequestBody, createdFor: testUserId3 })
         .end(function (err, res) {
           if (err) return done(err);
           expect(res).to.have.status(403);
@@ -249,7 +250,7 @@ describe("Impersonation Requests", () => {
         .request(app)
         .post(requestsEndpoint)
         .set("cookie", `${cookieName}=${superUserToken}`)
-        .send({ ...impersonationRequestBody, impersonatedUserId: testUserId2 })
+        .send({ ...impersonationRequestBody, createdFor: testUserId2 })
         .end(function (err, res) {
           if (err) return done(err);
           expect(res).to.have.status(403);
@@ -281,7 +282,7 @@ describe("Impersonation Requests", () => {
         .request(app)
         .post(requestsEndpoint)
         .set("cookie", `${cookieName}=${superUserToken}`)
-        .send({ ...impersonationRequestBody, impersonatedUserId: testUserId3 })
+        .send({ ...impersonationRequestBody, createdFor: testUserId3 })
         .end(function (err, res) {
           if (err) return done(err);
           expect(res).to.have.status(500);
@@ -295,15 +296,15 @@ describe("Impersonation Requests", () => {
     beforeEach(async () => {
       await impersonationModel.createImpersonationRequest({
         ...impersonationRequestsBodyData[3],
-        impersonatedUserId: testUserId4,
-        userId: testSuperUserId,
+        createdFor: testUserId4,
+        createdBy: testSuperUserId,
         status: REQUEST_STATE.REJECTED,
       });
 
       await impersonationModel.createImpersonationRequest({
         ...impersonationRequestsBodyData[4],
-        impersonatedUserId: testUserId5,
-        userId: testSuperUserId,
+        createdFor: testUserId5,
+        createdBy: testSuperUserId,
         status: REQUEST_STATE.REJECTED
       });
     });
@@ -345,7 +346,7 @@ describe("Impersonation Requests", () => {
           expect(res.body.data).to.be.an("array");
           expect(res.body.data.length).to.be.equal(4);
           expect(res.body.data[0]).to.include.all.keys(
-            "id", "userId", "impersonatedUserId"
+            "id", "createdBy", "createdFor"
           );
           done();
         });
@@ -361,7 +362,7 @@ describe("Impersonation Requests", () => {
           if (err) return done(err);
           expect(res).to.have.status(200);
           expect(res.body.data).to.be.an("array");
-          expect(res.body.data.every((r) => r.userId === testSuperUserId)).to.be.true;
+          expect(res.body.data.every((r) => r.createdBy === testSuperUserId)).to.be.true;
           done();
         });
     });
@@ -375,7 +376,7 @@ describe("Impersonation Requests", () => {
           if (err) return done(err);
           expect(res).to.have.status(200);
           expect(res.body.data).to.be.an("array");
-          expect(res.body.data.every((r) => r.impersonatedUserId === testUserId2)).to.be.true;
+          expect(res.body.data.every((r) => r.createdFor === testUserId2)).to.be.true;
           expect(res.body.data.length).to.equal(1);
           done();
         });
@@ -591,23 +592,23 @@ describe("Impersonation Requests", () => {
     beforeEach(async () => {
       approvedImpersonationRequest = await impersonationModel.createImpersonationRequest({
         ...impersonationRequestsBodyData[0],
-        impersonatedUserId: testUserId1,
+        createdFor: testUserId1,
         status: REQUEST_STATE.APPROVED
       });
 
       unapprovedImpersonationRequest = await impersonationModel.createImpersonationRequest({
         ...impersonationRequestsBodyData[1],
-        impersonatedUserId: testUserId3,
+        createdFor: testUserId3,
       });
 
       unapprovedImpersonationRequest2 = await impersonationModel.createImpersonationRequest({
         ...impersonationRequestsBodyData[2],
-        impersonatedUserId: testUserId4
+        createdFor: testUserId4
       });
 
       rejectedRequest = await impersonationModel.createImpersonationRequest({
         ...impersonationRequestsBodyData[3],
-        impersonatedUserId: testUserId1,
+        createdFor: testUserId1,
         status: REQUEST_STATE.REJECTED
       });
     });
@@ -660,7 +661,7 @@ describe("Impersonation Requests", () => {
           expect(res.statusCode).to.equal(200);
           expect(res.body.message).to.equal(REQUEST_APPROVED_SUCCESSFULLY);
           expect(res.body.data.id).to.equal(unapprovedImpersonationRequest.id);
-          expect(res.body.data.lastModifiedBy).to.equal(unapprovedImpersonationRequest.impersonatedUserId);
+          expect(res.body.data.lastModifiedBy).to.equal(unapprovedImpersonationRequest.createdFor);
           done();
         });
     });
@@ -677,7 +678,7 @@ describe("Impersonation Requests", () => {
           expect(res.statusCode).to.equal(200);
           expect(res.body.message).to.equal(REQUEST_REJECTED_SUCCESSFULLY);
           expect(res.body.data.id).to.equal(unapprovedImpersonationRequest2.id);
-          expect(res.body.data.lastModifiedBy).to.equal(unapprovedImpersonationRequest2.impersonatedUserId);
+          expect(res.body.data.lastModifiedBy).to.equal(unapprovedImpersonationRequest2.createdFor);
           done();
         });
     });
@@ -815,8 +816,8 @@ describe("Impersonation Requests", () => {
 
     finishedImpersonationRequest = await impersonationModel.createImpersonationRequest({
       ...impersonationRequestsBodyData[0],
-      impersonatedUserId: testUserId4,
-      userId: testSuperUserId,
+      createdFor: testUserId4,
+      createdBy: testSuperUserId,
       status: "APPROVED",
       isImpersonationFinished: true,
     });

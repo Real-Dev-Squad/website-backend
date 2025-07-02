@@ -28,7 +28,7 @@ describe("Impersonation Request Validators", function () {
   };
   let nextSpy: sinon.SinonSpy;
   const requestBody: CreateImpersonationRequestBody = {
-    impersonatedUserId: "randomId",
+    createdFor: "randomId",
     reason: "Testing purpose",
   };
 

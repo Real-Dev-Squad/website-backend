@@ -35,8 +35,8 @@ describe("models/impersonationRequests", () => {
       impersonationRequest = await impersonationModel.createImpersonationRequest(mockRequestBody);
       expect(impersonationRequest).to.have.property("id");
       expect(impersonationRequest).to.include({
-        impersonatedUserId: mockRequestBody.impersonatedUserId,
-        userId: mockRequestBody.userId,
+        createdFor: mockRequestBody.createdFor,
+        createdBy: mockRequestBody.createdBy,
         status: REQUEST_STATE.PENDING,
       });
     });
@@ -51,21 +51,21 @@ describe("models/impersonationRequests", () => {
     });
 
     it("should allow different super users to create requests for same user", async () => {
-      const request1 = await impersonationModel.createImpersonationRequest({ ...impersonationRequestsBodyData[0], userId: "121" });
-      const request2 = await impersonationModel.createImpersonationRequest({ ...impersonationRequestsBodyData[0], userId: "122" });
+      const request1 = await impersonationModel.createImpersonationRequest({ ...impersonationRequestsBodyData[0], createdBy: "121" });
+      const request2 = await impersonationModel.createImpersonationRequest({ ...impersonationRequestsBodyData[0], createdBy: "122" });
       expect(request1).to.have.property("id");
-      expect(request1.userId).to.equal("121");
-      expect(request1.impersonatedUserId).to.equal(impersonationRequestsBodyData[0].impersonatedUserId);
+      expect(request1.createdBy).to.equal("121");
+      expect(request1.createdFor).to.equal(impersonationRequestsBodyData[0].createdFor);
       expect(request2).to.have.property("id");
-      expect(request2.userId).to.equal("122");
-      expect(request2.impersonatedUserId).to.equal(impersonationRequestsBodyData[0].impersonatedUserId);
+      expect(request2.createdBy).to.equal("122");
+      expect(request2.createdFor).to.equal(impersonationRequestsBodyData[0].createdFor);
     });
 
     it("should fail if required fields are missing", async () => {
       try {
         await impersonationModel.createImpersonationRequest({
           ...impersonationRequestsBodyData[0],
-          impersonatedUserId: ""
+          createdFor: ""
         });
       } catch (error) {
         expect(error.message).to.include(ERROR_WHILE_CREATING_REQUEST);
@@ -152,10 +152,10 @@ describe("models/impersonationRequests", () => {
     });
 
     it("should filter requests by createdBy", async () => {
-      const query = { createdBy: impersonationRequests[0].userId };
+      const query = { createdBy: impersonationRequests[0].createdBy };
       const result = await impersonationModel.getImpersonationRequests(query);
       expect(result.allRequests.length).to.be.equal(1);
-      expect(result.allRequests.every(r => r.userId === impersonationRequests[0].userId)).to.be.true;
+      expect(result.allRequests.every(r => r.createdBy === impersonationRequests[0].createdBy)).to.be.true;
     });
 
     it("should return requests by size", async () => {
@@ -165,10 +165,10 @@ describe("models/impersonationRequests", () => {
     });
 
     it("should filter requests by createdFor", async () => {
-      const query = { createdFor: impersonationRequests[0].impersonatedUserId };
+      const query = { createdFor: impersonationRequests[0].createdFor };
       const result = await impersonationModel.getImpersonationRequests(query);
       expect(result.allRequests.length).to.be.equal(1);
-      expect(result.allRequests.every(r => r.impersonatedUserId === impersonationRequests[0].impersonatedUserId)).to.be.true;
+      expect(result.allRequests.every(r => r.createdFor === impersonationRequests[0].createdFor)).to.be.true;
     });
 
 
@@ -219,7 +219,7 @@ describe("models/impersonationRequests", () => {
       const updatedRequest = await impersonationModel.updateImpersonationRequest({
         id: impersonationRequest.id,
         updatePayload: { status: "APPROVED" },
-        lastModifiedBy: impersonationRequest.impersonatedUserId,
+        lastModifiedBy: impersonationRequest.createdFor,
       }) as UpdateImpersonationRequestStatusBody;
       expect(updatedRequest.status).to.equal(REQUEST_STATE.APPROVED);
     });
@@ -228,7 +228,7 @@ describe("models/impersonationRequests", () => {
       const updatedRequest = await impersonationModel.updateImpersonationRequest({
         id: impersonationRequest.id,
         updatePayload: { status: "REJECTED" },
-        lastModifiedBy: impersonationRequest.impersonatedUserId,
+        lastModifiedBy: impersonationRequest.createdFor,
       }) as UpdateImpersonationRequestStatusBody;
       expect(updatedRequest.status).to.equal(REQUEST_STATE.REJECTED);
     });
@@ -242,7 +242,7 @@ describe("models/impersonationRequests", () => {
       const updatedRequest = await impersonationModel.updateImpersonationRequest({
         id: impersonationRequest.id,
         updatePayload: updatedBody,
-        lastModifiedBy: impersonationRequest.userId,
+        lastModifiedBy: impersonationRequest.createdBy,
       }) as UpdateImpersonationRequestDataResponse;
       expect(updatedRequest.isImpersonationFinished).to.be.true;
       expect(Number(updatedRequest.startedAt)).to.be.greaterThan(0);
@@ -254,7 +254,7 @@ describe("models/impersonationRequests", () => {
       const updatedRequest = await impersonationModel.updateImpersonationRequest({
         id: impersonationRequest.id,
         updatePayload: { status: "APPROVED" },
-        lastModifiedBy: impersonationRequest.impersonatedUserId,
+        lastModifiedBy: impersonationRequest.createdFor,
       });
       const result = await impersonationModel.getImpersonationRequestById(impersonationRequest.id);
       expect(result).to.not.be.null;
@@ -274,7 +274,7 @@ describe("models/impersonationRequests", () => {
         await impersonationModel.updateImpersonationRequest({
           id: "impersonationRequest.id",
           updatePayload: { status: "APPROVED" },
-          lastModifiedBy: impersonationRequest.impersonatedUserId,
+          lastModifiedBy: impersonationRequest.createdFor,
         });
         expect.fail("Should throw error");
       } catch (err) {

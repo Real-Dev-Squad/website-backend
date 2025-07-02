@@ -41,7 +41,7 @@ export const createImpersonationRequestService = async (
   body: CreateImpersonationRequestServiceBody
 ): Promise<ImpersonationRequest> => {
   try {
-    const { userExists } = await fetchUser({ userId: body.impersonatedUserId });
+    const { userExists } = await fetchUser({ userId: body.createdFor });
     if (!userExists) {
       throw new NotFound(TASK_REQUEST_MESSAGES.USER_NOT_FOUND);
     }
@@ -49,8 +49,8 @@ export const createImpersonationRequestService = async (
 
     const impersonationRequest = await createImpersonationRequest({
       status: REQUEST_STATE.PENDING,
-      userId: body.userId,
-      impersonatedUserId: body.impersonatedUserId,
+      createdBy: body.createdBy,
+      createdFor: body.createdFor,
       isImpersonationFinished: false,
       reason: body.reason,
     });
@@ -60,7 +60,7 @@ export const createImpersonationRequestService = async (
       meta: {
         requestId: impersonationRequest.id,
         action: LOG_ACTION.CREATE,
-        userId: body.userId,
+        userId: body.createdBy,
         createdAt: Date.now(),
       },
       body: {
@@ -100,7 +100,7 @@ export const updateImpersonationRequestService = async (
       throw new NotFound(REQUEST_DOES_NOT_EXIST);
     }
 
-    if (request.impersonatedUserId !== body.lastModifiedBy || request.status !== REQUEST_STATE.PENDING) {
+    if (request.createdFor !== body.lastModifiedBy || request.status !== REQUEST_STATE.PENDING) {
       throw new Forbidden(OPERATION_NOT_ALLOWED);
     }
     
@@ -153,7 +153,7 @@ export const startImpersonationService = async (
     }
 
     if (
-      body.userId !== impersonationRequest.userId ||
+      body.userId !== impersonationRequest.createdBy ||
       impersonationRequest.status !== REQUEST_STATE.APPROVED ||
       impersonationRequest.isImpersonationFinished === true
     ) {
@@ -215,7 +215,7 @@ export const stopImpersonationService = async (
     if (!impersonationRequest) {
       throw new NotFound(REQUEST_DOES_NOT_EXIST);
     }
-    if ( body.userId !== impersonationRequest.impersonatedUserId ) {
+    if ( body.userId !== impersonationRequest.createdFor ) {
       throw new Forbidden(OPERATION_NOT_ALLOWED);
     }
 
@@ -264,31 +264,28 @@ export const stopImpersonationService = async (
 export const generateImpersonationTokenService = async (
   requestId: string,
   action: string
-): Promise<{ name: string, value: string, options: object }> => {
-    try {
+): Promise<{ name: string; value: string; options: object }> => {
+    const cookieName = config.get<string>("userToken.cookieName");
+    const rdsUiUrl = new URL(config.get<string>("services.rdsUi.baseUrl"));
+    const ttlInSeconds = Number(config.get("userToken.ttl"));
+  try {
     const request = await getImpersonationRequestById(requestId);
     if (!request) {
       throw new NotFound(REQUEST_DOES_NOT_EXIST);
     }
 
-    const { userId, impersonatedUserId } = request;
-    const cookieName = config.get<string>("userToken.cookieName");
-    const rdsUiUrl = new URL(config.get<string>("services.rdsUi.baseUrl"));
-    const ttlInSeconds = Number(config.get("userToken.ttl"));
+    const { createdBy: userId, createdFor: impersonatedUserId } = request;
+
 
     let token: string;
 
-    switch (action) {
-      case "START":
-        token = await authService.generateImpersonationAuthToken({ userId, impersonatedUserId });
-        break;
-
-      case "STOP":
-        token = await authService.generateAuthToken({ userId });
-        break;
-
-      default:
-        throw new BadRequest(INVALID_ACTION_PARAM);
+    if (action === "START") {
+      token = await authService.generateImpersonationAuthToken({
+        userId,
+        impersonatedUserId,
+      });
+    } else if (action === "STOP") {
+      token = await authService.generateAuthToken({ userId });
     }
 
     return {
