@@ -1,4 +1,4 @@
-import chai, { use } from "chai";
+import chai from "chai";
 import chaiHttp from "chai-http";
 import _ from "lodash";
 import config from "config";
