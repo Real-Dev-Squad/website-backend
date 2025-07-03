@@ -17,9 +17,9 @@ export const createImpersonationRequestValidator = async (
   next: NextFunction
 ): Promise<void> => {
   const schema = joi.object().strict().keys({
-    impersonatedUserId: joi.string().required().messages({
-      "string.empty": "impersonatedUserId cannot be empty",
-      "any.required": "impersonatedUserId is required"
+    createdFor: joi.string().required().messages({
+      "string.empty": "createdFor cannot be empty",
+      "any.required": "createdFor is required"
     }),
     reason: joi.string().required().messages({
       "string.empty": "reason cannot be empty",

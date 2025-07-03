@@ -32,7 +32,7 @@ describe("Tests Impersonation Requests Service", () => {
       id: "123",
       ...impersonationRequestsBodyData[2],
       reason: "He asked",
-      userId: "testUserId",
+      createdBy: "testUserId",
       createdAt: Timestamp.now(),
       updatedAt: Timestamp.now()
     }
@@ -43,14 +43,13 @@ describe("Tests Impersonation Requests Service", () => {
   });
 
   describe("createImpersonationRequestService", () => {
-    it("should return NotFound error with USER_NOT_FOUND if userId does not exist", async () => {
+    it("should return NotFound error with USER_NOT_FOUND if createdBy does not exist", async () => {
       sinon.stub(userQuery, "fetchUser").returns({ userExists: false });
 
       try {
         await impersonationService.createImpersonationRequestService({
-          userId: "randomIs",
-          createdBy: "randomName",
-          impersonatedUserId: "randomImpersonatedId",
+          createdBy: "randomIs",
+          createdFor: "randomImpersonatedId",
           reason: "He asked",
         });
       } catch (err) {
@@ -63,7 +62,7 @@ describe("Tests Impersonation Requests Service", () => {
       sinon.stub(impersonationModel, "createImpersonationRequest").returns(Promise.resolve({
         id: "123",
         ...mockRequestBody,
-        impersonatedUserId: userData[20].id,
+        createdFor: userData[20].id,
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now()
       }));
@@ -73,17 +72,15 @@ describe("Tests Impersonation Requests Service", () => {
       sinon.stub(logService, "addLog").resolves();
 
       const response = await impersonationService.createImpersonationRequestService({
-        userId: mockRequestBody.userId,
         createdBy: mockRequestBody.createdBy,
-        impersonatedUserId: userData[20].id,
+        createdFor: userData[20].id,
         reason: mockRequestBody.reason,
       });
 
       expect(response).to.not.be.null;
-      expect(response.createdBy).to.equal(mockRequestBody.createdBy);
       expect(response.id).to.not.be.null;
-      expect(response.userId).to.equal(mockRequestBody.userId);
-      expect(response.impersonatedUserId).to.equal(userData[20].id);
+      expect(response.createdBy).to.equal(mockRequestBody.createdBy);
+      expect(response.createdFor).to.equal(userData[20].id);
     });
 
     it("should throw error when createImpersonationRequestService fails", async () => {
@@ -91,9 +88,8 @@ describe("Tests Impersonation Requests Service", () => {
 
       try {
         await impersonationService.createImpersonationRequestService({
-          userId: mockRequestBody.userId,
           createdBy: mockRequestBody.createdBy,
-          impersonatedUserId: "112",
+          createdFor: "112",
           reason: mockRequestBody.reason,
         });
       } catch (error) {
@@ -107,7 +103,7 @@ describe("Tests Impersonation Requests Service", () => {
       testUserId = await addUser(userData[20]);
       impersonationRequest = await impersonationModel.createImpersonationRequest({
         ...impersonationRequestsBodyData[0],
-        impersonatedUserId: testUserId
+        createdFor: testUserId
       });
     });
 
@@ -129,7 +125,7 @@ describe("Tests Impersonation Requests Service", () => {
     it("should throw forbidden error if request is already approved", async () => {
       sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve({
         ...impersonationRequestsBodyData[1],
-        impersonatedUserId: "testUserId",
+        createdFor: "testUserId",
         id: "123",
         status: "APPROVED",
         createdAt: Timestamp.now(),
@@ -140,14 +136,14 @@ describe("Tests Impersonation Requests Service", () => {
         ...impersonationRequestsBodyData[1],
         reason: "He asked",
         status: "APPROVED",
-        impersonatedUserId: "testUserId",
+        createdFor: "testUserId",
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now()
       }));
       try {
         await impersonationModel.createImpersonationRequest({
           ...impersonationRequestsBodyData[1],
-          impersonatedUserId: testUserId
+          createdFor: testUserId
         });
         await impersonationService.updateImpersonationRequestService({
           id: "123",
@@ -164,7 +160,7 @@ describe("Tests Impersonation Requests Service", () => {
     it("should throw forbidden error if request is already rejected", async () => {
       sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve({
         ...impersonationRequestsBodyData[1],
-        impersonatedUserId: "testUserId",
+        createdFor: "testUserId",
         id: "123",
         status: "REJECTED",
         createdAt: Timestamp.now(),
@@ -190,13 +186,13 @@ describe("Tests Impersonation Requests Service", () => {
         ...impersonationRequestsBodyData[1],
         reason: "He asked",
         status: "REJECTED",
-        impersonatedUserId: "testUserId",
+        createdFor: "testUserId",
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now()
       }));
       sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve({
         ...impersonationRequestsBodyData[1],
-        impersonatedUserId: "testUserId",
+        createdFor: "testUserId",
         id: "123",
         createdAt: Timestamp.now(),
         updatedAt: Timestamp.now(),
@@ -204,7 +200,7 @@ describe("Tests Impersonation Requests Service", () => {
       try {
         await impersonationModel.createImpersonationRequest({
           ...impersonationRequestsBodyData[1],
-          impersonatedUserId: testUserId
+          createdFor: testUserId
         });
         await impersonationService.updateImpersonationRequestService({
           id: "123",
@@ -254,7 +250,7 @@ describe("Tests Impersonation Requests Service", () => {
       const body = {
         id: "someId",
         updatePayload: { status: "APPROVED" },
-        lastModifiedBy: "userId"
+        lastModifiedBy: "createdBy"
       };
 
       try {
@@ -364,7 +360,7 @@ describe("stopImpersonationService", () => {
   });
 
   it("should successfully update the request body with endedAt and lastModifiedBy", async () => {
-    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve({...dummyImpersonationRequest,status:"APPROVED",impersonatedUserId:"testUserId"}));
+    sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve({...dummyImpersonationRequest,status:"APPROVED",createdFor:"testUserId"}));
 
     sinon.stub(impersonationModel, "updateImpersonationRequest").resolves({
       id: "123",
