@@ -10,11 +10,9 @@ export type ImpersonationRequest = {
     status: REQUEST_STATE;
     isImpersonationFinished: boolean;
     createdBy: string;
-    createdFor: string;
-    userId: string;
     reason: string;
     message?: string;
-    impersonatedUserId: string;
+    createdFor: string;
     createdAt: Timestamp;
     updatedAt: Timestamp;
     startedAt?: Timestamp;
@@ -22,21 +20,27 @@ export type ImpersonationRequest = {
 }
 
 export type CreateImpersonationRequestBody = {
-   impersonatedUserId: string;
+   createdFor: string;
    reason: string;
 };
 
-export type CreateImpersonationRequestModelBody = {
+export type CreateImpersonationRequestModelDto = {
     status: REQUEST_STATE;
     isImpersonationFinished: boolean;
     createdBy: string;
-    createdFor: string;
-    userId: string;
     reason: string;
-    impersonatedUserId: string;
+    createdFor: string;
 }
 
 export type UpdateImpersonationRequestDataBody = {
+    startedAt?: Timestamp;
+    endedAt: Timestamp;
+    isImpersonationFinished?: boolean;
+}
+
+export type UpdateImpersonationRequestDataResponse = {
+    id:string;
+    lastModifiedBy:string;
     startedAt?: Timestamp;
     endedAt: Timestamp;
     isImpersonationFinished?: boolean;
@@ -47,8 +51,28 @@ export type UpdateImpersonationRequestStatusBody = {
     message?: string;
 }
 
+
+export type UpdateImpersonationRequestModelDto = {
+    id: string;
+    updatePayload: UpdateImpersonationRequestDataBody | UpdateImpersonationRequestStatusBody;
+    lastModifiedBy: string;
+}
+
+export type UpdateImpersonationStatusModelResponse = {
+    status: REQUEST_STATE.APPROVED | REQUEST_STATE.REJECTED;
+    message?: string;
+    id: string;
+    lastModifiedBy: string;
+}
+
 export type ImpersonationRequestQuery = RequestQuery & {
     dev?: string;
+    createdBy?: string;
+    createdFor?: string;
+    status?: keyof typeof REQUEST_STATE;
+    prev?: string;
+    next?: string;
+    size?: number;
 };
 
 export type ImpersonationRequestResponse = Response & {
@@ -65,7 +89,7 @@ export type CreateImpersonationRequest = Request & {
    query: ImpersonationRequestQuery;
 };
 
-export type UpdateImpersonationRequestStatus = Request & {
+export type UpdateImpersonationRequest = Request & {
     userData: userData;
     body: UpdateImpersonationRequestStatusBody;
     query: ImpersonationRequestQuery;
@@ -76,6 +100,37 @@ export type PaginatedImpersonationRequests = {
     allRequests: ImpersonationRequest[];
     next: string;
     prev: string;
-    page: number;
     count: number;
+}
+
+export type GetImpersonationRequestByIdRequest = Request & {
+    dev:string;
+    params: RequestParams;
+}
+
+export type GetImpersonationControllerRequest = Request & {
+    query: ImpersonationRequestQuery
+}
+
+export type CreateImpersonationRequestServiceBody={
+   createdBy: string;
+   createdFor: string;
+   reason: string;
+}
+
+export type ImpersonationSessionQuery = RequestQuery & {
+  dev?:string;
+  action:"START" | "STOP";
+}
+
+export type ImpersonationSessionRequest = Request & {
+    userData: userData;
+    query: ImpersonationSessionQuery;
+    params: RequestParams;
+    isImpersonating: boolean;
+}
+
+export type ImpersonationSessionServiceBody = {
+    requestId: string;
+    userId: string;
 }
