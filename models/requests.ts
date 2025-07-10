@@ -33,7 +33,9 @@ export const createRequest = async (body: any) => {
 
 export const updateRequest = async (id: string, body: any, lastModifiedBy: string, type:string) => {
   try {
+    console.log("reached update request model")
     const existingRequestDoc = await requestModel.doc(id).get();
+    console.log("existingRequestDoc", existingRequestDoc)
     if (!existingRequestDoc.exists) {
       return {
         error: REQUEST_DOES_NOT_EXIST,
@@ -103,7 +105,8 @@ export const getRequests = async (query: any) => {
       requestQuery = requestQuery.where("type", "==", type);
     }
     if (state) {
-      requestQuery = requestQuery.where("state", "==", state);
+      const fieldName = (type === REQUEST_TYPE.OOO && !dev) ? "status" : "state";
+      requestQuery = requestQuery.where(fieldName, "==", state);
     }
 
     requestQuery = requestQuery.orderBy("createdAt", "desc");

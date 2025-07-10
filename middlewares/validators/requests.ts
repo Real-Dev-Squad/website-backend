@@ -50,30 +50,30 @@ export const updateRequestsMiddleware = async (
   res: CustomResponse,
   next: NextFunction
 ) => {
-  const schema = joi
-  .object()
-  .strict()
-  .keys({
+  const { type } = req.body;
+
+  const baseSchema = {
     reason: joi.string().optional()
       .messages({
         "string.empty": "reason cannot be empty",
       }),
-    state: joi
-      .string()
-      .valid(REQUEST_STATE.APPROVED, REQUEST_STATE.REJECTED)
-      .required()
-      .messages({
-        "any.only": "state must be APPROVED or REJECTED",
-      }),
     type: joi.string().valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION, REQUEST_TYPE.ONBOARDING).required(),
-    comment: joi.string().optional(),
-    message: joi.string().optional(),
-    status: joi.string().valid(REQUEST_STATE.APPROVED, REQUEST_STATE.REJECTED).optional(),
+  };
+
+  const schema = joi.object().strict().keys({
+    ...baseSchema,
+    status: type === REQUEST_TYPE.OOO ? joi.string().valid(REQUEST_STATE.PENDING, REQUEST_STATE.APPROVED, REQUEST_STATE.REJECTED).required() : joi.string().valid(REQUEST_STATE.APPROVED, REQUEST_STATE.REJECTED).optional(),
+    comment: type === REQUEST_TYPE.OOO 
+      ? joi.string().required().messages({
+          "any.required": "comment is required for OOO requests",
+          "string.empty": "comment cannot be empty for OOO requests"
+        })
+      : joi.string().optional(),
+      state: type !== REQUEST_TYPE.OOO ? joi.string().valid(REQUEST_STATE.APPROVED, REQUEST_STATE.REJECTED).required() : joi.string().valid(REQUEST_STATE.APPROVED, REQUEST_STATE.REJECTED).optional(),
   });
 
   try {
     await schema.validateAsync(req.body, { abortEarly: false });
-    console.log("it is going to next")
     next();
   } catch (error) {
     const errorMessages = error.details.map((detail:any) => detail.message);

@@ -699,7 +699,7 @@ const addFutureStatus = async (futureStatusData) => {
       futureStatus: futureStatusData,
     };
     await userStatusModel.doc(docId).update(newStatusData);
-    console.log("updated future status");
+    console.log("updated future status in second model");
     return { id: docId, userStatusExists: true, data: newStatusData };
   } catch (error) {
     logger.error(`error in updating User Status Document ${error}`);
