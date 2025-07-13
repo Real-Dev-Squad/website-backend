@@ -130,7 +130,6 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
           userId,
           message: reason,
         };
-        console.log("userFutureStatusData", userFutureStatusData)
         await createUserFutureStatus(userFutureStatusData);
         await addFutureStatus(userFutureStatusData);
       }

@@ -562,7 +562,19 @@ describe("/requests OOO", function () {
           done();
         });
     });
-
+    it("should return 400 if request is already approved", function (done) {
+      chai
+        .request(app)
+        .put(`/requests/${approvedOooRequestId}`)
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send(validOooStatusUpdate)
+        .end(function (err, res) {
+          expect(res).to.have.status(400);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal(REQUEST_ALREADY_APPROVED);
+          done();
+        });
+    });
   });
 
   describe("GET /requests", function () {

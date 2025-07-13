@@ -10,14 +10,11 @@ import * as admin from "firebase-admin";
  */
 export const createUserFutureStatus = async (body: UserFutureStatusType) => {
   try {
-    console.log("reached create user future status")
-    console.log("body", body)
     const statusBody: UserFutureStatusType = {
       createdAt: Date.now(),
       ...body,
     };
     const resultDoc = await userFutureStatusModel.add(statusBody);
-    console.log("updated user future status")
     return {
       id: resultDoc.id,
       ...body,

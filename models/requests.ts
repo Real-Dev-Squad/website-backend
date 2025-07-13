@@ -33,9 +33,7 @@ export const createRequest = async (body: any) => {
 
 export const updateRequest = async (id: string, body: any, lastModifiedBy: string, type:string) => {
   try {
-    console.log("reached update request model")
     const existingRequestDoc = await requestModel.doc(id).get();
-    console.log("existingRequestDoc", existingRequestDoc)
     if (!existingRequestDoc.exists) {
       return {
         error: REQUEST_DOES_NOT_EXIST,
