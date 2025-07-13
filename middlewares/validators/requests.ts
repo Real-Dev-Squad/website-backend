@@ -51,7 +51,6 @@ export const updateRequestsMiddleware = async (
   next: NextFunction
 ) => {
   const { type } = req.body;
-  console.log("body", req.body)
   const baseSchema = {
     reason: joi.string().optional()
       .messages({
@@ -78,7 +77,6 @@ export const updateRequestsMiddleware = async (
   } catch (error) {
     const errorMessages = error.details.map((detail:any) => detail.message);
     logger.error(`Error while validating request payload : ${errorMessages}`);
-    console.log("error", error)
     res.boom.badRequest(errorMessages);
   }
 };
