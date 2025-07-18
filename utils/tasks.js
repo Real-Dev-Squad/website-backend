@@ -74,11 +74,11 @@ const transformQuery = (status = "", size, page, assignee = "", title = "") => {
   const transformedTitle = title;
 
   if (page) {
-    query.page = parseInt(page);
+    query.page = Number.parseInt(page);
   }
 
   if (size) {
-    query.size = parseInt(size);
+    query.size = Number.parseInt(size);
   }
 
   return {

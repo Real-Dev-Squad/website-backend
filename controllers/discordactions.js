@@ -127,8 +127,8 @@ const deleteGroupRole = async (req, res) => {
 const getPaginatedAllGroupRoles = async (req, res) => {
   try {
     const { page = 0, size = 10, dev } = req.query;
-    const limit = parseInt(size, 10) || 10;
-    const offset = parseInt(page, 10) * limit;
+    const limit = Number.parseInt(size, 10) || 10;
+    const offset = Number.parseInt(page, 10) * limit;
 
     if (limit < 1 || limit > 100) {
       return res.boom.badRequest("Invalid size. Must be between 1 and 100.");
@@ -139,8 +139,8 @@ const getPaginatedAllGroupRoles = async (req, res) => {
       const { roles, total } = await discordRolesModel.getPaginatedGroupRolesByPage({ offset, limit });
       const groupsWithMembershipInfo = await discordRolesModel.enrichGroupDataWithMembershipInfo(discordId, roles);
 
-      const nextPage = offset + limit < total ? parseInt(page, 10) + 1 : null;
-      const prevPage = page > 0 ? parseInt(page, 10) - 1 : null;
+      const nextPage = offset + limit < total ? Number.parseInt(page, 10) + 1 : null;
+      const prevPage = page > 0 ? Number.parseInt(page, 10) - 1 : null;
 
       const baseUrl = `${req.baseUrl}${req.path}`;
       const next = nextPage !== null ? `${baseUrl}?page=${nextPage}&size=${limit}&dev=true` : null;

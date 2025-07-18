@@ -133,8 +133,8 @@ const buildQueryToFetchPaginatedDocs = async (queryParams) => {
   const { type, userId, taskId, orderBy, size = PROGRESSES_SIZE, page = PROGRESSES_PAGE_SIZE } = queryParams;
   const orderByField = PROGRESS_VALID_SORT_FIELDS[0];
   const isAscOrDsc = orderBy && PROGRESS_VALID_SORT_FIELDS[0] === orderBy ? "asc" : "desc";
-  const limit = parseInt(size, 10);
-  const offset = parseInt(page, 10) * limit;
+  const limit = Number.parseInt(size, 10);
+  const offset = Number.parseInt(page, 10) * limit;
 
   let baseQuery;
   if (type) {
