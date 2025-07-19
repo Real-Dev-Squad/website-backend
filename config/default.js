@@ -86,17 +86,12 @@ module.exports = {
     cookieV2Name: `rds-session-v2-${NODE_ENV}`,
     ttl: 30 * 24 * 60 * 60, // in seconds
     refreshTtl: 180 * 24 * 60 * 60, // in seconds
-    impersonationTtl: 15 * 60, // in seconds
     publicKey: "<publicKey>",
     privateKey: "<privateKey>",
   },
 
   botToken: {
     botPublicKey: "<botpublicKey>",
-  },
-
-  discordService: {
-    publicKey: "DISCORD_SERVICE_PUBLIC_KEY",
   },
 
   // Cloudinary keys

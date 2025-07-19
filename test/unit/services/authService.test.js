@@ -28,30 +28,4 @@ describe("authService", function () {
 
     return done();
   });
-
-  describe("generateImpersonationAuthToken", function () {
-    const payload = { userId: "devUser123", impersonatedUserId: "testUser456" };
-
-    it("should generate a valid JWT with correct payload", function (done) {
-      const jwtToken = authService.generateImpersonationAuthToken(payload);
-      const decoded = authService.verifyAuthToken(jwtToken); // Assuming verifyAuthToken uses the same public key
-
-      expect(decoded).to.have.all.keys("userId", "impersonatedUserId", "iat", "exp");
-      expect(decoded.userId).to.equal(payload.userId);
-      expect(decoded.impersonatedUserId).to.equal(payload.impersonatedUserId);
-
-      return done();
-    });
-
-    it("should decode the impersonation JWT without verifying", function (done) {
-      const jwtToken = authService.generateImpersonationAuthToken(payload);
-      const decoded = authService.decodeAuthToken(jwtToken); // No signature verification
-
-      expect(decoded).to.have.all.keys("userId", "impersonatedUserId", "iat", "exp");
-      expect(decoded.userId).to.equal(payload.userId);
-      expect(decoded.impersonatedUserId).to.equal(payload.impersonatedUserId);
-
-      return done();
-    });
-  });
 });

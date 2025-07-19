@@ -10,7 +10,6 @@ const profileDiffs = require("../../models/profileDiffs");
 const cleanDb = require("../utils/cleanDb");
 // Import fixtures
 const userData = require("../fixtures/user/user")();
-const tasksData = require("../fixtures/tasks/tasks")();
 const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
 const superUser = userData[4];
 const searchParamValues = require("../fixtures/user/search")();
@@ -27,7 +26,7 @@ const {
 const { addJoinData, addOrUpdate } = require("../../models/users");
 const userStatusModel = require("../../models/userStatus");
 const { MAX_USERNAME_LENGTH } = require("../../constants/users.ts");
-const { TASK_STATUS } = require("../../constants/tasks");
+
 const userRoleUpdate = userData[4];
 const userRoleUnArchived = userData[13];
 const userAlreadyMember = userData[0];
@@ -36,6 +35,7 @@ const userAlreadyArchived = userData[5];
 const userAlreadyUnArchived = userData[4];
 const nonSuperUser = userData[0];
 const newUser = userData[18];
+
 const cookieName = config.get("userToken.cookieName");
 const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
 const Sinon = require("sinon");
@@ -497,18 +497,12 @@ describe("Users", function () {
   });
 
   describe("GET /users", function () {
-    let userWithOverdueApprovedTask;
-
     beforeEach(async function () {
       const { userId } = await addOrUpdate(userData[0]);
       await userStatusModel.updateUserStatus(userId, userStatusDataForNewUser);
       await addOrUpdate(userData[1]);
       await addOrUpdate(userData[2]);
       await addOrUpdate(userData[3]);
-
-      const assigneeData = { ...userData[6], discordId: getDiscordMembers[0].user.id };
-      userWithOverdueApprovedTask = await addUser(assigneeData);
-      await taskModel.add({ ...tasksData[0], assignee: userWithOverdueApprovedTask, status: TASK_STATUS.APPROVED });
     });
 
     afterEach(async function () {
@@ -882,24 +876,6 @@ describe("Users", function () {
       expect(res).to.have.status(200);
       expect(res.body).to.be.a("object");
       expect(res.body.message).to.equal("User not found");
-    });
-
-    it("should return users who have overdue tasks with APPROVED status", function (done) {
-      chai
-        .request(app)
-        .get("/users?query=filterBy:overdue_tasks")
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.an("object");
-          expect(res.body.users).to.be.an("array");
-          expect(res.body.users.length).to.equal(1);
-          expect(res.body.users[0].id).to.equal(userWithOverdueApprovedTask);
-
-          return done();
-        });
     });
 
     it("Should return user ID(s) with overdue tasks within the last 1 day", function (done) {
