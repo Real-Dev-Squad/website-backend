@@ -8,6 +8,7 @@ import {
   REQUEST_DOES_NOT_EXIST,
 } from "../constants/requests";
 import { getUserId } from "../utils/users";
+import { NotFound } from "http-errors";
 const SIZE = 5;
 
 export const createRequest = async (body: any) => {
@@ -65,6 +66,21 @@ export const updateRequest = async (id: string, body: any, lastModifiedBy: strin
     };
   } catch (error) {
     logger.error(ERROR_WHILE_UPDATING_REQUEST, error);
+    throw error;
+  }
+};
+
+export const getRequestById = async (id: string) => {
+  try {
+    const requestDoc = await requestModel.doc(id).get();
+
+    if (!requestDoc.exists) {
+      throw new NotFound(REQUEST_DOES_NOT_EXIST);
+    }
+
+    return requestDoc.data();
+  } catch (error) {
+    logger.error(ERROR_WHILE_FETCHING_REQUEST, error);
     throw error;
   }
 };
