@@ -12,7 +12,7 @@ import {
     REQUEST_REJECTED_SUCCESSFULLY,
     INVALID_REQUEST_TYPE,
 } from "../constants/requests";
-import { userState } from "../constants/userStatus";
+import { statusState, userState } from "../constants/userStatus";
 import { createRequest, getRequestById } from "../models/requests";
 import { OooStatusRequest, OooStatusRequestBody } from "../types/oooRequest";
 import { UserStatus } from "../types/userStatus";
@@ -21,7 +21,7 @@ import { BadRequest, Conflict } from "http-errors";
 import { updateRequest } from "../models/requests";
 import { AcknowledgeOooRequestBody } from "../types/oooRequest";
 import { addFutureStatus } from "../models/userStatus";
-
+import { createUserFutureStatus } from "../models/userFutureStatus";
 /**
  * Validates the user status.
  * 
@@ -186,6 +186,16 @@ export const acknowledgeOooRequest = async (
                 endsOn: requestData.until,
                 userId: requestData.userId,
                 message: body.comment,
+            });
+            await createUserFutureStatus({
+                requestId,
+                status: userState.OOO,
+                state: statusState.UPCOMING,
+                from: requestData.from,
+                endsOn: requestData.until,
+                userId: requestData.userId,
+                message: body.comment,
+                createdAt: Date.now()
             });
         }
 

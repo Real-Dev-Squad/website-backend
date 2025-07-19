@@ -1,6 +1,6 @@
 import firestore from "../utils/firestore";
 const requestModel = firestore.collection("requests");
-import { REQUEST_ALREADY_APPROVED, REQUEST_ALREADY_REJECTED, REQUEST_STATE } from "../constants/requests";
+import { REQUEST_ALREADY_APPROVED, REQUEST_ALREADY_REJECTED, REQUEST_STATE, REQUEST_TYPE } from "../constants/requests";
 import {
   ERROR_WHILE_FETCHING_REQUEST,
   ERROR_WHILE_CREATING_REQUEST,
@@ -9,6 +9,7 @@ import {
 } from "../constants/requests";
 import { getUserId } from "../utils/users";
 import { NotFound } from "http-errors";
+import { fetchUser } from "./users";
 const SIZE = 5;
 
 export const createRequest = async (body: any) => {
@@ -30,7 +31,7 @@ export const createRequest = async (body: any) => {
   }
 };
 
-export const updateRequest = async (id: string, body: any, lastModifiedBy: string, type:string) => {
+export const updateRequest = async (id: string, body: any, lastModifiedBy: string, type: string) => {
   try {
     const existingRequestDoc = await requestModel.doc(id).get();
     if (!existingRequestDoc.exists) {
@@ -104,11 +105,10 @@ export const getRequests = async (query: any) => {
         ...requestDoc.data(),
       };
     }
-    
-    if(requestedBy && dev){
+
+    if (requestedBy && dev) {
       requestQuery = requestQuery.where("requestedBy", "==", requestedBy);
-    }
-    else if (requestedBy) {
+    } else if (requestedBy) {
       const requestedByUserId = await getUserId(requestedBy);
       requestQuery = requestQuery.where("requestedBy", "==", requestedByUserId);
     }
@@ -165,6 +165,59 @@ export const getRequests = async (query: any) => {
       return null;
     }
 
+    // todo: remove this once previous OOO requests are removed form the database
+    // @ankush and @suraj had a discussion to manually update or remove the previous OOO requests
+    if (type === REQUEST_TYPE.OOO) {
+      const oooRequests = [];
+      if (!dev) {
+        for (const request of allRequests) {
+          if (request.status) {
+            const modifiedRequest = {
+              id: request.id,
+              type: request.type,
+              from: request.from,
+              until: request.until,
+              message: request.reason,
+              state: request.status,
+              lastModifiedBy: request.lastModifiedBy ?? "",
+              requestedBy: request.userId,
+              reason: request.comment ?? "",
+              createdAt: request.createdAt,
+              updatedAt: request.updatedAt,
+            };
+            oooRequests.push(modifiedRequest);
+          } else {
+            oooRequests.push(request);
+          }
+        }
+      } else {
+        for (const request of allRequests) {
+          if (request.state) {
+            const userResponse: any = await fetchUser({ userId: request.requestedBy });
+            const username = userResponse.user.username;
+
+            const modifiedRequest = {
+              id: request.id,
+              type: request.type,
+              from: request.from,
+              until: request.until,
+              reason: request.message,
+              status: request.state,
+              lastModifiedBy: request.lastModifiedBy ?? null,
+              requestedBy: username,
+              comment: request.reason ?? null,
+              createdAt: request.createdAt,
+              updatedAt: request.updatedAt,
+              userId: request.requestedBy,
+            };
+            oooRequests.push(modifiedRequest);
+          } else {
+            oooRequests.push(request);
+          }
+        }
+      }
+      allRequests = oooRequests;
+    }
     return {
       allRequests,
       prev: prevDoc.empty ? null : prevDoc.docs[0].id,
@@ -206,4 +259,3 @@ export const getRequestByKeyValues = async (keyValues: KeyValues) => {
     throw error;
   }
 };
-
