@@ -68,3 +68,14 @@ export const INVALID_REQUEST_TYPE = "Invalid request type";
 export const INVALID_REQUEST_DEADLINE = "New deadline of the request must be greater than old deadline";
 export const REQUEST_UPDATED_SUCCESSFULLY = "Request updated successfully";
 export const UNAUTHORIZED_TO_UPDATE_REQUEST = "Unauthorized to update request";
+
+export const FEATURE_NOT_IMPLEMENTED = "Feature not implemented";
+
+export const INVALID_ACTION_PARAM = "Invalid 'action' parameter: must be either 'START' or 'STOP'";
+
+export const OPERATION_NOT_ALLOWED = "You are not allowed for this operation at the moment";
+
+export const IMPERSONATION_LOG_TYPE = {
+  SESSION_STARTED:"SESSION_STARTED",
+  SESSION_STOPPED:"SESSION_STOPPED"
+}
