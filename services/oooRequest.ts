@@ -76,8 +76,7 @@ export const createOooRequest = async (
             from: body.from,
             until: body.until,
             type: body.type,
-            requestedBy: username,
-            userId,
+            requestedBy: userId,
             reason: body.reason,
             comment: null,
             status: REQUEST_STATE.PENDING,
@@ -107,7 +106,6 @@ export const createOooRequest = async (
 /**
  * Validates an Out-Of-Office (OOO) acknowledge request
  * 
- * @param {string} requestId - The unique identifier of the request.
  * @param {string} requestType - The type of the request (expected to be 'OOO').
  * @param {string} requestStatus - The current status of the request.
  * @throws {Error} Throws an error if an issue occurs during validation.
@@ -184,7 +182,7 @@ export const acknowledgeOooRequest = async (
                 state: REQUEST_TYPE.OOO,
                 from: requestData.from,
                 endsOn: requestData.until,
-                userId: requestData.userId,
+                userId: requestData.requestedBy,
                 message: body.comment,
             });
             await createUserFutureStatus({
@@ -193,7 +191,7 @@ export const acknowledgeOooRequest = async (
                 state: statusState.UPCOMING,
                 from: requestData.from,
                 endsOn: requestData.until,
-                userId: requestData.userId,
+                userId: requestData.requestedBy,
                 message: body.comment,
                 createdAt: Date.now()
             });

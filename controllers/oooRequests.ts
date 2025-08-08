@@ -25,17 +25,22 @@ import { getUserStatus, addFutureStatus } from "../models/userStatus";
 import { createOooRequest, validateUserStatus } from "../services/oooRequest";
 import * as oooRequestService from "../services/oooRequest";
 import { CustomResponse } from "../typeDefinitions/global";
-import { AcknowledgeOooRequest, OooRequestCreateRequest, OooRequestResponse, OooStatusRequest } from "../types/oooRequest";
+import {
+  AcknowledgeOooRequest,
+  OooRequestCreateRequest,
+  OooRequestResponse,
+  OooStatusRequest,
+} from "../types/oooRequest";
 import { UpdateRequest } from "../types/requests";
 import { NextFunction } from "express";
 
 /**
  * Controller to handle the creation of OOO requests.
- * 
+ *
  * This function processes the request to create an OOO request,
  * validates the user status, checks existing requests,
  * and stores the new request in the database with logging.
- * 
+ *
  * @param {OooRequestCreateRequest} req - The Express request object containing the body with OOO details.
  * @param {CustomResponse} res - The Express response object used to send back the response.
  * @returns {Promise<OooRequestResponse>} Resolves to a response with the success or an error message.
@@ -44,7 +49,6 @@ export const createOooRequestController = async (
   req: OooRequestCreateRequest,
   res: OooRequestResponse
 ): Promise<OooRequestResponse> => {
-
   const requestBody = req.body;
   const { id: userId, username } = req.userData;
   const isUserPartOfDiscord = req.userData.roles.in_discord;
@@ -62,25 +66,26 @@ export const createOooRequestController = async (
 
     if (validationResponse) {
       if (validationResponse.error === USER_STATUS_NOT_FOUND) {
-          return res.boom.notFound(validationResponse.error);
+        return res.boom.notFound(validationResponse.error);
       }
       if (validationResponse.error === OOO_STATUS_ALREADY_EXIST) {
-          return res.boom.forbidden(validationResponse.error);
+        return res.boom.forbidden(validationResponse.error);
       }
     }
 
     const latestOooRequest: OooStatusRequest = await getRequestByKeyValues({
-        userId,
-        type: REQUEST_TYPE.OOO,
-        status: REQUEST_STATE.PENDING,
+      userId,
+      type: REQUEST_TYPE.OOO,
+      status: REQUEST_STATE.PENDING,
     });
 
     if (latestOooRequest) {
-        await addLog(logType.PENDING_REQUEST_FOUND,
-            { userId, oooRequestId: latestOooRequest.id },
-            { message: REQUEST_ALREADY_PENDING }
-        );
-        return res.boom.conflict(REQUEST_ALREADY_PENDING);
+      await addLog(
+        logType.PENDING_REQUEST_FOUND,
+        { userId, oooRequestId: latestOooRequest.id },
+        { message: REQUEST_ALREADY_PENDING }
+      );
+      return res.boom.conflict(REQUEST_ALREADY_PENDING);
     }
 
     await createOooRequest(requestBody, username, userId);
@@ -155,44 +160,47 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
 };
 
 /**
- * Acknowledges an Out-of-Office (OOO) request
- * 
- * @param {AcknowledgeOooRequest} req - The request object.
- * @param {OooRequestResponse} res - The response object.
- * @returns {Promise<OooRequestResponse>} Resolves with success or failure.
+ * Acknowledges an Out-of-Office (OOO) request. Only available to superusers
+ * and currently restricted to dev mode.
+ *
+ * @param {AcknowledgeOooRequest} req - The request object containing request parameters and user data
+ * @param {OooRequestResponse} res - The response object
+ * @param {NextFunction} next - Express next function for error handling
+ * @returns {Promise<OooRequestResponse | void>} The response object or void on error
  */
 export const acknowledgeOooRequest = async (
   req: AcknowledgeOooRequest,
   res: OooRequestResponse,
   next: NextFunction
-)
-  : Promise<OooRequestResponse> => {
-    try {
-      const dev = req.query.dev === "true";
-      if(!dev) return res.boom.notImplemented("Feature not implemented");
+): Promise<OooRequestResponse> => {
+  try {
+    const dev = req.query.dev === "true";
+    if (!dev) return res.boom.notImplemented("Feature not implemented");
 
-      const isSuperuser = req.userData?.roles?.super_user;
-      if (!isSuperuser) {
-        return res.boom.forbidden(UNAUTHORIZED_TO_UPDATE_REQUEST);
-      }
-
-      const requestBody = req.body;
-      const superUserId = req.userData.id;
-      const requestId = req.params.id;
-
-      if (!requestId) {
-        return res.boom.badRequest(REQUEST_ID_REQUIRED);
-      }
-
-      const response = await oooRequestService.acknowledgeOooRequest(requestId, requestBody, superUserId);
-
-      return res.status(200).json({
-        message: response.message,
-      });
+    const isSuperuser = req.userData?.roles?.super_user;
+    if (!isSuperuser) {
+      return res.boom.forbidden(UNAUTHORIZED_TO_UPDATE_REQUEST);
     }
-    catch(error){
-      logger.error(ERROR_WHILE_ACKNOWLEDGING_REQUEST, error);
-      next(error);
-      return res;
+
+    const requestBody = req.body;
+    const superUserId = req.userData.id;
+    const requestId = req.params.id;
+
+    const response = await oooRequestService.acknowledgeOooRequest(requestId, requestBody, superUserId);
+
+    return res.status(200).json({
+      message: response.message,
+    });
+  } catch (error) {
+    logger.error(ERROR_WHILE_ACKNOWLEDGING_REQUEST, {
+      error: error.message,
+      requestId: req.params.id,
+      superUserId: req.userData?.id,
+      requestType: req.body?.type,
+      userAgent: req.get("User-Agent"),
+      timestamp: new Date().toISOString(),
+    });
+
+    next(new Error(ERROR_WHILE_ACKNOWLEDGING_REQUEST));
   }
 };

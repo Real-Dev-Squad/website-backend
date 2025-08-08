@@ -98,7 +98,7 @@ describe("Test OOO Request Service", function() {
             expect(response).to.deep.include({
                 ...createdOOORequest,
                 id: response.id,
-                requestedBy:testUserName,
+                requestedBy: testUserId,
                 userId: testUserId
             });
         });
@@ -212,7 +212,7 @@ describe("Test OOO Request Service", function() {
         it("should throw error when approve or rejection fails", async function () {
             sinon.stub(requestModel, "getRequestById").returns(testOooRequest);
             sinon.stub(oooRequestService, "validateOooAcknowledgeRequest");
-            sinon.stub(requestModel, "updateRequest").throws(new BadRequest(errorMessage));
+            sinon.stub(requestModel, "updateRequest").resolves({ error: errorMessage });
             await acknowledgeOooRequest(
                 testOooRequest.id,
                 testAcknowledgeOooRequest,

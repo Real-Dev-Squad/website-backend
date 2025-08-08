@@ -71,7 +71,7 @@ export const updateRequest = async (id: string, body: any, lastModifiedBy: strin
   }
 };
 
-export const getRequestById = async (id: string) => {
+export const getRequestById = async (id: string): Promise<any> => {
   try {
     const requestDoc = await requestModel.doc(id).get();
 
@@ -79,7 +79,10 @@ export const getRequestById = async (id: string) => {
       throw new NotFound(REQUEST_DOES_NOT_EXIST);
     }
 
-    return requestDoc.data();
+    return {
+      id: requestDoc.id,
+      ...requestDoc.data()
+    };
   } catch (error) {
     logger.error(ERROR_WHILE_FETCHING_REQUEST, error);
     throw error;
@@ -96,14 +99,14 @@ export const getRequests = async (query: any) => {
     let requestQuery: any = requestModel;
 
     if (id) {
-      const requestDoc = await requestModel.doc(id).get();
-      if (!requestDoc.exists) {
-        return null;
+      try {
+        return await getRequestById(id);
+      } catch (error) {
+        if (error.message === REQUEST_DOES_NOT_EXIST) {
+          return null;
+        }
+        throw error;
       }
-      return {
-        id: requestDoc.id,
-        ...requestDoc.data(),
-      };
     }
 
     if (requestedBy && dev) {
@@ -193,8 +196,8 @@ export const getRequests = async (query: any) => {
       } else {
         for (const request of allRequests) {
           if (request.state) {
-            const userResponse: any = await fetchUser({ userId: request.requestedBy });
-            const username = userResponse.user.username;
+            // const userResponse: any = await fetchUser({ userId: request.requestedBy });
+            // const username = userResponse.user.username;
 
             const modifiedRequest = {
               id: request.id,
@@ -204,11 +207,10 @@ export const getRequests = async (query: any) => {
               reason: request.message,
               status: request.state,
               lastModifiedBy: request.lastModifiedBy ?? null,
-              requestedBy: username,
+              requestedBy: request.requestedBy,
               comment: request.reason ?? null,
               createdAt: request.createdAt,
               updatedAt: request.updatedAt,
-              userId: request.requestedBy,
             };
             oooRequests.push(modifiedRequest);
           } else {

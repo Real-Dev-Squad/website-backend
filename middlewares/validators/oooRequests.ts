@@ -55,7 +55,8 @@ const schema = joi
         "any.only": "status must be APPROVED or REJECTED",
       }),
     type: joi.string().equal(REQUEST_TYPE.OOO).required().messages({
-      "type.any": "type is required",
+      "any.required": "type is required",
+      "any.only": "type must be OOO"
     })
   });
 
@@ -76,7 +77,7 @@ export const acknowledgeOooRequest = async (
     await schema.validateAsync(req.body, { abortEarly: false });
     next();
   } catch (error) {
-    const errorMessages = error.details.map((detail:{message: string}) => detail.message);
+    const errorMessages = error.details.map((detail) => detail.message);
     logger.error(`Error while validating request payload : ${errorMessages}`);
     return res.boom.badRequest(errorMessages);
   }

@@ -66,10 +66,12 @@ export const getRequestsController = async (req: any, res: any) => {
          });
        }
 
-    const { allRequests, next, prev, page } = requests;
-    if (allRequests.length === 0) {
-      return res.status(204).send();
-    }
+    // Check if this is a single request or paginated results
+    if ('allRequests' in requests) {
+      const { allRequests, next, prev, page } = requests;
+      if (allRequests.length === 0) {
+        return res.status(204).send();
+      }
 
     if (page) {
       const pageLink = `/requests?page=${page}`;
@@ -107,6 +109,7 @@ export const getRequestsController = async (req: any, res: any) => {
       next: nextUrl,
       prev: prevUrl,
     });
+    }
   } catch (err) {
     logger.error(ERROR_WHILE_FETCHING_REQUEST, err);
     return res.boom.badImplementation(ERROR_WHILE_FETCHING_REQUEST);

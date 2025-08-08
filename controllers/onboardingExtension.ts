@@ -107,7 +107,7 @@ export const createOnboardingExtensionRequestController = async (
             type: REQUEST_TYPE.ONBOARDING,
             state: REQUEST_STATE.PENDING,
             userId: userId,
-            requestedBy: username,
+            requestedBy: userId,
             oldEndsOn: oldEndsOn,
             newEndsOn: newEndsOn,
             reason: data.reason,
