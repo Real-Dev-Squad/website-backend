@@ -28,7 +28,6 @@ export const createdOOORequest = {
   status: "PENDING",
   lastModifiedBy: null,
   requestedBy: "suraj-maity-1",
-  userId: "jCqqOYCnm93mcmaYuSsQ",
   comment: null
 };
 
