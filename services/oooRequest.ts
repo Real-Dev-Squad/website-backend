@@ -155,7 +155,7 @@ export const acknowledgeOooRequest = async (
 
         const requestResult = await updateRequest(requestId, body, superUserId, REQUEST_TYPE.OOO);
 
-        if ("error" in requestResult) {
+        if (requestResult.error) {
             throw new BadRequest(requestResult.error);
         }
 

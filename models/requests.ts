@@ -71,7 +71,7 @@ export const updateRequest = async (id: string, body: any, lastModifiedBy: strin
   }
 };
 
-export const getRequestById = async (id: string): Promise<any> => {
+export const getRequestById = async (id: string): Promise<{ id: string; [key: string]: any }> => {
   try {
     const requestDoc = await requestModel.doc(id).get();
 
@@ -196,8 +196,6 @@ export const getRequests = async (query: any) => {
       } else {
         for (const request of allRequests) {
           if (request.state) {
-            // const userResponse: any = await fetchUser({ userId: request.requestedBy });
-            // const username = userResponse.user.username;
 
             const modifiedRequest = {
               id: request.id,
