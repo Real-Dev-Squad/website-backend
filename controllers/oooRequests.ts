@@ -174,9 +174,21 @@ export const acknowledgeOooRequest = async (
   next: NextFunction
 ): Promise<OooRequestResponse> => {
   try {
+    const dev = req.query.dev === "true";
+    if(!dev) return res.boom.notImplemented("Feature not implemented");
+
+    const isSuperuser = req.userData?.roles?.super_user;
+    if (!isSuperuser) {
+      return res.boom.forbidden(UNAUTHORIZED_TO_UPDATE_REQUEST);
+    }
+
     const requestBody = req.body;
     const superUserId = req.userData.id;
     const requestId = req.params.id;
+
+    if (!requestId) {
+      return res.boom.badRequest(REQUEST_ID_REQUIRED);
+    }
 
     const response = await oooRequestService.acknowledgeOooRequest(requestId, requestBody, superUserId);
 

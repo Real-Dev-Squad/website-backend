@@ -23,6 +23,6 @@ import { verifyDiscordBot } from "../middlewares/authorizeBot";
 router.get("/", getRequestsMiddleware, getRequestsController);
 router.post("/", skipAuthenticateForOnboardingExtensionRequest(authenticate, verifyDiscordBot), createRequestsMiddleware, createRequestController);
 router.put("/:id",authenticate, authorizeRoles([SUPERUSER]), updateRequestsMiddleware, updateRequestController);
-router.patch("/:id", authenticate, devFlagMiddleware, authorizeRoles([SUPERUSER]), updateRequestValidator, updateRequestBeforeAcknowledgedController);
+router.patch("/:id", authenticate, updateRequestValidator, updateRequestBeforeAcknowledgedController);
 module.exports = router;
 
