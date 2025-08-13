@@ -208,11 +208,11 @@ export const acknowledgeOooRequest = async (
     
     if (error.statusCode === 409) {
       return res.boom.conflict(error.message);
-    }
-    if (error.statusCode === 400) {
+    } else if (error.statusCode === 400) {
       return res.boom.badRequest(error.message);
+    } else {
+      
+      next(new Error(ERROR_WHILE_ACKNOWLEDGING_REQUEST));
     }
-
-    next(new Error(ERROR_WHILE_ACKNOWLEDGING_REQUEST));
   }
 };
