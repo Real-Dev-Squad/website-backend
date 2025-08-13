@@ -205,6 +205,14 @@ export const acknowledgeOooRequest = async (
       timestamp: new Date().toISOString(),
     });
 
+    
+    if (error.statusCode === 409) {
+      return res.boom.conflict(error.message);
+    }
+    if (error.statusCode === 400) {
+      return res.boom.badRequest(error.message);
+    }
+
     next(new Error(ERROR_WHILE_ACKNOWLEDGING_REQUEST));
   }
 };

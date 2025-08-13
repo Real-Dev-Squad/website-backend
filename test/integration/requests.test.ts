@@ -425,8 +425,7 @@ describe("/requests OOO", function () {
           if (err) {
             return done(err);
           }
-          // The system currently returns 500 for already approved requests due to error handling
-          expect(res.statusCode).to.equal(500);
+          expect(res.statusCode).to.equal(409);
           done();
         });
     });
@@ -441,8 +440,7 @@ describe("/requests OOO", function () {
           if (err) {
             return done(err);
           }
-          // The system currently returns 500 for already rejected requests due to error handling
-          expect(res.statusCode).to.equal(500);
+          expect(res.statusCode).to.equal(409);
           done();
         });
     });
@@ -457,8 +455,7 @@ describe("/requests OOO", function () {
           if (err) {
             return done(err);
           }
-          // The system currently returns 500 for invalid request types due to error handling
-          expect(res.statusCode).to.equal(500);
+          expect(res.statusCode).to.equal(400);
           done();
         });
     });
