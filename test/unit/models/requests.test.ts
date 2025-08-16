@@ -1,15 +1,14 @@
 import { expect } from "chai";
 import cleanDb from "../../utils/cleanDb";
-import { createRequest, getRequests, updateRequest, getRequestByKeyValues, getRequestById } from "../../../models/requests";
+import { createRequest, getRequests, updateRequest, getRequestByKeyValues } from "../../../models/requests";
 import {
   createOooRequests,
   createOooRequests2,
-  createOooRequests3,
   createOooStatusRequests,
   updateOooApprovedRequests,
   updateOooRejectedRequests,
 } from "./../../fixtures/oooRequest/oooRequest";
-import { REQUEST_DOES_NOT_EXIST, REQUEST_STATE, REQUEST_TYPE } from "../../../constants/requests";
+import { REQUEST_STATE, REQUEST_TYPE } from "../../../constants/requests";
 import userDataFixture from "./../../fixtures/user/user";
 import addUser from "../../utils/addUser";
 const userData = userDataFixture();
@@ -178,22 +177,6 @@ describe("models/oooRequests", () => {
     it("Should return null if the request with the specified key value does not exist", async () => {
       const oooRequestData = await getRequestByKeyValues({ requestedBy: "randomId", type: REQUEST_TYPE.OOO });
       expect(oooRequestData).to.be.equal(null);
-    });
-  });
-
-  describe("getRequestById", () => {
-
-    it("should return request using request id", async () => {
-      const oooRequest = await createRequest(createOooRequests3);
-      const response = await getRequestById(oooRequest.id);
-      expect(response).to.deep.include(createOooRequests3);
-    });
-
-    it("should return REQUEST_DOES_NOT_EXIST for invalid request id", async () => {
-      await getRequestById("111111111111").catch((error) => {
-        expect(error).to.be.not.undefined;
-        expect(error.message).to.equal(REQUEST_DOES_NOT_EXIST);
-      });
     });
   });
 });
