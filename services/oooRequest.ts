@@ -170,6 +170,7 @@ export const acknowledgeOooRequest = async (
                 requestId,
                 action: LOG_ACTION.UPDATE,
                 userId: superUserId,
+                createdAt: Date.now(),
             },
             body: requestResult,
         };

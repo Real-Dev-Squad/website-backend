@@ -3,7 +3,7 @@ const router = express.Router();
 const authorizeRoles = require("../middlewares/authorizeRoles");
 const { SUPERUSER } = require("../constants/roles");
 import authenticate from "../middlewares/authenticate";
-import { devFlagMiddleware } from "../middlewares/devFlag";
+import { conditionalOooChecks } from "../middlewares/conditionalOooChecks";
 import { 
     createRequestsMiddleware, 
     updateRequestsMiddleware,
@@ -19,10 +19,9 @@ import {
 import { skipAuthenticateForOnboardingExtensionRequest } from "../middlewares/skipAuthenticateForOnboardingExtension";
 import { verifyDiscordBot } from "../middlewares/authorizeBot";
 
-
 router.get("/", getRequestsMiddleware, getRequestsController);
 router.post("/", skipAuthenticateForOnboardingExtensionRequest(authenticate, verifyDiscordBot), createRequestsMiddleware, createRequestController);
 router.put("/:id",authenticate, authorizeRoles([SUPERUSER]), updateRequestsMiddleware, updateRequestController);
-router.patch("/:id", authenticate, updateRequestValidator, updateRequestBeforeAcknowledgedController);
+router.patch("/:id", authenticate, conditionalOooChecks, updateRequestValidator, updateRequestBeforeAcknowledgedController);
 module.exports = router;
 

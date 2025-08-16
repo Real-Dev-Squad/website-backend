@@ -9,7 +9,6 @@ import {
 } from "../constants/requests";
 import { getUserId } from "../utils/users";
 import { NotFound } from "http-errors";
-import { fetchUser } from "./users";
 const SIZE = 5;
 
 export const createRequest = async (body: any) => {
@@ -39,12 +38,17 @@ export const updateRequest = async (id: string, body: any, lastModifiedBy: strin
         error: REQUEST_DOES_NOT_EXIST,
       };
     }
-    if (existingRequestDoc.data().state === REQUEST_STATE.APPROVED) {
+    
+   
+    const statusField = type === REQUEST_TYPE.OOO ? 'status' : 'state';
+    const currentStatus = existingRequestDoc.data()[statusField];
+    
+    if (currentStatus === REQUEST_STATE.APPROVED) {
       return {
         error: REQUEST_ALREADY_APPROVED,
       };
     }
-    if (existingRequestDoc.data().state === REQUEST_STATE.REJECTED) {
+    if (currentStatus === REQUEST_STATE.REJECTED) {
       return {
         error: REQUEST_ALREADY_REJECTED,
       };
@@ -120,7 +124,9 @@ export const getRequests = async (query: any) => {
       requestQuery = requestQuery.where("type", "==", type);
     }
     if (state) {
-      requestQuery = requestQuery.where("state", "==", state);
+     
+      const fieldName = type === REQUEST_TYPE.OOO ? 'status' : 'state';
+      requestQuery = requestQuery.where(fieldName, "==", state);
     }
 
     requestQuery = requestQuery.orderBy("createdAt", "desc");
@@ -195,15 +201,15 @@ export const getRequests = async (query: any) => {
         }
       } else {
         for (const request of allRequests) {
-          if (request.state) {
-
+          
+          if (request.status) {
             const modifiedRequest = {
               id: request.id,
               type: request.type,
               from: request.from,
               until: request.until,
               reason: request.message,
-              status: request.state,
+              status: request.status,
               lastModifiedBy: request.lastModifiedBy ?? null,
               requestedBy: request.requestedBy,
               comment: request.reason ?? null,

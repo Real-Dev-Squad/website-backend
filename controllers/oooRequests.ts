@@ -74,7 +74,7 @@ export const createOooRequestController = async (
     }
 
     const latestOooRequest: OooStatusRequest = await getRequestByKeyValues({
-      userId,
+      requestedBy: userId,
       type: REQUEST_TYPE.OOO,
       status: REQUEST_STATE.PENDING,
     });
@@ -113,7 +113,7 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
       return res.boom.badRequest(requestResult.error);
     }
     const [logType, returnMessage] =
-      requestResult.state === REQUEST_STATE.APPROVED
+      requestResult.status === REQUEST_STATE.APPROVED
         ? [REQUEST_LOG_TYPE.REQUEST_APPROVED, REQUEST_APPROVED_SUCCESSFULLY]
         : [REQUEST_LOG_TYPE.REQUEST_REJECTED, REQUEST_REJECTED_SUCCESSFULLY];
 
@@ -128,7 +128,7 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
       body: requestResult,
     };
     await addLog(requestLog.type, requestLog.meta, requestLog.body);
-    if (requestResult.state === REQUEST_STATE.APPROVED) {
+    if (requestResult.status === REQUEST_STATE.APPROVED) {
       const requestData = await getRequests({ id: requestId });
 
       if (requestData) {
@@ -160,8 +160,8 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
 };
 
 /**
- * Acknowledges an Out-of-Office (OOO) request. Only available to superusers
- * and currently restricted to dev mode.
+ * Acknowledges an Out-of-Office (OOO) request. 
+ * Devflag and superuser checks are handled by conditionalOooChecks middleware.
  *
  * @param {AcknowledgeOooRequest} req - The request object containing request parameters and user data
  * @param {OooRequestResponse} res - The response object
@@ -174,13 +174,6 @@ export const acknowledgeOooRequest = async (
   next: NextFunction
 ): Promise<OooRequestResponse> => {
   try {
-    const dev = req.query.dev === "true";
-    if(!dev) return res.boom.notImplemented("Feature not implemented");
-
-    const isSuperuser = req.userData?.roles?.super_user;
-    if (!isSuperuser) {
-      return res.boom.forbidden(UNAUTHORIZED_TO_UPDATE_REQUEST);
-    }
 
     const requestBody = req.body;
     const superUserId = req.userData.id;
