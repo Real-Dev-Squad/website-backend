@@ -76,7 +76,7 @@ export const createOooRequest = async (
             from: body.from,
             until: body.until,
             type: body.type,
-            requestedBy: userId,
+            requestedBy: username,
             reason: body.reason,
             comment: null,
             status: REQUEST_STATE.PENDING,
