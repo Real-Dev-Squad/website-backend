@@ -5,14 +5,14 @@
   "scripts": {
     "start": "node ./dist/server.js",
     "tsc": "tsc",
-    "postinstall": "yarn run tsc",
+    "postinstall": "pnpm tsc",
     "dev": "cross-env NODE_ENV=development ts-node-dev server.js",
     "lint": "eslint .",
     "lint-fix": "eslint . --fix",
     "validate-setup": "node scripts/validateSetup.js",
     "test-integration": "sh scripts/tests/testIntegration.sh",
     "test-unit": "sh scripts/tests/testUnit.sh",
-    "test": "yarn lint && yarn test-unit && yarn test-integration",
+    "test": "pnpm lint && pnpm test-unit && pnpm test-integration",
     "tdd:watch": "sh scripts/tests/tdd.sh"
   },
   "dependencies": {
@@ -33,6 +33,7 @@
     "joi": "17.12.2",
     "jsdoc": "4.0.2",
     "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.21",
     "morgan": "1.10.0",
     "multer": "1.4.5-lts.1",
     "newrelic": "11.19.0",
@@ -85,6 +86,7 @@
   ],
   "volta": {
     "node": "22.10.0",
-    "yarn": "1.22.21"
-  }
+    "pnpm": "10.14.0"
+  },
+  "packageManager": "pnpm@10.14.0"
 }
