@@ -95,8 +95,8 @@ describe("Test OOO Request Service", function() {
             expect(response).to.deep.include({
                 ...createdOOORequest,
                 id: response.id,
-                requestedBy:testUserName,
-                userId: testUserId
+                requestedBy: testUserId, 
+                
             });
         });
 

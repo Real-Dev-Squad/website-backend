@@ -188,7 +188,7 @@ describe("/requests OOO", function () {
           expect(res.body).to.not.have.property("data");
 
           await requestsQuery.getRequestByKeyValues({
-            userId: testUserId,
+            requestedBy: testUserId,
             type: REQUEST_TYPE.OOO,
             status: REQUEST_STATE.PENDING
           }).then((request) => {

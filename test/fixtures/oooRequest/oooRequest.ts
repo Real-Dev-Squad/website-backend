@@ -27,8 +27,7 @@ export const createdOOORequest = {
   reason: validOooStatusRequests.reason,
   status: "PENDING",
   lastModifiedBy: null,
-  requestedBy: "suraj-maity-1",
-  userId: "jCqqOYCnm93mcmaYuSsQ",
+  requestedBy: "jCqqOYCnm93mcmaYuSsQ",
   comment: null
 };
 
@@ -87,7 +86,7 @@ export const createOooRequests = {
   from: Date.now() + 100000,
   until: Date.now() + 200000,
   message: "Out of office for personal reasons.",
-  state: REQUEST_STATE.PENDING,
+  status: REQUEST_STATE.PENDING,
 };
 export const createOooRequests2 = {
   requestedBy: "testUser2",
@@ -95,7 +94,7 @@ export const createOooRequests2 = {
   from: Date.now() + 100000,
   until: Date.now() + 200000,
   message: "Out of office for personal reasons.",
-  state: REQUEST_STATE.PENDING,
+  status: REQUEST_STATE.PENDING,
 };
 
 
