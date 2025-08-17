@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-identitystore": "^3.864.0",
+    "@google-cloud/firestore": "^7.11.3",
     "@types/nodemailer": "^7.0.0",
     "axios": "^1.11.0",
     "cloudinary": "^2.7.0",

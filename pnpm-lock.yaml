@@ -11,6 +11,9 @@ importers:
       '@aws-sdk/client-identitystore':
         specifier: ^3.864.0
         version: 3.864.0
+      '@google-cloud/firestore':
+        specifier: ^7.11.3
+        version: 7.11.3(encoding@0.1.13)
       '@types/nodemailer':
         specifier: ^7.0.0
         version: 7.0.0
@@ -5858,7 +5861,6 @@ snapshots:
     transitivePeerDependencies:
       - encoding
       - supports-color
-    optional: true
 
   '@google-cloud/paginator@5.0.2':
     dependencies:
@@ -8586,8 +8588,7 @@ snapshots:
       hasown: 2.0.2
       is-callable: 1.2.7
 
-  functional-red-black-tree@1.0.1:
-    optional: true
+  functional-red-black-tree@1.0.1: {}
 
   functions-have-names@1.2.3: {}
 
