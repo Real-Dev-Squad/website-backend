@@ -10,11 +10,9 @@ export type ImpersonationRequest = {
     status: REQUEST_STATE;
     isImpersonationFinished: boolean;
     createdBy: string;
-    createdFor: string;
-    userId: string;
     reason: string;
     message?: string;
-    impersonatedUserId: string;
+    createdFor: string;
     createdAt: Timestamp;
     updatedAt: Timestamp;
     startedAt?: Timestamp;
@@ -22,7 +20,7 @@ export type ImpersonationRequest = {
 }
 
 export type CreateImpersonationRequestBody = {
-   impersonatedUserId: string;
+   createdFor: string;
    reason: string;
 };
 
@@ -30,10 +28,8 @@ export type CreateImpersonationRequestModelDto = {
     status: REQUEST_STATE;
     isImpersonationFinished: boolean;
     createdBy: string;
-    createdFor: string;
-    userId: string;
     reason: string;
-    impersonatedUserId: string;
+    createdFor: string;
 }
 
 export type UpdateImpersonationRequestDataBody = {
@@ -117,9 +113,8 @@ export type GetImpersonationControllerRequest = Request & {
 }
 
 export type CreateImpersonationRequestServiceBody={
-   userId: string;
    createdBy: string;
-   impersonatedUserId: string;
+   createdFor: string;
    reason: string;
 }
 

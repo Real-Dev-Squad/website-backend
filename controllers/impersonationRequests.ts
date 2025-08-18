@@ -37,14 +37,12 @@ export const createImpersonationRequestController = async (
   next: NextFunction
 ): Promise<ImpersonationRequestResponse | void> => {
   try {
-    const { impersonatedUserId, reason } = req.body as CreateImpersonationRequestBody;
+    const { createdFor, reason } = req.body as CreateImpersonationRequestBody;
     const userId = req.userData?.id;
-    const createdBy = req.userData?.username;
 
     const impersonationRequest = await createImpersonationRequestService({
-      userId,
-      createdBy,
-      impersonatedUserId,
+      createdBy: userId,
+      createdFor,
       reason
     });
 
