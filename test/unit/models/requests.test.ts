@@ -115,14 +115,14 @@ describe("models/oooRequests", () => {
     it("Should return a list of all the requests with specified state - APPROVED", async () => {
       const oooRequest: any = await createRequest(createOooStatusRequests);
       await updateRequest(oooRequest.id, updateOooApprovedRequests, updateOooApprovedRequests.lastModifiedBy, REQUEST_TYPE.OOO)
-      const query = { dev: "true", state: REQUEST_STATE.APPROVED };
+      const query = { dev: "true", type: REQUEST_TYPE.OOO, state: REQUEST_STATE.APPROVED };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData.allRequests[0].state).to.be.equal(REQUEST_STATE.APPROVED);
     });
 
     it("Should return a list of all the requests with specified state - PENDING", async () => {
       await createRequest(createOooStatusRequests);
-      const query = { dev: "true", state: REQUEST_STATE.PENDING };
+      const query = { dev: "true", type: REQUEST_TYPE.OOO, state: REQUEST_STATE.PENDING };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData.allRequests[0].state).to.be.equal(REQUEST_STATE.PENDING);
     });
@@ -144,7 +144,7 @@ describe("models/oooRequests", () => {
     });
 
     it("Should return empty array if no data is found", async () => {
-      const query = { dev: "true", state: REQUEST_STATE.PENDING };
+      const query = { dev: "true", type: REQUEST_TYPE.OOO, state: REQUEST_STATE.PENDING };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData).to.be.equal(null);
     });

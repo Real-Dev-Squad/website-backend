@@ -62,9 +62,33 @@ export const updateRequest = async (id: string, body: any, lastModifiedBy: strin
     const requestBody: any = {
       updatedAt: Date.now(),
       lastModifiedBy,
-      ...body,
     };
+    
+    
+    if (type === REQUEST_TYPE.OOO && body.state !== undefined) {
+      requestBody.status = body.state;
+      
+      Object.keys(body).forEach(key => {
+        if (key !== 'state') {
+          requestBody[key] = body[key];
+        }
+      });
+    } else {
+      
+      Object.assign(requestBody, body);
+    }
+    
     await requestModel.doc(id).update(requestBody);
+    
+   
+    if (type === REQUEST_TYPE.OOO && body.state !== undefined) {
+      return {
+        id,
+        state: body.state, 
+        ...requestBody,
+      };
+    }
+    
     return {
       id,
       ...requestBody,
@@ -124,9 +148,18 @@ export const getRequests = async (query: any) => {
       requestQuery = requestQuery.where("type", "==", type);
     }
     if (state) {
-     
       const fieldName = type === REQUEST_TYPE.OOO ? 'status' : 'state';
       requestQuery = requestQuery.where(fieldName, "==", state);
+    }
+    
+    // Handle status field for OOO requests
+    if (query.status && type === REQUEST_TYPE.OOO) {
+      requestQuery = requestQuery.where("status", "==", query.status);
+    }
+    
+    // Ensure OOO requests are properly filtered when type is specified
+    if (type === REQUEST_TYPE.OOO && state) {
+      requestQuery = requestQuery.where("status", "==", state);
     }
 
     requestQuery = requestQuery.orderBy("createdAt", "desc");
@@ -209,7 +242,7 @@ export const getRequests = async (query: any) => {
               from: request.from,
               until: request.until,
               reason: request.message,
-              status: request.status,
+              state: request.status, // Map status to state for consistent API
               lastModifiedBy: request.lastModifiedBy ?? null,
               requestedBy: request.requestedBy,
               comment: request.reason ?? null,

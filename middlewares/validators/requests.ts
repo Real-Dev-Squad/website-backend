@@ -92,6 +92,10 @@ export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: O
       .string()
       .valid(REQUEST_STATE.APPROVED, REQUEST_STATE.PENDING, REQUEST_STATE.REJECTED)
       .optional(),
+    status: joi
+      .string()
+      .valid(REQUEST_STATE.APPROVED, REQUEST_STATE.PENDING, REQUEST_STATE.REJECTED)
+      .optional(),
     page: joi.number().integer().min(0).when("next", {
       is: joi.exist(),
       then: joi.forbidden().messages({

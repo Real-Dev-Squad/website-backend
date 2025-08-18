@@ -160,18 +160,32 @@ describe("/requests OOO", function () {
     });
 
     it("should return 500 response when creating OOO request fails", function (done) {
-      sinon.stub(requestsQuery, "createRequest")
-      .throws("Error while creating OOO request");
-      chai.request(app)
-        .post(requestsEndpoint)
-        .set("cookie", `${cookieName}=${authToken}`)
-        .send(validOooStatusRequests)
-        .end(function (err, res) {
-          if (err) return done(err);
-          expect(res.statusCode).to.equal(500);
-          expect(res.body.message).to.equal("An internal server error occurred");
-          done();
-        });
+      
+      addUser(userData[17]).then(async (freshUserId) => {
+        
+        const testUserStatus = {
+          currentStatus: {
+            state: userState.ACTIVE
+          }
+        };
+        await updateUserStatus(freshUserId, testUserStatus);
+        
+        const freshAuthToken = authService.generateAuthToken({ userId: freshUserId });
+        
+        sinon.stub(requestsQuery, "createRequest")
+        .throws("Error while creating OOO request");
+        
+        chai.request(app)
+          .post(requestsEndpoint)
+          .set("cookie", `${cookieName}=${freshAuthToken}`)
+          .send(validOooStatusRequests)
+          .end(function (err, res) {
+            if (err) return done(err);
+            expect(res.statusCode).to.equal(500);
+            expect(res.body.message).to.equal("An internal server error occurred");
+            done();
+          });
+      }).catch(done);
     });
 
     it("should create a new request when dev is true", function (done) {
@@ -587,7 +601,7 @@ describe("/requests OOO", function () {
           expect(res.body.data[0]).to.have.property("id");
           expect(res.body.data[0]).to.have.property("requestedBy");
           expect(res.body.data[0]).to.have.property("type");
-          expect(res.body.data[0]).to.have.property("state");
+          expect(res.body.data[0]).to.have.property("status");
           expect(res.body.data[0]).to.have.property("message");
           done();
         });
@@ -615,13 +629,13 @@ describe("/requests OOO", function () {
         });
     });
 
-    it("should return all requests by specific user and state", function (done) {
+    it("should return all requests by specific user and status", function (done) {
       chai
         .request(app)
-        .get(`/requests?state=APPROVED&requestedBy=${userData[16].username}`)
+        .get(`/requests?status=APPROVED&requestedBy=${userData[16].username}`)
         .end(function (err, res) {
           expect(res).to.have.status(200);
-          expect(res.body.data.every((e: any) => e.state === "APPROVED"));
+          expect(res.body.data.every((e: any) => e.status === "APPROVED"));
           expect(res.body.data.every((e: any) => e.requestedBy === testUserId));
           done();
         });
