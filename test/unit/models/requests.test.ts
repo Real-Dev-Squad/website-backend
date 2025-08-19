@@ -121,7 +121,7 @@ describe("models/oooRequests", () => {
     });
 
     it("Should return a list of all the requests with specified state - PENDING", async () => {
-      await createRequest(createOooStatusRequests);
+      const oooRequest = await createRequest(createOooStatusRequests);
       const query = { dev: "true", type: REQUEST_TYPE.OOO, state: REQUEST_STATE.PENDING };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData.allRequests[0].state).to.be.equal(REQUEST_STATE.PENDING);
