@@ -1,6 +1,6 @@
 import firestore from "../utils/firestore";
 const requestModel = firestore.collection("requests");
-import { REQUEST_ALREADY_APPROVED, REQUEST_ALREADY_REJECTED, REQUEST_STATE } from "../constants/requests";
+import { REQUEST_ALREADY_APPROVED, REQUEST_ALREADY_REJECTED, REQUEST_STATE, REQUEST_TYPE } from "../constants/requests";
 import {
   ERROR_WHILE_FETCHING_REQUEST,
   ERROR_WHILE_CREATING_REQUEST,
@@ -8,6 +8,7 @@ import {
   REQUEST_DOES_NOT_EXIST,
 } from "../constants/requests";
 import { getUserId } from "../utils/users";
+import { NotFound } from "http-errors";
 const SIZE = 5;
 
 export const createRequest = async (body: any) => {
@@ -29,7 +30,7 @@ export const createRequest = async (body: any) => {
   }
 };
 
-export const updateRequest = async (id: string, body: any, lastModifiedBy: string, type:string) => {
+export const updateRequest = async (id: string, body: any, lastModifiedBy: string, type: string) => {
   try {
     const existingRequestDoc = await requestModel.doc(id).get();
     if (!existingRequestDoc.exists) {
@@ -37,12 +38,17 @@ export const updateRequest = async (id: string, body: any, lastModifiedBy: strin
         error: REQUEST_DOES_NOT_EXIST,
       };
     }
-    if (existingRequestDoc.data().state === REQUEST_STATE.APPROVED) {
+    
+   
+    const statusField = type === REQUEST_TYPE.OOO ? 'status' : 'state';
+    const currentStatus = existingRequestDoc.data()[statusField];
+    
+    if (currentStatus === REQUEST_STATE.APPROVED) {
       return {
         error: REQUEST_ALREADY_APPROVED,
       };
     }
-    if (existingRequestDoc.data().state === REQUEST_STATE.REJECTED) {
+    if (currentStatus === REQUEST_STATE.REJECTED) {
       return {
         error: REQUEST_ALREADY_REJECTED,
       };
@@ -56,15 +62,57 @@ export const updateRequest = async (id: string, body: any, lastModifiedBy: strin
     const requestBody: any = {
       updatedAt: Date.now(),
       lastModifiedBy,
-      ...body,
     };
+    
+    
+    if (type === REQUEST_TYPE.OOO && body.state !== undefined) {
+      requestBody.status = body.state;
+      
+      Object.keys(body).forEach(key => {
+        if (key !== 'state') {
+          requestBody[key] = body[key];
+        }
+      });
+    } else {
+      
+      Object.assign(requestBody, body);
+    }
+    
     await requestModel.doc(id).update(requestBody);
+    
+   
+    if (type === REQUEST_TYPE.OOO && body.state !== undefined) {
+      return {
+        id,
+        state: body.state, 
+        ...requestBody,
+      };
+    }
+    
     return {
       id,
       ...requestBody,
     };
   } catch (error) {
     logger.error(ERROR_WHILE_UPDATING_REQUEST, error);
+    throw error;
+  }
+};
+
+export const getRequestById = async (id: string): Promise<{ id: string; [key: string]: any }> => {
+  try {
+    const requestDoc = await requestModel.doc(id).get();
+
+    if (!requestDoc.exists) {
+      throw new NotFound(REQUEST_DOES_NOT_EXIST);
+    }
+
+    return {
+      id: requestDoc.id,
+      ...requestDoc.data()
+    };
+  } catch (error) {
+    logger.error(ERROR_WHILE_FETCHING_REQUEST, error);
     throw error;
   }
 };
@@ -79,20 +127,19 @@ export const getRequests = async (query: any) => {
     let requestQuery: any = requestModel;
 
     if (id) {
-      const requestDoc = await requestModel.doc(id).get();
-      if (!requestDoc.exists) {
-        return null;
+      try {
+        return await getRequestById(id);
+      } catch (error) {
+        if (error.message === REQUEST_DOES_NOT_EXIST) {
+          return null;
+        }
+        throw error;
       }
-      return {
-        id: requestDoc.id,
-        ...requestDoc.data(),
-      };
     }
-    
-    if(requestedBy && dev){
+
+    if (requestedBy && dev) {
       requestQuery = requestQuery.where("requestedBy", "==", requestedBy);
-    }
-    else if (requestedBy) {
+    } else if (requestedBy) {
       const requestedByUserId = await getUserId(requestedBy);
       requestQuery = requestQuery.where("requestedBy", "==", requestedByUserId);
     }
@@ -101,7 +148,18 @@ export const getRequests = async (query: any) => {
       requestQuery = requestQuery.where("type", "==", type);
     }
     if (state) {
-      requestQuery = requestQuery.where("state", "==", state);
+      const fieldName = type === REQUEST_TYPE.OOO ? 'status' : 'state';
+      requestQuery = requestQuery.where(fieldName, "==", state);
+    }
+    
+    // Handle status field for OOO requests
+    if (query.status && type === REQUEST_TYPE.OOO) {
+      requestQuery = requestQuery.where("status", "==", query.status);
+    }
+    
+    // Ensure OOO requests are properly filtered when type is specified
+    if (type === REQUEST_TYPE.OOO && state) {
+      requestQuery = requestQuery.where("status", "==", state);
     }
 
     requestQuery = requestQuery.orderBy("createdAt", "desc");
@@ -149,6 +207,56 @@ export const getRequests = async (query: any) => {
       return null;
     }
 
+    // todo: remove this once previous OOO requests are removed form the database
+    // @ankush and @suraj had a discussion to manually update or remove the previous OOO requests
+    if (type === REQUEST_TYPE.OOO) {
+      const oooRequests = [];
+      if (!dev) {
+        for (const request of allRequests) {
+          if (request.status) {
+            const modifiedRequest = {
+              id: request.id,
+              type: request.type,
+              from: request.from,
+              until: request.until,
+              message: request.reason,
+              state: request.status,
+              lastModifiedBy: request.lastModifiedBy ?? "",
+              requestedBy: request.userId,
+              reason: request.comment ?? "",
+              createdAt: request.createdAt,
+              updatedAt: request.updatedAt,
+            };
+            oooRequests.push(modifiedRequest);
+          } else {
+            oooRequests.push(request);
+          }
+        }
+      } else {
+        for (const request of allRequests) {
+          
+          if (request.status) {
+            const modifiedRequest = {
+              id: request.id,
+              type: request.type,
+              from: request.from,
+              until: request.until,
+              reason: request.message,
+              state: request.status, // Map status to state for consistent API
+              lastModifiedBy: request.lastModifiedBy ?? null,
+              requestedBy: request.requestedBy,
+              comment: request.reason ?? null,
+              createdAt: request.createdAt,
+              updatedAt: request.updatedAt,
+            };
+            oooRequests.push(modifiedRequest);
+          } else {
+            oooRequests.push(request);
+          }
+        }
+      }
+      allRequests = oooRequests;
+    }
     return {
       allRequests,
       prev: prevDoc.empty ? null : prevDoc.docs[0].id,
@@ -190,4 +298,3 @@ export const getRequestByKeyValues = async (keyValues: KeyValues) => {
     throw error;
   }
 };
-

@@ -12,6 +12,9 @@ import {
   REQUEST_ALREADY_PENDING,
   USER_STATUS_NOT_FOUND,
   OOO_STATUS_ALREADY_EXIST,
+  UNAUTHORIZED_TO_UPDATE_REQUEST,
+  ERROR_WHILE_ACKNOWLEDGING_REQUEST,
+  REQUEST_ID_REQUIRED,
 } from "../constants/requests";
 import { statusState } from "../constants/userStatus";
 import { logType } from "../constants/logs";
@@ -20,17 +23,24 @@ import { getRequestByKeyValues, getRequests, updateRequest } from "../models/req
 import { createUserFutureStatus } from "../models/userFutureStatus";
 import { getUserStatus, addFutureStatus } from "../models/userStatus";
 import { createOooRequest, validateUserStatus } from "../services/oooRequest";
+import * as oooRequestService from "../services/oooRequest";
 import { CustomResponse } from "../typeDefinitions/global";
-import { OooRequestCreateRequest, OooRequestResponse, OooStatusRequest } from "../types/oooRequest";
+import {
+  AcknowledgeOooRequest,
+  OooRequestCreateRequest,
+  OooRequestResponse,
+  OooStatusRequest,
+} from "../types/oooRequest";
 import { UpdateRequest } from "../types/requests";
+import { NextFunction } from "express";
 
 /**
  * Controller to handle the creation of OOO requests.
- * 
+ *
  * This function processes the request to create an OOO request,
  * validates the user status, checks existing requests,
  * and stores the new request in the database with logging.
- * 
+ *
  * @param {OooRequestCreateRequest} req - The Express request object containing the body with OOO details.
  * @param {CustomResponse} res - The Express response object used to send back the response.
  * @returns {Promise<OooRequestResponse>} Resolves to a response with the success or an error message.
@@ -39,7 +49,6 @@ export const createOooRequestController = async (
   req: OooRequestCreateRequest,
   res: OooRequestResponse
 ): Promise<OooRequestResponse> => {
-
   const requestBody = req.body;
   const { id: userId, username } = req.userData;
   const isUserPartOfDiscord = req.userData.roles.in_discord;
@@ -57,25 +66,26 @@ export const createOooRequestController = async (
 
     if (validationResponse) {
       if (validationResponse.error === USER_STATUS_NOT_FOUND) {
-          return res.boom.notFound(validationResponse.error);
+        return res.boom.notFound(validationResponse.error);
       }
       if (validationResponse.error === OOO_STATUS_ALREADY_EXIST) {
-          return res.boom.forbidden(validationResponse.error);
+        return res.boom.forbidden(validationResponse.error);
       }
     }
 
     const latestOooRequest: OooStatusRequest = await getRequestByKeyValues({
-        userId,
-        type: REQUEST_TYPE.OOO,
-        status: REQUEST_STATE.PENDING,
+      requestedBy: userId,
+      type: REQUEST_TYPE.OOO,
+      status: REQUEST_STATE.PENDING,
     });
 
     if (latestOooRequest) {
-        await addLog(logType.PENDING_REQUEST_FOUND,
-            { userId, oooRequestId: latestOooRequest.id },
-            { message: REQUEST_ALREADY_PENDING }
-        );
-        return res.boom.conflict(REQUEST_ALREADY_PENDING);
+      await addLog(
+        logType.PENDING_REQUEST_FOUND,
+        { userId, oooRequestId: latestOooRequest.id },
+        { message: REQUEST_ALREADY_PENDING }
+      );
+      return res.boom.conflict(REQUEST_ALREADY_PENDING);
     }
 
     await createOooRequest(requestBody, username, userId);
@@ -103,7 +113,7 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
       return res.boom.badRequest(requestResult.error);
     }
     const [logType, returnMessage] =
-      requestResult.state === REQUEST_STATE.APPROVED
+      requestResult.status === REQUEST_STATE.APPROVED
         ? [REQUEST_LOG_TYPE.REQUEST_APPROVED, REQUEST_APPROVED_SUCCESSFULLY]
         : [REQUEST_LOG_TYPE.REQUEST_REJECTED, REQUEST_REJECTED_SUCCESSFULLY];
 
@@ -118,7 +128,7 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
       body: requestResult,
     };
     await addLog(requestLog.type, requestLog.meta, requestLog.body);
-    if (requestResult.state === REQUEST_STATE.APPROVED) {
+    if (requestResult.status === REQUEST_STATE.APPROVED) {
       const requestData = await getRequests({ id: requestId });
 
       if (requestData) {
@@ -146,5 +156,56 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
   } catch (err) {
     logger.error(ERROR_WHILE_UPDATING_REQUEST, err);
     return res.boom.badImplementation(ERROR_WHILE_UPDATING_REQUEST);
+  }
+};
+
+/**
+ * Acknowledges an Out-of-Office (OOO) request. 
+ * Devflag and superuser checks are handled by conditionalOooChecks middleware.
+ *
+ * @param {AcknowledgeOooRequest} req - The request object containing request parameters and user data
+ * @param {OooRequestResponse} res - The response object
+ * @param {NextFunction} next - Express next function for error handling
+ * @returns {Promise<OooRequestResponse | void>} The response object or void on error
+ */
+export const acknowledgeOooRequest = async (
+  req: AcknowledgeOooRequest,
+  res: OooRequestResponse,
+  next: NextFunction
+): Promise<OooRequestResponse> => {
+  try {
+
+    const requestBody = req.body;
+    const superUserId = req.userData.id;
+    const requestId = req.params.id;
+
+    if (!requestId) {
+      return res.boom.badRequest(REQUEST_ID_REQUIRED);
+    }
+
+    const response = await oooRequestService.acknowledgeOooRequest(requestId, requestBody, superUserId);
+
+    return res.status(200).json({
+      message: response.message,
+    });
+  } catch (error) {
+    logger.error(ERROR_WHILE_ACKNOWLEDGING_REQUEST, {
+      error: error.message,
+      requestId: req.params.id,
+      superUserId: req.userData?.id,
+      requestType: req.body?.type,
+      userAgent: req.get("User-Agent"),
+      timestamp: new Date().toISOString(),
+    });
+
+    
+    if (error.statusCode === 409) {
+      return res.boom.conflict(error.message);
+    } else if (error.statusCode === 400) {
+      return res.boom.badRequest(error.message);
+    } else {
+      
+      next(new Error(ERROR_WHILE_ACKNOWLEDGING_REQUEST));
+    }
   }
 };

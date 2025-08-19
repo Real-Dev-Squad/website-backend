@@ -5,8 +5,8 @@ import {
 } from "../constants/requests";
 import { getRequests } from "../models/requests";
 import { getPaginatedLink } from "../utils/helper";
-import { createOooRequestController, updateOooRequestController } from "./oooRequests";
-import { OooRequestCreateRequest, OooRequestResponse } from "../types/oooRequest";
+import { acknowledgeOooRequest, createOooRequestController, updateOooRequestController } from "./oooRequests";
+import { AcknowledgeOooRequest, OooRequestCreateRequest, OooRequestResponse } from "../types/oooRequest";
 import { CustomResponse } from "../typeDefinitions/global";
 import { ExtensionRequestRequest, ExtensionRequestResponse } from "../types/extensionRequests";
 import { createTaskExtensionRequest, updateTaskExtensionRequest } from "./extensionRequestsv2";
@@ -16,8 +16,7 @@ import { createTaskRequestController } from "./taskRequestsv2";
 import { OnboardingExtensionCreateRequest, OnboardingExtensionResponse, UpdateOnboardingExtensionStateRequest } from "../types/onboardingExtension";
 import { createOnboardingExtensionRequestController, updateOnboardingExtensionRequestController, updateOnboardingExtensionRequestState } from "./onboardingExtension";
 import { UpdateOnboardingExtensionRequest } from "../types/onboardingExtension";
-
-import { Request } from "express";
+import { NextFunction, Request } from "express";
 
 export const createRequestController = async (
   req: OooRequestCreateRequest | ExtensionRequestRequest | TaskRequestRequest | OnboardingExtensionCreateRequest,
@@ -67,10 +66,10 @@ export const getRequestsController = async (req: any, res: any) => {
          });
        }
 
-    const { allRequests, next, prev, page } = requests;
-    if (allRequests.length === 0) {
-      return res.status(204).send();
-    }
+       const { allRequests, next, prev, page } = requests;
+       if (allRequests.length === 0) {
+         return res.status(204).send();
+       }
 
     if (page) {
       const pageLink = `/requests?page=${page}`;
@@ -108,6 +107,7 @@ export const getRequestsController = async (req: any, res: any) => {
       next: nextUrl,
       prev: prevUrl,
     });
+    
   } catch (err) {
     logger.error(ERROR_WHILE_FETCHING_REQUEST, err);
     return res.boom.badImplementation(ERROR_WHILE_FETCHING_REQUEST);
@@ -121,9 +121,13 @@ export const getRequestsController = async (req: any, res: any) => {
  * @param {CustomResponse} res - The response object.
  * @returns {Promise<void>} Resolves or sends an error for invalid types.
  */
-export const updateRequestBeforeAcknowledgedController = async (req: Request, res: CustomResponse) => {
+export const updateRequestBeforeAcknowledgedController = async (req: Request, res: CustomResponse, next: NextFunction) => {
   const type = req.body.type;
+
   switch(type){
+    case REQUEST_TYPE.OOO:
+      await acknowledgeOooRequest(req as AcknowledgeOooRequest, res as OooRequestResponse, next);
+      break;
     case REQUEST_TYPE.ONBOARDING:
       await updateOnboardingExtensionRequestController(req as UpdateOnboardingExtensionRequest, res as OnboardingExtensionResponse);
       break;

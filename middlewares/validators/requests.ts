@@ -1,8 +1,8 @@
 import joi from "joi";
 import { NextFunction } from "express";
 import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/requests";
-import { OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
-import { createOooStatusRequestValidator } from "./oooRequests";
+import { AcknowledgeOooRequest, OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
+import { acknowledgeOooRequest, createOooStatusRequestValidator } from "./oooRequests";
 import { createExtensionRequestValidator } from "./extensionRequestsv2";
 import {createTaskRequestValidator} from "./taskRequests";
 import { ExtensionRequestRequest, ExtensionRequestResponse } from "../../types/extensionRequests";
@@ -92,6 +92,10 @@ export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: O
       .string()
       .valid(REQUEST_STATE.APPROVED, REQUEST_STATE.PENDING, REQUEST_STATE.REJECTED)
       .optional(),
+    status: joi
+      .string()
+      .valid(REQUEST_STATE.APPROVED, REQUEST_STATE.PENDING, REQUEST_STATE.REJECTED)
+      .optional(),
     page: joi.number().integer().min(0).when("next", {
       is: joi.exist(),
       then: joi.forbidden().messages({
@@ -125,18 +129,24 @@ export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: O
 /**
  * Validates update requests based on their type.
  * 
- * @param {UpdateOnboardingExtensionRequest} req - Request object.
+ * @param {UpdateOnboardingExtensionRequest | AcknowledgeOooRequest} req - Request object.
  * @param {CustomResponse} res - Response object.
  * @param {NextFunction} next - Next middleware if valid.
  * @returns {Promise<void>} Resolves or sends errors.
  */
 export const updateRequestValidator = async (
-  req: UpdateOnboardingExtensionRequest,
+  req: UpdateOnboardingExtensionRequest | AcknowledgeOooRequest,
   res: CustomResponse,
   next: NextFunction
   ): Promise<void> => {
   const type = req.body.type;
+
   switch (type) {
+      case REQUEST_TYPE.OOO:
+          await acknowledgeOooRequest(
+            req,
+            res as OooRequestResponse, next);
+          break;
       case REQUEST_TYPE.ONBOARDING:
           await updateOnboardingExtensionRequestValidator(
             req, 
