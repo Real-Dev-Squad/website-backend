@@ -147,7 +147,7 @@ describe("models/oooRequests", () => {
 
     it("Should return PENDING status in new schema when dev=true", async () => {
       await createRequest(createOooStatusRequests);
-      const query = { dev: "true", state: REQUEST_STATE.PENDING };
+      const query = { dev: "true", status: REQUEST_STATE.PENDING };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData.allRequests[0].status).to.be.equal(REQUEST_STATE.PENDING);
     });

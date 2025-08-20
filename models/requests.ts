@@ -1,4 +1,5 @@
 import firestore from "../utils/firestore";
+import type { OooStatusRequest } from "../types/oooRequest";
 const requestModel = firestore.collection("requests");
 import { REQUEST_ALREADY_APPROVED, REQUEST_ALREADY_REJECTED, REQUEST_STATE, REQUEST_TYPE } from "../constants/requests";
 import {
@@ -9,6 +10,36 @@ import {
 } from "../constants/requests";
 import { getUserId } from "../utils/users";
 const SIZE = 5;
+
+// todo: remove this once previous OOO requests are removed form the database
+    // @ankush and @suraj had a discussion to manually update or remove the previous OOO requests
+const toOldOOO = (request) => ({
+  id: request.id,
+  type: request.type,
+  from: request.from,
+  until: request.until,
+  message: request.reason,
+  state: request.status,
+  lastModifiedBy: request.lastModifiedBy ?? "",
+  requestedBy: request.requestedBy,
+  reason: request.comment ?? "",
+  createdAt: request.createdAt,
+  updatedAt: request.updatedAt,
+});
+
+const toNewOOO = (request) => ({
+  id: request.id,
+  type: request.type,
+  from: request.from,
+  until: request.until,
+  reason: request.message,
+  status: request.state,
+  lastModifiedBy: request.lastModifiedBy ?? null,
+  requestedBy: request.requestedBy,
+  comment: request.reason ?? null,
+  createdAt: request.createdAt,
+  updatedAt: request.updatedAt,
+});
 
 export const createRequest = async (body: any) => {
   try {
@@ -155,41 +186,9 @@ export const getRequests = async (query: any) => {
     for (const request of allRequests as any[]) {
       if (request.type === REQUEST_TYPE.OOO) {
         if (!dev) {
-          if (request.status) {
-            transformedRequests.push({
-              id: request.id,
-              type: request.type,
-              from: request.from,
-              until: request.until,
-              message: request.reason,
-              state: request.status,
-              lastModifiedBy: request.lastModifiedBy ?? "",
-              requestedBy: request.requestedBy,
-              reason: request.comment ?? "",
-              createdAt: request.createdAt,
-              updatedAt: request.updatedAt,
-            });
-          } else {
-            transformedRequests.push(request);
-          }
+          transformedRequests.push(request.status ? toOldOOO(request) : request);
         } else {
-          if (request.state) {
-            transformedRequests.push({
-              id: request.id,
-              type: request.type,
-              from: request.from,
-              until: request.until,
-              reason: request.message,
-              status: request.state,
-              lastModifiedBy: request.lastModifiedBy ?? null,
-              requestedBy: request.requestedBy,
-              comment: request.reason ?? null,
-              createdAt: request.createdAt,
-              updatedAt: request.updatedAt,
-            });
-          } else {
-            transformedRequests.push(request);
-          }
+          transformedRequests.push(request.state ? toNewOOO(request) : request);
         }
       } else {
         
