@@ -112,19 +112,44 @@ describe("models/oooRequests", () => {
       expect(oooRequestData.allRequests).to.be.have.length(2);
     });
 
-    it("Should return a list of all the requests with specified state - APPROVED", async () => {
+    it("Should return APPROVED state in old schema when dev=false", async () => {
       const oooRequest: any = await createRequest(createOooStatusRequests);
-      await updateRequest(oooRequest.id, updateOooApprovedRequests, updateOooApprovedRequests.lastModifiedBy, REQUEST_TYPE.OOO)
-      const query = { dev: "true", state: REQUEST_STATE.APPROVED };
+      await updateRequest(
+        oooRequest.id,
+        updateOooApprovedRequests,
+        updateOooApprovedRequests.lastModifiedBy,
+        REQUEST_TYPE.OOO
+      );
+      const query = { dev: "false", state: REQUEST_STATE.APPROVED };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData.allRequests[0].state).to.be.equal(REQUEST_STATE.APPROVED);
     });
 
-    it("Should return a list of all the requests with specified state - PENDING", async () => {
+    it("Should return APPROVED status in new schema when dev=true", async () => {
+      const oooRequest: any = await createRequest(createOooStatusRequests);
+      await updateRequest(
+        oooRequest.id,
+        updateOooApprovedRequests,
+        updateOooApprovedRequests.lastModifiedBy,
+        REQUEST_TYPE.OOO
+      );
+      const query = { dev: "true", state: REQUEST_STATE.APPROVED };
+      const oooRequestData = await getRequests(query);
+      expect(oooRequestData.allRequests[0].status).to.be.equal(REQUEST_STATE.APPROVED);
+    });
+
+    it("Should return PENDING state in old schema when dev=false", async () => {
+      await createRequest(createOooStatusRequests);
+      const query = { dev: "false", state: REQUEST_STATE.PENDING };
+      const oooRequestData = await getRequests(query);
+      expect(oooRequestData.allRequests[0].state).to.be.equal(REQUEST_STATE.PENDING);
+    });
+
+    it("Should return PENDING status in new schema when dev=true", async () => {
       await createRequest(createOooStatusRequests);
       const query = { dev: "true", state: REQUEST_STATE.PENDING };
       const oooRequestData = await getRequests(query);
-      expect(oooRequestData.allRequests[0].state).to.be.equal(REQUEST_STATE.PENDING);
+      expect(oooRequestData.allRequests[0].status).to.be.equal(REQUEST_STATE.PENDING);
     });
 
     it("Should return a list of all the requests by specific user ", async () => {
