@@ -32,3 +32,31 @@ export const convertDateStringToMilliseconds = (date: string): { isDate: boolean
         milliseconds,
     };
 };
+
+export const oldOOOSchema = (request: any) => ({
+  id: request.id,
+  type: request.type,
+  from: request.from,
+  until: request.until,
+  message: request.reason,
+  state: request.status,
+  lastModifiedBy: request.lastModifiedBy ?? "",
+  requestedBy: request.requestedBy,
+  reason: request.comment ?? "",
+  createdAt: request.createdAt,
+  updatedAt: request.updatedAt,
+});
+
+export const newOOOSchema = (request: any) => ({
+  id: request.id,
+  type: request.type,
+  from: request.from,
+  until: request.until,
+  reason: request.message,
+  status: request.state,
+  lastModifiedBy: request.lastModifiedBy ?? null,
+  requestedBy: request.requestedBy,
+  comment: request.reason ?? null,
+  createdAt: request.createdAt,
+  updatedAt: request.updatedAt,
+});
