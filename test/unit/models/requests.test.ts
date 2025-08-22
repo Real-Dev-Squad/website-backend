@@ -11,6 +11,7 @@ import {
 import { REQUEST_STATE, REQUEST_TYPE } from "../../../constants/requests";
 import userDataFixture from "./../../fixtures/user/user";
 import addUser from "../../utils/addUser";
+import { oldOooStatusRequest, OooStatusRequest } from "../../../types/oooRequest";
 const userData = userDataFixture();
 
 let testUserId: string;
@@ -46,8 +47,8 @@ describe("models/oooRequests", () => {
 
   describe("updateRequest", () => {
     it("should update an existing OOO request", async () => {
-      const oooRequest: any = await createRequest(createOooStatusRequests);
-      const updatedOooRequest: any = await updateRequest(
+      const oooRequest: oldOooStatusRequest = await createRequest(createOooStatusRequests);
+      const updatedOooRequest: oldOooStatusRequest = await updateRequest(
         oooRequest.id,
         updateOooApprovedRequests,
         updateOooApprovedRequests.lastModifiedBy
@@ -113,7 +114,7 @@ describe("models/oooRequests", () => {
     });
 
     it("Should return APPROVED state in old schema when dev=false", async () => {
-      const oooRequest: any = await createRequest(createOooStatusRequests);
+      const oooRequest: OooStatusRequest = await createRequest(createOooStatusRequests);
       await updateRequest(
         oooRequest.id,
         updateOooApprovedRequests,
@@ -126,7 +127,7 @@ describe("models/oooRequests", () => {
     });
 
     it("Should return APPROVED status in new schema when dev=true", async () => {
-      const oooRequest: any = await createRequest(createOooStatusRequests);
+      const oooRequest: OooStatusRequest = await createRequest(createOooStatusRequests);
       await updateRequest(
         oooRequest.id,
         updateOooApprovedRequests,
