@@ -27,8 +27,7 @@ export const createdOOORequest = {
   reason: validOooStatusRequests.reason,
   status: "PENDING",
   lastModifiedBy: null,
-  requestedBy: "suraj-maity-1",
-  userId: "jCqqOYCnm93mcmaYuSsQ",
+  requestedBy: "jCqqOYCnm93mcmaYuSsQ",
   comment: null
 };
 
