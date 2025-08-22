@@ -1,3 +1,6 @@
+import { REQUEST_TYPE } from "../constants/requests";
+import { OooStatusRequest, oldOooStatusRequest } from "../types/oooRequest";
+
 /**
  * Calculates the new deadline based on the current date, the old end date, and the additional duration in milliseconds.
  *
@@ -33,7 +36,7 @@ export const convertDateStringToMilliseconds = (date: string): { isDate: boolean
     };
 };
 
-export const oldOOOSchema = (request: any) => ({
+export const oldOOOSchema = (request: OooStatusRequest) => ({
   id: request.id,
   type: request.type,
   from: request.from,
@@ -47,7 +50,7 @@ export const oldOOOSchema = (request: any) => ({
   updatedAt: request.updatedAt,
 });
 
-export const newOOOSchema = (request: any) => ({
+export const newOOOSchema = (request: oldOooStatusRequest) => ({
   id: request.id,
   type: request.type,
   from: request.from,
@@ -60,3 +63,25 @@ export const newOOOSchema = (request: any) => ({
   createdAt: request.createdAt,
   updatedAt: request.updatedAt,
 });
+
+/**
+ * Transforms request responses based on request type and dev flag
+ * @param {boolean} dev - Development flag to determine transformation logic
+ */
+export const transformRequestResponse = (allRequests: any[], dev: boolean = false): any[] => {
+  const transformedRequests: any[] = [];
+  
+  for (const request of allRequests) {
+    if (request.type === REQUEST_TYPE.OOO) {
+      if (dev) {
+        transformedRequests.push(request.status ? oldOOOSchema(request) : request);
+      } else {
+        transformedRequests.push(request.state ? newOOOSchema(request) : request);
+      }
+    } else {
+      transformedRequests.push(request);
+    }
+  }
+  
+  return transformedRequests;
+};

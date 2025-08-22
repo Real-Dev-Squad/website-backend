@@ -9,7 +9,7 @@ import {
   REQUEST_DOES_NOT_EXIST,
 } from "../constants/requests";
 import { getUserId } from "../utils/users";
-import { oldOOOSchema, newOOOSchema } from "../utils/requests";
+import { transformRequestResponse } from "../utils/requests";
 const SIZE = 5;
 
 
@@ -152,19 +152,7 @@ export const getRequests = async (query: any) => {
       return null;
     }
 
-    const transformedRequests = [] as any[];
-    for (const request of allRequests as any[]) {
-      if (request.type === REQUEST_TYPE.OOO) {
-        if (dev) {
-          transformedRequests.push(request.status ? oldOOOSchema(request) : request);
-        } else {
-          transformedRequests.push(request.state ? newOOOSchema(request) : request);
-        }
-      } else {
-        
-        transformedRequests.push(request);
-      }
-    }
+    const transformedRequests = transformRequestResponse(allRequests, dev);
     allRequests = transformedRequests;
 
     return {
