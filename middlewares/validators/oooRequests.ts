@@ -1,7 +1,7 @@
 import joi from "joi";
 import { NextFunction } from "express";
 import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/requests";
-import { OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
+import { AcknowledgeOooRequest, OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
 
 export const createOooStatusRequestValidator = async (
   req: OooRequestCreateRequest,
@@ -37,4 +37,48 @@ export const createOooStatusRequestValidator = async (
     });
 
   await schema.validateAsync(req.body, { abortEarly: false });
+};
+
+const schema = joi
+  .object()
+  .strict()
+  .keys({
+    comment: joi.string().optional()
+      .messages({
+        "string.empty": "comment cannot be empty",
+      }),
+    status: joi
+      .string()
+      .valid(REQUEST_STATE.APPROVED, REQUEST_STATE.REJECTED)
+      .required()
+      .messages({
+        "any.only": "status must be APPROVED or REJECTED",
+      }),
+    type: joi.string().equal(REQUEST_TYPE.OOO).required().messages({
+      "any.required": "type is required",
+      "any.only": "type must be OOO"
+    })
+  });
+
+/**
+ * Middleware to validate the acknowledge Out-Of-Office (OOO) request payload.
+ * 
+ * @param {AcknowledgeOooRequest} req - The request object containing the body to be validated.
+ * @param {OooRequestResponse} res - The response object used to send error responses if validation fails.
+ * @param {NextFunction} next - The next middleware function to call if validation succeeds.
+ * @returns {Promise<void>} Resolves or sends errors.
+ */
+export const acknowledgeOooRequest = async (
+  req: AcknowledgeOooRequest,
+  res: OooRequestResponse,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    await schema.validateAsync(req.body, { abortEarly: false });
+    next();
+  } catch (error) {
+    const errorMessages = error.details.map((detail) => detail.message);
+    logger.error(`Error while validating request payload : ${errorMessages}`);
+    return res.boom.badRequest(errorMessages);
+  }
 };

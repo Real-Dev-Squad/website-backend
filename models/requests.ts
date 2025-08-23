@@ -1,6 +1,6 @@
 import firestore from "../utils/firestore";
 const requestModel = firestore.collection("requests");
-import { REQUEST_ALREADY_APPROVED, REQUEST_ALREADY_REJECTED, REQUEST_STATE } from "../constants/requests";
+import { REQUEST_ALREADY_APPROVED, REQUEST_ALREADY_REJECTED, REQUEST_STATE,REQUEST_TYPE } from "../constants/requests";
 import {
   ERROR_WHILE_FETCHING_REQUEST,
   ERROR_WHILE_CREATING_REQUEST,
@@ -8,6 +8,8 @@ import {
   REQUEST_DOES_NOT_EXIST,
 } from "../constants/requests";
 import { getUserId } from "../utils/users";
+import {NotFound} from "http-errors"
+import {fetchUser} from "./users"
 const SIZE = 5;
 
 export const createRequest = async (body: any) => {
@@ -68,6 +70,19 @@ export const updateRequest = async (id: string, body: any, lastModifiedBy: strin
     throw error;
   }
 };
+
+export const getRequestById = async (id: string) => {
+  try {
+    const requestDoc = await requestModel.doc(id).get();
+    if (!requestDoc.exists) {
+      throw new NotFound("Request not found");
+    }
+    return requestDoc.data();
+  } catch (error) {
+    logger.error(ERROR_WHILE_FETCHING_REQUEST, error);
+    throw error;
+  }
+}
 
 export const getRequests = async (query: any) => {
   let { id, type, requestedBy, state, prev, next, page, size = SIZE } = query;
