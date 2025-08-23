@@ -25,7 +25,7 @@ import { userState } from "../../../constants/userStatus";
 import addUser from "../../utils/addUser";
 import userDataFixture from "../../fixtures/user/user";
 import * as logService from "../../../services/logService";
-import { acknowledgeOooRequest, createOooRequests3 } from "../../fixtures/oooRequest/oooRequest";
+import { createOooRequests3 } from "../../fixtures/oooRequest/oooRequest";
 import { createRequest } from "../../../models/requests";
 
 describe("Test OOO Request Service", function() {
@@ -91,7 +91,7 @@ describe("Test OOO Request Service", function() {
         });
 
         it("should create OOO request", async function() {
-            const response = await createOooRequest(validOooStatusRequests, testUserName, testUserId);
+            const response = await createOooRequest(validOooStatusRequests, testUserId);
             expect(response).to.deep.include({
                 ...createdOOORequest,
                 id: response.id,
@@ -103,7 +103,7 @@ describe("Test OOO Request Service", function() {
             sinon.stub(logService, "addLog").throws(new Error(errorMessage));
 
             try {
-                await createOooRequest(validOooStatusRequests, testUserName, testUserId);
+                await createOooRequest(validOooStatusRequests, testUserId);
             } catch (error) {
                 expect(error.message).to.equal(errorMessage);
             }
