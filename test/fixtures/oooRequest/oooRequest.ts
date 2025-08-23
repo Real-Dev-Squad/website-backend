@@ -167,7 +167,7 @@ export const createOooRequests3 = {
   status: REQUEST_STATE.PENDING
 };
 
-export const acknowledgeOooRequest = {
+export const testAcknowledgeOooRequest = {
   type: REQUEST_TYPE.OOO,
   status: REQUEST_STATE.APPROVED,
   comment: "OOO request approved as it's emergency."
