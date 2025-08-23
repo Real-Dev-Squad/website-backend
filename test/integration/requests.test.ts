@@ -34,6 +34,8 @@ import {
   UNAUTHORIZED_TO_CREATE_OOO_REQUEST,
   USER_STATUS_NOT_FOUND,
   OOO_STATUS_ALREADY_EXIST,
+  REQUEST_FETCHED_SUCCESSFULLY,
+  ERROR_WHILE_FETCHING_REQUEST,
 } from "../../constants/requests";
 import { updateTask } from "../../models/tasks";
 import { validTaskAssignmentRequest, validTaskCreqtionRequest } from "../fixtures/taskRequests/taskRequests";
@@ -559,7 +561,6 @@ describe("/requests OOO", function () {
           done();
         });
     });
-
     it("should return 400 if request is already approved", function (done) {
       chai
         .request(app)
@@ -690,7 +691,71 @@ describe("/requests OOO", function () {
           done();
         });
     });
+    it("should return requests with page link when page query is passed", function (done) {
+      chai
+        .request(app)
+        .get("/requests?page=1")
+        .end(function (err, res) {
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal(REQUEST_FETCHED_SUCCESSFULLY);
+          expect(res.body).to.have.property("page");
+          expect(res.body.page).to.equal("/requests?page=2");
+          done();
+        });
+    });
+
+    it("should return requests with next and prev links when cursor based pagination is used", function (done) {
+      chai
+        .request(app)
+        .get("/requests?next=someDocId")
+        .end(function (err, res) {
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal(REQUEST_FETCHED_SUCCESSFULLY);
+          expect(res.body).to.have.property("next");
+          expect(res.body).to.have.property("prev");
+          done();
+        });
+    });
   });
+
+    
+
+    it("should return 204 if requests array is empty", function (done) {
+      chai
+        .request(app)
+        .get("/requests")
+        .end(function (err, res) {
+          expect(res).to.have.status(204);
+          done();
+        });
+    });
+
+    it("should return request when queried by id", function (done) {
+      chai
+        .request(app)
+        .get("/requests?id=someId")
+        .end(function (err, res) {
+          expect(res).to.have.status(200);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal(REQUEST_FETCHED_SUCCESSFULLY);
+          expect(res.body).to.have.property("data");
+          done();
+        });
+    });
+
+    it("should return 500 if error occurs while fetching requests", function (done) {
+      chai
+        .request(app)
+        .get("/requests")
+        .end(function (err, res) {
+          expect(res).to.have.status(500);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal(ERROR_WHILE_FETCHING_REQUEST);
+          done();
+        });
+    });
 });
 
 describe("/requests Extension", function () {
@@ -964,6 +1029,37 @@ describe("/requests Extension", function () {
         });
     });
 
+    it("should return 400(Bad Request) if request type is invalid", function (done) {
+      chai
+        .request(app)
+        .put(`/requests/${pendingExtensionRequestId}`)
+        .set("cookie", `${cookieName}=${superUserJwtToken}`)
+        .send({
+          type: "INVALID_TYPE",
+          state: REQUEST_STATE.APPROVED
+        })
+        .end(function (err, res) {
+          expect(res).to.have.status(400);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal("Invalid request type");
+          done();
+        });
+    });
+
+    it("should return 400(Bad Request) if request state is invalid", function (done) {
+      chai
+        .request(app)
+        .put(`/requests/${pendingExtensionRequestId}`)
+        .set("cookie", `${cookieName}=${superUserJwtToken}`)
+        .send(invalidExtensionRequest)
+        .end(function (err, res) {
+          expect(res).to.have.status(400);
+          expect(res.body).to.have.property("message");
+          expect(res.body.message).to.equal("state must be APPROVED or REJECTED");
+          done();
+        });
+    });
+
     it("should return 401 if user is not super user", function (done) {
       chai
         .request(app)
@@ -1069,6 +1165,7 @@ describe("/requests Extension", function () {
           done();
         });
     });
+
   });
 });
 

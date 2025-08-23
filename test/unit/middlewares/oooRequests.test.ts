@@ -64,17 +64,20 @@ describe("OOO Status Request Validators", function () {
           from: null,
           until: null,
           reason: "",
+          status: "INVALID"
         },
       };
       try {
         await createOooStatusRequestValidator(req as any, res as any, nextSpy);
       } catch (error) {
         expect(error).to.be.an.instanceOf(Error);
-        expect(error.details.length).to.equal(4);
+        expect(error.details.length).to.equal(5);
         expect(error.details[0].message).to.equal(`"from" must be a number`);
-        expect(error.details[1].message).to.equal(`"until" must be a number`);
+        expect(error.details[1].message).to.equal(`"until" must be a number`); 
         expect(error.details[2].message).to.equal('reason cannot be empty');
         expect(error.details[3].message).to.equal('"type" must be [OOO]');
+        expect(error.details[4].message).to.equal('"status" must be [PENDING]');
+
       }
     });
 

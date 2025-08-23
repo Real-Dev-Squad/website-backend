@@ -440,7 +440,7 @@ describe("/requests Onboarding Extension", () => {
                 if(err) return done(err);
                 expect(res.statusCode).to.equal(400);
                 expect(res.body.error).to.equal("Bad Request");
-                expect(res.body.message).to.equal('"type" must be one of [OOO, EXTENSION, ONBOARDING]');
+                expect(res.body.message).to.equal('Invalid request type');
                 done();
             })
         })

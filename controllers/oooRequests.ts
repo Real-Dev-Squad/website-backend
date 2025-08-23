@@ -50,11 +50,9 @@ export const createOooRequestController = async (
   if (!isUserPartOfDiscord) {
     return res.boom.forbidden(UNAUTHORIZED_TO_CREATE_OOO_REQUEST);
   }
-
   try {
     const userStatus = await getUserStatus(userId);
     const validationResponse = await validateUserStatus(userId, userStatus);
-
     if (validationResponse) {
       if (validationResponse.error === USER_STATUS_NOT_FOUND) {
           return res.boom.notFound(validationResponse.error);
@@ -70,7 +68,7 @@ export const createOooRequestController = async (
       status: REQUEST_STATE.PENDING,
     });
 
-    if (latestOooRequest) {
+    if (latestOooRequest && latestOooRequest.status === REQUEST_STATE.PENDING ) {
         await addLog(logType.PENDING_REQUEST_FOUND,
             { userId, oooRequestId: latestOooRequest.id },
             { message: REQUEST_ALREADY_PENDING }
@@ -103,7 +101,7 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
       return res.boom.badRequest(requestResult.error);
     }
     const [logType, returnMessage] =
-      requestResult.state === REQUEST_STATE.APPROVED
+      requestResult.status === REQUEST_STATE.APPROVED
         ? [REQUEST_LOG_TYPE.REQUEST_APPROVED, REQUEST_APPROVED_SUCCESSFULLY]
         : [REQUEST_LOG_TYPE.REQUEST_REJECTED, REQUEST_REJECTED_SUCCESSFULLY];
 
@@ -118,19 +116,19 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
       body: requestResult,
     };
     await addLog(requestLog.type, requestLog.meta, requestLog.body);
-    if (requestResult.state === REQUEST_STATE.APPROVED) {
-      const requestData = await getRequests({ id: requestId });
+    if (requestResult.status === REQUEST_STATE.APPROVED) {
+      const requestData = await getRequests({ id: requestId, type: REQUEST_TYPE.OOO });
 
       if (requestData) {
-        const { from, until, requestedBy, message } = requestData as any;
+        const { from, until, userId, reason } = requestData as any;
         const userFutureStatusData = {
           requestId,
           status: REQUEST_TYPE.OOO,
           state: statusState.UPCOMING,
           from,
           endsOn: until,
-          userId: requestedBy,
-          message,
+          userId,
+          message: reason,
         };
         await createUserFutureStatus(userFutureStatusData);
         await addFutureStatus(userFutureStatusData);

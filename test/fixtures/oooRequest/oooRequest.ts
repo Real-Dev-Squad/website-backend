@@ -16,7 +16,8 @@ export const validOooStatusRequests = {
   type: "OOO",
   from: Date.now() + 1 * 24 * 60 * 60 * 1000,
   until: Date.now() + 5 * 24 * 60 * 60 * 1000,
-  reason: "Out of office for personal reasons."
+  reason: "Out of office for personal reasons.",
+  status: REQUEST_STATE.PENDING,
 };
 
 export const createdOOORequest = {
@@ -69,8 +70,8 @@ export const updateOooRejectedRequests = {
 };
 
 export const validOooStatusUpdate ={
-  state: REQUEST_STATE.APPROVED,
-  reason: "Welcome back! Enjoy the conference.",
+  status: REQUEST_STATE.APPROVED,
+  comment: "Welcome back! Enjoy the conference.",
   type:REQUEST_TYPE.OOO
 }
 

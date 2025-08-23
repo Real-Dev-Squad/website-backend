@@ -34,6 +34,10 @@ export const createOooStatusRequestValidator = async (
         "string.empty": "type cannot be empty",
         "any.required": "type is required",
       }),
+      status: joi.string().valid(REQUEST_STATE.PENDING).required().messages({
+        "string.empty": "status cannot be empty",
+        "any.required": "status is required",
+      }),
     });
 
   await schema.validateAsync(req.body, { abortEarly: false });
