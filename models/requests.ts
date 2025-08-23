@@ -152,8 +152,7 @@ export const getRequests = async (query: any) => {
       return null;
     }
 
-    const transformedRequests = transformRequestResponse(allRequests, dev);
-    allRequests = transformedRequests;
+    allRequests = transformRequestResponse(allRequests, dev);
 
     return {
       allRequests,
