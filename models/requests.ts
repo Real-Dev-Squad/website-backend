@@ -1,6 +1,6 @@
 import firestore from "../utils/firestore";
 const requestModel = firestore.collection("requests");
-import { REQUEST_ALREADY_APPROVED, REQUEST_ALREADY_REJECTED, REQUEST_STATE } from "../constants/requests";
+import { REQUEST_ALREADY_APPROVED, REQUEST_ALREADY_REJECTED, REQUEST_STATE, REQUEST_TYPE } from "../constants/requests";
 import {
   ERROR_WHILE_FETCHING_REQUEST,
   ERROR_WHILE_CREATING_REQUEST,
@@ -8,6 +8,7 @@ import {
   REQUEST_DOES_NOT_EXIST,
 } from "../constants/requests";
 import { getUserId } from "../utils/users";
+import { fetchUser } from "./users";
 const SIZE = 5;
 
 export const createRequest = async (body: any) => {
@@ -147,6 +148,58 @@ export const getRequests = async (query: any) => {
     }
     if (allRequests.length === 0) {
       return null;
+    }
+
+    if (type === REQUEST_TYPE.OOO) {
+      const oooRequests = [];
+      if (dev) {
+        for (const request of allRequests) {
+          if (request.status) {
+            const modifiedRequest = {
+                id: request.id,
+                type: request.type,
+                from: request.from,
+                until: request.until,
+                message: request.reason,
+                state: request.status,
+                lastModifiedBy: request.lastModifiedBy ?? "",
+                requestedBy: request.userId,
+                reason: request.comment ?? "",
+                createdAt: request.createdAt,
+                updatedAt: request.updatedAt
+            };
+            oooRequests.push(modifiedRequest);
+          } else {
+            oooRequests.push(request);
+          }
+        }
+      } else {
+        for (const request of allRequests) {
+          if (request.state) {
+            const userResponse: any = await fetchUser({ userId: request.requestedBy });
+            const username = userResponse.user.username;
+
+            const modifiedRequest = {
+              id: request.id,
+              type: request.type,
+              from: request.from,
+              until: request.until,
+              reason: request.message,
+              status: request.state,
+              lastModifiedBy: request.lastModifiedBy ?? null,
+              requestedBy: username,
+              comment: request.reason ?? null,
+              createdAt: request.createdAt,
+              updatedAt: request.updatedAt,
+              userId: request.requestedBy
+            };
+            oooRequests.push(modifiedRequest);
+          } else {
+            oooRequests.push(request);
+          }
+        }
+      }
+      allRequests = oooRequests;
     }
 
     return {
