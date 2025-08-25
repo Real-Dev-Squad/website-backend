@@ -13,10 +13,23 @@ export type OooStatusRequest = {
   status: REQUEST_STATE;
   lastModifiedBy: string | null;
   requestedBy: string;
-  userId: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
   comment: string | null;
+};
+
+export type oldOooStatusRequest = {
+  id: string;
+  type: REQUEST_TYPE.OOO;
+  from: number;
+  until: number;
+  message: string;
+  state: REQUEST_STATE;
+  lastModifiedBy: string | null;
+  requestedBy: string;
+  reason: string | null;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
 };
 export type OooStatusRequestBody = {
   from: number;
