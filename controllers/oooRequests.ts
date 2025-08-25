@@ -65,9 +65,9 @@ export const createOooRequestController = async (
     }
 
     const latestOooRequest: OooStatusRequest = await getRequestByKeyValues({
-        userId,
-        type: REQUEST_TYPE.OOO,
-        status: REQUEST_STATE.PENDING,
+      requestedBy: userId,
+      type: REQUEST_TYPE.OOO,
+      status: REQUEST_STATE.PENDING,
     });
 
     if (latestOooRequest) {
