@@ -4,10 +4,10 @@ const { months, discordNicknameLength } = require("../constants/users");
 const dataAccessLayer = require("../services/dataAccessLayer");
 const discordService = require("../services/discordService");
 const ROLES = require("../constants/roles");
+const logger = require("./logger");
 const addUserToDBForTest = async (userData) => {
   await userModel.add(userData);
 };
-
 /**
  * Used for receiving userId when providing username
  *
