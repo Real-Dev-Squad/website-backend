@@ -22,8 +22,7 @@ import { addLog } from "../models/logs";
 import { getRequestByKeyValues, getRequests, updateRequest } from "../models/requests";
 import { createUserFutureStatus } from "../models/userFutureStatus";
 import { getUserStatus, addFutureStatus } from "../models/userStatus";
-import { createOooRequest, validateUserStatus } from "../services/oooRequest";
-import * as oooRequestService from "../services/oooRequest";
+import { createOooRequest, validateUserStatus, acknowledgeOooRequest as acknowledgeOooRequestService } from "../services/oooRequest";
 import { CustomResponse } from "../typeDefinitions/global";
 import { AcknowledgeOooRequest, OooRequestCreateRequest, OooRequestResponse, OooStatusRequest } from "../types/oooRequest";
 import { UpdateRequest } from "../types/requests";
@@ -183,7 +182,7 @@ export const acknowledgeOooRequest = async (
         return res.boom.badRequest(REQUEST_ID_REQUIRED);
       }
 
-      const response = await oooRequestService.acknowledgeOooRequest(requestId, requestBody, superUserId);
+      const response = await acknowledgeOooRequestService(requestId, requestBody, superUserId);
 
       return res.status(200).json({
         message: response.message,
