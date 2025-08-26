@@ -1,3 +1,6 @@
+import { REQUEST_TYPE } from "../constants/requests";
+import { OooStatusRequest, oldOooStatusRequest } from "../types/oooRequest";
+
 /**
  * Calculates the new deadline based on the current date, the old end date, and the additional duration in milliseconds.
  *
@@ -31,4 +34,62 @@ export const convertDateStringToMilliseconds = (date: string): { isDate: boolean
         isDate: true,
         milliseconds,
     };
+};
+
+export const oldOOOSchema = (request: OooStatusRequest) => ({
+  id: request.id,
+  type: request.type,
+  from: request.from,
+  until: request.until,
+  message: request.reason,
+  state: request.status,
+  lastModifiedBy: request.lastModifiedBy ?? "",
+  requestedBy: request.requestedBy,
+  reason: request.comment ?? "",
+  createdAt: request.createdAt,
+  updatedAt: request.updatedAt,
+});
+
+export const newOOOSchema = (request: oldOooStatusRequest) => ({
+  id: request.id,
+  type: request.type,
+  from: request.from,
+  until: request.until,
+  reason: request.message,
+  status: request.state,
+  lastModifiedBy: request.lastModifiedBy ?? null,
+  requestedBy: request.requestedBy,
+  comment: request.reason ?? null,
+  createdAt: request.createdAt,
+  updatedAt: request.updatedAt,
+});
+
+/**
+ * Transforms request responses based on request type and dev flag
+ * @param {boolean} dev - Development flag to determine transformation logic
+ */
+export const transformRequestResponse = (allRequests: (OooStatusRequest | oldOooStatusRequest)[], dev: boolean = false): (OooStatusRequest | oldOooStatusRequest)[] => {
+  const transformedRequests: (OooStatusRequest | oldOooStatusRequest)[] = [];
+  
+  for (const request of allRequests) {
+    if (request.type === REQUEST_TYPE.OOO) {
+      if (dev) {
+        if ('status' in request) {
+          transformedRequests.push(oldOOOSchema(request as OooStatusRequest));
+        } else {
+          transformedRequests.push(request);
+        }
+      } else {
+        if ('state' in request) {
+          transformedRequests.push(newOOOSchema(request as oldOooStatusRequest));
+        } else {
+          transformedRequests.push(request);
+        }
+      }
+    } else {
+      transformedRequests.push(request);
+    }
+  }
+  
+  return transformedRequests;
 };

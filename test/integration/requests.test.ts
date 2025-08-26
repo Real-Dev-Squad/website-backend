@@ -579,7 +579,7 @@ describe("/requests OOO", function () {
     it("should return all requests", function (done) {
       chai
         .request(app)
-        .get("/requests")
+        .get("/requests?dev=true")
         .end(function (err, res) {
           expect(res).to.have.status(200);
           expect(res.body.data).to.have.lengthOf(2);
