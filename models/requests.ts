@@ -1,6 +1,7 @@
 import firestore from "../utils/firestore";
+import type { OooStatusRequest } from "../types/oooRequest";
 const requestModel = firestore.collection("requests");
-import { REQUEST_ALREADY_APPROVED, REQUEST_ALREADY_REJECTED, REQUEST_STATE } from "../constants/requests";
+import { REQUEST_ALREADY_APPROVED, REQUEST_ALREADY_REJECTED, REQUEST_STATE, REQUEST_TYPE } from "../constants/requests";
 import {
   ERROR_WHILE_FETCHING_REQUEST,
   ERROR_WHILE_CREATING_REQUEST,
@@ -8,7 +9,9 @@ import {
   REQUEST_DOES_NOT_EXIST,
 } from "../constants/requests";
 import { getUserId } from "../utils/users";
+import { transformRequestResponse } from "../utils/requests";
 const SIZE = 5;
+
 
 export const createRequest = async (body: any) => {
   try {
@@ -148,6 +151,8 @@ export const getRequests = async (query: any) => {
     if (allRequests.length === 0) {
       return null;
     }
+
+    allRequests = transformRequestResponse(allRequests, dev);
 
     return {
       allRequests,
