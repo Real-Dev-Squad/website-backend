@@ -60,6 +60,16 @@ const schema = joi
     })
   });
 
+const paramsSchema = joi
+  .object()
+  .strict()
+  .keys({
+    id: joi.string().required().messages({
+      "any.required": "Request ID is required",
+      "string.empty": "Request ID cannot be empty"
+    })
+  });
+
 /**
  * Middleware to validate the acknowledge Out-Of-Office (OOO) request payload.
  * 
@@ -74,7 +84,12 @@ export const acknowledgeOooRequest = async (
   next: NextFunction
 ): Promise<void> => {
   try {
+    // Validate request body
     await schema.validateAsync(req.body, { abortEarly: false });
+    
+    // Validate request params (ID)
+    await paramsSchema.validateAsync(req.params, { abortEarly: false });
+    
     next();
   } catch (error) {
     const errorMessages = error.details.map((detail) => detail.message);

@@ -8,11 +8,9 @@ import {
   ERROR_WHILE_UPDATING_REQUEST,
   REQUEST_APPROVED_SUCCESSFULLY,
   REQUEST_REJECTED_SUCCESSFULLY,
-  UNAUTHORIZED_TO_CREATE_OOO_REQUEST,
   REQUEST_ALREADY_PENDING,
   USER_STATUS_NOT_FOUND,
   OOO_STATUS_ALREADY_EXIST,
-  UNAUTHORIZED_TO_UPDATE_REQUEST,
   ERROR_WHILE_ACKNOWLEDGING_REQUEST,
   REQUEST_ID_REQUIRED,
 } from "../constants/requests";
@@ -45,15 +43,7 @@ export const createOooRequestController = async (
 ): Promise<OooRequestResponse> => {
 
   const requestBody = req.body;
-  const { id: userId, username } = req.userData;
-  const isUserPartOfDiscord = req.userData.roles.in_discord;
-  const dev = req.query.dev === "true";
-
-  if (!dev) return res.boom.notImplemented("Feature not implemented");
-
-  if (!isUserPartOfDiscord) {
-    return res.boom.forbidden(UNAUTHORIZED_TO_CREATE_OOO_REQUEST);
-  }
+  const { id: userId } = req.userData;
 
   try {
     const userStatus = await getUserStatus(userId);
@@ -153,11 +143,12 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
   }
 };
 /**
- * Acknowledges an Out-of-Office (OOO) request
+ * Acknowledges an Out-of-Office (OOO) request by updating its status to approved or rejected
  * 
- * @param {AcknowledgeOooRequest} req - The request object.
- * @param {OooRequestResponse} res - The response object.
- * @returns {Promise<OooRequestResponse>} Resolves with success or failure.
+ * @param {AcknowledgeOooRequest} req - The request object containing acknowledgment details (status, comment) and request ID in params
+ * @param {OooRequestResponse} res - The response object for sending success/error responses
+ * @param {NextFunction} next - Express next function for error handling
+ * @returns {Promise<OooRequestResponse>} Resolves with success message or passes error to next middleware
  */
 export const acknowledgeOooRequest = async (
   req: AcknowledgeOooRequest,
@@ -166,21 +157,10 @@ export const acknowledgeOooRequest = async (
 )
   : Promise<OooRequestResponse> => {
     try {
-      const dev = req.query.dev === "true";
-      if(!dev) return res.boom.notImplemented("Feature not implemented");
-
-      const isSuperuser = req.userData?.roles?.super_user;
-      if (!isSuperuser) {
-        return res.boom.forbidden(UNAUTHORIZED_TO_UPDATE_REQUEST);
-      }
 
       const requestBody = req.body;
       const superUserId = req.userData.id;
       const requestId = req.params.id;
-
-      if (!requestId) {
-        return res.boom.badRequest(REQUEST_ID_REQUIRED);
-      }
 
       const response = await acknowledgeOooRequestService(requestId, requestBody, superUserId);
 
