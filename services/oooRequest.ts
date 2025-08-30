@@ -13,7 +13,7 @@ import {
     REQUEST_REJECTED_SUCCESSFULLY,
 } from "../constants/requests";
 import { statusState, userState } from "../constants/userStatus";
-import { createRequest, getRequestById, updateRequest } from "../models/requests";
+import { createRequest, getRequests, updateRequest } from "../models/requests";
 import { AcknowledgeOooRequestBody, OooStatusRequest, OooStatusRequestBody } from "../types/oooRequest";
 import { UserStatus } from "../types/userStatus";
 import { addLog } from "./logService";
@@ -144,7 +144,7 @@ export const acknowledgeOooRequest = async (
     superUserId: string,
 ) => {
     try{
-        const requestData = await getRequestById(requestId);
+        const requestData = await getRequests({ id: requestId });
         await validateOooAcknowledgeRequest(requestData.type, requestData.status);
         const requestResult = await updateRequest(requestId, body, superUserId, REQUEST_TYPE.OOO);
         if("error" in requestResult){

@@ -1,5 +1,4 @@
 import firestore from "../utils/firestore";
-import type { OooStatusRequest } from "../types/oooRequest";
 const requestModel = firestore.collection("requests");
 import { REQUEST_ALREADY_APPROVED, REQUEST_ALREADY_REJECTED, REQUEST_STATE } from "../constants/requests";
 import {
@@ -73,19 +72,6 @@ export const updateRequest = async (id: string, body: any, lastModifiedBy: strin
   }
 };
 
-export const getRequestById = async (id: string) => {
-  try {
-    const requestDoc = await requestModel.doc(id).get();
-    if (!requestDoc.exists) {
-      throw new NotFound(REQUEST_DOES_NOT_EXIST);
-    }
-    return requestDoc.data();
-  } catch (error) {
-    logger.error(ERROR_WHILE_FETCHING_REQUEST, error);
-    throw error;
-  }
-}
-
 export const getRequests = async (query: any) => {
   let { id, type, requestedBy, state, prev, next, page, size = SIZE } = query;
   const dev = query.dev === "true";
@@ -98,7 +84,15 @@ export const getRequests = async (query: any) => {
     if (id) {
       const requestDoc = await requestModel.doc(id).get();
       if (!requestDoc.exists) {
+        
+        if (type === 'OOO') {
+          throw new NotFound(REQUEST_DOES_NOT_EXIST);
+        }
         return null;
+      }
+      
+      if (type === 'OOO') {
+        return requestDoc.data();
       }
       return {
         id: requestDoc.id,
