@@ -103,7 +103,6 @@ export const createOooRequest = async (
 /**
  * Validate the out-of-office acknowledgement request.
  * 
- * @param {string} requestId - The unique identifier of the request.
  * @param {string} requestType - The type of the request (OOO or OOO_ACKNOWLEDGEMENT).
  * @param {string} requestStatus - The status of the request (PENDING, APPROVED, REJECTED).
  * @throws {Error} Throws an error if an issue occurs during validation.
