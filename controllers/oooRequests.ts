@@ -11,6 +11,7 @@ import {
   REQUEST_ALREADY_PENDING,
   USER_STATUS_NOT_FOUND,
   OOO_STATUS_ALREADY_EXIST,
+  UNAUTHORIZED_TO_CREATE_OOO_REQUEST,
   ERROR_WHILE_ACKNOWLEDGING_REQUEST,
   REQUEST_ID_REQUIRED,
 } from "../constants/requests";
@@ -43,7 +44,17 @@ export const createOooRequestController = async (
 ): Promise<OooRequestResponse> => {
 
   const requestBody = req.body;
-  const { id: userId } = req.userData;
+  const { id: userId, roles } = req.userData;
+  const dev = req.query.dev === "true";
+  const isUserPartOfDiscord = roles.in_discord;
+
+  if (!dev) {
+    return res.boom.notImplemented("Feature not implemented");
+  }
+
+  if (!isUserPartOfDiscord) {
+    return res.boom.forbidden(UNAUTHORIZED_TO_CREATE_OOO_REQUEST);
+  }
 
   try {
     const userStatus = await getUserStatus(userId);
