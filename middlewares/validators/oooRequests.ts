@@ -78,18 +78,14 @@ const paramsSchema = joi
  * @param {NextFunction} next - The next middleware function to call if validation succeeds.
  * @returns {Promise<void>} Resolves or sends errors.
  */
-export const acknowledgeOooRequest = async (
+export const acknowledgeOooRequestValidator = async (
   req: AcknowledgeOooRequest,
   res: OooRequestResponse,
   next: NextFunction
 ): Promise<void> => {
   try {
-    // Validate request body
     await schema.validateAsync(req.body, { abortEarly: false });
-    
-    // Validate request params (ID)
     await paramsSchema.validateAsync(req.params, { abortEarly: false });
-    
     next();
   } catch (error) {
     const errorMessages = error.details.map((detail) => detail.message);

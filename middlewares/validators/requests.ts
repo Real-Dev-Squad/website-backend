@@ -2,7 +2,7 @@ import joi from "joi";
 import { NextFunction } from "express";
 import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/requests";
 import { AcknowledgeOooRequest, OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
-import { acknowledgeOooRequest, createOooStatusRequestValidator } from "./oooRequests";
+import { acknowledgeOooRequestValidator, createOooStatusRequestValidator } from "./oooRequests";
 import { createExtensionRequestValidator } from "./extensionRequestsv2";
 import {createTaskRequestValidator} from "./taskRequests";
 import { ExtensionRequestRequest, ExtensionRequestResponse } from "../../types/extensionRequests";
@@ -147,7 +147,7 @@ export const updateRequestValidator = async (
             res as OnboardingExtensionResponse, next);
           break;
       case REQUEST_TYPE.OOO:
-          await acknowledgeOooRequest(req, res as OooRequestResponse, next);
+          await acknowledgeOooRequestValidator(req, res as OooRequestResponse, next);
           break;
       default:
           return res.boom.badRequest("Invalid type");
