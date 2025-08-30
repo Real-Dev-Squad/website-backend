@@ -239,7 +239,7 @@ describe("Test OOO Request Service", function() {
                 });
         });
 
-        it("should throw error", async function() {
+        it("should propagate error when logging fails", async function() {
             sinon.stub(logService, "addLog").throws(new Error(errorMessage));
             
             try {
