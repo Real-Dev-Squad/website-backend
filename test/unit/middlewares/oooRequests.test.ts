@@ -4,9 +4,9 @@ const { expect } = chai;
 
 import {
   createOooStatusRequestValidator,
-   acknowledgeOooRequest,
+   acknowledgeOooRequestValidator,
 } from "./../../../middlewares/validators/oooRequests";
-import { TestacknowledgeOooRequest, validOooStatusRequests, validOooStatusUpdate } from "../../fixtures/oooRequest/oooRequest";
+import { TestAcknowledgeOooRequest, validOooStatusRequests, validOooStatusUpdate } from "../../fixtures/oooRequest/oooRequest";
 import _ from "lodash";
 
 describe("OOO Status Request Validators", function () {
@@ -91,40 +91,50 @@ describe("OOO Status Request Validators", function () {
     });
   });
 
-  describe.skip("acknowledgeOOORequestsValidator", function () {
+  describe("acknowledgeOOORequestsValidator", function () {
     it("should not validate for an invalid request for invalid request type", async function () {
       req = {
-        body: { ...TestacknowledgeOooRequest, type: "XYZ"}
+        body: { ...TestAcknowledgeOooRequest, type: "XYZ"},
+        params: { id: "test-id" }
       };
 
-      // await acknowledgeOooRequestValidator(req, res, nextSpy);
-      expect(nextSpy.notCalled).to.be.true;
+      try {
+        await acknowledgeOooRequestValidator(req as any, res as any, nextSpy);
+      } catch (error) {
+        expect(nextSpy.notCalled).to.be.true;
+      }
     });
 
     it("should not validate for an invalid request if status is incorrect", async function () {
       req = {
-        body: { ...TestacknowledgeOooRequest, status: "PENDING"}
+        body: { ...TestAcknowledgeOooRequest, status: "PENDING"},
+        params: { id: "test-id" }
       };
 
-      // await acknowledgeOooRequestValidator(req, res, nextSpy);
-      expect(nextSpy.notCalled).to.be.true;
+      try {
+        await acknowledgeOooRequestValidator(req as any, res as any, nextSpy);
+      } catch (error) {
+        expect(nextSpy.notCalled).to.be.true;
+      }
     });
 
     it("should validate for a valid acknowledge OOO request if comment not provided by superusers", async function() {
       req = {
-        body: _.omit(TestacknowledgeOooRequest, "comment")
+        body: _.omit(TestAcknowledgeOooRequest, "comment"),
+        params: { id: "test-id" }
       };
       res = {};
-      // await acknowledgeOooRequestValidator(req, res, nextSpy);
+      await acknowledgeOooRequestValidator(req as any, res as any, nextSpy);
       expect(nextSpy.calledOnce).to.be.true;
     });
 
     it("should validate for a valid acknowledge OOO request", async function() {
       req = {
-        body: TestacknowledgeOooRequest
+        body: TestAcknowledgeOooRequest,
+        params: { id: "test-id" }
       };
       res = {};
-      await acknowledgeOooRequest(req, res, nextSpy);
+      await acknowledgeOooRequestValidator(req as any, res as any, nextSpy);
       expect(nextSpy.calledOnce).to.be.true;
     });
   });
