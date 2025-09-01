@@ -60,7 +60,7 @@ export const validateUserStatus = async (
  * Create an OOO request for a user.
  * 
  * @param {OooStatusRequestBody} body - The request body containing OOO details.
- * @param {string} requestedBy - The userid of the person creating the request.
+ * @param {string} requestedBy - The userId of the person creating the request.
  * @returns {Promise<object>} The created OOO request.
  * @throws {Error} Throws an error if an issue occurs during validation.
  */
@@ -145,7 +145,17 @@ export const acknowledgeOooRequest = async (
 ) => {
     try{
         const requestData = await getRequests({ id: requestId });
-        await validateOooAcknowledgeRequest(requestData.type, requestData.status);
+        if (!requestData) {
+            throw new BadRequest("Request not found");
+        }
+        if (!('type' in requestData) || !('status' in requestData) || !('from' in requestData) || !('until' in requestData) || !('requestedBy' in requestData)) {
+            throw new BadRequest("Invalid request data structure");
+        }
+        const { type, status, from, until, requestedBy } = requestData;
+        await validateOooAcknowledgeRequest(type as string, status as string);
+        const fromDate = from as number;
+        const untilDate = until as number;
+        const requestedByUser = requestedBy as string;
         const requestResult = await updateRequest(requestId, body, superUserId, REQUEST_TYPE.OOO);
         if("error" in requestResult){
             throw new BadRequest(requestResult.error);
@@ -166,18 +176,18 @@ export const acknowledgeOooRequest = async (
             await addFutureStatus({
                 requestId,
                 state: REQUEST_TYPE.OOO,
-                from: requestData.from,
-                endsOn: requestData.until,
-                userId: requestData.requestedBy,
+                from: fromDate,
+                endsOn: untilDate,
+                userId: requestedByUser,
                 message: body.comment,
             });
             await createUserFutureStatus({
                 requestId,
                 status: userState.OOO,
                 state: statusState.UPCOMING,
-                from: requestData.from,
-                endsOn: requestData.until,
-                userId: requestData.requestedBy,
+                from: fromDate,
+                endsOn: untilDate,
+                userId: requestedByUser,
                 message: body.comment,
                 createdAt: Date.now()
             });

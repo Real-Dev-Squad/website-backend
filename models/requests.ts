@@ -85,15 +85,9 @@ export const getRequests = async (query: any) => {
       const requestDoc = await requestModel.doc(id).get();
       if (!requestDoc.exists) {
         
-        if (type === 'OOO') {
-          throw new NotFound(REQUEST_DOES_NOT_EXIST);
-        }
         return null;
       }
       
-      if (type === 'OOO') {
-        return requestDoc.data();
-      }
       return {
         id: requestDoc.id,
         ...requestDoc.data(),
