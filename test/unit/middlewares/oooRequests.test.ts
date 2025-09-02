@@ -8,6 +8,7 @@ import {
 } from "./../../../middlewares/validators/oooRequests";
 import { TestAcknowledgeOooRequest, validOooStatusRequests, validOooStatusUpdate } from "../../fixtures/oooRequest/oooRequest";
 import _ from "lodash";
+import { AcknowledgeOooRequest, OooRequestResponse } from "../../../types/oooRequest";
 
 describe("OOO Status Request Validators", function () {
   let req: any;
@@ -99,7 +100,7 @@ describe("OOO Status Request Validators", function () {
       };
 
       try {
-        await acknowledgeOooRequestValidator(req as any, res as any, nextSpy);
+        await acknowledgeOooRequestValidator(req as AcknowledgeOooRequest, res as OooRequestResponse, nextSpy);
       } catch (error) {
         expect(nextSpy.notCalled).to.be.true;
       }
@@ -112,7 +113,7 @@ describe("OOO Status Request Validators", function () {
       };
 
       try {
-        await acknowledgeOooRequestValidator(req as any, res as any, nextSpy);
+        await acknowledgeOooRequestValidator(req as AcknowledgeOooRequest, res as OooRequestResponse, nextSpy);
       } catch (error) {
         expect(nextSpy.notCalled).to.be.true;
       }
@@ -124,7 +125,7 @@ describe("OOO Status Request Validators", function () {
         params: { id: "test-id" }
       };
       res = {};
-      await acknowledgeOooRequestValidator(req as any, res as any, nextSpy);
+      await acknowledgeOooRequestValidator(req as AcknowledgeOooRequest, res as OooRequestResponse, nextSpy);
       expect(nextSpy.calledOnce).to.be.true;
     });
 
@@ -134,7 +135,7 @@ describe("OOO Status Request Validators", function () {
         params: { id: "test-id" }
       };
       res = {};
-      await acknowledgeOooRequestValidator(req as any, res as any, nextSpy);
+      await acknowledgeOooRequestValidator(req as AcknowledgeOooRequest, res as OooRequestResponse, nextSpy);
       expect(nextSpy.calledOnce).to.be.true;
     });
   });
