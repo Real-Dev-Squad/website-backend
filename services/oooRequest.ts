@@ -19,7 +19,7 @@ import { createRequest, getRequests, updateRequest } from "../models/requests";
 import { AcknowledgeOooRequestBody, OooStatusRequest, oldOooStatusRequest, OooStatusRequestBody } from "../types/oooRequest";
 import { UserStatus } from "../types/userStatus";
 import { addLog } from "./logService";
-import { BadRequest, Conflict } from "http-errors";
+import { BadRequest, Conflict, NotFound } from "http-errors";
 import { addFutureStatus } from "../models/userStatus";
 import { createUserFutureStatus } from "../models/userFutureStatus";
 import { newOOOSchema} from "../utils/requests";
@@ -149,7 +149,7 @@ export const acknowledgeOooRequest = async (
     try{
         const requestData = await getRequests({ id: requestId });
         if (!requestData) {
-            throw new BadRequest("Request not found");
+            throw new NotFound("Request not found");
         }
         const normalized: OooStatusRequest = (
             (requestData as OooStatusRequest).type === REQUEST_TYPE.OOO &&

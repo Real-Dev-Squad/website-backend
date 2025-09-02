@@ -9,7 +9,6 @@ import {
 } from "../constants/requests";
 import { getUserId } from "../utils/users";
 import { transformRequestResponse } from "../utils/requests";
-import {NotFound} from "http-errors"
 const SIZE = 5;
 
 
