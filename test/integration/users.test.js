@@ -1017,8 +1017,8 @@ describe("Users", function () {
     });
 
     it("Should accept lowercase profileStatus", function (done) {
-            chai
-              .request(app)
+      chai
+        .request(app)
         .get("/users?profileStatus=blocked")
         .end((err, res) => {
           if (err) {
@@ -1032,7 +1032,7 @@ describe("Users", function () {
           });
           return done();
         });
-      });
+    });
   });
 
   describe("GET /users/self", function () {
