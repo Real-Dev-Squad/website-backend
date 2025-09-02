@@ -197,7 +197,7 @@ async function getUsers(req, res, next) {
       query: joi.string().optional(),
       q: joi.string().optional(),
       profile: joi.string().valid("true").optional(),
-      profileStatus: joi.string().trim().uppercase().optional().messages({
+      profileStatus: joi.string().optional().messages({
         "string.empty": "profileStatus value must not be empty",
       }),
       filterBy: joi.string().optional(),
