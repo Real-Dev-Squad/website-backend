@@ -3,7 +3,7 @@ const router = express.Router();
 const authorizeRoles = require("../middlewares/authorizeRoles");
 const { SUPERUSER } = require("../constants/roles");
 import authenticate from "../middlewares/authenticate";
-import { conditionalOooChecks } from "../middlewares/conditionalOooChecks";
+import { conditionalOooChecks } from "../middlewares/oooRoleCheckMiddleware";
 import { 
     createRequestsMiddleware, 
     updateRequestsMiddleware,
