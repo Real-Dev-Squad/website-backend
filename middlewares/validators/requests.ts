@@ -88,7 +88,7 @@ export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: O
       .valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION, REQUEST_TYPE.TASK, REQUEST_TYPE.ALL, REQUEST_TYPE.ONBOARDING)
       .optional(),
     requestedBy: joi.string().insensitive().optional(),
-    state: joi // TODO: Remove this validator once feature is tested and ready to be used
+    state: joi 
       .string()
       .valid(REQUEST_STATE.APPROVED, REQUEST_STATE.PENDING, REQUEST_STATE.REJECTED)
       .optional(),

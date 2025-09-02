@@ -21,8 +21,6 @@ export const conditionalOooChecks = (req: CustomRequest, res: CustomResponse, ne
      //TODO: Remove this middleware once the OOO feature is tested and ready to be used
     devFlagMiddleware(req, res, (err: any) => {
       if (err) return next(err);
-
-
       authorizeRoles([SUPERUSER])(req, res, next);
     });
   } else {

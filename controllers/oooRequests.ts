@@ -44,13 +44,11 @@ export const createOooRequestController = async (
 ): Promise<OooRequestResponse> => {
 
   const requestBody = req.body;
-  const { id: userId, roles } = req.userData;
+  const { id: userId, username } = req.userData;
+  const isUserPartOfDiscord = req.userData.roles.in_discord;
   const dev = req.query.dev === "true";
-  const isUserPartOfDiscord = roles.in_discord;
 
-  if (!dev) {
-    return res.boom.notImplemented("Feature not implemented");
-  }
+  if (!dev) return res.boom.notImplemented("Feature not implemented");
 
   if (!isUserPartOfDiscord) {
     return res.boom.forbidden(UNAUTHORIZED_TO_CREATE_OOO_REQUEST);

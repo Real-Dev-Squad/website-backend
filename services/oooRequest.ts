@@ -11,15 +11,18 @@ import {
     REQUEST_ALREADY_REJECTED,
     REQUEST_APPROVED_SUCCESSFULLY,
     REQUEST_REJECTED_SUCCESSFULLY,
+    ERROR_WHILE_ACKNOWLEDGING_REQUEST,
+    ERROR_WHILE_CREATING_REQUEST,
 } from "../constants/requests";
 import { statusState, userState } from "../constants/userStatus";
 import { createRequest, getRequests, updateRequest } from "../models/requests";
-import { AcknowledgeOooRequestBody, OooStatusRequest, OooStatusRequestBody } from "../types/oooRequest";
+import { AcknowledgeOooRequestBody, OooStatusRequest, oldOooStatusRequest, OooStatusRequestBody } from "../types/oooRequest";
 import { UserStatus } from "../types/userStatus";
 import { addLog } from "./logService";
 import { BadRequest, Conflict } from "http-errors";
 import { addFutureStatus } from "../models/userStatus";
 import { createUserFutureStatus } from "../models/userFutureStatus";
+import { newOOOSchema} from "../utils/requests";
 
 /**
  * Validates the user status.
@@ -95,7 +98,7 @@ export const createOooRequest = async (
 
         return request;
     } catch (error) {
-        logger.error("Error while creating OOO request", error);
+        logger.error(ERROR_WHILE_CREATING_REQUEST, error);
         throw error;
     }
 }
@@ -148,16 +151,19 @@ export const acknowledgeOooRequest = async (
         if (!requestData) {
             throw new BadRequest("Request not found");
         }
-        if (!('type' in requestData) || !('status' in requestData) || !('from' in requestData) || !('until' in requestData) || !('requestedBy' in requestData)) {
-            throw new BadRequest("Invalid request data structure");
-        }
-        const { type, status, from, until, requestedBy } = requestData;
+        const normalized: OooStatusRequest = (
+            (requestData as OooStatusRequest).type === REQUEST_TYPE.OOO &&
+            'state' in (requestData as OooStatusRequest) &&
+            !('status' in (requestData as OooStatusRequest))
+        ) ? newOOOSchema(requestData as oldOooStatusRequest) as OooStatusRequest : requestData as OooStatusRequest;
+
+        const { type, status, from, until, requestedBy } = normalized;
         await validateOooAcknowledgeRequest(type as string, status as string);
-        const fromDate = from as number;
-        const untilDate = until as number;
-        const requestedByUser = requestedBy as string;
+        const fromDate = from;
+        const untilDate = until;
+        const requestedByUser = requestedBy;
         const requestResult = await updateRequest(requestId, body, superUserId, REQUEST_TYPE.OOO);
-        if("error" in requestResult){
+        if(requestResult.error){
             throw new BadRequest(requestResult.error);
         }
         const [acknowledgeLogType, returnMessage]=
@@ -200,7 +206,7 @@ export const acknowledgeOooRequest = async (
             },
         };
     } catch (error) {
-        logger.error("Error while acknowledging OOO request", error);
+        logger.error(ERROR_WHILE_ACKNOWLEDGING_REQUEST, error);
         throw error;
     }
 }
