@@ -1015,6 +1015,24 @@ describe("Users", function () {
           return done();
         });
     });
+
+    it("Should accept lowercase profileStatus", function (done) {
+            chai
+              .request(app)
+        .get("/users?profileStatus=blocked")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.users).to.be.a("array");
+          res.body.users.forEach((user) => {
+            expect(user.profileStatus).to.equal("BLOCKED");
+          });
+          return done();
+        });
+      });
   });
 
   describe("GET /users/self", function () {

@@ -137,15 +137,16 @@ const getUsers = async (req, res) => {
     }
 
     if (profileStatus) {
+      const normalizedProfileStatus = String(profileStatus).trim().toUpperCase();
       try {
-        const users = await userQuery.fetchUserForKeyValue("profileStatus", profileStatus);
+        const users = await userQuery.fetchUserForKeyValue("profileStatus", normalizedProfileStatus);
         return res.json({
-          message: `Users with profile status ${profileStatus} returned successfully!`,
+          message: `Users with profile status ${normalizedProfileStatus} returned successfully!`,
           count: users.length,
           users: users,
         });
       } catch (error) {
-        logger.error(`Error while fetching users with profile status ${profileStatus}: ${error}`);
+        logger.error(`Error while fetching users with profile status ${normalizedProfileStatus}: ${error}`);
         return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
       }
     }
