@@ -488,6 +488,20 @@ describe("Middleware | Validators | User", function () {
       expect(next.calledOnce).to.be.equal(true);
     });
 
+    it("Allows the request with profileStatus parameter to pass to next", async function () {
+      const req = {
+        query: {
+          profileStatus: "BLOCKED",
+        },
+      };
+
+      const res = {};
+      const next = sinon.spy();
+
+      await getUsers(req, res, next);
+      expect(next.calledOnce).to.be.equal(true);
+    });
+
     it("Stops the request for passing on to next", async function () {
       const req = {
         query: {
