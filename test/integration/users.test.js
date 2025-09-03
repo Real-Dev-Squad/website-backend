@@ -974,6 +974,65 @@ describe("Users", function () {
           return done();
         });
     });
+
+    it("Should return users filtered by profile status", function (done) {
+      chai
+        .request(app)
+        .get("/users?profileStatus=BLOCKED")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users with profile status BLOCKED returned successfully!");
+          expect(res.body.users).to.be.a("array");
+          expect(res.body.count).to.be.a("number");
+
+          res.body.users.forEach((user) => {
+            expect(user.profileStatus).to.equal("BLOCKED");
+          });
+
+          return done();
+        });
+    });
+
+    it("Should return empty array when no users with specified profile status", function (done) {
+      chai
+        .request(app)
+        .get("/users?profileStatus=NON_EXISTENT_STATUS")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.message).to.equal("Users with profile status NON_EXISTENT_STATUS returned successfully!");
+          expect(res.body.users).to.be.a("array");
+          expect(res.body.count).to.equal(0);
+          expect(res.body.users).to.have.length(0);
+
+          return done();
+        });
+    });
+
+    it("Should accept lowercase profileStatus", function (done) {
+      chai
+        .request(app)
+        .get("/users?profileStatus=blocked")
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a("object");
+          expect(res.body.users).to.be.a("array");
+          res.body.users.forEach((user) => {
+            expect(user.profileStatus).to.equal("BLOCKED");
+          });
+          return done();
+        });
+    });
   });
 
   describe("GET /users/self", function () {

@@ -197,6 +197,9 @@ async function getUsers(req, res, next) {
       query: joi.string().optional(),
       q: joi.string().optional(),
       profile: joi.string().valid("true").optional(),
+      profileStatus: joi.string().optional().messages({
+        "string.empty": "profileStatus value must not be empty",
+      }),
       filterBy: joi.string().optional(),
       days: joi.string().optional(),
       dev: joi.string().optional(),
@@ -368,6 +371,7 @@ const migrationsValidator = async (req, res, next) => {
     res.boom.badRequest("Invalid Query Parameters Passed");
   }
 };
+
 module.exports = {
   updateUser,
   updateProfileURL,

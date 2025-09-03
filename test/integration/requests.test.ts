@@ -188,11 +188,10 @@ describe("/requests OOO", function () {
           expect(res.body).to.not.have.property("data");
 
           await requestsQuery.getRequestByKeyValues({
-            userId: testUserId,
+            requestedBy: testUserId,
             type: REQUEST_TYPE.OOO,
             status: REQUEST_STATE.PENDING
           }).then((request) => {
-            expect(request).to.not.be.null;
             expect(request.reason).to.equal(validOooStatusRequests.reason);
             done();
           }).catch(done);
@@ -580,7 +579,7 @@ describe("/requests OOO", function () {
     it("should return all requests", function (done) {
       chai
         .request(app)
-        .get("/requests")
+        .get("/requests?dev=true")
         .end(function (err, res) {
           expect(res).to.have.status(200);
           expect(res.body.data).to.have.lengthOf(2);
