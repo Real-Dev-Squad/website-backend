@@ -38,11 +38,7 @@ describe("Test OOO Request Service", function () {
   let testUserId: string;
   const errorMessage = "Unexpected error occured";
 
-  const expectAsyncError = async (promise: Promise<unknown>, expectedMessage: string) => {
-    const error = await promise.catch((err) => err);
-    expect(error).to.exist;
-    expect((error as Error).message).to.include(expectedMessage);
-  };
+
 
   beforeEach(async function () {
     const users = userDataFixture();
@@ -104,8 +100,12 @@ describe("Test OOO Request Service", function () {
          it("should throw error", async function () {
        sinon.stub(logService, "addLog").throws(new Error(errorMessage));
 
-       const promise = createOooRequest(validOooStatusRequests, testUserId);
-       await expectAsyncError(promise, errorMessage);
+       try {
+         await createOooRequest(validOooStatusRequests, testUserId);
+         expect.fail("Should have thrown an error");
+       } catch (error) {
+         expect(error.message).to.equal(errorMessage);
+       }
      });
   });
 
@@ -122,18 +122,30 @@ describe("Test OOO Request Service", function () {
     });
 
     it("should return INVALID_REQUEST_TYPE if request type is not OOO", async function () {
-      const promise = validateOooAcknowledgeRequest(REQUEST_TYPE.ONBOARDING, testOooRequest.status);
-      await expectAsyncError(promise, INVALID_REQUEST_TYPE);
+      try {
+        await validateOooAcknowledgeRequest(REQUEST_TYPE.ONBOARDING, testOooRequest.status);
+        expect.fail("Should have thrown an error");
+      } catch (error) {
+        expect(error.message).to.equal(INVALID_REQUEST_TYPE);
+      }
     });
 
     it("should return REQUEST_ALREADY_APPROVED if request is already approved", async function () {
-      const promise = validateOooAcknowledgeRequest(REQUEST_TYPE.OOO, REQUEST_STATE.APPROVED);
-      await expectAsyncError(promise, REQUEST_ALREADY_APPROVED);
+      try {
+        await validateOooAcknowledgeRequest(REQUEST_TYPE.OOO, REQUEST_STATE.APPROVED);
+        expect.fail("Should have thrown an error");
+      } catch (error) {
+        expect(error.message).to.equal(REQUEST_ALREADY_APPROVED);
+      }
     });
 
     it("should return REQUEST_ALREADY_REJECTED if request is already rejected", async function () {
-      const promise = validateOooAcknowledgeRequest(REQUEST_TYPE.OOO, REQUEST_STATE.REJECTED);
-      await expectAsyncError(promise, REQUEST_ALREADY_REJECTED);
+      try {
+        await validateOooAcknowledgeRequest(REQUEST_TYPE.OOO, REQUEST_STATE.REJECTED);
+        expect.fail("Should have thrown an error");
+      } catch (error) {
+        expect(error.message).to.equal(REQUEST_ALREADY_REJECTED);
+      }
     });
 
     it("should return undefined when all validation checks passes", async function () {
@@ -161,8 +173,12 @@ describe("Test OOO Request Service", function () {
 
     it("should return 'Request not found' if invalid request id is passed", async function () {
       const invalidOOORequestId = "11111111111111111111";
-      const promise = acknowledgeOooRequest(invalidOOORequestId, testAcknowledgeOooRequest, testSuperUserId);
-      await expectAsyncError(promise, "Request not found");
+      try {
+        await acknowledgeOooRequest(invalidOOORequestId, testAcknowledgeOooRequest, testSuperUserId);
+        expect.fail("Should have thrown an error");
+      } catch (error) {
+        expect(error.message).to.equal("Request not found");
+      }
     });
 
     it("should approve OOO request", async function () {
@@ -186,8 +202,12 @@ describe("Test OOO Request Service", function () {
     it("should propagate error when logging fails", async function () {
       sinon.stub(logService, "addLog").throws(new Error(errorMessage));
 
-      const promise = acknowledgeOooRequest(testOooRequest.id, testAcknowledgeOooRequest, testSuperUserId);
-      await expectAsyncError(promise, errorMessage);
+      try {
+        await acknowledgeOooRequest(testOooRequest.id, testAcknowledgeOooRequest, testSuperUserId);
+        expect.fail("Should have thrown an error");
+      } catch (error) {
+        expect(error.message).to.equal(errorMessage);
+      }
     });
   });
 });
