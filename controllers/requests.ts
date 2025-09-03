@@ -5,7 +5,7 @@ import {
 } from "../constants/requests";
 import { getRequests } from "../models/requests";
 import { getPaginatedLink } from "../utils/helper";
-import { acknowledgeOooRequest, createOooRequestController, updateOooRequestController } from "./oooRequests";
+import { acknowledgeOooRequestController, createOooRequestController, updateOooRequestController } from "./oooRequests";
 import { AcknowledgeOooRequest, OooRequestCreateRequest, OooRequestResponse } from "../types/oooRequest";
 import { CustomResponse } from "../typeDefinitions/global";
 import { ExtensionRequestRequest, ExtensionRequestResponse } from "../types/extensionRequests";
@@ -125,7 +125,7 @@ export const updateRequestBeforeAcknowledgedController = async (req: Request, re
   const type = req.body.type;
   switch(type){
     case REQUEST_TYPE.OOO:
-      await acknowledgeOooRequest(req as AcknowledgeOooRequest, res as OooRequestResponse, next);
+      await acknowledgeOooRequestController(req as AcknowledgeOooRequest, res as OooRequestResponse, next);
       break;
     case REQUEST_TYPE.ONBOARDING:
       await updateOnboardingExtensionRequestController(req as UpdateOnboardingExtensionRequest, res as OnboardingExtensionResponse);

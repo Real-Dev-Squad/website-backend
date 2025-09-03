@@ -159,7 +159,7 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
  * @param {NextFunction} next - Express next function for error handling
  * @returns {Promise<OooRequestResponse>} Resolves with success message or passes error to next middleware
  */
-export const acknowledgeOooRequest = async (
+export const acknowledgeOooRequestController = async (
   req: AcknowledgeOooRequest,
   res: OooRequestResponse,
   next: NextFunction
