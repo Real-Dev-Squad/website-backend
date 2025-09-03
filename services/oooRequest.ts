@@ -159,9 +159,6 @@ export const acknowledgeOooRequest = async (
 
         const { type, status, from, until, requestedBy } = normalized;
         await validateOooAcknowledgeRequest(type as string, status as string);
-        const fromDate = from;
-        const untilDate = until;
-        const requestedByUser = requestedBy;
         const requestResult = await updateRequest(requestId, body, superUserId, REQUEST_TYPE.OOO);
         if(requestResult.error){
             throw new BadRequest(requestResult.error);
@@ -182,18 +179,18 @@ export const acknowledgeOooRequest = async (
             await addFutureStatus({
                 requestId,
                 state: REQUEST_TYPE.OOO,
-                from: fromDate,
-                endsOn: untilDate,
-                userId: requestedByUser,
+                from: from,
+                endsOn: until,
+                userId: requestedBy,
                 message: body.comment,
             });
             await createUserFutureStatus({
                 requestId,
                 status: userState.OOO,
                 state: statusState.UPCOMING,
-                from: fromDate,
-                endsOn: untilDate,
-                userId: requestedByUser,
+                from: from,
+                endsOn: until,
+                userId: requestedBy,
                 message: body.comment,
                 createdAt: Date.now()
             });
