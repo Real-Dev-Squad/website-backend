@@ -14,13 +14,7 @@ describe("OOO Status Request Validators", function () {
   let req: any;
   let res: any;
   let nextSpy;
-
-  // Helper function to test async errors without try-catch
-  const expectAsyncError = async (promise: Promise<any>, expectedMessage: string) => {
-    const error = await promise.catch((err) => err);
-    expect(error).to.exist;
-    expect(error.message).to.include(expectedMessage);
-  };
+  
   beforeEach(function () {
     res = {
       boom: {
