@@ -13,7 +13,7 @@ const { SUPERUSER } = require("../constants/roles");
  * @param {CustomResponse} res - The response object  
  * @param {NextFunction} next - The next middleware function
  */
-export const conditionalOooChecks = (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
+export const oooRoleCheckMiddleware = (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
   const requestType = req.body?.type;
 
 
