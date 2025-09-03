@@ -6,7 +6,7 @@ import {
   createOooStatusRequestValidator,
    acknowledgeOooRequestValidator,
 } from "./../../../middlewares/validators/oooRequests";
-import { TestAcknowledgeOooRequest, validOooStatusRequests, validOooStatusUpdate } from "../../fixtures/oooRequest/oooRequest";
+import { testAcknowledgeOooRequest, validOooStatusRequests, validOooStatusUpdate } from "../../fixtures/oooRequest/oooRequest";
 import _ from "lodash";
 import { AcknowledgeOooRequest, OooRequestResponse } from "../../../types/oooRequest";
 
@@ -14,6 +14,13 @@ describe("OOO Status Request Validators", function () {
   let req: any;
   let res: any;
   let nextSpy;
+
+  // Helper function to test async errors without try-catch
+  const expectAsyncError = async (promise: Promise<any>, expectedMessage: string) => {
+    const error = await promise.catch((err) => err);
+    expect(error).to.exist;
+    expect(error.message).to.include(expectedMessage);
+  };
   beforeEach(function () {
     res = {
       boom: {
@@ -95,33 +102,29 @@ describe("OOO Status Request Validators", function () {
   describe("acknowledgeOOORequestsValidator", function () {
     it("should not validate for an invalid request for invalid request type", async function () {
       req = {
-        body: { ...TestAcknowledgeOooRequest, type: "XYZ"},
+        body: { ...testAcknowledgeOooRequest, type: "XYZ"},
         params: { id: "test-id" }
       };
 
-      try {
-        await acknowledgeOooRequestValidator(req as AcknowledgeOooRequest, res as OooRequestResponse, nextSpy);
-      } catch (error) {
-        expect(nextSpy.notCalled).to.be.true;
-      }
+      await acknowledgeOooRequestValidator(req as AcknowledgeOooRequest, res as OooRequestResponse, nextSpy);
+      expect(res.boom.badRequest.calledOnce).to.be.true;
+      expect(nextSpy.notCalled).to.be.true;
     });
 
     it("should not validate for an invalid request if status is incorrect", async function () {
       req = {
-        body: { ...TestAcknowledgeOooRequest, status: "PENDING"},
+        body: { ...testAcknowledgeOooRequest, status: "PENDING"},
         params: { id: "test-id" }
       };
 
-      try {
-        await acknowledgeOooRequestValidator(req as AcknowledgeOooRequest, res as OooRequestResponse, nextSpy);
-      } catch (error) {
-        expect(nextSpy.notCalled).to.be.true;
-      }
+      await acknowledgeOooRequestValidator(req as AcknowledgeOooRequest, res as OooRequestResponse, nextSpy);
+      expect(res.boom.badRequest.calledOnce).to.be.true;
+      expect(nextSpy.notCalled).to.be.true;
     });
 
     it("should validate for a valid acknowledge OOO request if comment not provided by superusers", async function() {
       req = {
-        body: _.omit(TestAcknowledgeOooRequest, "comment"),
+        body: _.omit(testAcknowledgeOooRequest, "comment"),
         params: { id: "test-id" }
       };
       res = {};
@@ -131,7 +134,7 @@ describe("OOO Status Request Validators", function () {
 
     it("should validate for a valid acknowledge OOO request", async function() {
       req = {
-        body: TestAcknowledgeOooRequest,
+        body: testAcknowledgeOooRequest,
         params: { id: "test-id" }
       };
       res = {};

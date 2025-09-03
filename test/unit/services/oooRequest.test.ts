@@ -30,7 +30,7 @@ import { userState } from "../../../constants/userStatus";
 import addUser from "../../utils/addUser";
 import userDataFixture from "../../fixtures/user/user";
 import * as logService from "../../../services/logService";
-import { createOooRequests3, TestAcknowledgeOooRequest } from "../../fixtures/oooRequest/oooRequest";
+import { createOooRequests3, testAcknowledgeOooRequest } from "../../fixtures/oooRequest/oooRequest";
 import { createRequest } from "../../../models/requests";
 
 describe("Test OOO Request Service", function () {
@@ -38,11 +38,10 @@ describe("Test OOO Request Service", function () {
   let testUserId: string;
   const errorMessage = "Unexpected error occured";
 
-  // Helper function to test async errors without try-catch
-  const expectAsyncError = async (promise: Promise<any>, expectedMessage: string) => {
+  const expectAsyncError = async (promise: Promise<unknown>, expectedMessage: string) => {
     const error = await promise.catch((err) => err);
     expect(error).to.exist;
-    expect(error.message).to.include(expectedMessage);
+    expect((error as Error).message).to.include(expectedMessage);
   };
 
   beforeEach(async function () {
@@ -102,15 +101,12 @@ describe("Test OOO Request Service", function () {
       });
     });
 
-    it("should throw error", async function () {
-      sinon.stub(logService, "addLog").throws(new Error(errorMessage));
+         it("should throw error", async function () {
+       sinon.stub(logService, "addLog").throws(new Error(errorMessage));
 
-      try {
-        await createOooRequest(validOooStatusRequests, testUserId);
-      } catch (error) {
-        expect(error.message).to.equal(errorMessage);
-      }
-    });
+       const promise = createOooRequest(validOooStatusRequests, testUserId);
+       await expectAsyncError(promise, errorMessage);
+     });
   });
 
   describe("validateOOOAcknowledgeRequest", function () {
@@ -165,48 +161,32 @@ describe("Test OOO Request Service", function () {
 
     it("should return 'Request not found' if invalid request id is passed", async function () {
       const invalidOOORequestId = "11111111111111111111";
-      const promise = acknowledgeOooRequest(invalidOOORequestId, TestAcknowledgeOooRequest, testSuperUserId);
+      const promise = acknowledgeOooRequest(invalidOOORequestId, testAcknowledgeOooRequest, testSuperUserId);
       await expectAsyncError(promise, "Request not found");
     });
 
     it("should approve OOO request", async function () {
-      const response = await acknowledgeOooRequest(testOooRequest.id, TestAcknowledgeOooRequest, testSuperUserId);
-      expect(response).to.deep.include({
+      const response = await acknowledgeOooRequest(testOooRequest.id, testAcknowledgeOooRequest, testSuperUserId);
+      expect(response).to.deep.equal({
         message: REQUEST_APPROVED_SUCCESSFULLY,
-        data: {
-          id: testOooRequest.id,
-          lastModifiedBy: testSuperUserId,
-          status: REQUEST_STATE.APPROVED,
-          type: REQUEST_TYPE.OOO,
-          comment: TestAcknowledgeOooRequest.comment,
-          updatedAt: response.data.updatedAt,
-        },
       });
     });
 
     it("should reject OOO request", async function () {
       const response = await acknowledgeOooRequest(
         testOooRequest.id,
-        { ...TestAcknowledgeOooRequest, status: REQUEST_STATE.REJECTED },
+        { ...testAcknowledgeOooRequest, status: REQUEST_STATE.REJECTED },
         testSuperUserId
       );
-      expect(response).to.deep.include({
+      expect(response).to.deep.equal({
         message: REQUEST_REJECTED_SUCCESSFULLY,
-        data: {
-          id: testOooRequest.id,
-          status: REQUEST_STATE.REJECTED,
-          lastModifiedBy: testSuperUserId,
-          type: REQUEST_TYPE.OOO,
-          comment: TestAcknowledgeOooRequest.comment,
-          updatedAt: response.data.updatedAt,
-        },
       });
     });
 
     it("should propagate error when logging fails", async function () {
       sinon.stub(logService, "addLog").throws(new Error(errorMessage));
 
-      const promise = acknowledgeOooRequest(testOooRequest.id, TestAcknowledgeOooRequest, testSuperUserId);
+      const promise = acknowledgeOooRequest(testOooRequest.id, testAcknowledgeOooRequest, testSuperUserId);
       await expectAsyncError(promise, errorMessage);
     });
   });
