@@ -82,7 +82,7 @@ export const getRequests = async (query: any) => {
 
     if (id) {
       const requestDoc = await requestModel.doc(id).get();
-      if (!requestDoc.exists) { 
+      if (!requestDoc.exists) {
         return null;
       }
       return {
