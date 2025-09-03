@@ -90,7 +90,7 @@ const getUserById = async (req, res) => {
 const getUsers = async (req, res) => {
   try {
     // getting user details by id if present.
-    const { q, dev: devParam, query } = req.query;
+    const { q, dev: devParam, query, profileStatus } = req.query;
     const dev = devParam === "true";
     const queryString = (dev ? q : query) || "";
     const transformedQuery = parseSearchQuery(queryString);
@@ -133,6 +133,21 @@ const getUsers = async (req, res) => {
       } catch (error) {
         logger.error(`Error while fetching user: ${error}`);
         return res.boom.serverUnavailable(INTERNAL_SERVER_ERROR);
+      }
+    }
+
+    if (profileStatus) {
+      const normalizedProfileStatus = String(profileStatus).trim().toUpperCase();
+      try {
+        const users = await userQuery.fetchUserForKeyValue("profileStatus", normalizedProfileStatus);
+        return res.json({
+          message: `Users with profile status ${normalizedProfileStatus} returned successfully!`,
+          count: users.length,
+          users: users,
+        });
+      } catch (error) {
+        logger.error(`Error while fetching users with profile status ${normalizedProfileStatus}: ${error}`);
+        return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
       }
     }
 
