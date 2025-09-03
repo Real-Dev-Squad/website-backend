@@ -151,6 +151,7 @@ export const acknowledgeOooRequest = async (
         if (!requestData) {
             throw new NotFound("Request not found");
         }
+        //TODO: Remove this after old request format is removed
         const normalized: OooStatusRequest = (
             (requestData as OooStatusRequest).type === REQUEST_TYPE.OOO &&
             'state' in (requestData as OooStatusRequest) &&
@@ -197,10 +198,6 @@ export const acknowledgeOooRequest = async (
         }
          return {
             message: returnMessage,
-            data: {
-                id: requestResult.id,
-                ...requestResult,
-            },
         };
     } catch (error) {
         logger.error(ERROR_WHILE_ACKNOWLEDGING_REQUEST, error);
