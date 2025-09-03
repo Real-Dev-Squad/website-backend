@@ -147,17 +147,12 @@ export const acknowledgeOooRequest = async (
     superUserId: string,
 ) => {
     try{
-        const requestData = await getRequests({ id: requestId });
+        const requestData = await getRequests({ id: requestId }) as OooStatusRequest | oldOooStatusRequest;
         if (!requestData) {
             throw new NotFound("Request not found");
         }
-        const normalized: OooStatusRequest = (
-            (requestData as OooStatusRequest).type === REQUEST_TYPE.OOO &&
-            'state' in (requestData as OooStatusRequest) &&
-            !('status' in (requestData as OooStatusRequest))
-        ) ? newOOOSchema(requestData as oldOooStatusRequest) as OooStatusRequest : requestData as OooStatusRequest;
+    const { type, status, from, until, requestedBy } = requestData as OooStatusRequest;
 
-        const { type, status, from, until, requestedBy } = normalized;
         await validateOooAcknowledgeRequest(type as string, status as string);
         const requestResult = await updateRequest(requestId, body, superUserId, REQUEST_TYPE.OOO);
         if(requestResult.error){
@@ -197,10 +192,6 @@ export const acknowledgeOooRequest = async (
         }
          return {
             message: returnMessage,
-            data: {
-                id: requestResult.id,
-                ...requestResult,
-            },
         };
     } catch (error) {
         logger.error(ERROR_WHILE_ACKNOWLEDGING_REQUEST, error);
