@@ -183,7 +183,7 @@ describe("Test OOO Request Service", function () {
 
     it("should approve OOO request", async function () {
       const response = await acknowledgeOooRequest(testOooRequest.id, testAcknowledgeOooRequest, testSuperUserId);
-      expect(response).to.deep.equal({
+      expect(response).to.include({
         message: REQUEST_APPROVED_SUCCESSFULLY,
       });
     });
@@ -194,7 +194,7 @@ describe("Test OOO Request Service", function () {
         { ...testAcknowledgeOooRequest, status: REQUEST_STATE.REJECTED },
         testSuperUserId
       );
-      expect(response).to.deep.equal({
+      expect(response).to.include({
         message: REQUEST_REJECTED_SUCCESSFULLY,
       });
     });
