@@ -120,10 +120,10 @@ export const validateOooAcknowledgeRequest = async (
             throw new BadRequest(INVALID_REQUEST_TYPE)
         }
         if (requestStatus === REQUEST_STATE.APPROVED) {
-            throw new Conflict(REQUEST_ALREADY_APPROVED)
+            throw new BadRequest(REQUEST_ALREADY_APPROVED)
         }
         if (requestStatus === REQUEST_STATE.REJECTED) {
-            throw new Conflict(REQUEST_ALREADY_REJECTED)
+            throw new BadRequest(REQUEST_ALREADY_REJECTED)
         }
     } catch (error) {
         logger.error("Error while validating OOO acknowledge request", error);
