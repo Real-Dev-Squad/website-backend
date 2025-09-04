@@ -111,25 +111,26 @@ export const createOooRequest = async (
  * @throws {Error} Throws an error if an issue occurs during validation.
  */
 
-export const validateOooAcknowledgeRequest = async (
+export const validateOooAcknowledgeRequest = (
     requestType: string,
     requestStatus: string,
-) => {
-    try {
-        if (requestType !== REQUEST_TYPE.OOO) {
-            throw new BadRequest(INVALID_REQUEST_TYPE)
-        }
-        if (requestStatus === REQUEST_STATE.APPROVED) {
-            throw new BadRequest(REQUEST_ALREADY_APPROVED)
-        }
-        if (requestStatus === REQUEST_STATE.REJECTED) {
-            throw new BadRequest(REQUEST_ALREADY_REJECTED)
-        }
-    } catch (error) {
-        logger.error("Error while validating OOO acknowledge request", error);
-        throw error;
+  ) => {
+    if (requestType !== REQUEST_TYPE.OOO) {
+      logger.error(`Invalid request type: ${requestType}`);
+      throw new BadRequest(INVALID_REQUEST_TYPE);
     }
-}
+  
+    if (requestStatus === REQUEST_STATE.APPROVED) {
+      logger.error(`Request already approved`);
+      throw new BadRequest(REQUEST_ALREADY_APPROVED);
+    }
+  
+    if (requestStatus === REQUEST_STATE.REJECTED) {
+      logger.error(`Request already rejected`);
+      throw new BadRequest(REQUEST_ALREADY_REJECTED);
+    }
+  };
+  
 
 /**
  * Acknowledges the OOO request.
@@ -145,56 +146,66 @@ export const acknowledgeOooRequest = async (
     requestId: string,
     body: AcknowledgeOooRequestBody,
     superUserId: string,
-) => {
-    try{
-        const requestData = await getRequests({ id: requestId }) as OooStatusRequest | oldOooStatusRequest;
-        if (!requestData) {
-            throw new NotFound("Request not found");
-        }
-    const { type, status, from, until, requestedBy } = requestData as OooStatusRequest;
-
-        await validateOooAcknowledgeRequest(type as string, status as string);
-        const requestResult = await updateRequest(requestId, body, superUserId, REQUEST_TYPE.OOO);
-        if(requestResult.error){
-            throw new BadRequest(requestResult.error);
-        }
-        const [acknowledgeLogType, returnMessage]=
-        requestResult.status === REQUEST_STATE.APPROVED ? [REQUEST_LOG_TYPE.REQUEST_APPROVED, REQUEST_APPROVED_SUCCESSFULLY] : [REQUEST_LOG_TYPE.REQUEST_REJECTED, REQUEST_REJECTED_SUCCESSFULLY];
-        const requestLog = {
-            type: acknowledgeLogType,
-            meta: {
-                requestId: requestId,
-                action: LOG_ACTION.UPDATE,
-                userId: superUserId,
-            },
-            body: requestResult,
-        }
-        await addLog(requestLog.type, requestLog.meta, requestLog.body);
-        if (requestResult.status === REQUEST_STATE.APPROVED) {
-            await addFutureStatus({
-                requestId,
-                state: REQUEST_TYPE.OOO,
-                from: from,
-                endsOn: until,
-                userId: requestedBy,
-                message: body.comment,
-            });
-            await createUserFutureStatus({
-                requestId,
-                status: userState.OOO,
-                state: statusState.UPCOMING,
-                from: from,
-                endsOn: until,
-                userId: requestedBy,
-                message: body.comment,
-                createdAt: Date.now()
-            });
-        }
-         return {
-            message: returnMessage,
-        };
+  ) => {
+    try {
+      const requestData = await getRequests({ id: requestId }) as OooStatusRequest | oldOooStatusRequest;
+      if (!requestData) {
+        throw new NotFound("Request not found");
+      }
+  
+      const { type, status, from, until, requestedBy } = requestData as OooStatusRequest;
+  
+      await validateOooAcknowledgeRequest(type, status);
+  
+      const requestResult = await updateRequest(requestId, body, superUserId, REQUEST_TYPE.OOO);
+      if (requestResult.error) {
+        throw new BadRequest(requestResult.error);
+      }
+  
+      const [acknowledgeLogType, returnMessage] =
+        requestResult.status === REQUEST_STATE.APPROVED
+          ? [REQUEST_LOG_TYPE.REQUEST_APPROVED, REQUEST_APPROVED_SUCCESSFULLY]
+          : [REQUEST_LOG_TYPE.REQUEST_REJECTED, REQUEST_REJECTED_SUCCESSFULLY];
+  
+      await addLog(
+        acknowledgeLogType,
+        {
+          requestId,
+          action: LOG_ACTION.UPDATE,
+          userId: superUserId,
+        },
+        requestResult,
+      );
+  
+      if (requestResult.status === REQUEST_STATE.APPROVED) {
+        await addFutureStatus({
+          requestId,
+          state: REQUEST_TYPE.OOO,
+          from,
+          endsOn: until,
+          userId: requestedBy,
+          message: body.comment ?? "",
+        });
+  
+        await createUserFutureStatus({
+          requestId,
+          status: userState.OOO,
+          state: statusState.UPCOMING,
+          from,
+          endsOn: until,
+          userId: requestedBy,
+          message: body.comment ?? "",
+          createdAt: Date.now(),
+        });
+      }
+  
+      return {
+        message: returnMessage,
+        request: requestResult,
+      };
     } catch (error) {
-        logger.error(ERROR_WHILE_ACKNOWLEDGING_REQUEST, error);
-        throw error;
+      logger.error(ERROR_WHILE_ACKNOWLEDGING_REQUEST, { error });
+      throw error;
     }
-}
+  };
+  
