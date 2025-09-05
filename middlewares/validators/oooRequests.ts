@@ -88,17 +88,15 @@ export const acknowledgeOooRequestValidator = async (
     await paramsSchema.validateAsync(req.params, { abortEarly: false });
     return next();
   } catch (error: unknown) {
-    const isJoiValidationError = (err: unknown): err is joi.ValidationError => {
-      return Boolean(err) && typeof (err as any).isJoi === "boolean" && (err as any).isJoi === true && Array.isArray((err as any).details);
-    };
 
-    if (isJoiValidationError(error)) {
+    if (error instanceof joi.ValidationError) {
       const errorMessages = error.details.map((detail) => detail.message);
       logger.error(`${ERROR_WHILE_ACKNOWLEDGING_REQUEST}: ${errorMessages}`);
       return res.boom.badRequest(errorMessages);
     }
-    const genericMessage = typeof (error as any)?.message === "string" ? (error as any).message : String(error);
-    logger.error(`${ERROR_WHILE_ACKNOWLEDGING_REQUEST}: ${genericMessage}`);
+    
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.error(`${ERROR_WHILE_ACKNOWLEDGING_REQUEST}: ${errorMessage}`);
     return res.boom.badRequest([ERROR_WHILE_ACKNOWLEDGING_REQUEST]);
   }
 };

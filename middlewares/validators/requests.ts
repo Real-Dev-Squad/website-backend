@@ -147,7 +147,7 @@ export const updateRequestValidator = async (
             res as OnboardingExtensionResponse, next);
           break;
       case REQUEST_TYPE.OOO:
-          await acknowledgeOooRequestValidator(req, res as OooRequestResponse, next);
+          await acknowledgeOooRequestValidator(req as AcknowledgeOooRequest, res as OooRequestResponse, next);
           break;
       default:
           return res.boom.badRequest("Invalid type");
