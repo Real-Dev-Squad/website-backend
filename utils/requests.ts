@@ -75,14 +75,14 @@ export const transformRequestResponse = (allRequests: (OooStatusRequest | oldOoo
       return request;
     }
 
-    if (dev) {
-      return 'status' in request 
-        ? oldOOOSchema(request as OooStatusRequest)
-        : request;
+    if (dev && 'status' in request) {
+      return oldOOOSchema(request as OooStatusRequest);
+    }
+    
+    if (!dev && 'state' in request) {
+      return newOOOSchema(request as oldOooStatusRequest);
     }
 
-    return 'state' in request 
-      ? newOOOSchema(request as oldOooStatusRequest)
-      : request;
+    return request;
   });
 };

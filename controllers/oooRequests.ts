@@ -180,6 +180,6 @@ export const acknowledgeOooRequestController = async (
     catch(error){
       logger.error(ERROR_WHILE_ACKNOWLEDGING_REQUEST, error);
       next(error);
-      return res;
+      return;
   }
 };

@@ -153,9 +153,10 @@ export const acknowledgeOooRequest = async (
         throw new NotFound("Request not found");
       }
   
-      const { type, status, from, until, requestedBy } = requestData as OooStatusRequest;
-  
-      await validateOooAcknowledgeRequest(type, status);
+      const { type, from, until, requestedBy } = requestData;
+      const status = 'status' in requestData ? requestData.status : (requestData as oldOooStatusRequest).state;
+  await validateOooAcknowledgeRequest(type, status);
+      
   
       const requestResult = await updateRequest(requestId, body, superUserId, REQUEST_TYPE.OOO);
       if (requestResult.error) {
