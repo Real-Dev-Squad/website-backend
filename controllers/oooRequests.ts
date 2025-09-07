@@ -8,10 +8,12 @@ import {
   ERROR_WHILE_UPDATING_REQUEST,
   REQUEST_APPROVED_SUCCESSFULLY,
   REQUEST_REJECTED_SUCCESSFULLY,
-  UNAUTHORIZED_TO_CREATE_OOO_REQUEST,
   REQUEST_ALREADY_PENDING,
   USER_STATUS_NOT_FOUND,
   OOO_STATUS_ALREADY_EXIST,
+  UNAUTHORIZED_TO_CREATE_OOO_REQUEST,
+  ERROR_WHILE_ACKNOWLEDGING_REQUEST,
+  REQUEST_ID_REQUIRED,
 } from "../constants/requests";
 import { statusState } from "../constants/userStatus";
 import { logType } from "../constants/logs";
@@ -19,10 +21,11 @@ import { addLog } from "../models/logs";
 import { getRequestByKeyValues, getRequests, updateRequest } from "../models/requests";
 import { createUserFutureStatus } from "../models/userFutureStatus";
 import { getUserStatus, addFutureStatus } from "../models/userStatus";
-import { createOooRequest, validateUserStatus } from "../services/oooRequest";
+import { createOooRequest, validateUserStatus, acknowledgeOooRequest as acknowledgeOooRequestService } from "../services/oooRequest";
 import { CustomResponse } from "../typeDefinitions/global";
-import { OooRequestCreateRequest, OooRequestResponse, OooStatusRequest } from "../types/oooRequest";
+import { AcknowledgeOooRequest, OooRequestCreateRequest, OooRequestResponse, OooStatusRequest } from "../types/oooRequest";
 import { UpdateRequest } from "../types/requests";
+import { NextFunction } from "express";
 
 /**
  * Controller to handle the creation of OOO requests.
@@ -78,7 +81,7 @@ export const createOooRequestController = async (
         return res.boom.conflict(REQUEST_ALREADY_PENDING);
     }
 
-    await createOooRequest(requestBody, username, userId);
+    await createOooRequest(requestBody, userId);
 
     return res.status(201).json({
       message: REQUEST_CREATED_SUCCESSFULLY,
@@ -146,5 +149,37 @@ export const updateOooRequestController = async (req: UpdateRequest, res: Custom
   } catch (err) {
     logger.error(ERROR_WHILE_UPDATING_REQUEST, err);
     return res.boom.badImplementation(ERROR_WHILE_UPDATING_REQUEST);
+  }
+};
+/**
+ * Acknowledges an Out-of-Office (OOO) request by updating its status to approved or rejected
+ * 
+ * @param {AcknowledgeOooRequest} req - The request object containing acknowledgment details (status, comment) and request ID in params
+ * @param {OooRequestResponse} res - The response object for sending success/error responses
+ * @param {NextFunction} next - Express next function for error handling
+ * @returns {Promise<OooRequestResponse>} Resolves with success message or passes error to next middleware
+ */
+export const acknowledgeOooRequestController = async (
+  req: AcknowledgeOooRequest,
+  res: OooRequestResponse,
+  next: NextFunction
+)
+  : Promise<OooRequestResponse> => {
+    try {
+
+      const requestBody = req.body;
+      const superUserId = req.userData.id;
+      const requestId = req.params.id;
+
+      const response = await acknowledgeOooRequestService(requestId, requestBody, superUserId);
+
+      return res.status(200).json({
+        message: response.message,
+      });
+    }
+    catch(error){
+      logger.error(ERROR_WHILE_ACKNOWLEDGING_REQUEST, error);
+      next(error);
+      return;
   }
 };

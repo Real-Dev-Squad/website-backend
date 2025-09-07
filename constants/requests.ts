@@ -39,7 +39,9 @@ export const REQUEST_ALREADY_REJECTED = "Request already rejected";
 export const ERROR_WHILE_FETCHING_REQUEST = "Error while fetching request";
 export const ERROR_WHILE_CREATING_REQUEST = "Error while creating request";
 export const ERROR_WHILE_UPDATING_REQUEST = "Error while updating request";
+export const ERROR_WHILE_ACKNOWLEDGING_REQUEST = "Error while acknowledging request";
 
+export const REQUEST_ID_REQUIRED = "Request id is required";
 export const REQUEST_DOES_NOT_EXIST = "Request does not exist";
 export const REQUEST_ALREADY_PENDING = "Request already exists please wait for approval or rejection";
 export const UNAUTHORIZED_TO_CREATE_OOO_REQUEST = "Unauthorized to create OOO request";

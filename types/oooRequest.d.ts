@@ -55,3 +55,20 @@ export type OooRequestCreateRequest = Request & {
 };
 
 export type OooRequestUpdateRequest = Request & { oooRequestUpdateBody , userData: userData , query: RequestQuery , params: RequestParams };
+
+export type AcknowledgeOooRequestQuery = RequestQuery & {
+  dev?: string
+};
+
+export type AcknowledgeOooRequestBody = {
+  type: REQUEST_TYPE.OOO;
+  comment?: string;
+  status: REQUEST_STATE.APPROVED | REQUEST_STATE.REJECTED;
+}
+
+export type AcknowledgeOooRequest = Request & {
+  body: AcknowledgeOooRequestBody;
+  userData: userData;
+  query: AcknowledgeOooRequestQuery;
+  params: RequestParams;
+}
