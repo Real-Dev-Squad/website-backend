@@ -1,4 +1,4 @@
-const cacheLogs = [
+export const cacheLogs = [
   {
     timestamp: {
       _seconds: 1657193216,
@@ -14,7 +14,7 @@ const cacheLogs = [
   },
 ];
 
-const cacheModelData = [
+export const cacheModelData = [
   {
     timestamp: { _seconds: 1659870503, _nanoseconds: 482000000 },
   },
@@ -23,7 +23,7 @@ const cacheModelData = [
   },
 ];
 
-const purgeCacheResponse = [
+export const purgeCacheResponse = [
   {
     data: {
       success: true,

@@ -1,7 +1,7 @@
-import { REQUEST_TYPE } from "../../../constants/requests";
-import { createOnboardingExtensionRequestValidator } from "../../../middlewares/validators/onboardingExtensionRequest";
+import { REQUEST_TYPE } from "../../../constants/requests.js";
+import { createOnboardingExtensionRequestValidator } from "../../../middlewares/validators/onboardingExtensionRequest.js";
 import sinon from "sinon";
-import { CreateOnboardingExtensionBody } from "../../../types/onboardingExtension";
+import { CreateOnboardingExtensionBody } from "../../../types/onboardingExtension.js";
 import { expect } from "chai";
 
 describe("Onboarding Extension Request Validators", () => {

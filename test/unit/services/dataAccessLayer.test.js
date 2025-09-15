@@ -3,7 +3,7 @@ import * as chai from "chai";
 import chaiHttp from "chai-http";
 
 import userQuery from "../../../models/users.js";
-import members from "../../../models/members.js";
+import * as members from "../../../models/members.js";
 import { KEYS_NOT_ALLOWED, ACCESS_LEVEL } from "../../../constants/userDataLevels.js";
 
 import {

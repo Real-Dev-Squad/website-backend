@@ -5,9 +5,9 @@ import config from "config";
 
 import app from "../../server.js";
 import { generateAuthToken, verifyAuthToken } from "../../services/authService.js";
-import tasksModel from "../../models/tasks.js";
-import userStatusModel from "../../models/userStatus.js";
-import taskRequestsModel from "../../models/taskRequests.js";
+import * as tasksModel from "../../models/tasks.js";
+import * as userStatusModel from "../../models/userStatus.js";
+import * as taskRequestsModel from "../../models/taskRequests.js";
 import addUser from "../utils/addUser.js";
 import cleanDb from "../utils/cleanDb.js";
 import userData from "../fixtures/user/user.js";
@@ -22,7 +22,7 @@ import {
   TASK_REQUEST_ACTIONS,
 } from "../../constants/taskRequests.js";
 import usersUtils from "../../utils/users.js";
-import githubService from "../../services/githubService.js";
+import * as githubService from "../../services/githubService.js";
 import { userState } from "../../constants/userStatus.js";
 
 const { expect } = chai;

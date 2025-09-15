@@ -1,4 +1,4 @@
-const GET_OR_CREATE_GOAL_USER = {
+export const GET_OR_CREATE_GOAL_USER = {
   status: 201,
   json: () =>
     Promise.resolve({

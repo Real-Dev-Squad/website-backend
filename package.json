@@ -78,6 +78,7 @@
     "sinon": "18.0.0",
     "ts-node": "10.9.2",
     "ts-node-dev": "2.0.0",
+    "tsx": "^4.20.5",
     "typescript": "5.3.3"
   },
   "engines": {
@@ -89,5 +90,19 @@
   "volta": {
     "node": "22.10.0",
     "yarn": "1.22.21"
+  },
+  "ts-node": {
+    "esm": true,
+    "transpileOnly": true,
+    "experimentalSpecifierResolution": "node",
+    "compilerOptions": {
+      "module": "ESNext",
+      "target": "ES2022",
+      "allowJs": true,
+      "resolveJsonModule": true,
+      "moduleResolution": "node",
+      "allowSyntheticDefaultImports": true,
+      "esModuleInterop": true
+    }
   }
 }

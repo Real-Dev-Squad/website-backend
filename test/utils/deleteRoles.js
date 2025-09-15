@@ -1,7 +1,7 @@
 import firestore from "../../utils/firestore.js";
 import logger from "../../utils/logger.js";
 
-const userCollection = firestore.collection("users");
+export const userCollection = firestore.collection("users");
 
 /**
  * Deletes the specified roles for a user

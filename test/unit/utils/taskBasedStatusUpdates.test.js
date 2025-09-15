@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import sinon from "sinon";
-import { NotFound } from "http-errors";
+import createError from "http-errors";
 import { userState } from "../../../constants/userStatus.js";
 import {
   generateAlreadyExistingStatusResponse,
@@ -12,6 +12,7 @@ import {
   updateFutureStatusToState,
   getNextDayTimeStamp,
 } from "../../../utils/userStatus.js";
+const { NotFound } = createError;
 
 describe("Task Based User Status Update Util Functions", function () {
   it('should return an object with status "success" and message that the state is already in that state', function () {

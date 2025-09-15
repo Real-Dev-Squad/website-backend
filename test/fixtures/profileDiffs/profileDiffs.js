@@ -1,4 +1,4 @@
-export default () => {
+const getProfileDiffs = () => {
   return [
     {
       approval: "PENDING",
@@ -104,3 +104,6 @@ export default () => {
     },
   ];
 };
+
+export { getProfileDiffs };
+export default getProfileDiffs;

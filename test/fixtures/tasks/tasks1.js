@@ -1,7 +1,7 @@
 import { DINERO, NEELAM } from "../../../constants/wallets.js";
 import userData from "../user/user.js";
 
-const appOwner = userData[3];
+export const appOwner = userData[3];
 /**
  * Sample tasks for tests
  * @return  {object}

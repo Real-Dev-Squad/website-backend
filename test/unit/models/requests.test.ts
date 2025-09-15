@@ -1,6 +1,6 @@
 import { expect } from "chai";
-import cleanDb from "../../utils/cleanDb";
-import { createRequest, getRequests, updateRequest, getRequestByKeyValues } from "../../../models/requests";
+import cleanDb from "../../utils/cleanDb.js";
+import { createRequest, getRequests, updateRequest, getRequestByKeyValues } from "../../../models/requests.js";
 import {
   createOooRequests,
   createOooRequests2,
@@ -8,9 +8,9 @@ import {
   updateOooApprovedRequests,
   updateOooRejectedRequests,
 } from "./../../fixtures/oooRequest/oooRequest";
-import { REQUEST_STATE, REQUEST_TYPE } from "../../../constants/requests";
+import { REQUEST_STATE, REQUEST_TYPE } from "../../../constants/requests.js";
 import userDataFixture from "./../../fixtures/user/user";
-import addUser from "../../utils/addUser";
+import addUser from "../../utils/addUser.js";
 const userData = userDataFixture();
 
 let testUserId: string;

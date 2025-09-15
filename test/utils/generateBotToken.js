@@ -21,3 +21,8 @@ export const generateCronJobToken = (data) => {
   });
   return token;
 };
+
+export default {
+  generateToken,
+  generateCronJobToken,
+};

@@ -1,7 +1,8 @@
 import { userFutureStatusData } from "../../fixtures/userFutureStatus/userFutureStatusData.js";
 import { expect } from "chai";
 import sinon from "sinon";
-import { NotFound, Forbidden } from "http-errors";
+import createError from "http-errors";
+const { NotFound, Forbidden } = createError;
 import firestore from "../../../utils/firestore.js";
 import { cancelOooStatus, addFutureStatus } from "../../../models/userStatus.js";
 import cleanDb from "../../utils/cleanDb.js";

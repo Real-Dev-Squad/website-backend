@@ -1,4 +1,4 @@
-const skipAuthorizeRolesUnderFF = (authorizeMiddleware) => {
+export const skipAuthorizeRolesUnderFF = (authorizeMiddleware) => {
   return (req, res, next) => {
     const { dev } = req.query;
     const isDev = dev === "true";

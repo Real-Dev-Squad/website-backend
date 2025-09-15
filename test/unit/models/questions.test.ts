@@ -1,8 +1,8 @@
 import { expect } from "chai";
 
-const cleanDb = require("../../utils/cleanDb");
-const questionQuery = require("../../../models/questions");
-const questionDataArray = require("../../fixtures/questions/questions");
+import cleanDb from "../../utils/cleanDb.js";
+import * as questionQuery from "../../../models/questions";
+import { SAMPLE_QUESTION_DATA as questionDataArray } from "../../fixtures/questions/questions";
 const questionDataWithMaxWords = questionDataArray[0];
 const questionDataWithoutMaxWords = questionDataArray[1];
 
@@ -13,7 +13,7 @@ describe("Questions", function () {
 
   describe("createQuestion", function () {
     it("should create a question in db with the given data and max_characters should be added by default if not provided", async function () {
-      const result = await questionQuery.createQuestion(questionDataWithoutMaxWords);
+      const result = await questionQuery.createQuestion(questionDataWithoutMaxWords as any);
 
       expect(result).to.be.a("object");
       expect(result.question).to.equal(questionDataWithoutMaxWords.question);
@@ -23,7 +23,7 @@ describe("Questions", function () {
     });
 
     it("should create a question in db with the given data and max_characters should be added as provided", async function () {
-      const result = await questionQuery.createQuestion(questionDataWithMaxWords);
+      const result = await questionQuery.createQuestion(questionDataWithMaxWords as any);
 
       expect(result).to.be.a("object");
       expect(result.question).to.equal(questionDataWithMaxWords.question);

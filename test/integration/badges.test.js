@@ -11,7 +11,7 @@ import userData from "../fixtures/user/user.js";
 import model from "../../models/badges.js";
 
 import { generateAuthToken } from "../../services/authService.js";
-import imageService from "../../services/imageService.js";
+import * as imageService from "../../services/imageService.js";
 import addUser from "../utils/addUser.js";
 import cleanDb from "../utils/cleanDb.js";
 

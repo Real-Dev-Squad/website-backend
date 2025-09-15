@@ -4,7 +4,7 @@ const { expect } = chai;
 
 import { createTaskRequestValidator } from "./../../../middlewares/validators/taskRequests";
 
-import { validTaskCreqtionRequest, validTaskAssignmentRequest } from "../../fixtures/taskRequests/taskRequests";
+import { validTaskCreqtionRequest, validTaskAssignmentRequest } from "../../fixtures/taskRequests/taskRequests.js";
 
 describe("Task Request Validators", function () {
   let req: any;

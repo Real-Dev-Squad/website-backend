@@ -5,17 +5,17 @@
  * @return {Object}
  */
 
-const userFound = {
+export const userFound = {
   userExists: true,
   userBadges: [{ title: "badgeTitle", description: "badgeDescription" }],
 };
 
-const userNotFound = {
+export const userNotFound = {
   userExists: false,
   userBadges: [],
 };
 
-const badgesEmpty = {
+export const badgesEmpty = {
   userExists: true,
   userBadges: [],
 };

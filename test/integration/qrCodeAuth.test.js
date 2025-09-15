@@ -7,7 +7,7 @@ import cleanDb from "../utils/cleanDb.js";
 import userData from "../fixtures/user/user.js";
 import { userDeviceInfoDataArray } from "../fixtures/qrCodeAuth/qrCodeAuth.js";
 import addUser from "../utils/addUser.js";
-import qrCodeAuthModel from "../../models/qrCodeAuth.js";
+import * as qrCodeAuthModel from "../../models/qrCodeAuth.js";
 import { generateAuthToken } from "../../services/authService.js";
 
 const { expect } = chai;

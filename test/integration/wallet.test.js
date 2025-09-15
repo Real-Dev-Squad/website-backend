@@ -2,7 +2,7 @@ import chai from "chai";
 import chaiHttp from "chai-http";
 
 import app from "../../server.js";
-import authService from "../../services/authService.js";
+import * as authService from "../../services/authService.js";
 import addUser from "../utils/addUser.js";
 import cleanDb from "../utils/cleanDb.js";
 import usersUtils from "../../utils/users.js";

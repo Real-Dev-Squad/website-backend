@@ -146,3 +146,9 @@ export const tasksData = [
     dependsOn: [],
   },
 ];
+
+// Default export
+export default {
+  usersData,
+  tasksData,
+};

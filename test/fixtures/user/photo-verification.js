@@ -1,4 +1,4 @@
-const userPhotoVerificationData = {
+export const userPhotoVerificationData = {
   discordId: "12345",
   userId: "1234567abcd",
   discord: {
@@ -18,7 +18,7 @@ const userPhotoVerificationData = {
     },
   },
 };
-const newUserPhotoVerificationData = {
+export const newUserPhotoVerificationData = {
   discordId: "1234567",
   userId: "new-user-id",
   discord: {

@@ -2,7 +2,7 @@ import chai from "chai";
 import sinon from "sinon";
 const { expect } = chai;
 
-const { createInviteValidator } = require("./../../../middlewares/validators/invites");
+import { createInviteValidator  } from "./../../../middlewares/validators/invites";
 import { InviteBodyData, inviteData } from "./../../fixtures/invites/invitesData";
 
 describe("Invite Validators", function () {
@@ -14,7 +14,7 @@ describe("Invite Validators", function () {
       const res = {};
       const nextSpy = sinon.spy();
 
-      await createInviteValidator(req, res, nextSpy);
+      await createInviteValidator(req as any, res as any, nextSpy);
 
       expect(nextSpy.calledOnce).to.equal(true);
     });
@@ -32,7 +32,7 @@ describe("Invite Validators", function () {
       };
       const nextSpy = sinon.spy();
 
-      await createInviteValidator(req, res, nextSpy);
+      await createInviteValidator(req as any, res as any, nextSpy);
 
       expect(res.boom.badRequest.calledOnce).to.equal(true);
       expect(nextSpy.calledOnce).to.equal(false);

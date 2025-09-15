@@ -1,5 +1,5 @@
 import { TASK_REQUEST_TYPE } from "../../../constants/taskRequests.js";
-const validAssignmentRequest = {
+export const validAssignmentRequest = {
   taskId: "1234",
   externalIssueUrl: "https://api.github.com/repos/Real-Dev-Squad/website-status/issues/1564672",
   requestType: "ASSIGNMENT",
@@ -12,8 +12,8 @@ const { taskId: tarTaskId, ...assignmentReqWithoutTaskId } = validAssignmentRequ
 const { userId: tarUserId, ...assignmentReqWithoutUserId } = validAssignmentRequest;
 const { proposedDeadline: tarProposedDeadline, ...assignmentReqWithoutProposedDeadline } = validAssignmentRequest;
 const { externalIssueUrl: tarExternalIssueUrl, ...assignmentReqWithoutExtIssueId } = validAssignmentRequest;
-const assignmentReqWithDescription = { ...validAssignmentRequest, description: "something something" };
-const validCreationRequest = {
+export const assignmentReqWithDescription = { ...validAssignmentRequest, description: "something something" };
+export const validCreationRequest = {
   externalIssueUrl: "https://api.github.com/repos/Real-Dev-Squad/website-status/issues/1564672",
   externalIssueHtmlUrl: "https://github.com/Real-Dev-Squad/website-status/issues/1564672",
   requestType: "CREATION",
@@ -21,15 +21,15 @@ const validCreationRequest = {
   proposedDeadline: 1243455234,
   proposedStartDate: 1243405234,
 };
-const creationReqWithTaskId = { ...validCreationRequest, taskId: "1234" };
+export const creationReqWithTaskId = { ...validCreationRequest, taskId: "1234" };
 const { userId: tcrUserId, ...creationReqWithoutUserId } = validCreationRequest;
 const { proposedDeadline: tcrProposedDeadline, ...creationReqWithoutProposedDeadline } = validCreationRequest;
 const { externalIssueUrl: tcrExternalIssueUrl, ...creationReqWithoutExtIssueId } = validCreationRequest;
-const creationReqWithDescription = { ...validCreationRequest, description: "something something" };
-const invalidRequest = {
+export const creationReqWithDescription = { ...validCreationRequest, description: "something something" };
+export const invalidRequest = {
   hello: "world",
 };
-const taskRequestData = {
+export const taskRequestData = {
   userId: "user123",
   proposedDeadline: 1697452226700,
   proposedStartDate: 1697452226700,
@@ -39,7 +39,7 @@ const taskRequestData = {
   externalIssueHtmlUrl: "https://github.com/Real-Dev-Squad/website-backend/issues/1599",
   markdownEnabled: false,
 };
-const existingTaskRequest = {
+export const existingTaskRequest = {
   requestors: ["user123"],
   status: "PENDING",
   taskTitle: "Task Title",
@@ -62,12 +62,12 @@ const existingTaskRequest = {
   lastModifiedBy: "testUser",
   lastModifiedAt: 1697452229369,
 };
-const existingOldTaskRequest = {
+export const existingOldTaskRequest = {
   requestors: ["user123"],
   status: "PENDING",
   taskId: "task123",
 };
-const existingOldTaskRequestWithMultipleUsers = {
+export const existingOldTaskRequestWithMultipleUsers = {
   requestors: ["user123", "user456"],
   status: "PENDING",
   taskId: "task456",

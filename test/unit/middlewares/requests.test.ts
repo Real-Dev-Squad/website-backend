@@ -7,17 +7,17 @@ import {
   getRequestsMiddleware,
   updateRequestsMiddleware,
   updateRequestValidator,
-} from "../../../middlewares/validators/requests";
+} from "../../../middlewares/validators/requests.js";
 import {
   validOooStatusRequests,
   invalidOooStatusRequests,
   validOooStatusUpdate,
   invalidOooStatusUpdate,
-} from "../../fixtures/oooRequest/oooRequest";
-import { OooRequestCreateRequest, OooRequestResponse } from "../../../types/oooRequest";
-import { REQUEST_TYPE } from "../../../constants/requests";
-import { convertDaysToMilliseconds } from "../../../utils/time";
-import { updateOnboardingExtensionRequestValidator } from "../../../middlewares/validators/onboardingExtensionRequest";
+} from "../../fixtures/oooRequest/oooRequest.js";
+import { OooRequestCreateRequest, OooRequestResponse } from "../../../types/oooRequest.js";
+import { REQUEST_TYPE } from "../../../constants/requests.js";
+import { convertDaysToMilliseconds } from "../../../utils/time.js";
+import { updateOnboardingExtensionRequestValidator } from "../../../middlewares/validators/onboardingExtensionRequest.js";
 
 describe("Create Request Validators", function () {
   let req: any;

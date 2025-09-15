@@ -1,9 +1,9 @@
 import taskModel from "../models/tasks.js";
 import firestore from "../utils/firestore.js";
 
-const tasks = firestore.collection("tasks");
+export const tasks = firestore.collection("tasks");
 
-const assignTask = async function (req, res) {
+export const assignTask = async function (req, res) {
   try {
     // this hardcoded value will be removed once we have user skill
     const { task } = await taskModel.fetchSkillLevelTask("FRONTEND", 1);

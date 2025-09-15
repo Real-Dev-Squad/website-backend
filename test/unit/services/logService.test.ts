@@ -1,8 +1,8 @@
 import { expect } from "chai";
-const Sinon = require("sinon");
-const cleanDb = require("../../utils/cleanDb");
-const { addLog } = require("../../../services/logService");
-const { INTERNAL_SERVER_ERROR } = require("../../../constants/errorMessages");
+import Sinon from "sinon";
+import cleanDb from "../../utils/cleanDb.js";
+import { addLog  } from "../../../services/logService.js";
+import { INTERNAL_SERVER_ERROR  } from "../../../constants/errorMessages.js";
 
 describe("Logs services", function () {
     beforeEach(function () {

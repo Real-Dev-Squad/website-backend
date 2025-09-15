@@ -9,10 +9,10 @@ import { validateMillisecondsTimestamp } from "./utils.js";
 import { TASK_STATUS, TASK_STATUS_OLD, MAPPED_TASK_STATUS, tasksUsersStatus } from "../../constants/tasks.js";
 import logger from "../../utils/logger.js";
 
-const TASK_STATUS_ENUM = Object.values(TASK_STATUS);
-const MAPPED_TASK_STATUS_ENUM = Object.keys(MAPPED_TASK_STATUS);
+export const TASK_STATUS_ENUM = Object.values(TASK_STATUS);
+export const MAPPED_TASK_STATUS_ENUM = Object.keys(MAPPED_TASK_STATUS);
 
-const createTask = async (req, res, next) => {
+export const createTask = async (req, res, next) => {
   const schema = joi
     .object()
     .strict()
@@ -74,7 +74,7 @@ const createTask = async (req, res, next) => {
   }
 };
 
-const updateTask = async (req, res, next) => {
+export const updateTask = async (req, res, next) => {
   const schema = joi
     .object()
     .strict()
@@ -122,7 +122,7 @@ const updateTask = async (req, res, next) => {
   }
 };
 
-const updateSelfTask = async (req, res, next) => {
+export const updateSelfTask = async (req, res, next) => {
   const validStatus = [...TASK_STATUS_ENUM, ...Object.values(TASK_STATUS_OLD)].filter(
     (item) => item !== TASK_STATUS.AVAILABLE
   );
@@ -150,7 +150,7 @@ const updateSelfTask = async (req, res, next) => {
   }
 };
 
-const getTasksValidator = async (req, res, next) => {
+export const getTasksValidator = async (req, res, next) => {
   const schema = joi.object().keys({
     dev: joi.bool().optional().sensitive(),
     status: joi
@@ -207,7 +207,7 @@ const getTasksValidator = async (req, res, next) => {
     res.boom.badRequest(error.details[0].message);
   }
 };
-const getUsersValidator = async (req, res, next) => {
+export const getUsersValidator = async (req, res, next) => {
   const queryParamsSchema = joi.object().keys({
     cursor: joi.string().optional(),
     q: joi.string().optional(),
@@ -269,7 +269,7 @@ const getUsersValidator = async (req, res, next) => {
   }
 };
 
-const filterOrphanTasksValidator = async (req, res, next) => {
+export const filterOrphanTasksValidator = async (req, res, next) => {
   try {
     await validateMillisecondsTimestamp(req.body, "lastOrphanTasksFilterationTimestamp");
     next();

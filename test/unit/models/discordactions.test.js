@@ -3,12 +3,12 @@ import chai, { expect } from "chai";
 import admin from "firebase-admin";
 
 import firestore from "../../../utils/firestore.js";
-import photoVerificationModel from "../../../models/photo-verification.js";
-import discordRoleModel from "../../../models/discord-roles.js";
+import * as photoVerificationModel from "../../../models/photo-verification.js";
+import * as discordRoleModel from "../../../models/discord-roles.js";
 import userStatusCollection from "../../../models/usersStatus.js";
 import tasksData from "../../fixtures/tasks/tasks.js";
 import { getDiscordMembers } from "../../fixtures/discordResponse/discord-response.js";
-import discordService from "../../../services/discordService.js";
+import * as discordService from "../../../services/discordService.js";
 import { TASK_STATUS } from "../../../constants/tasks.js";
 import addUser from "../../utils/addUser.js";
 import {
@@ -48,8 +48,8 @@ import {
 import cleanDb from "../../utils/cleanDb.js";
 import { userPhotoVerificationData } from "../../fixtures/user/photo-verification.js";
 import userData from "../../fixtures/user/user.js";
-import userStatusModel from "../../../models/userStatus.js";
-import { generateUserStatusData } from "../../fixtures/userStatus/userStatus.js";
+import * as userStatusModel from "../../../models/userStatus.js";
+import userStatusData, { generateUserStatusData } from "../../fixtures/userStatus/userStatus.js";
 import dataAccessLayer from "../../../services/dataAccessLayer.js";
 import { ONE_DAY_IN_MS } from "../../../constants/users.js";
 import { createProgressDocument } from "../../../models/progresses.js";
@@ -58,7 +58,6 @@ import { convertDaysToMilliseconds } from "../../../utils/time.js";
 import { userState } from "../../../constants/userStatus.js";
 import { REQUEST_TYPE, REQUEST_STATE } from "../../../constants/requests.js";
 import { createRequest } from "../../../models/requests.js";
-import userStatusData from "../fixtures/userStatus/userStatus.js";
 
 const tasksModel = firestore.collection("tasks");
 const memberRoleModel = firestore.collection("member-group-roles");

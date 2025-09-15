@@ -5,10 +5,10 @@
  * @return {Object}
  */
 
-const walletKeys = ["id", "data"];
+export const walletKeys = ["id", "data"];
 
-const walletBodyKeys = ["message", "wallet"];
+export const walletBodyKeys = ["message", "wallet"];
 
-const walletDataKeys = ["userId", "isActive", "currencies"];
+export const walletDataKeys = ["userId", "isActive", "currencies"];
 
 export default { walletBodyKeys, walletKeys, walletDataKeys };

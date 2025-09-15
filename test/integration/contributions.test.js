@@ -3,9 +3,9 @@ import chai from "chai";
 import sinon from "sinon";
 import chaiHttp from "chai-http";
 
-import githubService from "../../services/githubService.js";
-import testModel from "../../models/tasks.js";
-import userModel from "../../models/users.js";
+import * as githubService from "../../services/githubService.js";
+import * as testModel from "../../models/tasks.js";
+import * as userModel from "../../models/users.js";
 
 import app from "../../server.js";
 

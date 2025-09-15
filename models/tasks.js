@@ -773,6 +773,32 @@ const fetchIncompleteTasksByUserIds = async (userIds) => {
   }
 };
 
+// Named exports
+export {
+  updateTaskStatusToDone,
+  updateTask,
+  addDependency,
+  getBuiltTasks,
+  fetchPaginatedTasks,
+  fetchTasks,
+  fetchActiveTaskMembers,
+  fetchTask,
+  fetchTaskByIssueId,
+  fetchSelfTask,
+  fetchUserTasks,
+  getNewTask,
+  fetchSkillLevelTask,
+  fetchSelfTasks,
+  fetchUserCompletedTasks,
+  overdueTasks,
+  getOverdueTasks,
+  updateTaskStatus,
+  updateOrphanTasksStatus,
+  markUnDoneTasksOfArchivedUsersBacklog,
+  fetchIncompleteTasksByUserIds,
+};
+
+// Default export
 export default {
   updateTaskStatusToDone,
   updateTask,

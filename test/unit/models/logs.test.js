@@ -10,7 +10,7 @@ import Sinon from "sinon";
 import { INTERNAL_SERVER_ERROR } from "../../../constants/errorMessages.js";
 import userData from "../../fixtures/user/user.js";
 import addUser from "../../utils/addUser.js";
-import authService from "../../../services/authService.js";
+import * as authService from "../../../services/authService.js";
 import { extensionRequestLogs } from "../../fixtures/logs/extensionRequests.js";
 import { LOGS_FETCHED_SUCCESSFULLY } from "../../../constants/logs.js";
 import tasks from "../../../models/tasks.js";

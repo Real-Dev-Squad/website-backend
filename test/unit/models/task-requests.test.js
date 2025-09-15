@@ -1,18 +1,7 @@
-import { expect } from "chai";
+import { expect, assert } from "chai";
 import sinon from "sinon";
-import assert from "chai.assert";
 
-import {
-  createRequest,
-  fetchTaskRequests,
-  approveTaskRequest,
-  fetchPaginatedTaskRequests,
-  fetchTaskRequestById,
-  addNewFields,
-  removeOldField,
-  addUsersCountAndCreatedAt,
-  rejectTaskRequest,
-} from "./../../../models/taskRequests.js";
+import taskRequestsModel from "./../../../models/taskRequests.js";
 import {
   TASK_REQUEST_TYPE,
   TASK_REQUEST_STATUS,
@@ -23,13 +12,25 @@ import mockData from "../../fixtures/task-requests/task-requests.js";
 import firestore from "../../../utils/firestore.js";
 
 import cleanDb from "../../utils/cleanDb.js";
-import userModel from "../../../models/users.js";
-import tasksModel from "../../../models/tasks.js";
-import usersService from "../../../services/dataAccessLayer.js";
+import * as userModel from "../../../models/users.js";
+import * as tasksModel from "../../../models/tasks.js";
+import * as usersService from "../../../services/dataAccessLayer.js";
 
 import { TASK_STATUS, DEFAULT_TASK_PRIORITY } from "../../../constants/tasks.js";
 import tasksData from "../../fixtures/tasks/tasks.js";
 import userData from "../../fixtures/user/user.js";
+
+const {
+  createRequest,
+  fetchTaskRequests,
+  approveTaskRequest,
+  fetchPaginatedTaskRequests,
+  fetchTaskRequestById,
+  addNewFields,
+  removeOldField,
+  addUsersCountAndCreatedAt,
+  rejectTaskRequest,
+} = taskRequestsModel;
 
 const tasksCollection = firestore.collection("tasks");
 const taskRequestsCollection = firestore.collection("taskRequests");

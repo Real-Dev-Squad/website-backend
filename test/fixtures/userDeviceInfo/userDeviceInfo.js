@@ -5,7 +5,7 @@
  * @return {Object}
  */
 
-const userDeviceInfoDataArray = [
+export const userDeviceInfoDataArray = [
   {
     user_id: "TEST_USER_ID",
     device_info: "TEST_DEVICE_INFO",
@@ -13,6 +13,6 @@ const userDeviceInfoDataArray = [
   },
 ];
 
-const userDeviceInfoIdKeys = ["user_id", "device_info", "device_id"];
+export const userDeviceInfoIdKeys = ["user_id", "device_info", "device_id"];
 
 export default { userDeviceInfoDataArray, userDeviceInfoIdKeys };

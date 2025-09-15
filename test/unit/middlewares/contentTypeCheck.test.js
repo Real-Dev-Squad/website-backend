@@ -4,7 +4,7 @@ import sinon from "sinon";
 
 import cookieName from "config";
 import app from "../../../server.js";
-import authService from "../../../services/authService.js";
+import * as authService from "../../../services/authService.js";
 import { getDiscordMembers } from "../../fixtures/discordResponse/discord-response.js";
 import addUser from "../../utils/addUser.js";
 import cleanDb from "../../utils/cleanDb.js";

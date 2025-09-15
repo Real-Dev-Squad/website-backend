@@ -13,7 +13,7 @@ import eventCodeData from "../fixtures/events/event-codes.js";
 import userData from "../fixtures/user/user.js";
 
 import eventQuery from "../../models/events.js";
-import logsModel from "../../models/logs.js";
+import * as logsModel from "../../models/logs.js";
 
 import config from "config";
 import sinon from "sinon";

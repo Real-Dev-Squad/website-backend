@@ -1,4 +1,4 @@
-import { InviteBody, Invite } from "../../../types/invites";
+import { InviteBody, Invite } from "../../../types/invites.js";
 
 export const InviteBodyData: InviteBody = {
   userId: "123456",

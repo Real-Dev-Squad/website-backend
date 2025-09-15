@@ -67,4 +67,4 @@ const fetchRecruitersInfo = async () => {
   }
 };
 
-export { addRecruiterInfo, fetchRecruitersInfo };
+export default { addRecruiterInfo, fetchRecruitersInfo };

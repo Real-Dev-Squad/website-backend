@@ -1,5 +1,7 @@
 // Import fixtures
-import githubUserInfo from "../auth/githubUserInfo.js";
+import githubUserInfoFunc from "../auth/githubUserInfo.js";
+
+export const githubUserInfo = githubUserInfoFunc();
 
 /**
  * User info for GitHub auth response

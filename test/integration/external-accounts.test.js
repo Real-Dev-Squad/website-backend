@@ -7,7 +7,7 @@ import addUser from "../utils/addUser.js";
 import { BAD_TOKEN, CLOUDFLARE_WORKER } from "../../constants/bot.js";
 import { generateAuthToken } from "../../services/authService.js";
 import externalAccountData from "../fixtures/external-accounts/external-accounts.js";
-import externalAccountsModel from "../../models/external-accounts.js";
+import * as externalAccountsModel from "../../models/external-accounts.js";
 import { usersFromRds, getDiscordMembers } from "../fixtures/discordResponse/discord-response.js";
 import Sinon from "sinon";
 import { INTERNAL_SERVER_ERROR } from "../../constants/errorMessages.js";

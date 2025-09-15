@@ -1,8 +1,8 @@
 import chai from "chai";
 const { expect } = chai;
-const cleanDb = require("../../utils/cleanDb");
-const applicationsData = require("../../fixtures/applications/applications")();
-const ApplicationModel = require("../../../models/applications");
+import cleanDb from "../../utils/cleanDb.js";
+import { SAMPLE_APPLICATION_DATA as applicationsData } from "../../fixtures/applications/applications";
+import * as ApplicationModel from "../../../models/applications.js";
 
 describe("applications", function () {
   let applicationId1: string,
@@ -19,11 +19,11 @@ describe("applications", function () {
     const applicationFive = { ...applicationsData[4], userId: "kfasdjfkdlfjkasdjflsdjfk" };
 
     const promises = [
-      ApplicationModel.addApplication(applicationOne),
-      ApplicationModel.addApplication(applicationTwo),
-      ApplicationModel.addApplication(applicationThree),
-      ApplicationModel.addApplication(applicationFour),
-      ApplicationModel.addApplication(applicationFive),
+      ApplicationModel.addApplication(applicationOne as any),
+      ApplicationModel.addApplication(applicationTwo as any),
+      ApplicationModel.addApplication(applicationThree as any),
+      ApplicationModel.addApplication(applicationFour as any),
+      ApplicationModel.addApplication(applicationFive as any),
     ];
     const [id1, id2, id3, id4, id5] = await Promise.all(promises);
     applicationId1 = id1;
@@ -60,7 +60,7 @@ describe("applications", function () {
       const applicationId = await ApplicationModel.addApplication({
         ...applicationsData[4],
         userId: "fasfjsjkfjaskdfjskaldfj",
-      });
+      } as any);
       expect(applicationId).to.exist;
     });
   });
@@ -98,7 +98,7 @@ describe("applications", function () {
 
   describe("getApplicationById", function () {
     it("should return the application if the application exist in the db", async function () {
-      const application = await ApplicationModel.getApplicationById(applicationId1);
+      const application: any = await ApplicationModel.getApplicationById(applicationId1);
       expect(application.notFound).to.be.equal(false);
       expect(application.id).to.be.equal(applicationId1);
     });
@@ -113,7 +113,7 @@ describe("applications", function () {
     it("should update a particular application", async function () {
       const dataToUpdate = { status: "accepted" };
       await ApplicationModel.updateApplication(dataToUpdate, applicationId1);
-      const application = await ApplicationModel.getApplicationById(applicationId1);
+      const application: any = await ApplicationModel.getApplicationById(applicationId1);
 
       expect(application.status).to.be.equal("accepted");
     });

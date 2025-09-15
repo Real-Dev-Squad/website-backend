@@ -1,5 +1,5 @@
-import { REQUEST_STATE, REQUEST_TYPE } from "../../../constants/requests";
-import { TASK_REQUEST_TYPE } from "../../../constants/taskRequests";
+import { REQUEST_STATE, REQUEST_TYPE } from "../../../constants/requests.js";
+import { TASK_REQUEST_TYPE } from "../../../constants/taskRequests.js";
 
 export const validTaskCreqtionRequest = {
   externalIssueUrl: "https://api.github.com/repos/Real-Dev-Squad/website-my/issues/599",

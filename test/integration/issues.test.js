@@ -4,7 +4,7 @@ import chaiHttp from "chai-http";
 
 import app from "../../server.js";
 import cleanDb from "../utils/cleanDb.js";
-import githubService from "../../services/githubService.js";
+import * as githubService from "../../services/githubService.js";
 import issuesMockData from "../fixtures/issues/issues.js";
 
 const { expect } = chai;

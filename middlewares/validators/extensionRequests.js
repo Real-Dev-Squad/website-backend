@@ -3,9 +3,9 @@ import { EXTENSION_REQUEST_STATUS } from "../../constants/extensionRequests.js";
 import { parseQueryParams } from "../../utils/queryParser.js";
 import { URLSearchParams } from "url";
 
-const ER_STATUS_ENUM = Object.values(EXTENSION_REQUEST_STATUS);
+export const ER_STATUS_ENUM = Object.values(EXTENSION_REQUEST_STATUS);
 
-const createExtensionRequest = async (req, res, next) => {
+export const createExtensionRequest = async (req, res, next) => {
   const schema = joi
     .object()
     .strict()
@@ -28,7 +28,7 @@ const createExtensionRequest = async (req, res, next) => {
   }
 };
 
-const updateExtensionRequestStatus = async (req, res, next) => {
+export const updateExtensionRequestStatus = async (req, res, next) => {
   const schema = joi
     .object()
     .strict()
@@ -45,7 +45,7 @@ const updateExtensionRequestStatus = async (req, res, next) => {
   }
 };
 
-const updateExtensionRequest = async (req, res, next) => {
+export const updateExtensionRequest = async (req, res, next) => {
   const schema = joi.object().strict().keys({
     taskId: joi.string().optional(),
     title: joi.string().optional(),
@@ -64,7 +64,7 @@ const updateExtensionRequest = async (req, res, next) => {
   }
 };
 
-const getExtensionRequestsValidator = async (req, res, next) => {
+export const getExtensionRequestsValidator = async (req, res, next) => {
   const schema = joi.object().keys({
     dev: joi.bool().optional().sensitive(),
     cursor: joi.string().optional(),

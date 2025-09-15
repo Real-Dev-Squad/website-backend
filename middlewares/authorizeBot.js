@@ -35,3 +35,8 @@ export const verifyDiscordBot = async (req, res, next) => {
     return res.boom.badRequest("Invalid Request");
   }
 };
+
+export default {
+  verifyCronJob,
+  verifyDiscordBot,
+};

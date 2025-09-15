@@ -10,7 +10,7 @@ import {
   createUser,
   addUserToGroup,
   fetchAwsUserIdByUsername,
-} from '../../../utils/awsFunctions';
+} from "../../../utils/awsFunctions.js";
 
 describe('AWS Identity Store Functions', () => {
   let sendStub: sinon.SinonStub;

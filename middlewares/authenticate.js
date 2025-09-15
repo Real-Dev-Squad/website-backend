@@ -17,7 +17,7 @@ import { retrieveUsers } from "../services/dataAccessLayer.js";
  * @param {Function} next - Express middleware function
  * @returns {Object} - Returns unauthorized object if user has been restricted.
  */
-const checkRestricted = async (req, res, next) => {
+export const checkRestricted = async (req, res, next) => {
   const { roles } = req.userData;
   if (roles && roles.restricted && req.method !== "GET") {
     return res.boom.forbidden("You are restricted from performing this action");

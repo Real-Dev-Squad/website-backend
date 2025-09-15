@@ -234,3 +234,5 @@ export {
   OutputFixtureForFnConvertTimestampsToUTC,
   generateDefaultFutureStatus,
 };
+
+export default getStatusData();

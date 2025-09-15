@@ -6,7 +6,7 @@ import {
   createOooStatusRequestValidator,
   // acknowledgeOOORequestsValidator,
 } from "./../../../middlewares/validators/oooRequests";
-import { acknowledgeOooRequest, validOooStatusRequests, validOooStatusUpdate } from "../../fixtures/oooRequest/oooRequest";
+import { acknowledgeOooRequest, validOooStatusRequests, validOooStatusUpdate } from "../../fixtures/oooRequest/oooRequest.js";
 import _ from "lodash";
 
 describe("OOO Status Request Validators", function () {

@@ -1,10 +1,10 @@
 import { expect } from "chai";
-const sinon = require("sinon");
-import { Answer, AnswerFieldsToUpdate } from "../../../typeDefinitions/answers";
+import sinon from "sinon";
+import { Answer, AnswerFieldsToUpdate } from "../../../typeDefinitions/answers.js";
 
-const cleanDb = require("../../utils/cleanDb");
-const answerQuery = require("../../../models/answers");
-const answerDataArray = require("../../fixtures/answers/answers");
+import cleanDb from "../../utils/cleanDb.js";
+import * as answerQuery from "../../../models/answers";
+import { SAMPLE_ANSWER_DATA as answerDataArray } from "../../fixtures/answers/answers";
 
 describe("Answers", function () {
   afterEach(async function () {
@@ -14,7 +14,7 @@ describe("Answers", function () {
 
   describe("createAnswer", function () {
     it("should create a answer in db with the given data and add approved_by, status, rejected_by default values", async function () {
-      const createdAnswer: Answer = await answerQuery.createAnswer(answerDataArray[0]);
+      const createdAnswer: any = await answerQuery.createAnswer(answerDataArray[0] as any);
 
       expect(createdAnswer).to.be.a("object");
       expect(createdAnswer.id).to.equal(answerDataArray[0].id);
@@ -29,7 +29,7 @@ describe("Answers", function () {
       sinon.stub(answerQuery, "createAnswer").throws(new Error("Error while creating answer"));
 
       try {
-        await answerQuery.createAnswer(answerDataArray[0]);
+        await answerQuery.createAnswer(answerDataArray[0] as any);
       } catch (error) {
         expect(error).to.be.instanceOf(Error);
         expect(error.message).to.equal("Error while creating answer");
@@ -41,7 +41,7 @@ describe("Answers", function () {
     let createdAnswer: Answer;
     let createdAnswerId: string;
     beforeEach(async function () {
-      createdAnswer = await answerQuery.createAnswer(answerDataArray[0]);
+      createdAnswer = await answerQuery.createAnswer(answerDataArray[0] as any) as any;
       createdAnswerId = createdAnswer.id;
     });
 
@@ -55,7 +55,7 @@ describe("Answers", function () {
         reviewed_by: "satyam-bajpai",
       };
 
-      const updatedAnswer: Answer = await answerQuery.updateAnswer(createdAnswerId, fieldsToUpdate);
+      const updatedAnswer: any = await answerQuery.updateAnswer(createdAnswerId, fieldsToUpdate);
 
       expect(updatedAnswer).to.be.a("object");
       expect(updatedAnswer.id).to.equal(answerDataArray[0].id);
@@ -72,7 +72,7 @@ describe("Answers", function () {
         status: "APPROVED",
         reviewed_by: "satyam-bajpai",
       };
-      const updatedAnswer: Answer = await answerQuery.updateAnswer(createdAnswerId, fieldsToUpdate);
+      const updatedAnswer: any = await answerQuery.updateAnswer(createdAnswerId, fieldsToUpdate);
 
       expect(updatedAnswer).to.be.a("object");
       expect(updatedAnswer.id).to.equal(answerDataArray[0].id);
@@ -104,8 +104,8 @@ describe("Answers", function () {
   describe("getAnswers", function () {
     const answersThatWillBeAdded = [answerDataArray[0], answerDataArray[3]];
     beforeEach(async function () {
-      await answerQuery.createAnswer(answerDataArray[0]);
-      await answerQuery.createAnswer(answerDataArray[3]);
+      await answerQuery.createAnswer(answerDataArray[0] as any);
+      await answerQuery.createAnswer(answerDataArray[3] as any);
     });
     afterEach(async function () {
       await cleanDb();
@@ -115,7 +115,7 @@ describe("Answers", function () {
       const queryFields = {
         questionId: "demo-question-id-1",
       };
-      const answers: Answer = await answerQuery.getAnswers(queryFields);
+      const answers: Answer[] = await answerQuery.getAnswers(queryFields as any);
 
       expect(answers).to.be.a("array");
       expect(answers).to.be.of.length(2);
@@ -136,7 +136,7 @@ describe("Answers", function () {
         questionId: "demo-question-id-1",
       };
       try {
-        await answerQuery.getAnswers(queryFields);
+        await answerQuery.getAnswers(queryFields as any);
       } catch (error) {
         expect(error).to.be.instanceOf(Error);
         expect(error.message).to.equal("Error while getting answers");

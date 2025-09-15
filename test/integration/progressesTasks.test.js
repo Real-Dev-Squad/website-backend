@@ -5,7 +5,7 @@ import firestore from "../../utils/firestore.js";
 import app from "../../server.js";
 import { generateAuthToken } from "../../services/authService.js";
 import tasks from "../../models/tasks.js";
-import progressesModel from "../../models/progresses.js";
+import * as progressesModel from "../../models/progresses.js";
 import addUser from "../utils/addUser.js";
 import cleanDb from "../utils/cleanDb.js";
 import {

@@ -5,7 +5,7 @@
  * @return {Object}
  */
 
-const recruiterDataArray = [
+export const recruiterDataArray = [
   {
     company: "Test-feature",
     first_name: "Ankita",
@@ -18,7 +18,7 @@ const recruiterDataArray = [
   },
 ];
 
-const recruiterWithIdKeys = [
+export const recruiterWithIdKeys = [
   "company",
   "first_name",
   "last_name",

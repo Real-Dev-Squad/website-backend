@@ -122,3 +122,13 @@ export const stubbedModelTaskProgressData = (userId, taskId, createdAt, date) =>
     blockers: "Waiting for feedback from the code review",
   };
 };
+
+// Default export
+export default {
+  standupProgressDay1,
+  incompleteProgress,
+  stubbedModelProgressData,
+  taskProgressDay1,
+  incompleteTaskProgress,
+  stubbedModelTaskProgressData,
+};

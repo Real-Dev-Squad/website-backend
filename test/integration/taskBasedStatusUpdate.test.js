@@ -3,7 +3,7 @@ import config from "config";
 import sinon from "sinon";
 
 import { userState } from "../../constants/userStatus.js";
-import userStatusModelFunction from "../../models/userStatus.js";
+import * as userStatusModelFunction from "../../models/userStatus.js";
 import app from "../../server.js";
 import { generateAuthToken } from "../../services/authService.js";
 import firestore from "../../utils/firestore.js";

@@ -1,7 +1,7 @@
 import firestore from "../../utils/firestore.js";
 import getProfileDiffs from "../fixtures/profileDiffs/profileDiffs.js";
 
-const profileDiffsModel = firestore.collection("profileDiffs");
+export const profileDiffsModel = firestore.collection("profileDiffs");
 
 export default async (userId) => {
   const PROFILE_DIFFS = getProfileDiffs();

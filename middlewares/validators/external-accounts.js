@@ -1,7 +1,7 @@
 import joi from "joi";
 import { EXTERNAL_ACCOUNTS_POST_ACTIONS } from "../../constants/external-accounts.js";
 
-const externalAccountData = async (req, res, next) => {
+export const externalAccountData = async (req, res, next) => {
   const schema = joi
     .object()
     .strict()
@@ -26,7 +26,7 @@ const externalAccountData = async (req, res, next) => {
     res.boom.badRequest(error.details[0].message);
   }
 };
-const postExternalAccountsUsers = async (req, res, next) => {
+export const postExternalAccountsUsers = async (req, res, next) => {
   const schema = joi
     .object()
     .strict()
@@ -46,7 +46,7 @@ const postExternalAccountsUsers = async (req, res, next) => {
   }
 };
 
-const linkDiscord = async (req, res, next) => {
+export const linkDiscord = async (req, res, next) => {
   const { token } = req.params;
 
   const schema = joi.object({

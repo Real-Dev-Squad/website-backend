@@ -1,4 +1,4 @@
-import users from "../../models/users.js";
+import * as users from "../../models/users.js";
 
 // Import fixtures
 import userData from "../fixtures/user/user.js";

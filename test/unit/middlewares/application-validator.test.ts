@@ -1,8 +1,8 @@
 import chai from "chai";
-const Sinon = require("sinon");
+import Sinon from "sinon";
 const { expect } = chai;
-const applicationValidator = require("../../../middlewares/validators/application");
-const applicationsData = require("../../fixtures/applications/applications")();
+import applicationValidator from "../../../middlewares/validators/application";
+import { SAMPLE_APPLICATION_DATA as applicationsData } from "../../fixtures/applications/applications";
 
 describe("application validator test", function () {
   describe("validateApplicationData", function () {
@@ -16,7 +16,7 @@ describe("application validator test", function () {
       };
 
       const nextSpy = Sinon.spy();
-      await applicationValidator.validateApplicationData(req, {}, nextSpy);
+      await applicationValidator.validateApplicationData(req as any, {} as any, nextSpy);
       expect(nextSpy.callCount).to.equal(1);
     });
 
@@ -35,7 +35,7 @@ describe("application validator test", function () {
       };
 
       const nextSpy = Sinon.spy();
-      await applicationValidator.validateApplicationData(req, res, nextSpy);
+      await applicationValidator.validateApplicationData(req as any, res as any, nextSpy);
       expect(nextSpy.callCount).to.equal(0);
     });
 
@@ -56,7 +56,7 @@ describe("application validator test", function () {
       };
 
       const nextSpy = Sinon.spy();
-      await applicationValidator.validateApplicationData(req, res, nextSpy);
+      await applicationValidator.validateApplicationData(req as any, res as any, nextSpy);
       expect(nextSpy.callCount).to.equal(0);
     });
 
@@ -77,7 +77,7 @@ describe("application validator test", function () {
       };
 
       const nextSpy = Sinon.spy();
-      await applicationValidator.validateApplicationData(req, res, nextSpy);
+      await applicationValidator.validateApplicationData(req as any, res as any, nextSpy);
       expect(nextSpy.callCount).to.equal(0);
     });
   });
@@ -96,7 +96,7 @@ describe("application validator test", function () {
         },
       };
       const nextSpy = Sinon.spy();
-      await applicationValidator.validateApplicationUpdateData(req, res, nextSpy);
+      await applicationValidator.validateApplicationUpdateData(req as any, res as any, nextSpy);
       expect(nextSpy.callCount).to.equal(1);
     });
 
@@ -113,7 +113,7 @@ describe("application validator test", function () {
       };
 
       const nextSpy = Sinon.spy();
-      await applicationValidator.validateApplicationUpdateData(req, res, nextSpy);
+      await applicationValidator.validateApplicationUpdateData(req as any, res as any, nextSpy);
       expect(nextSpy.callCount).to.equal(0);
     });
 
@@ -130,7 +130,7 @@ describe("application validator test", function () {
       };
 
       const nextSpy = Sinon.spy();
-      await applicationValidator.validateApplicationUpdateData(req, res, nextSpy);
+      await applicationValidator.validateApplicationUpdateData(req as any, res as any, nextSpy);
       expect(nextSpy.callCount).to.equal(0);
     });
   });
@@ -152,7 +152,7 @@ describe("application validator test", function () {
         },
       };
       const nextSpy = Sinon.spy();
-      await applicationValidator.validateApplicationQueryParam(req, res, nextSpy);
+      await applicationValidator.validateApplicationQueryParam(req as any, res as any, nextSpy);
       expect(nextSpy.callCount).to.equal(1);
     });
 
@@ -168,7 +168,7 @@ describe("application validator test", function () {
         },
       };
       const nextSpy = Sinon.spy();
-      await applicationValidator.validateApplicationQueryParam(req, res, nextSpy);
+      await applicationValidator.validateApplicationQueryParam(req as any, res as any, nextSpy);
       expect(nextSpy.callCount).to.equal(0);
     });
   });

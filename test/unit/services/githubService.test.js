@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import sinon from "sinon";
-import axios from "../../../utils/fetch.js";
-import githubService from "../../../services/githubService.js";
+import * as fetchModule from "../../../utils/fetch.js";
+import * as githubService from "../../../services/githubService.js";
 import githubUserInfo from "../../fixtures/auth/githubUserInfo.js";
 import { prDates } from "../../fixtures/pullrequests/pullrequests.js";
 import cleanDb from "../../utils/cleanDb.js";
@@ -9,7 +9,7 @@ import addUser from "../../utils/addUser.js";
 
 describe("githubService", function () {
   beforeEach(async function () {
-    sinon.stub(axios, "fetch").returnsArg(0);
+    sinon.stub(fetchModule, "fetch").returnsArg(0);
   });
 
   afterEach(async function () {

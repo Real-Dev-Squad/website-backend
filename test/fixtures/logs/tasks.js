@@ -54,3 +54,8 @@ export const taskLogs = [
     },
   },
 ];
+
+// Default export
+export default {
+  taskLogs,
+};

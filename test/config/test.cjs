@@ -1,3 +1,4 @@
+/* eslint-disable import/no-commonjs */
 /**
  * Set the environment specific config in this file.
  * Defaults set from default.js
@@ -5,7 +6,7 @@
 
 const port = 7337;
 const NODE_ENV = process.env.NODE_ENV;
-export default {
+module.exports = {
   port,
   enableFileLogs: false,
   // Console logs are set to avoid the winston error of no defined transports

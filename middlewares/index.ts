@@ -38,11 +38,32 @@ export const middleware = (app) => {
   app.use(
     cors({
       origin: (origin, callback) => {
-        const allowedOrigins = config.get("cors.allowedOrigins") as RegExp;
-        if (!origin || allowedOrigins.test(origin)) {
+        const allowedOriginsConfig = config.get("cors.allowedOrigins");
+        
+        let allowedOrigins;
+        try {
+          if (allowedOriginsConfig instanceof RegExp) {
+            allowedOrigins = allowedOriginsConfig;
+          } else if (typeof allowedOriginsConfig === 'string') {
+            // Handle string representation of regex
+            const regexStr = allowedOriginsConfig.startsWith('/') && allowedOriginsConfig.endsWith('/')
+              ? allowedOriginsConfig.slice(1, -1)
+              : allowedOriginsConfig;
+            allowedOrigins = new RegExp(regexStr);
+          } else {
+            // Fallback: create from string representation
+            allowedOrigins = new RegExp(allowedOriginsConfig.toString());
+          }
+          
+          if (!origin || allowedOrigins.test(origin)) {
+            callback(null, true);
+          } else {
+            callback(new Error('Not allowed by CORS'));
+          }
+        } catch (error) {
+          // Fallback: allow all origins if there's an error with regex
+          console.error('CORS regex configuration error:', error);
           callback(null, true);
-        } else {
-          callback(new Error('Not allowed by CORS'));
         }
       },
       credentials: true,

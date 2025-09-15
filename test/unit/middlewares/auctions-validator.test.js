@@ -1,7 +1,8 @@
 import { expect } from "chai";
 import sinon from "sinon";
 
-import { createAuction, placeBid } from "../../../middlewares/validators/auctions.js";
+import auctionsValidator from "../../../middlewares/validators/auctions.js";
+const { createAuction, placeBid } = auctionsValidator;
 
 describe("auctions validator", function () {
   describe("create auctions validator", function () {

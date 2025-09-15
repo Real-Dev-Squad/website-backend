@@ -6,17 +6,17 @@ import {
     REQUEST_STATE, 
     REQUEST_TYPE, 
     UNAUTHORIZED_TO_UPDATE_REQUEST 
-} from "../../../constants/requests"
+} from "../../../constants/requests.js"
 import { 
     updateOnboardingExtensionRequest, 
     validateOnboardingExtensionUpdateRequest 
-} from "../../../services/onboardingExtension"
+} from "../../../services/onboardingExtension.js"
 import { expect } from "chai"
-import firestore from "../../../utils/firestore";
-import { convertDaysToMilliseconds } from "../../../utils/time";
-import cleanDb from "../../utils/cleanDb";
+import firestore from "../../../utils/firestore.js";
+import { convertDaysToMilliseconds } from "../../../utils/time.js";
+import cleanDb from "../../utils/cleanDb.js";
 const requestModel = firestore.collection("requests");
-import * as logService from "../../../services/logService";
+import * as logService from "../../../services/logService.js";
 import sinon from "sinon";
 
 describe("Test Onboarding Extension Service", () => {

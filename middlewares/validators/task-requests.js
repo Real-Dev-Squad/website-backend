@@ -5,12 +5,12 @@ import { GITHUB_URL } from "../../constants/urls.js";
 import { RQLQueryParser } from "../../utils/RQLParser.js";
 import { TASK_REQUEST_STATUS, TASK_REQUEST_TYPE } from "../../constants/taskRequests.js";
 
-const githubOrg = config.get("githubApi.org");
-const githubBaseUrl = config.get("githubApi.baseUrl");
-const githubIssuerUrlPattern = new RegExp(`^${githubBaseUrl}/repos/${githubOrg}/.+/issues/\\d+$`);
-const githubIssueHtmlUrlPattern = new RegExp(`^${GITHUB_URL}/${githubOrg}/.+/issues/\\d+$`); // Example: https://github.com/Real-Dev-Squad/website-status/issues/1050
+export const githubOrg = config.get("githubApi.org");
+export const githubBaseUrl = config.get("githubApi.baseUrl");
+export const githubIssuerUrlPattern = new RegExp(`^${githubBaseUrl}/repos/${githubOrg}/.+/issues/\\d+$`);
+export const githubIssueHtmlUrlPattern = new RegExp(`^${GITHUB_URL}/${githubOrg}/.+/issues/\\d+$`); // Example: https://github.com/Real-Dev-Squad/website-status/issues/1050
 
-const postTaskRequests = async (req, res, next) => {
+export const postTaskRequests = async (req, res, next) => {
   const taskAssignmentSchema = joi
     .object()
     .strict()
@@ -50,7 +50,7 @@ const postTaskRequests = async (req, res, next) => {
   }
 };
 
-const getTaskRequests = async (req, res, next) => {
+export const getTaskRequests = async (req, res, next) => {
   const queryParamsSchema = joi
     .object()
     .keys({

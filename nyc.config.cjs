@@ -1,8 +1,9 @@
+/* eslint-disable import/no-commonjs */
 /**
  * Nyc coverage config
  * Documentation: https://github.com/istanbuljs/nyc#common-configuration-options
  */
-export default {
+module.exports = {
   all: true,
   "check-coverage": false, // Will be enabled after reaching 50% coverage: https://github.com/Real-Dev-Squad/website-backend/issues/493
   exclude: ["test/**", "mockdata/**", "docs/**", "public/**", "dist/**"],

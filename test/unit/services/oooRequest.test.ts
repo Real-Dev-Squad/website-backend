@@ -1,5 +1,5 @@
 import sinon from "sinon";
-import cleanDb from "../../utils/cleanDb";
+import cleanDb from "../../utils/cleanDb.js";
 import {
     INVALID_REQUEST_TYPE,
     REQUEST_ALREADY_APPROVED,
@@ -11,22 +11,22 @@ import {
     REQUEST_TYPE,
     OOO_STATUS_ALREADY_EXIST,
     USER_STATUS_NOT_FOUND,
-} from "../../../constants/requests";
+} from "../../../constants/requests.js";
 import { 
     createOooRequest,
     validateUserStatus,
     // acknowledgeOOORequest,
     // validateOOOAcknowledgeRequest
-} from "../../../services/oooRequest";
+} from "../../../services/oooRequest.js";
 import { expect } from "chai";
-import { testUserStatus, validOooStatusRequests, validUserCurrentStatus, createdOOORequest } from "../../fixtures/oooRequest/oooRequest";
-import { updateUserStatus } from "../../../models/userStatus";
-import { userState } from "../../../constants/userStatus";
-import addUser from "../../utils/addUser";
-import userDataFixture from "../../fixtures/user/user";
-import * as logService from "../../../services/logService";
-import { acknowledgeOooRequest, createOooRequests3 } from "../../fixtures/oooRequest/oooRequest";
-import { createRequest } from "../../../models/requests";
+import { testUserStatus, validOooStatusRequests, validUserCurrentStatus, createdOOORequest } from "../../fixtures/oooRequest/oooRequest.js";
+import { updateUserStatus } from "../../../models/userStatus.js";
+import { userState } from "../../../constants/userStatus.js";
+import addUser from "../../utils/addUser.js";
+import userDataFixture from "../../fixtures/user/user.js";
+import * as logService from "../../../services/logService.js";
+import { acknowledgeOooRequest, createOooRequests3 } from "../../fixtures/oooRequest/oooRequest.js";
+import { createRequest } from "../../../models/requests.js";
 
 describe("Test OOO Request Service", function() {
 

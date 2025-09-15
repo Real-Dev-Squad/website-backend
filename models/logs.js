@@ -342,3 +342,12 @@ const updateLogs = async () => {
 };
 
 export { addLog, fetchLogs, fetchCacheLogs, fetchLastAddedCacheLog, fetchAllLogs, updateLogs };
+
+export default {
+  addLog,
+  fetchLogs,
+  fetchCacheLogs,
+  fetchLastAddedCacheLog,
+  fetchAllLogs,
+  updateLogs,
+};

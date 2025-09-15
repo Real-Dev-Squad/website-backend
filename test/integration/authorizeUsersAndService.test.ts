@@ -1,12 +1,12 @@
 // @ts-nocheck
 
 import { expect } from "chai";
-import { authorizeAndAuthenticate  } from "../../middlewares/authorizeUsersAndService";
+import { authorizeAndAuthenticate  } from "../../middlewares/authorizeUsersAndService.js";
 import { generateCronJobToken, generateToken } from "../utils/generateBotToken.js";
 import userDataFixture from "../fixtures/user/user.js";
 import { generateAuthToken } from "../../services/authService.js";
-import addUser from "../utils/addUser";
-import cleanDb from "../utils/cleanDb";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
 import ROLES from "../../constants/roles.js";
 import { Services, CLOUDFLARE_WORKER, CRON_JOB_HANDLER } from "../../constants/bot.js";
 import config from "config";
@@ -15,8 +15,8 @@ import AppMiddlewares from "../../middlewares/index.js";
 import chai from "chai";
 import sinon from "sinon";
 
-import * as authorizeBot from "../../middlewares/authorizeBot";
-import { CustomRequest, CustomResponse } from "../../types/global";
+import * as authorizeBot from "../../middlewares/authorizeBot.js";
+import { CustomRequest, CustomResponse } from "../../types/global.js";
 
 const userData = userDataFixture();
 const cookieName = config.get("userToken.cookieName");

@@ -1,4 +1,4 @@
-const getDiscordMembers = [
+export const getDiscordMembers = [
   {
     avatar: "",
     communication_disabled_until: "",
@@ -116,7 +116,7 @@ const getDiscordMembers = [
   },
 ];
 
-const usersFromRds = [
+export const usersFromRds = [
   {
     username: "nonArchivedAndInDiscord",
     first_name: "",
@@ -185,7 +185,7 @@ const usersFromRds = [
   },
 ];
 
-const updatedNicknameResponse = {
+export const updatedNicknameResponse = {
   userAffected: {
     userId: "X0H3paYveEWh7Q2fPhor",
     username: "test-name-007",
@@ -194,7 +194,7 @@ const updatedNicknameResponse = {
   message: "User nickname changed successfully",
 };
 
-const getOnboarding31DPlusMembers = [
+export const getOnboarding31DPlusMembers = [
   {
     avatar: "",
     communication_disabled_until: "",

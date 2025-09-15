@@ -8,7 +8,7 @@ import { generateAuthToken } from "../../services/authService.js";
 import addUser from "../utils/addUser.js";
 import cleanDb from "../utils/cleanDb.js";
 import userData from "../fixtures/user/user.js";
-import ApplicationModel from "../../models/applications.js";
+import * as ApplicationModel from "../../models/applications.js";
 import usersInDiscord from "../fixtures/user/inDiscord.js";
 import firestore from "../../utils/firestore.js";
 import { userPhotoVerificationData } from "../fixtures/user/photo-verification.js";
@@ -20,7 +20,7 @@ import {
   groupOnboarding31dPlus,
   groupIdle,
 } from "../fixtures/discordactions/discordactions.js";
-import discordServices from "../../services/discordService.js";
+import * as discordServices from "../../services/discordService.js";
 import discordRolesModel, { addGroupRoleToMember, addInviteToInviteModel } from "../../models/discordactions.js";
 import { updateUserStatus } from "../../models/userStatus.js";
 import { generateUserStatusData, userStatusDataForOooState } from "../fixtures/userStatus/userStatus.js";

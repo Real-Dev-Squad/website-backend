@@ -7,3 +7,9 @@ export const ROLES = {
   INDISCORD: "in_discord",
 };
 
+export const SUPERUSER = ROLES.SUPERUSER;
+export const APPOWNER = ROLES.APPOWNER;
+export const MEMBER = ROLES.MEMBER;
+export const ARCHIVED = ROLES.ARCHIVED;
+export const INDISCORD = ROLES.INDISCORD;
+

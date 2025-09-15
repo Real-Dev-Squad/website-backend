@@ -1,4 +1,4 @@
-const BADGES = [
+export const BADGES = [
   {
     id: 1,
     name: "badge unknown-1",
@@ -37,9 +37,9 @@ const BADGES = [
   },
 ];
 
-const CLOUNDINARY_IMAGE_URL = "https://imageUrl.cloudinary.com/badges/something.jpg";
+export const CLOUNDINARY_IMAGE_URL = "https://imageUrl.cloudinary.com/badges/something.jpg";
 
-const EXPECTED_BADGE_OBJECT = {
+export const EXPECTED_BADGE_OBJECT = {
   id: "some-random-badge-id",
   name: "badgeXrandom",
   createdBy: "shmbajaj",
@@ -48,7 +48,7 @@ const EXPECTED_BADGE_OBJECT = {
   createdAt: {},
 };
 
-const CLOUNDINARY_BADGE_IMAGE_UPLOAD_RESPONSE = {
+export const CLOUNDINARY_BADGE_IMAGE_UPLOAD_RESPONSE = {
   id: "badge-image-random-id",
   imageUrl: CLOUNDINARY_IMAGE_URL,
 };

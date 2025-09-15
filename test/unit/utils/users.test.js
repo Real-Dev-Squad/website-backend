@@ -2,9 +2,9 @@ import { expect } from "chai";
 
 import sinon from "sinon";
 import { discordNicknameLength, months } from "../../../constants/users.js";
-import dataAccessLayer from "../../../services/dataAccessLayer.js";
+import * as dataAccessLayer from "../../../services/dataAccessLayer.js";
 import firestore from "../../../utils/firestore.js";
-import usersUtils from "../../../utils/users.js";
+import * as usersUtils from "../../../utils/users.js";
 import { filteredPRs } from "../../fixtures/pullrequests/pullrequests.js";
 import userData from "../../fixtures/user/user.js";
 import addUser from "../../utils/addUser.js";

@@ -1,7 +1,7 @@
 import chai from "chai";
 import sinon from "sinon";
 const { expect } = chai;
-import { generateDiscordInviteLink } from "../../../utils/discord-actions";
+import { generateDiscordInviteLink } from "../../../utils/discord-actions.js";
 
 describe("generateDiscordInviteLink", () => {
   let fetchStub;

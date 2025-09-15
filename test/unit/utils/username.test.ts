@@ -1,7 +1,7 @@
 import chai from "chai";
-import { formatUsername } from "../../../utils/username";
+import { formatUsername } from "../../../utils/username.js";
 const { expect } = chai;
-const { MAX_USERNAME_LENGTH } = require("../../../constants/users");
+import { MAX_USERNAME_LENGTH  } from "../../../constants/users.js";
 
 describe("formatUsername", function () {
   it("should return a username with the correct format for valid first and last name", function () {

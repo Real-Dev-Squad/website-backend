@@ -1,4 +1,4 @@
-const predefinedTrackedProgressDataForUser = {
+export const predefinedTrackedProgressDataForUser = {
   type: "user",
   monitored: true,
   frequency: 1,
@@ -6,7 +6,7 @@ const predefinedTrackedProgressDataForUser = {
   updatedAt: "2023-05-20T03:49:20.298Z",
 };
 
-const predefinedTrackedProgressDataForTask = {
+export const predefinedTrackedProgressDataForTask = {
   type: "task",
   monitored: true,
   frequency: 4,
@@ -14,18 +14,18 @@ const predefinedTrackedProgressDataForTask = {
   updatedAt: "2023-05-20T03:49:20.298Z",
 };
 
-const trackedProgressUserDataForPost = {
+export const trackedProgressUserDataForPost = {
   type: "user",
   monitored: true,
 };
 
-const trackedProgressTaskDataForPost = {
+export const trackedProgressTaskDataForPost = {
   type: "task",
   monitored: true,
   frequency: 2,
 };
 
-const trackedProgressDataForPatch = {
+export const trackedProgressDataForPatch = {
   monitored: false,
 };
 
@@ -36,7 +36,7 @@ const trackedProgressDataForPatch = {
  * @returns {boolean} - Returns true if the value is a valid ISO string, otherwise false.
  *
  */
-const isISOString = (value) => {
+export const isISOString = (value) => {
   return new Date(value).toISOString() === value;
 };
 
