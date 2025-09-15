@@ -10,7 +10,8 @@ import {
 } from "./../../fixtures/oooRequest/oooRequest";
 import { REQUEST_STATE, REQUEST_TYPE } from "../../../constants/requests.js";
 import userDataFixture from "./../../fixtures/user/user";
-import addUser from "../../utils/addUser.js";
+import addUser from "../../utils/addUser";
+import { oldOooStatusRequest, OooStatusRequest } from "../../../types/oooRequest";
 const userData = userDataFixture();
 
 let testUserId: string;
@@ -46,8 +47,8 @@ describe("models/oooRequests", () => {
 
   describe("updateRequest", () => {
     it("should update an existing OOO request", async () => {
-      const oooRequest: any = await createRequest(createOooStatusRequests);
-      const updatedOooRequest: any = await updateRequest(
+      const oooRequest: oldOooStatusRequest = await createRequest(createOooStatusRequests);
+      const updatedOooRequest: oldOooStatusRequest = await updateRequest(
         oooRequest.id,
         updateOooApprovedRequests,
         updateOooApprovedRequests.lastModifiedBy
@@ -112,17 +113,42 @@ describe("models/oooRequests", () => {
       expect(oooRequestData.allRequests).to.be.have.length(2);
     });
 
-    it("Should return a list of all the requests with specified state - APPROVED", async () => {
-      const oooRequest: any = await createRequest(createOooStatusRequests);
-      await updateRequest(oooRequest.id, updateOooApprovedRequests, updateOooApprovedRequests.lastModifiedBy, REQUEST_TYPE.OOO)
+    it("Should return APPROVED state in old schema when dev=false", async () => {
+      const oooRequest: OooStatusRequest = await createRequest(createOooStatusRequests);
+      await updateRequest(
+        oooRequest.id,
+        updateOooApprovedRequests,
+        updateOooApprovedRequests.lastModifiedBy,
+        REQUEST_TYPE.OOO
+      );
+      const query = { dev: "false", status: REQUEST_STATE.APPROVED };
+      const oooRequestData = await getRequests(query);
+      expect(oooRequestData.allRequests[0].status).to.be.equal(REQUEST_STATE.APPROVED);
+    });
+
+    it("Should return APPROVED status in new schema when dev=true", async () => {
+      const oooRequest: OooStatusRequest = await createRequest(createOooStatusRequests);
+      await updateRequest(
+        oooRequest.id,
+        updateOooApprovedRequests,
+        updateOooApprovedRequests.lastModifiedBy,
+        REQUEST_TYPE.OOO
+      );
       const query = { dev: "true", state: REQUEST_STATE.APPROVED };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData.allRequests[0].state).to.be.equal(REQUEST_STATE.APPROVED);
     });
 
-    it("Should return a list of all the requests with specified state - PENDING", async () => {
+    it("Should return PENDING state in old schema when dev=false", async () => {
       await createRequest(createOooStatusRequests);
-      const query = { dev: "true", state: REQUEST_STATE.PENDING };
+      const query = { dev: "false", status: REQUEST_STATE.PENDING };
+      const oooRequestData = await getRequests(query);
+      expect(oooRequestData.allRequests[0].status).to.be.equal(REQUEST_STATE.PENDING);
+    });
+
+    it("Should return PENDING status in new schema when dev=true", async () => {
+      await createRequest(createOooStatusRequests);
+      const query = { dev: "true", status: REQUEST_STATE.PENDING };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData.allRequests[0].state).to.be.equal(REQUEST_STATE.PENDING);
     });
@@ -144,7 +170,7 @@ describe("models/oooRequests", () => {
     });
 
     it("Should return empty array if no data is found", async () => {
-      const query = { dev: "true", state: REQUEST_STATE.PENDING };
+      const query = { dev: "true", status: REQUEST_STATE.PENDING };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData).to.be.equal(null);
     });

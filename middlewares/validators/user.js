@@ -1,4 +1,5 @@
 import joi from "joi";
+import logger from "../../utils/logger.js";
 
 import { ROLES } from "../../constants/roles.js";
 import { userState } from "../../constants/userStatus.js";
@@ -193,6 +194,9 @@ async function getUsers(req, res, next) {
       query: joi.string().optional(),
       q: joi.string().optional(),
       profile: joi.string().valid("true").optional(),
+      profileStatus: joi.string().optional().messages({
+        "string.empty": "profileStatus value must not be empty",
+      }),
       filterBy: joi.string().optional(),
       days: joi.string().optional(),
       dev: joi.string().optional(),

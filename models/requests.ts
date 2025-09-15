@@ -8,9 +8,11 @@ import {
   ERROR_WHILE_CREATING_REQUEST,
   ERROR_WHILE_UPDATING_REQUEST,
   REQUEST_DOES_NOT_EXIST,
-} from "../constants/requests.js";
-import { getUserId } from "../utils/users.js";
+} from "../constants/requests";
+import { getUserId } from "../utils/users";
+import { transformRequestResponse } from "../utils/requests";
 const SIZE = 5;
+
 
 export const createRequest = async (body: any) => {
   try {
@@ -150,6 +152,8 @@ export const getRequests = async (query: any) => {
     if (allRequests.length === 0) {
       return null;
     }
+
+    allRequests = transformRequestResponse(allRequests, dev);
 
     return {
       allRequests,

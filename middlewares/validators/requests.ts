@@ -1,17 +1,16 @@
 import joi from "joi";
 import { NextFunction } from "express";
-import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/requests.js";
-import { OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest.js";
-import { createOooStatusRequestValidator } from "./oooRequests.js";
-import { createExtensionRequestValidator } from "./extensionRequestsv2.js";
-import {createTaskRequestValidator} from "./taskRequests.js";
-import { ExtensionRequestRequest, ExtensionRequestResponse } from "../../types/extensionRequests.js";
-import { CustomResponse } from "../../typeDefinitions/global.js";
-import { UpdateRequest } from "../../types/requests.js";
-import { TaskRequestRequest, TaskRequestResponse } from "../../types/taskRequests.js";
-import { createOnboardingExtensionRequestValidator, updateOnboardingExtensionRequestValidator } from "./onboardingExtensionRequest.js";
-import { OnboardingExtensionCreateRequest, OnboardingExtensionResponse, UpdateOnboardingExtensionRequest } from "../../types/onboardingExtension.js";
-import logger from "../../utils/logger.js";
+import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/requests";
+import { AcknowledgeOooRequest, OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
+import { acknowledgeOooRequestValidator, createOooStatusRequestValidator } from "./oooRequests";
+import { createExtensionRequestValidator } from "./extensionRequestsv2";
+import {createTaskRequestValidator} from "./taskRequests";
+import { ExtensionRequestRequest, ExtensionRequestResponse } from "../../types/extensionRequests";
+import { CustomResponse } from "../../typeDefinitions/global";
+import { UpdateRequest } from "../../types/requests";
+import { TaskRequestRequest, TaskRequestResponse } from "../../types/taskRequests";
+import { createOnboardingExtensionRequestValidator, updateOnboardingExtensionRequestValidator } from "./onboardingExtensionRequest";
+import { OnboardingExtensionCreateRequest, OnboardingExtensionResponse, UpdateOnboardingExtensionRequest } from "../../types/onboardingExtension";
 
 export const createRequestsMiddleware = async (
   req: OooRequestCreateRequest|ExtensionRequestRequest | TaskRequestRequest | OnboardingExtensionCreateRequest,
@@ -89,7 +88,11 @@ export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: O
       .valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION, REQUEST_TYPE.TASK, REQUEST_TYPE.ALL, REQUEST_TYPE.ONBOARDING)
       .optional(),
     requestedBy: joi.string().insensitive().optional(),
-    state: joi
+    state: joi 
+      .string()
+      .valid(REQUEST_STATE.APPROVED, REQUEST_STATE.PENDING, REQUEST_STATE.REJECTED)
+      .optional(),
+    status: joi
       .string()
       .valid(REQUEST_STATE.APPROVED, REQUEST_STATE.PENDING, REQUEST_STATE.REJECTED)
       .optional(),
@@ -125,14 +128,14 @@ export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: O
 
 /**
  * Validates update requests based on their type.
- *
- * @param {UpdateOnboardingExtensionRequest} req - Request object.
+ * 
+ * @param {UpdateOnboardingExtensionRequest | AcknowledgeOooRequest} req - Request object.
  * @param {CustomResponse} res - Response object.
  * @param {NextFunction} next - Next middleware if valid.
  * @returns {Promise<void>} Resolves or sends errors.
  */
 export const updateRequestValidator = async (
-  req: UpdateOnboardingExtensionRequest,
+  req: UpdateOnboardingExtensionRequest | AcknowledgeOooRequest,
   res: CustomResponse,
   next: NextFunction
   ): Promise<void> => {
@@ -142,6 +145,9 @@ export const updateRequestValidator = async (
           await updateOnboardingExtensionRequestValidator(
             req,
             res as OnboardingExtensionResponse, next);
+          break;
+      case REQUEST_TYPE.OOO:
+          await acknowledgeOooRequestValidator(req as AcknowledgeOooRequest, res as OooRequestResponse, next);
           break;
       default:
           return res.boom.badRequest("Invalid type");

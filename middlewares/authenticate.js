@@ -1,64 +1,82 @@
-import config from "config";
+import authService from "../services/authService.js";
+import dataAccess from "../services/dataAccessLayer.js";
 import logger from "../utils/logger.js";
-import { decodeAuthToken, generateAuthToken, verifyAuthToken } from "../services/authService.js";
-import { retrieveUsers } from "../services/dataAccessLayer.js";
 
 /**
- * Middleware to check if the user has been restricted. If user is restricted,
- * then only allow read requests and do not allow to any edit/create requests.
+ * Middleware to check if the user is restricted or in an impersonation session.
+ *
+ * - If the user is impersonating, only GET requests and the STOP impersonation route are allowed.
+ * - If the user is restricted (based on roles), only GET requests are permitted.
  *
  * Note: This requires that user is authenticated hence must be called after
  * the user authentication middleware. We are calling it from within the
  * `authenticate` middleware itself to avoid explicitly adding this middleware
  * while defining routes.
  *
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
- * @param {Function} next - Express middleware function
- * @returns {Object} - Returns unauthorized object if user has been restricted.
+ * @async
+ * @function checkRestricted
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @param {Function} next - Express next middleware function
+ * @returns {void}
  */
 export const checkRestricted = async (req, res, next) => {
   const { roles } = req.userData;
+
+  if (req.isImpersonating) {
+    const isStopImpersonationRoute =
+      req.method === "PATCH" &&
+      req.baseUrl === "/impersonation" &&
+      /^\/[a-zA-Z0-9_-]+$/.test(req.path) &&
+      req.query.action === "STOP";
+
+    if (req.method !== "GET" && !isStopImpersonationRoute) {
+      return res.boom.forbidden("Only viewing is permitted during impersonation");
+    }
+  }
+
   if (roles && roles.restricted && req.method !== "GET") {
     return res.boom.forbidden("You are restricted from performing this action");
   }
+
   return next();
 };
 
 /**
- * Middleware to validate the authenticated routes
- * 1] Verifies the token and adds user info to `req.userData` for further use
- * 2] In case of JWT expiry, adds a new JWT to the response if `currTime - tokenInitialisationTime <= refreshTtl`
+ * Authentication middleware that:
+ * 1. Verifies JWT token from cookies (or headers in non-production).
+ * 2. Handles impersonation if applicable.
+ * 3. Refreshes token if it's expired but still within the refresh TTL window.
+ * 4. Attaches user data to `req.userData` for downstream use.
  *
- * The currently implemented mechanism satisfies the current use case.
- * Authentication with JWT and a refreshToken to be added once we have user permissions and authorizations to be handled
- *
- * @todo: Add tests to assert on refreshed JWT generation by modifying the TTL values for the specific test. Currently not possible in the absence of a test-suite.
- *
- *
- * @param req {Object} - Express request object
- * @param res {Object} - Express response object
- * @param next {Function} - Express middleware function
- * @return {Object} - Returns unauthenticated object if token is invalid
+ * @async
+ * @function
+ * @param {import('express').Request} req - Express request object
+ * @param {import('express').Response} res - Express response object
+ * @param {Function} next - Express next middleware function
+ * @returns {Promise<void>} - Calls `next()` on successful authentication or returns an error response.
  */
 export default async (req, res, next) => {
   try {
     let token = req.cookies[config.get("userToken.cookieName")];
 
     /**
-     * Enable Bearer Token authentication for NON-PRODUCTION environments
-     * This is enabled as Swagger UI does not support cookie authe
+     * Enable Bearer Token authentication for NON-PRODUCTION environments.
+     * Useful for Swagger or manual testing where cookies are not easily managed.
      */
     if (process.env.NODE_ENV !== "production" && !token) {
-      token = req.headers.authorization.split(" ")[1];
+      token = req.headers.authorization?.split(" ")[1];
     }
 
-    const { userId } = verifyAuthToken(token);
+    const { userId, impersonatedUserId } = authService.verifyAuthToken(token);
+    // `req.isImpersonating` keeps track of the impersonation session
+    req.isImpersonating = Boolean(impersonatedUserId);
 
-    // add user data to `req.userData` for further use
-    const userData = await retrieveUsers({ id: userId });
+    const userData = impersonatedUserId
+      ? await dataAccess.retrieveUsers({ id: impersonatedUserId })
+      : await dataAccess.retrieveUsers({ id: userId });
+
     req.userData = userData.user;
-
     return checkRestricted(req, res, next);
   } catch (err) {
     logger.error(err);
@@ -66,8 +84,8 @@ export default async (req, res, next) => {
     if (err.name === "TokenExpiredError") {
       const refreshTtl = config.get("userToken.refreshTtl");
       const token = req.cookies[config.get("userToken.cookieName")];
-      const { userId, iat } = decodeAuthToken(token);
-      const newToken = generateAuthToken({ userId });
+      const { userId, iat } = authService.decodeAuthToken(token);
+      const newToken = authService.generateAuthToken({ userId });
       const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl"));
 
       // add new JWT to the response if it satisfies the refreshTtl time
@@ -80,14 +98,13 @@ export default async (req, res, next) => {
           sameSite: "lax",
         });
 
-        // add user data to `req.userData` for further use
-        req.userData = await retrieveUsers({ id: userId });
+        const userData = await dataAccess.retrieveUsers({ id: userId });
+        req.userData = userData.user;
+
         return checkRestricted(req, res, next);
-      } else {
-        return res.boom.unauthorized("Unauthenticated User");
       }
-    } else {
       return res.boom.unauthorized("Unauthenticated User");
     }
+    return res.boom.unauthorized("Unauthenticated User");
   }
 };

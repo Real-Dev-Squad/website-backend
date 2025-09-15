@@ -1,7 +1,8 @@
 import joi from "joi";
 import { NextFunction } from "express";
-import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/requests.js";
-import { OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest.js";
+import { REQUEST_STATE, REQUEST_TYPE, ERROR_WHILE_ACKNOWLEDGING_REQUEST } from "../../constants/requests";
+import { AcknowledgeOooRequest, OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
+import logger from "../../utils/logger";
 
 export const createOooStatusRequestValidator = async (
   req: OooRequestCreateRequest,
@@ -37,4 +38,66 @@ export const createOooStatusRequestValidator = async (
     });
 
   await schema.validateAsync(req.body, { abortEarly: false });
+};
+
+const acknowledgeOooRequestSchema = joi
+  .object()
+  .strict()
+  .keys({
+    comment: joi.string().optional()
+      .messages({
+        "string.empty": "comment cannot be empty",
+      }),
+    status: joi
+      .string()
+      .valid(REQUEST_STATE.APPROVED, REQUEST_STATE.REJECTED)
+      .required()
+      .messages({
+        "any.only": "status must be APPROVED or REJECTED",
+      }),
+    type: joi.string().equal(REQUEST_TYPE.OOO).required().messages({
+      "any.required": "type is required",
+      "any.only": "type must be OOO"
+    })
+  });
+
+const paramsSchema = joi
+  .object()
+  .strict()
+  .keys({
+    id: joi.string().trim().required().messages({
+      "any.required": "Request ID is required",
+      "string.empty": "Request ID cannot be empty"
+    })
+  });
+
+/**
+ * Middleware to validate the acknowledge Out-Of-Office (OOO) request payload.
+ * 
+ * @param {AcknowledgeOooRequest} req - The request object containing the body to be validated.
+ * @param {OooRequestResponse} res - The response object used to send error responses if validation fails.
+ * @param {NextFunction} next - The next middleware function to call if validation succeeds.
+ * @returns {Promise<void>} Resolves or sends errors.
+ */
+export const acknowledgeOooRequestValidator = async (
+  req: AcknowledgeOooRequest,
+  res: OooRequestResponse,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    await acknowledgeOooRequestSchema.validateAsync(req.body, { abortEarly: false });
+    await paramsSchema.validateAsync(req.params, { abortEarly: false });
+    return next();
+  } catch (error: unknown) {
+
+    if (error instanceof joi.ValidationError) {
+      const errorMessages = error.details.map((detail) => detail.message);
+      logger.error(`${ERROR_WHILE_ACKNOWLEDGING_REQUEST}: ${errorMessages}`);
+      return res.boom.badRequest(errorMessages);
+    }
+    
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.error(`${ERROR_WHILE_ACKNOWLEDGING_REQUEST}: ${errorMessage}`);
+    return res.boom.badRequest([ERROR_WHILE_ACKNOWLEDGING_REQUEST]);
+  }
 };

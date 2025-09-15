@@ -90,12 +90,20 @@ module.exports = {
       __name: "USER_TOKEN_REFRESH_TTL",
       __format: "number",
     },
+    impersonationTtl: {
+      __name: "USER_TOKEN_IMPERSONATION_TTL",
+      __format: "number",
+    },
     publicKey: "PUBLIC_KEY",
     privateKey: "PRIVATE_KEY",
   },
 
   botToken: {
     botPublicKey: "BOT_PUBLIC_KEY",
+  },
+
+  discordService: {
+    publicKey: "DISCORD_SERVICE_PUBLIC_KEY",
   },
 
   cronJobHandler: {

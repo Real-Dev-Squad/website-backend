@@ -14,7 +14,20 @@ export const generateToken = (data) => {
   });
 };
 
-export const generateCronJobToken = (data) => {
+/**
+ * Generates the JWT
+ *
+ * @param payload {Object} - Payload to be added in the JWT
+ * @return {String} - Generated JWT
+ */
+const generateDiscordServiceToken = (data) => {
+  return jwt.sign(data, config.get("discordService.privateKey"), {
+    algorithm: "RS256",
+    expiresIn: "1m",
+  });
+};
+
+const generateCronJobToken = (data) => {
   const token = jwt.sign(data, config.get("cronJobHandler.privateKey"), {
     algorithm: "RS256",
     expiresIn: "1m",
@@ -22,7 +35,4 @@ export const generateCronJobToken = (data) => {
   return token;
 };
 
-export default {
-  generateToken,
-  generateCronJobToken,
-};
+export default { generateToken, generateCronJobToken, generateDiscordServiceToken };

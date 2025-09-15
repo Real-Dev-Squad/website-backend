@@ -121,9 +121,12 @@ export const getRequestsController = async (req: any, res: any) => {
  * @param {CustomResponse} res - The response object.
  * @returns {Promise<void>} Resolves or sends an error for invalid types.
  */
-export const updateRequestBeforeAcknowledgedController = async (req: Request, res: CustomResponse) => {
+export const updateRequestBeforeAcknowledgedController = async (req: Request, res: CustomResponse, next: NextFunction) => {
   const type = req.body.type;
   switch(type){
+    case REQUEST_TYPE.OOO:
+      await acknowledgeOooRequestController(req as AcknowledgeOooRequest, res as OooRequestResponse, next);
+      break;
     case REQUEST_TYPE.ONBOARDING:
       await updateOnboardingExtensionRequestController(req as UpdateOnboardingExtensionRequest, res as OnboardingExtensionResponse);
       break;
