@@ -11,7 +11,7 @@ import { Timestamp } from "firebase-admin/firestore";
 import firestore from "../../../utils/firestore";
 
 const userData = userDataFixture();
-const logger = require("../../../utils/logger");
+import logger from "../../../utils/logger";
 
 describe("models/impersonationRequests", () => {
   let impersonationRequest;

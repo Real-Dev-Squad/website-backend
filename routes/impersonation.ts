@@ -4,8 +4,8 @@ import authenticate from "../middlewares/authenticate";
 import { createImpersonationRequestController, getImpersonationRequestByIdController, getImpersonationRequestsController, impersonationController, updateImpersonationRequestStatusController } from "../controllers/impersonationRequests";
 import { addAuthorizationForImpersonation } from "../middlewares/addAuthorizationForImpersonation";
 const router = express.Router();
-const authorizeRoles = require("../middlewares/authorizeRoles");
-const { SUPERUSER } = require("../constants/roles");
+import {authorizeRoles} from "../middlewares/authorizeRoles";
+import { SUPERUSER } from "../constants/roles";
 
 router.post(
   "/requests",

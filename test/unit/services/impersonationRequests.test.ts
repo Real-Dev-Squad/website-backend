@@ -19,10 +19,10 @@ import { Timestamp } from "firebase-admin/firestore";
 import addUser from "../../utils/addUser";
 import cleanDb from "../../utils/cleanDb";
 import config from "config";
-const authService = require("../../../services/authService");
-const userQuery = require("../../../models/users");
+import * as authService from "../../../services/authService";
+import * as userQuery from "../../../models/users";
 const userData = userDataFixture();
-const logger = require("../../../utils/logger");
+import logger from "../../../utils/logger";
 
 describe("Tests Impersonation Requests Service", () => {
   const mockRequestBody: CreateImpersonationRequestModelDto = impersonationRequestsBodyData[0];
