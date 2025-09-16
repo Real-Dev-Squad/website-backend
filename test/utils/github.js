@@ -1,3 +1,5 @@
+import config from "config";
+
 const defaultClientId = config.get("githubOauth.clientId");
 const baseURL = config.get("services.rdsApi.baseUrl");
 
@@ -19,4 +21,4 @@ const generateGithubAuthRedirectUrl = function ({
   return `${encodedUrl}&client_id=${clientId}`;
 };
 
-module.exports = { generateGithubAuthRedirectUrl };
+export { generateGithubAuthRedirectUrl };

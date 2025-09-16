@@ -1,18 +1,19 @@
 import chai from "chai";
 import Sinon from "sinon";
-import { logType } from "../../../constants/logs";
-import discordActions from "../../../models/discordactions";
-import { addLog } from "../../../models/logs";
-import firestore from "../../../utils/firestore";
-import { removeDiscordRoleFromUser } from "../../../utils/removeDiscordRoleFromUser";
-import { groupData, memberGroupData } from "../../fixtures/discordactions/discordactions";
-import addUser from "../../utils/addUser";
-import cleanDb from "../../utils/cleanDb";
+import { logType } from "../../../constants/logs.js";
+import * as discordActions from "../../../models/discordactions.js";
+import { addLog } from "../../../models/logs.js";
+import firestore from "../../../utils/firestore.js";
+import { removeDiscordRoleFromUser } from "../../../utils/removeDiscordRoleFromUser.js";
+import { groupData, memberGroupData } from "../../fixtures/discordactions/discordactions.js";
+import addUser from "../../utils/addUser.js";
+import cleanDb from "../../utils/cleanDb.js";
 const { expect } = chai;
 const discordRolesModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
 const logsModel = firestore.collection("logs");
-const userData = require("../../fixtures/user/user")();
+import userDataModule from "../../fixtures/user/user.js";
+const userData = userDataModule();
 
 describe("removeDiscordRoleFromUser", function () {
   let userId;

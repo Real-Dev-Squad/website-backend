@@ -1,7 +1,12 @@
-import { getPaginatedLink } from "../utils/helper";
-import { ALL_LOGS_FETCHED_SUCCESSFULLY, ERROR_WHILE_FETCHING_LOGS, LOGS_FETCHED_SUCCESSFULLY } from "../constants/logs";
-const logsQuery = require("../models/logs");
-const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+import { getPaginatedLink } from "../utils/helper.js";
+import {
+  ALL_LOGS_FETCHED_SUCCESSFULLY,
+  ERROR_WHILE_FETCHING_LOGS,
+  LOGS_FETCHED_SUCCESSFULLY,
+} from "../constants/logs.js";
+import { fetchAllLogs as getAllLogs, fetchLogs as getLogs, updateLogs as updateLogsModel } from "../models/logs.js";
+import { SOMETHING_WENT_WRONG } from "../constants/errorMessages.js";
+import logger from "../utils/logger.js";
 
 /**
  * Fetches logs
@@ -11,7 +16,7 @@ const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
  */
 const fetchLogs = async (req, res) => {
   try {
-    const logs = await logsQuery.fetchLogs(req.query, req.params.type);
+    const logs = await getLogs(req.query, req.params.type);
     return res.json({
       message: LOGS_FETCHED_SUCCESSFULLY,
       logs,
@@ -25,7 +30,7 @@ const fetchLogs = async (req, res) => {
 const fetchAllLogs = async (req, res) => {
   const { query } = req;
   try {
-    const logs = await logsQuery.fetchAllLogs(query);
+    const logs = await getAllLogs(query);
     if (logs.length === 0) {
       return res.status(204).send();
     }
@@ -77,7 +82,7 @@ const fetchAllLogs = async (req, res) => {
 
 const updateLogs = async (req, res) => {
   try {
-    const response = await logsQuery.updateLogs();
+    const response = await updateLogsModel();
     return res.json({
       response,
     });
@@ -86,8 +91,4 @@ const updateLogs = async (req, res) => {
   }
 };
 
-module.exports = {
-  fetchLogs,
-  fetchAllLogs,
-  updateLogs,
-};
+export { fetchLogs, fetchAllLogs, updateLogs };

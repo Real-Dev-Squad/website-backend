@@ -1,11 +1,11 @@
 import express from "express";
-import { createImpersonationRequestValidator, getImpersonationRequestByIdValidator, getImpersonationRequestsValidator, updateImpersonationRequestValidator, impersonationSessionValidator } from "../middlewares/validators/impersonationRequests";
-import authenticate from "../middlewares/authenticate";
-import { createImpersonationRequestController, getImpersonationRequestByIdController, getImpersonationRequestsController, impersonationController, updateImpersonationRequestStatusController } from "../controllers/impersonationRequests";
-import { addAuthorizationForImpersonation } from "../middlewares/addAuthorizationForImpersonation";
+import { createImpersonationRequestValidator, getImpersonationRequestByIdValidator, getImpersonationRequestsValidator, updateImpersonationRequestValidator, impersonationSessionValidator } from "../middlewares/validators/impersonationRequests.js";
+import authenticate from "../middlewares/authenticate.js";
+import { createImpersonationRequestController, getImpersonationRequestByIdController, getImpersonationRequestsController, impersonationController, updateImpersonationRequestStatusController } from "../controllers/impersonationRequests.js";
+import { addAuthorizationForImpersonation } from "../middlewares/addAuthorizationForImpersonation.js";
 const router = express.Router();
-const authorizeRoles = require("../middlewares/authorizeRoles");
-const { SUPERUSER } = require("../constants/roles");
+import {authorizeRoles} from "../middlewares/authorizeRoles.js";
+import { SUPERUSER } from "../constants/roles.js";
 
 router.post(
   "/requests",
@@ -44,4 +44,4 @@ router.patch(
     impersonationController
 );
 
-module.exports = router;
+export default router;

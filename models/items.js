@@ -1,4 +1,5 @@
-const firestore = require("../utils/firestore");
+import firestore from "../utils/firestore.js";
+import logger from "../utils/logger.js";
 
 const itemTagsModel = firestore.collection("itemTags");
 const tagModel = firestore.collection("tags");
@@ -91,8 +92,4 @@ const getItemBasedOnFilter = async (query) => {
   }
 };
 
-module.exports = {
-  addTagsToItem,
-  removeTagsFromItem,
-  getItemBasedOnFilter,
-};
+export default { addTagsToItem, removeTagsFromItem, getItemBasedOnFilter };

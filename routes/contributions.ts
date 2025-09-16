@@ -1,7 +1,7 @@
 import express from "express";
 const router = express.Router();
-import contributions from "../controllers/contributions";
+import { getUserContributions } from "../controllers/contributions.js";
 
-router.get("/:username", contributions.getUserContributions);
+router.get("/:username", getUserContributions);
 
-module.exports = router;
+export default router;

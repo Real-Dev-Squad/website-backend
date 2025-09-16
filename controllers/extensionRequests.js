@@ -1,13 +1,20 @@
-const extensionRequestsQuery = require("../models/extensionRequests");
-const { addLog } = require("../models/logs");
-const tasks = require("../models/tasks");
-const { getUsername, getUsernameElseUndefined, getUserIdElseUndefined } = require("../utils/users");
-const { EXTENSION_REQUEST_STATUS } = require("../constants/extensionRequests");
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const { transformQuery } = require("../utils/extensionRequests");
-const { parseQueryParams } = require("../utils/queryParser");
-const logsQuery = require("../models/logs");
-const { getFullName } = require("../utils/users");
+import {
+  fetchLatestExtensionRequest,
+  createExtensionRequest,
+  fetchPaginatedExtensionRequests,
+  fetchExtensionRequest,
+  fetchLatestExtensionRequest as fetchLatestExtensionRequestQuery,
+  fetchExtensionRequests as fetchExtensionRequestsQuery,
+  updateExtensionRequest as updateExtensionRequestQuery,
+} from "../models/extensionRequests.js";
+import { addLog, fetchLogs } from "../models/logs.js";
+import tasks from "../models/tasks.js";
+import { getUsername, getUsernameElseUndefined, getUserIdElseUndefined, getFullName } from "../utils/users.js";
+import { EXTENSION_REQUEST_STATUS } from "../constants/extensionRequests.js";
+import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
+import { transformQuery } from "../utils/extensionRequests.js";
+import { parseQueryParams } from "../utils/queryParser.js";
+import logger from "../utils/logger.js";
 
 /**
  * Create ETA extension Request
@@ -49,7 +56,7 @@ const createTaskExtensionRequest = async (req, res) => {
       extensionBody.oldEndsOn = task.endsOn;
     }
 
-    const latestExtensionRequest = await extensionRequestsQuery.fetchLatestExtensionRequest({
+    const latestExtensionRequest = await fetchLatestExtensionRequest({
       taskId: extensionBody.taskId,
     });
 
@@ -69,7 +76,7 @@ const createTaskExtensionRequest = async (req, res) => {
       extensionBody = { ...extensionBody, requestNumber: 1 };
     }
 
-    const extensionRequest = await extensionRequestsQuery.createExtensionRequest(extensionBody);
+    const extensionRequest = await createExtensionRequest(extensionBody);
     const extensionLog = {
       type: "extensionRequests",
       meta: {
@@ -109,7 +116,7 @@ const fetchExtensionRequests = async (req, res) => {
     const { status, taskId, assignee } = parseQueryParams(req._parsedUrl.search);
     const { transformedSize, transformedStatus } = transformQuery(size, status);
 
-    const allExtensionRequests = await extensionRequestsQuery.fetchPaginatedExtensionRequests(
+    const allExtensionRequests = await fetchPaginatedExtensionRequests(
       { taskId, status: transformedStatus, assignee },
       { cursor, order, size: transformedSize }
     );
@@ -126,7 +133,7 @@ const fetchExtensionRequests = async (req, res) => {
 const getExtensionRequest = async (req, res) => {
   try {
     const extensionRequestId = req.params.id;
-    const { extensionRequestData } = await extensionRequestsQuery.fetchExtensionRequest(extensionRequestId);
+    const { extensionRequestData } = await fetchExtensionRequest(extensionRequestId);
 
     if (!extensionRequestData) {
       return res.boom.notFound("Extension Request not found");
@@ -152,7 +159,7 @@ const getSelfExtensionRequests = async (req, res) => {
     if (userId) {
       let allExtensionRequests;
       if (taskId) {
-        const latestExtensionRequest = await extensionRequestsQuery.fetchLatestExtensionRequest({
+        const latestExtensionRequest = await fetchLatestExtensionRequestQuery({
           taskId,
         });
 
@@ -161,7 +168,7 @@ const getSelfExtensionRequests = async (req, res) => {
         } else {
           // Add reviewer's name if status is not PENDING
           if (latestExtensionRequest.status === "APPROVED" || latestExtensionRequest.status === "DENIED") {
-            const logs = await logsQuery.fetchLogs(
+            const logs = await fetchLogs(
               { "meta.extensionRequestId": latestExtensionRequest.id, limit: 1 },
               "extensionRequests"
             );
@@ -180,7 +187,7 @@ const getSelfExtensionRequests = async (req, res) => {
           allExtensionRequests = [latestExtensionRequest];
         }
       } else {
-        allExtensionRequests = await extensionRequestsQuery.fetchExtensionRequests({
+        allExtensionRequests = await fetchExtensionRequestsQuery({
           assignee: userId,
           status: status || undefined,
         });
@@ -206,7 +213,7 @@ const updateExtensionRequest = async (req, res) => {
   const isDev = dev === "true";
   const isSuperUser = req.userData?.roles.super_user;
   try {
-    const extensionRequest = await extensionRequestsQuery.fetchExtensionRequest(req.params.id);
+    const extensionRequest = await fetchExtensionRequest(req.params.id);
     if (!extensionRequest.extensionRequestData) {
       return res.boom.notFound("Extension Request not found");
     }
@@ -226,7 +233,7 @@ const updateExtensionRequest = async (req, res) => {
       }
     }
 
-    const promises = [extensionRequestsQuery.updateExtensionRequest(req.body, req.params.id)];
+    const promises = [updateExtensionRequestQuery(req.body, req.params.id)];
     // If flag is present, then only create log for change in ETA/reason by SU
     let body = {};
     // Check if reason has been changed
@@ -272,7 +279,7 @@ const updateExtensionRequest = async (req, res) => {
  */
 const updateExtensionRequestStatus = async (req, res) => {
   try {
-    const extensionRequest = await extensionRequestsQuery.fetchExtensionRequest(req.params.id);
+    const extensionRequest = await fetchExtensionRequest(req.params.id);
     if (!extensionRequest.extensionRequestData) {
       return res.boom.notFound("Extension Request not found");
     }
@@ -292,7 +299,7 @@ const updateExtensionRequestStatus = async (req, res) => {
     };
 
     const promises = [
-      extensionRequestsQuery.updateExtensionRequest(req.body, req.params.id),
+      updateExtensionRequestQuery(req.body, req.params.id),
       addLog(extensionLog.type, extensionLog.meta, extensionLog.body),
     ];
 
@@ -330,7 +337,7 @@ const updateExtensionRequestStatus = async (req, res) => {
   }
 };
 
-module.exports = {
+export {
   createTaskExtensionRequest,
   fetchExtensionRequests,
   getExtensionRequest,

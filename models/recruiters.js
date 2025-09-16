@@ -3,9 +3,10 @@
  * This will contain the DB schema if we start consuming an ORM for managing the DB operations
  */
 
-const firestore = require("../utils/firestore");
+import firestore from "../utils/firestore.js";
+import * as userModel from "./users.js";
+
 const recruiterModel = firestore.collection("recruiters");
-const userModel = require("./users");
 
 /**
  * Add the recruiter data
@@ -66,7 +67,4 @@ const fetchRecruitersInfo = async () => {
   }
 };
 
-module.exports = {
-  addRecruiterInfo,
-  fetchRecruitersInfo,
-};
+export default { addRecruiterInfo, fetchRecruitersInfo };

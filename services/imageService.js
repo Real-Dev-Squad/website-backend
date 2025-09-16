@@ -1,7 +1,9 @@
-const DatauriParser = require("datauri/parser");
-const userModel = require("../models/users");
-const { upload } = require("../utils/cloudinary");
-const cloudinaryMetaData = require("../constants/cloudinary");
+import DatauriParser from "datauri/parser.js";
+
+import { updateUserPicture } from "../models/users.js";
+import { upload } from "../utils/cloudinary.js";
+import cloudinaryMetaData from "../constants/cloudinary.js";
+import logger from "../utils/logger.js";
 
 /**
  * upload user profile picture to cloudinary
@@ -24,7 +26,7 @@ const uploadProfilePicture = async ({ file, userId, coordinates }) => {
       },
     });
     const { public_id: publicId, secure_url: url } = uploadResponse;
-    await userModel.updateUserPicture({ publicId, url }, userId);
+    await updateUserPicture({ publicId, url }, userId);
     return { publicId, url };
   } catch (err) {
     logger.error(`Error while uploading profile picture ${err}`);
@@ -55,7 +57,4 @@ async function uploadBadgeImage({ file, badgeName }) {
   }
 }
 
-module.exports = {
-  uploadProfilePicture,
-  uploadBadgeImage,
-};
+export { uploadProfilePicture, uploadBadgeImage };

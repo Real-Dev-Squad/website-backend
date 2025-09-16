@@ -1,21 +1,27 @@
-import { expect } from "chai";
-import { authorizeAndAuthenticate  } from "../../middlewares/authorizeUsersAndService";
-import bot from "../utils/generateBotToken";
-const userData = require("../fixtures/user/user")();
-import authService from "../../services/authService";
-import addUser from "../utils/addUser";
-import cleanDb from "../utils/cleanDb";
-const ROLES = require("../../constants/roles");
-const { Services, CLOUDFLARE_WORKER, CRON_JOB_HANDLER } = require("../../constants/bot");
-const cookieName = config.get("userToken.cookieName");
-const express = require("express");
-const router = express.Router();
-const AppMiddlewares = require("../../middlewares");
-const chai = require("chai");
-const sinon = require("sinon");
+// @ts-nocheck
 
-import authorizeBot from "../../middlewares/authorizeBot";
-import { CustomRequest, CustomResponse } from "../../types/global";
+import { expect } from "chai";
+import { authorizeAndAuthenticate  } from "../../middlewares/authorizeUsersAndService.js";
+import { generateCronJobToken, generateToken } from "../utils/generateBotToken.js";
+import userDataFixture from "../fixtures/user/user.js";
+import { generateAuthToken } from "../../services/authService.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
+import ROLES from "../../constants/roles.js";
+import { Services, CLOUDFLARE_WORKER, CRON_JOB_HANDLER } from "../../constants/bot.js";
+import config from "config";
+import express from "express";
+import AppMiddlewares from "../../middlewares/index.js";
+import chai from "chai";
+import sinon from "sinon";
+
+import * as authorizeBot from "../../middlewares/authorizeBot.js";
+import { CustomRequest, CustomResponse } from "../../types/global.js";
+
+const userData = userDataFixture();
+const cookieName = config.get("userToken.cookieName");
+const router = express.Router();
+
 describe("Middleware | Authorization", function () {
   let req: any, res: any, next: any;
   const superUser = userData[4];
@@ -64,21 +70,21 @@ describe("Middleware | Authorization", function () {
     });
 
     it("should call verifyCronJob for valid cron job token", async function () {
-      const jwtToken = bot.generateCronJobToken({ name: CRON_JOB_HANDLER });
+      const jwtToken = generateCronJobToken({ name: CRON_JOB_HANDLER });
       req.headers.authorization = `Bearer ${jwtToken}`;
       await authorizeAndAuthenticate ([ROLES.APPOWNER], [Services.CRON_JOB_HANDLER])(req, res, next);
       expect(next.calledOnce).to.be.equal(true);
     });
 
     it("should call verifyDiscordBot for valid Discord bot token", async function () {
-      const jwtToken = bot.generateToken({ name: CLOUDFLARE_WORKER });
+      const jwtToken = generateToken({ name: CLOUDFLARE_WORKER });
       req.headers.authorization = `Bearer ${jwtToken}`;
       await authorizeAndAuthenticate ([ROLES.APPOWNER], [Services.CLOUDFLARE_WORKER])(req, res, next);
       expect(next.calledOnce).to.be.equal(true);
     });
 
     it("should return unauthorized for unknown service names", async function () {
-      const jwtToken = bot.generateToken({ name: "Invalid name" });
+      const jwtToken = generateToken({ name: "Invalid name" });
       req.headers.authorization = `Bearer ${jwtToken}`;
       await authorizeAndAuthenticate ([ROLES.APPOWNER], [Services.CLOUDFLARE_WORKER])(req, res, next);
       expect(res.boom.unauthorized.calledOnce).to.be.equal(true);
@@ -98,8 +104,8 @@ describe("Middleware | Authorization", function () {
     beforeEach(async () => {
       const defaultUserId = await addUser(defaultUser);
       const superUserId = await addUser(superUser);
-      defaultJwt = authService.generateAuthToken({ userId: defaultUserId });
-      superUserJwt = authService.generateAuthToken({ userId: superUserId });
+      defaultJwt = generateAuthToken({ userId: defaultUserId });
+      superUserJwt = generateAuthToken({ userId: superUserId });
     });
     afterEach(async () => {
       await cleanDb();
@@ -118,7 +124,7 @@ describe("Middleware | Authorization", function () {
         });
     });
     it("should not authenticate invalid tokens", function (done) {
-      const jwtToken = bot.generateCronJobToken({ name: CRON_JOB_HANDLER });
+      const jwtToken = generateCronJobToken({ name: CRON_JOB_HANDLER });
       chai
         .request(app)
         .get("/for-super-user")
@@ -145,7 +151,7 @@ describe("Middleware | Authorization", function () {
         });
     });
     it("should allow services if user does not have authorization", function (done) {
-      const jwtToken = bot.generateCronJobToken({ name: CRON_JOB_HANDLER });
+      const jwtToken = generateCronJobToken({ name: CRON_JOB_HANDLER });
       chai
         .request(app)
         .get("/for-super-user")
@@ -160,7 +166,7 @@ describe("Middleware | Authorization", function () {
         });
     });
     it("should respond with status 500 for unknown errors", function (done) {
-      const jwtToken = bot.generateCronJobToken({ name: CRON_JOB_HANDLER });
+      const jwtToken = generateCronJobToken({ name: CRON_JOB_HANDLER });
       sinon.stub(authorizeBot, "verifyCronJob").throws(new Error("Error"));
       chai
         .request(app)

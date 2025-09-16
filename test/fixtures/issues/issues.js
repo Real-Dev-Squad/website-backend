@@ -1,4 +1,4 @@
-const issuesData = {
+export const issuesData = {
   url: "https://api.github.com/repos/Real-Dev-Squad/website-www/issues/679",
   repository_url: "https://api.github.com/repos/Real-Dev-Squad/website-www",
   labels_url: "https://api.github.com/repos/Real-Dev-Squad/website-www/issues/679/labels{/name}",
@@ -110,5 +110,5 @@ const issuesData = {
   score: 1,
 };
 
-const issuesHtmlUrl = "https://github.com/Real-Dev-Squad/website-www/issues/679";
-module.exports = { issuesData, issuesHtmlUrl };
+export const issuesHtmlUrl = "https://github.com/Real-Dev-Squad/website-www/issues/679";
+export default { issuesData, issuesHtmlUrl };

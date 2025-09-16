@@ -1,16 +1,18 @@
+// @ts-nocheck
+
 import chai from "chai";
 import chaiHttp from "chai-http";
 const { expect } = chai;
 import config from "config";
-const app = require("../../server");
-const addUser = require("../utils/addUser");
-const cleanDb = require("../utils/cleanDb");
-const authService = require("../../services/authService");
-const userData = require("../fixtures/user/user")();
-const applicationModel = require("../../models/applications");
-const { requestRoleData } = require("../fixtures/discordactions/discordactions");
+import app from "../../server.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
+import * as authService from "../../services/authService.js";
+import userData from "../fixtures/user/user.js";
+import * as applicationModel from "../../models/applications.js";
+import { requestRoleData } from "../fixtures/discordactions/discordactions.js";
 
-const applicationsData = require("../fixtures/applications/applications")();
+import { SAMPLE_APPLICATION_DATA } from "../fixtures/applications/applications.js";
 const cookieName = config.get("userToken.cookieName");
 
 const appOwner = userData[3];
@@ -41,11 +43,11 @@ describe("Application", function () {
     jwt = authService.generateAuthToken({ userId });
     superUserJwt = authService.generateAuthToken({ userId: superUserId });
     secondUserJwt = authService.generateAuthToken({ userId: secondUserId });
-    const applicationOne = { ...applicationsData[0], userId };
-    const applicationTwo = { ...applicationsData[1], userId: superUserId };
-    const applicationThree = { ...applicationsData[2], userId: "fakfjdkfjkfasjdkfsjdkf" };
-    const applicationFour = { ...applicationsData[3], userId: "fkasdjfkldjfldjkfalsdfjl" };
-    const applicationFive = { ...applicationsData[4], userId: "kfasdjfkdlfjkasdjflsdjfk" };
+    const applicationOne = { ...SAMPLE_APPLICATION_DATA[0], userId };
+    const applicationTwo = { ...SAMPLE_APPLICATION_DATA[1], userId: superUserId };
+    const applicationThree = { ...SAMPLE_APPLICATION_DATA[2], userId: "fakfjdkfjkfasjdkfsjdkf" };
+    const applicationFour = { ...SAMPLE_APPLICATION_DATA[3], userId: "fkasdjfkldjfldjkfalsdfjl" };
+    const applicationFive = { ...SAMPLE_APPLICATION_DATA[4], userId: "kfasdjfkdlfjkasdjflsdjfk" };
 
     const promises = [
       applicationModel.addApplication(applicationOne),
@@ -339,7 +341,7 @@ describe("Application", function () {
         .post(`/applications`)
         .set("cookie", `${cookieName}=${secondUserJwt}`)
         .send({
-          ...applicationsData[5],
+          ...SAMPLE_APPLICATION_DATA[5],
         })
         .end((err, res) => {
           if (err) {
@@ -358,7 +360,7 @@ describe("Application", function () {
         .post(`/applications`)
         .set("cookie", `${cookieName}=${secondUserJwt}`)
         .send({
-          ...applicationsData[5],
+          ...SAMPLE_APPLICATION_DATA[5],
         })
         .end((err, res) => {
           if (err) {

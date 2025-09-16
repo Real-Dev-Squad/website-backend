@@ -1,9 +1,9 @@
 import chai from "chai";
 import sinon from "sinon";
 const { expect } = chai;
-const conditionalMiddleware = require("../../../middlewares/conditionalMiddleware");
-const authService = require("../../../services/authService");
-const addUser = require("../../utils/addUser");
+import conditionalMiddleware from "../../../middlewares/conditionalMiddleware.js";
+import * as authService from "../../../services/authService.js";
+import addUser from "../../utils/addUser.js";
 
 describe("conditional Middleware", function () {
   let req, res, next, validatorStub, middleware;

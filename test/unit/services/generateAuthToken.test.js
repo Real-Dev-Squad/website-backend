@@ -1,5 +1,5 @@
-const { expect } = require("chai");
-const { generateAuthToken } = require("../../../services/authService");
+import { expect } from "chai";
+import { generateAuthToken } from "../../../services/authService.js";
 
 describe("RDS-session cookie as a unique token", function () {
   it("should generate cookie as token", function () {

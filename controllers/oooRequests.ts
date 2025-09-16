@@ -1,31 +1,31 @@
+import { NextFunction } from "express";
+import { logType } from "../constants/logs.js";
 import {
-  REQUEST_LOG_TYPE,
-  LOG_ACTION,
-  REQUEST_CREATED_SUCCESSFULLY,
+  ERROR_WHILE_ACKNOWLEDGING_REQUEST,
   ERROR_WHILE_CREATING_REQUEST,
+  ERROR_WHILE_UPDATING_REQUEST,
+  LOG_ACTION,
+  OOO_STATUS_ALREADY_EXIST,
+  REQUEST_ALREADY_PENDING,
+  REQUEST_APPROVED_SUCCESSFULLY,
+  REQUEST_CREATED_SUCCESSFULLY,
+  REQUEST_LOG_TYPE,
+  REQUEST_REJECTED_SUCCESSFULLY,
   REQUEST_STATE,
   REQUEST_TYPE,
-  ERROR_WHILE_UPDATING_REQUEST,
-  REQUEST_APPROVED_SUCCESSFULLY,
-  REQUEST_REJECTED_SUCCESSFULLY,
-  REQUEST_ALREADY_PENDING,
-  USER_STATUS_NOT_FOUND,
-  OOO_STATUS_ALREADY_EXIST,
   UNAUTHORIZED_TO_CREATE_OOO_REQUEST,
-  ERROR_WHILE_ACKNOWLEDGING_REQUEST,
-  REQUEST_ID_REQUIRED,
-} from "../constants/requests";
-import { statusState } from "../constants/userStatus";
-import { logType } from "../constants/logs";
-import { addLog } from "../models/logs";
-import { getRequestByKeyValues, getRequests, updateRequest } from "../models/requests";
-import { createUserFutureStatus } from "../models/userFutureStatus";
-import { getUserStatus, addFutureStatus } from "../models/userStatus";
-import { createOooRequest, validateUserStatus, acknowledgeOooRequest as acknowledgeOooRequestService } from "../services/oooRequest";
-import { CustomResponse } from "../typeDefinitions/global";
-import { AcknowledgeOooRequest, OooRequestCreateRequest, OooRequestResponse, OooStatusRequest } from "../types/oooRequest";
-import { UpdateRequest } from "../types/requests";
-import { NextFunction } from "express";
+  USER_STATUS_NOT_FOUND,
+} from "../constants/requests.js";
+import { statusState } from "../constants/userStatus.js";
+import { addLog } from "../models/logs.js";
+import { getRequestByKeyValues, getRequests, updateRequest } from "../models/requests.js";
+import { createUserFutureStatus } from "../models/userFutureStatus.js";
+import { addFutureStatus, getUserStatus } from "../models/userStatus.js";
+import { acknowledgeOooRequest, createOooRequest, validateUserStatus } from "../services/oooRequest.js";
+import { CustomResponse } from "../typeDefinitions/global.js";
+import { AcknowledgeOooRequest, OooRequestCreateRequest, OooRequestResponse, OooStatusRequest } from "../types/oooRequest.js";
+import { UpdateRequest } from "../types/requests.js";
+import logger from "../utils/logger.js";
 
 /**
  * Controller to handle the creation of OOO requests.
@@ -171,7 +171,7 @@ export const acknowledgeOooRequestController = async (
       const superUserId = req.userData.id;
       const requestId = req.params.id;
 
-      const response = await acknowledgeOooRequestService(requestId, requestBody, superUserId);
+      const response = await acknowledgeOooRequest(requestId, requestBody, superUserId);
 
       return res.status(200).json({
         message: response.message,

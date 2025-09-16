@@ -1,13 +1,12 @@
-const chai = require("chai");
-const { expect } = chai;
+import { expect } from "chai";
+import cleanDb from "../../utils/cleanDb.js";
+import firestore from "../../../utils/firestore.js";
+import qrCodeAuth from "../../../models/qrCodeAuth.js";
+import { userDeviceInfoDataArray } from "../../fixtures/qrCodeAuth/qrCodeAuth.js";
+import users from "../../../models/users.js";
+import userDataArray from "../../fixtures/user/user.js";
 
-const cleanDb = require("../../utils/cleanDb");
-const firestore = require("../../../utils/firestore");
-const qrCodeAuth = require("../../../models/qrCodeAuth");
-const { userDeviceInfoDataArray } = require("../../fixtures/qrCodeAuth/qrCodeAuth");
 const qrCodeAuthModel = firestore.collection("QrCodeAuth");
-const users = require("../../../models/users");
-const userDataArray = require("../../fixtures/user/user")();
 /**
  * Test the model functions and validate the data stored
  */

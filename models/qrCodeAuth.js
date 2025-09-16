@@ -1,4 +1,6 @@
-const firestore = require("../utils/firestore");
+import firestore from "../utils/firestore.js";
+import logger from "../utils/logger.js";
+
 const QrCodeAuthModel = firestore.collection("QrCodeAuth");
 
 /**
@@ -75,8 +77,4 @@ const retrieveUserDeviceInfo = async ({ deviceId, userId }) => {
   }
 };
 
-module.exports = {
-  updateStatus,
-  storeUserDeviceInfo,
-  retrieveUserDeviceInfo,
-};
+export default { updateStatus, storeUserDeviceInfo, retrieveUserDeviceInfo };

@@ -1,21 +1,23 @@
+// @ts-nocheck
+
 import chai, { expect } from "chai";
-const sinon = require("sinon");
-const config = require("config");
-const chaiHttp = require("chai-http");
+import sinon from "sinon";
+import config from "config";
+import chaiHttp from "chai-http";
 
-const app = require("../../server");
-const authService = require("../../services/authService");
-const addUser = require("../utils/addUser");
-const cleanDb = require("../utils/cleanDb");
+import app from "../../server.js";
+import * as authService from "../../services/authService.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
 
-const questionQuery = require("../../models/questions");
+import * as questionQuery from "../../models/questions.js";
 
-const userData = require("../fixtures/user/user")();
+import userData from "../fixtures/user/user.js";
 const defaultUser = userData[16];
 const superUser = userData[4];
 
-const questionDataArray = require("../fixtures/questions/questions");
-const questionDataWithMaxWords = questionDataArray[5];
+import { SAMPLE_QUESTION_DATA } from "../fixtures/questions/questions.js";
+const questionDataWithMaxWords = SAMPLE_QUESTION_DATA[5];
 
 const cookieName = config.get("userToken.cookieName");
 
@@ -101,7 +103,7 @@ describe("questions", function () {
     });
 
     it("should create and return the question if the user is super user", function (done) {
-      sinon.stub(questionQuery, "createQuestion").resolves(questionDataArray[6]);
+      sinon.stub(questionQuery, "createQuestion").resolves(SAMPLE_QUESTION_DATA[6]);
 
       chai
         .request(app)
@@ -115,11 +117,11 @@ describe("questions", function () {
 
           expect(response).to.have.status(201);
           expect(response.body.message).to.equal("Question created and sent successfully to connected peers");
-          expect(response.body.data.question).to.equal(questionDataArray[6].question);
-          expect(response.body.data.id).to.equal(questionDataArray[6].id);
-          expect(response.body.data.created_at).to.equal(questionDataArray[6].created_at);
-          expect(response.body.data.created_by).to.equal(questionDataArray[6].created_by);
-          expect(response.body.data.updated_at).to.equal(questionDataArray[6].updated_at);
+          expect(response.body.data.question).to.equal(SAMPLE_QUESTION_DATA[6].question);
+          expect(response.body.data.id).to.equal(SAMPLE_QUESTION_DATA[6].id);
+          expect(response.body.data.created_at).to.equal(SAMPLE_QUESTION_DATA[6].created_at);
+          expect(response.body.data.created_by).to.equal(SAMPLE_QUESTION_DATA[6].created_by);
+          expect(response.body.data.updated_at).to.equal(SAMPLE_QUESTION_DATA[6].updated_at);
 
           return done();
         });

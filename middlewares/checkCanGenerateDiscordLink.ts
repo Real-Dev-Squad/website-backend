@@ -1,8 +1,8 @@
 import { NextFunction } from "express";
-import { CustomRequest, CustomResponse } from "../types/global";
-const ApplicationModel = require("../models/applications");
+import { CustomRequest, CustomResponse } from "../types/global.js";
+import { getUserApplications } from "../models/applications.js";
 
-const checkCanGenerateDiscordLink = async (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
+export const checkCanGenerateDiscordLink = async (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
   const { id: userId, roles } = req.userData;
   const isSuperUser = roles.super_user;
   const userIdInQuery = req.query.userId;
@@ -16,14 +16,16 @@ const checkCanGenerateDiscordLink = async (req: CustomRequest, res: CustomRespon
   }
 
   try {
-    const applications = await ApplicationModel.getUserApplications(userId);
-    
+    const applications = await getUserApplications(userId);
+
     if (!applications || applications.length === 0) {
       return res.boom.forbidden("No applications found.");
     }
 
-    const approvedApplication = applications.find((application: { status: string; }) => application.status === 'accepted');
-    
+    const approvedApplication = applications.find(
+      (application: { status: string }) => application.status === "accepted"
+    );
+
     if (!approvedApplication) {
       return res.boom.forbidden("Only users with an accepted application can generate a Discord invite link.");
     }
@@ -34,11 +36,8 @@ const checkCanGenerateDiscordLink = async (req: CustomRequest, res: CustomRespon
   }
 };
 
-export default checkCanGenerateDiscordLink;
-
 // <------ We have to revisit this later ------->
 // <--- https://github.com/Real-Dev-Squad/website-backend/issues/2078 --->
-
 
 // const checkCanGenerateDiscordLink = async (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
 //   const { discordId, roles, id: userId, profileStatus } = req.userData;
@@ -64,4 +63,4 @@ export default checkCanGenerateDiscordLink;
 //   return next();
 // };
 
-module.exports = checkCanGenerateDiscordLink;
+export default checkCanGenerateDiscordLink;

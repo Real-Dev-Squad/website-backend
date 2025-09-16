@@ -1,8 +1,8 @@
-import { createUserFutureStatus, getUserFutureStatus } from "../../../models/userFutureStatus";
+import { createUserFutureStatus, getUserFutureStatus } from "../../../models/userFutureStatus.js";
 import { expect } from "chai";
-import cleanDb from "../../utils/cleanDb";
-import { UserFutureStatusType } from "../../../types/userFutureStatus";
-import { userFutureStatusData } from "../../fixtures/userFutureStatus/userFutureStatusData";
+import cleanDb from "../../utils/cleanDb.js";
+import { UserFutureStatusType } from "../../../types/userFutureStatus.js";
+import { userFutureStatusData } from "../../fixtures/userFutureStatus/userFutureStatusData.js";
 
 describe("models/userFutureStatus", () => {
   afterEach(async () => {

@@ -1,6 +1,8 @@
-const firestore = require("../utils/firestore");
+import firestore from "../utils/firestore.js";
+import { buildExtensionRequests, formatExtensionRequest, generateNextLink } from "../utils/extensionRequests.js";
+import logger from "../utils/logger.js";
+
 const extensionRequestsModel = firestore.collection("extensionRequests");
-const { buildExtensionRequests, formatExtensionRequest, generateNextLink } = require("../utils/extensionRequests");
 
 /**
  * Create Extension Request
@@ -166,7 +168,7 @@ const fetchLatestExtensionRequest = async (ExtensionRequestQuery) => {
   }
 };
 
-module.exports = {
+export {
   createExtensionRequest,
   fetchExtensionRequests,
   fetchExtensionRequest,

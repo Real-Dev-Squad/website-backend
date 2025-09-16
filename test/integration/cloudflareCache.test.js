@@ -1,20 +1,20 @@
-const chai = require("chai");
+import chai from "chai";
+import chaiHttp from "chai-http";
+import sinon from "sinon";
+
+import app from "../../server.js";
+import addUser from "../utils/addUser.js";
+import { generateAuthToken } from "../../services/authService.js";
+import cleanDb from "../utils/cleanDb.js";
+import logsQuery from "../../models/logs.js";
+
+import config from "config";
+import cloudflare from "../../services/cloudflareService.js";
+
+import userData from "../fixtures/user/user.js";
+import cacheData from "../fixtures/cloudflareCache/data.js";
 const { expect } = chai;
-const chaiHttp = require("chai-http");
-const sinon = require("sinon");
-
-const app = require("../../server");
-const addUser = require("../utils/addUser");
-const authService = require("../../services/authService");
-const cleanDb = require("../utils/cleanDb");
-const logsQuery = require("../../models/logs");
-
-const config = require("config");
 const cookieName = config.get("userToken.cookieName");
-const cloudflare = require("../../services/cloudflareService");
-
-const userData = require("../fixtures/user/user")();
-const cacheData = require("../fixtures/cloudflareCache/data");
 
 const superUser = userData[4];
 
@@ -32,7 +32,7 @@ describe("Purged Cache Metadata", function () {
     before(async function () {
       await cleanDb();
       const userId = await addUser(userData[0]);
-      jwt = authService.generateAuthToken({ userId });
+      jwt = generateAuthToken({ userId });
     });
 
     it("Should return no cache is cleared yet if no cache logs found in last 24 hours", function (done) {
@@ -99,7 +99,7 @@ describe("Purged Cache Metadata", function () {
       await cleanDb();
       await addUser(userData[0]);
       const userId = await addUser(superUser);
-      jwt = authService.generateAuthToken({ userId });
+      jwt = generateAuthToken({ userId });
     });
 
     beforeEach(async function () {

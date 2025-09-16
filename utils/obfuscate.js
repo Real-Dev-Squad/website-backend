@@ -6,7 +6,4 @@ const obfuscateMail = (email) => {
   return email.slice(0, 2) + email.slice(2, email.length - 2).replace(/./g, "*") + email.slice(email.length - 2);
 };
 
-module.exports = {
-  obfuscatePhone,
-  obfuscateMail,
-};
+export { obfuscatePhone, obfuscateMail };

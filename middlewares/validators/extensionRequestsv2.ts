@@ -1,7 +1,7 @@
 import joi from "joi";
-import { ExtensionRequestRequest, ExtensionRequestResponse } from "../../types/extensionRequests";
 import { NextFunction } from "express";
-import { REQUEST_TYPE,REQUEST_STATE } from "../../constants/requests";
+import { ExtensionRequestRequest, ExtensionRequestResponse } from "../../types/extensionRequests.js";
+import { REQUEST_TYPE,REQUEST_STATE } from "../../constants/requests.js";
 
 export const createExtensionRequestValidator = async (
   req: ExtensionRequestRequest,

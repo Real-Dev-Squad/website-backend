@@ -1,8 +1,7 @@
-const chai = require("chai");
-const { expect } = chai;
-const cleanDb = require("../../utils/cleanDb");
-const profileDiffsQuery = require("../../../models/profileDiffs");
-const getProfileDiffs = require("../../fixtures/profileDiffs/profileDiffs");
+import { expect } from "chai";
+import cleanDb from "../../utils/cleanDb.js";
+import profileDiffsQuery from "../../../models/profileDiffs.js";
+import { getProfileDiffs } from "../../fixtures/profileDiffs/profileDiffs.js";
 
 describe("profileDiffs", function () {
   afterEach(async function () {

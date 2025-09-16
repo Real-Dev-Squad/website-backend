@@ -1,27 +1,27 @@
+// @ts-nocheck
+
 /**
  * This eslint rule is disabled because of https://github.com/nodesecurity/eslint-plugin-security/issues/21
  * It gives linting errors in testing the DB data with keys from fixtures
  */
 /* eslint-disable security/detect-object-injection */
 
-const chai = require("chai");
-const sinon = require("sinon");
-const { expect } = chai;
-const cleanDb = require("../../utils/cleanDb");
-const users = require("../../../models/users");
-const firestore = require("../../../utils/firestore");
-const { userPhotoVerificationData, newUserPhotoVerificationData } = require("../../fixtures/user/photo-verification");
-const { generateStatusDataForState } = require("../../fixtures/userStatus/userStatus");
+import { expect } from "chai";
+import sinon from "sinon";
+import * as users from "../../../models/users.js";
+import firestore from "../../../utils/firestore.js";
+import cleanDb from "../../utils/cleanDb.js";
+import addUser from "../../utils/addUser.js";
+import { userState } from "../../../constants/userStatus.js";
+import joinData from "../../fixtures/user/join.js";
+import userDataArray from "../../fixtures/user/user.js";
+import { generateStatusDataForState } from "../../fixtures/userStatus/userStatus.js";
+import { usersData as abandonedUsersData } from "../../fixtures/abandoned-tasks/departed-users.js";
+
 const userModel = firestore.collection("users");
 const userStatusModel = firestore.collection("usersStatus");
 const joinModel = firestore.collection("applicants");
-const userDataArray = require("../../fixtures/user/user")();
-const joinData = require("../../fixtures/user/join")();
 const photoVerificationModel = firestore.collection("photo-verification");
-const userData = require("../../fixtures/user/user");
-const addUser = require("../../utils/addUser");
-const { userState } = require("../../../constants/userStatus");
-const { usersData: abandonedUsersData } = require("../../fixtures/abandoned-tasks/departed-users");
 /**
  * Test the model functions and validate the data stored
  */
@@ -33,13 +33,13 @@ describe("users", function () {
 
   describe("addOrUpdate", function () {
     it("should add the user collection and set the flag incompleteUserDetails and isNewUser and in_discord", async function () {
-      const userData = userDataArray[0];
-      const { isNewUser, userId } = await users.addOrUpdate(userData);
+      const userDetails = userDataArray[0];
+      const { isNewUser, userId } = await users.addOrUpdate(userDetails[0], null, false);
 
       const data = (await userModel.doc(userId).get()).data();
 
-      Object.keys(userData).forEach((key) => {
-        expect(userData[key]).to.deep.equal(data[key]);
+      Object.keys(userDetails).forEach((key) => {
+        expect(userDetails[key]).to.deep.equal(data[key]);
       });
 
       expect(data.incompleteUserDetails).to.equal(true);
@@ -48,13 +48,13 @@ describe("users", function () {
     });
 
     it("should update the user collection and unset the flag isNewUser", async function () {
-      const userData = userDataArray[0];
+      const userDetails = userDataArray()[0];
 
       // Add the user the first time
-      const { isNewUser } = await users.addOrUpdate(userData);
+      const { isNewUser } = await users.addOrUpdate(userDetails[0], null, false);
 
       // Update the user with same data
-      const { isNewUser: updatedIsNewUserFlag } = await users.addOrUpdate(userData);
+      const { isNewUser: updatedIsNewUserFlag } = await users.addOrUpdate(userDetails[0], null, false);
 
       expect(isNewUser).to.equal(true);
       expect(updatedIsNewUserFlag).to.equal(false);
@@ -84,51 +84,55 @@ describe("users", function () {
     });
 
     it("should return the user information when github username is passed", async function () {
-      const userData = userDataArray[0];
-      await users.addOrUpdate(userData);
+      const userDetails = userDataArray[0];
+      await users.addOrUpdate(userDetails[0], null, false);
       const githubUsername = "ankur";
       const { user, userExists } = await users.fetchUser({ githubUsername });
+
       expect(user).to.haveOwnProperty("id");
       expect(user).to.haveOwnProperty("username");
       expect(user).to.haveOwnProperty("first_name");
       expect(user).to.haveOwnProperty("last_name");
 
-      expect(user.first_name).to.equal(userData.first_name);
-      expect(user.last_name).to.equal(userData.last_name);
+      expect(user.first_name).to.equal(userDetails.first_name);
+      expect(user.last_name).to.equal(userDetails.last_name);
       expect(userExists).to.equal(true);
     });
 
     it("It should have created_At and updated_At fields", async function () {
-      const userData = userDataArray[15];
-      await users.addOrUpdate(userData);
+      const userDetails = userDataArray[15];
+      await users.addOrUpdate(userDetails[0], null, false);
       const githubUsername = "sahsisunny";
       const { user, userExists } = await users.fetchUser({ githubUsername });
+
       expect(user).to.haveOwnProperty("created_at");
       expect(user).to.haveOwnProperty("updated_at");
       expect(userExists).to.equal(true);
     });
 
     it("It should have github_created_at fields", async function () {
-      const userData = userDataArray[0];
-      await users.addOrUpdate(userData);
+      const userDetails = userDataArray[0];
+      await users.addOrUpdate(userDetails[0], null, false);
       const githubUsername = "ankur";
       const { user } = await users.fetchUser({ githubUsername });
+
       expect(user).to.haveOwnProperty("github_created_at");
     });
 
     it("it should filter out the id field while updating profileDiff", async function () {
-      const userData = userDataArray[0];
-      const { userId } = await users.addOrUpdate(userData);
+      const userDetails = userDataArray[0];
+      const { userId } = await users.addOrUpdate(userDetails[0], null, false);
       const profileDiff = { id: "random-id", diff: "random-diff" };
-      await users.addOrUpdate(profileDiff, userId);
+      await users.addOrUpdate(profileDiff, userId, false);
       const data = (await userModel.doc(userId).get()).data();
+
       expect(data).to.haveOwnProperty("diff");
       expect(data.id).not.equal("random-id");
     });
 
     it("it should update profileDiff even if it is deeply nested", async function () {
-      const userData = userDataArray[0];
-      const { userId } = await users.addOrUpdate(userData);
+      const userDetails = userDataArray[0];
+      const { userId } = await users.addOrUpdate(userDetails[0], null, false);
       const profileDiffs = {
         level1: {
           level2: {
@@ -150,7 +154,7 @@ describe("users", function () {
           },
         },
       };
-      await users.addOrUpdate(profileDiffs, userId);
+      await users.addOrUpdate(profileDiffs, userId, false);
       const data = (await userModel.doc(userId).get()).data();
       expect(data)
         .to.have.nested.property("level1.level2.level3.level4.level5.level6.level7.level8.level9.level10")
@@ -184,10 +188,10 @@ describe("users", function () {
   });
 
   describe("fetch user details based on discord id", function () {
-    let [userId0] = [];
+    let userId0: string;
 
     beforeEach(async function () {
-      const userArr = userData();
+      const userArr = userDataArray();
       userId0 = await addUser(userArr[0]);
       await userStatusModel.doc("userStatus000").set(generateStatusDataForState(userId0, userState.IDLE));
     });
@@ -343,7 +347,7 @@ describe("users", function () {
     beforeEach(async function () {
       const addUsersPromises = [];
       userDataArray.forEach((user) => {
-        const userData = {
+        const userDataArray = {
           ...user,
           roles: {
             ...user.roles,
@@ -351,7 +355,7 @@ describe("users", function () {
             archived: false,
           },
         };
-        addUsersPromises.push(userModel.add(userData));
+        addUsersPromises.push(userModel.add(userDataArray));
       });
 
       await Promise.all(addUsersPromises);
@@ -370,9 +374,9 @@ describe("users", function () {
         .get();
 
       updatedUsers.forEach((user) => {
-        const userData = user.data();
-        expect(userData.roles.in_discord).to.be.equal(false);
-        expect(userData.roles.archived).to.be.equal(true);
+        const userDataArray = user.data();
+        expect(userDataArray.roles.in_discord).to.be.equal(false);
+        expect(userDataArray.roles.archived).to.be.equal(true);
       });
     });
 
@@ -398,9 +402,9 @@ describe("users", function () {
         .get();
 
       updatedUsers.forEach((user) => {
-        const userData = user.data();
-        expect(userData.roles.in_discord).to.be.equal(false);
-        expect(userData.roles.archived).to.be.not.equal(true);
+        const userDataArray = user.data();
+        expect(userDataArray.roles.in_discord).to.be.equal(false);
+        expect(userDataArray.roles.archived).to.be.not.equal(true);
       });
     });
   });
@@ -433,7 +437,7 @@ describe("users", function () {
     let [userId0, userId1, userId2] = [];
 
     beforeEach(async function () {
-      const userArr = userData();
+      const userArr = userDataArray();
       userId0 = await addUser(userArr[0]);
       userId1 = await addUser(userArr[1]);
       userId2 = await addUser(userArr[2]);
@@ -553,7 +557,7 @@ describe("users", function () {
     });
 
     it("should fetch users with modified roles : []", async function () {
-      const superUser = { ...userData()[4], disabled_roles: [] };
+      const superUser = { ...userDataArray()[4], disabled_roles: [] };
       const userId = await addUser(superUser);
 
       const userDoc = await users.fetchUser({ userId });
@@ -562,7 +566,7 @@ describe("users", function () {
     });
 
     it("should fetch users with modified roles : super_user", async function () {
-      const superUser = { ...userData()[4], disabled_roles: ["super_user"] };
+      const superUser = { ...userDataArray()[4], disabled_roles: ["super_user"] };
       const userId = await addUser(superUser);
 
       const userDoc = await users.fetchUser({ userId });
@@ -571,7 +575,7 @@ describe("users", function () {
     });
 
     it("should fetch users with modified roles : member", async function () {
-      const memberUser = { ...userData()[6], disabled_roles: ["member"] };
+      const memberUser = { ...userDataArray()[6], disabled_roles: ["member"] };
       const userId = await addUser(memberUser);
 
       const userDoc = await users.fetchUser({ userId });
@@ -581,9 +585,9 @@ describe("users", function () {
 
     it("should fetch users with modified roles : super_user & member", async function () {
       const userWithBothRoles = {
-        ...userData()[4],
+        ...userDataArray()[4],
         disabled_roles: ["super_user", "member"],
-        roles: { ...userData()[4].roles, member: true },
+        roles: { ...userDataArray()[4].roles, member: true },
       };
 
       const userId = await addUser(userWithBothRoles);
@@ -620,7 +624,7 @@ describe("users", function () {
 
     it("should return an empty array if there are no departed users in the database", async function () {
       await cleanDb();
-      const activeUser = abandonedUsersData[2];
+      const activeUser = [2];
       await userModel.add(activeUser);
 
       const result = await users.fetchPaginatedUsers({ departed: "true" });

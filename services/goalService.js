@@ -1,6 +1,6 @@
-const config = require("config");
+import config from "config";
 
-const getOrCreateGoalUser = async ({ userId, roles }) => {
+export const getOrCreateGoalUser = async ({ userId, roles }) => {
   const body = JSON.stringify({
     data: {
       type: "User",
@@ -17,4 +17,3 @@ const getOrCreateGoalUser = async ({ userId, roles }) => {
     headers: { "Content-Type": "application/vnd.api+json", "Rest-Key": goalSiteConfig.secretKey },
   });
 };
-module.exports = { getOrCreateGoalUser };

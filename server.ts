@@ -1,39 +1,34 @@
 /**
  * Initialise globals
  */
-const config = require("config");
+import config from "config";
+import * as http from "http";
+import app from "./app.js";
+import logger from "./utils/logger.js";
+
+// Set globals
+global.logger = logger;
 global.config = config;
 
-const logger = require("./utils/logger");
-global.logger = logger;
+// Initialise newrelic
+import "newrelic";
 
 logger.info(`Initialising newrelic with app name:: ${config.get("integrations.newrelic.appName")}`);
-// Initialise newrelic
-require("newrelic");
-
-/**
- * Module dependencies.
- */
-const http = require("http");
-const app = require("./app");
 
 /**
  * Get port from environment and store in Express.
  */
-
 const port = config.get("port");
 app.set("port", port);
 
 /**
  * Create HTTP server.
  */
-
 const server = http.createServer(app);
 
 /**
  * Listen on provided port, on all network interfaces.
  */
-
 server.listen(port);
 server.on("error", onError);
 server.on("listening", onListening);
@@ -41,7 +36,6 @@ server.on("listening", onListening);
 /**
  * Event listener for HTTP server "error" event.
  */
-
 function onError(error) {
   if (error.syscall !== "listen") {
     throw error;
@@ -71,9 +65,8 @@ function onError(error) {
 /**
  * Event listener for HTTP server "listening" event.
  */
-
 function onListening() {
   logger.info(`Express API running on port:${port} with environment:${process.env.NODE_ENV}`);
 }
 
-module.exports = server;
+export default server;

@@ -1,15 +1,15 @@
-const { RateLimiterMemory } = require("rate-limiter-flexible");
-const { TOO_MANY_REQUESTS } = require("../constants/rateLimiting");
-const { getRetrySeconds } = require("../utils/rateLimiting");
+import { RateLimiterMemory } from "rate-limiter-flexible";
+import { TOO_MANY_REQUESTS } from "../constants/rateLimiting.js";
+import { getRetrySeconds } from "../utils/rateLimiting.js";
 
 // INFO: temporarily added here, will be take from env-var/config
-const opts = {
+export const opts = {
   keyPrefix: "commonRateLimiter--login_fail_by_ip_per_minute",
   points: 5,
   duration: 30,
   blockDuration: 60 * 10,
 };
-const globalRateLimiter = new RateLimiterMemory(opts);
+export const globalRateLimiter = new RateLimiterMemory(opts);
 
 /**
  * @param req object represents the HTTP request and has property for the request ip address
@@ -18,7 +18,7 @@ const globalRateLimiter = new RateLimiterMemory(opts);
  * @returns Promise, which:
  *  - `resolved`  with next middelware function call `next()`
  *  - `resolved`  with response status set to 429 and message `Too Many Requests`  */
-async function commonRateLimiter(req, res, next) {
+export async function commonRateLimiter(req, res, next) {
   // INFO: get the clientIP when running behind a proxy
   const ipAddress = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
   let retrySeconds = 0;
@@ -47,6 +47,6 @@ async function commonRateLimiter(req, res, next) {
   }
 }
 
-module.exports = {
+export default {
   commonRateLimiter,
 };

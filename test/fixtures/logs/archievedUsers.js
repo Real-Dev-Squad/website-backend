@@ -63,3 +63,8 @@ export const archivedUserDetailsModal = [
     },
   },
 ];
+
+// Default export
+export default {
+  archivedUserDetailsModal,
+};

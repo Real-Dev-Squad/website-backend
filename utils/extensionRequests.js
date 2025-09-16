@@ -1,4 +1,5 @@
-const { getUsername } = require("./users");
+import { getUsername } from "./users.js";
+
 const buildExtensionRequests = (extensionRequests, initialArray = []) => {
   if (!extensionRequests.empty) {
     extensionRequests.forEach((extensionRequests) => {
@@ -66,9 +67,4 @@ const generateNextLink = (nextPageParams) => {
   return nextLink;
 };
 
-module.exports = {
-  buildExtensionRequests,
-  formatExtensionRequest,
-  transformQuery,
-  generateNextLink,
-};
+export { buildExtensionRequests, formatExtensionRequest, transformQuery, generateNextLink };

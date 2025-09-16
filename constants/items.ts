@@ -1,3 +1,1 @@
-module.exports = {
-  TYPES: ["TASK", "USER"],
-};
+export const TYPES = ["TASK", "USER"];

@@ -6,7 +6,7 @@
  * @param {object} res - Express response object
  * @param {function} next - Express middleware function
  */
-module.exports = (req, res, next) => {
+export default (req, res, next) => {
   const contentType = req.headers["content-type"];
   if (contentType && contentType !== "application/json") {
     const notMultiPart = !contentType.includes("multipart/form-data");

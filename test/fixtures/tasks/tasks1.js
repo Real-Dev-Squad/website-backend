@@ -1,12 +1,13 @@
-const { DINERO, NEELAM } = require("../../../constants/wallets");
-const userData = require("../user/user")();
-const appOwner = userData[3];
+import { DINERO, NEELAM } from "../../../constants/wallets.js";
+import userData from "../user/user.js";
+
+export const appOwner = userData[3];
 /**
  * Sample tasks for tests
  * @return  {object}
  */
 
-module.exports = () => {
+export default () => {
   return [
     {
       title: "Test task",

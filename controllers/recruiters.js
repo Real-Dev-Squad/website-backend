@@ -1,5 +1,5 @@
-const recruiterQuery = require("../models/recruiters");
-const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+import * as recruiterQuery from "../models/recruiters.js";
+import { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } from "../constants/errorMessages.js";
 
 /**
  * Posts the data about the recruiter
@@ -43,7 +43,7 @@ const fetchRecruitersInfo = async (req, res) => {
   }
 };
 
-module.exports = {
+export default {
   addRecruiter,
   fetchRecruitersInfo,
 };

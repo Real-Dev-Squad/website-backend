@@ -70,3 +70,8 @@ export const extensionRequestLogs = [
     },
   },
 ];
+
+// Default export
+export default {
+  extensionRequestLogs,
+};

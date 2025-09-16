@@ -1,23 +1,20 @@
-const githubService = require("./githubService");
+import { fetchIssues, fetchOpenIssues } from "./githubService.js";
+
 /**
  * Get the contributions of the user
  * @param {string} username
  */
-
 const getOrgIssues = async () => {
-  const data = await githubService.fetchIssues();
+  const data = await fetchIssues();
   return data;
 };
 
 const searchOrgIssues = async (searchString) => {
-  const data = await githubService.fetchOpenIssues({
+  const data = await fetchOpenIssues({
     searchString,
   });
 
   return data;
 };
 
-module.exports = {
-  getOrgIssues,
-  searchOrgIssues,
-};
+export { getOrgIssues, searchOrgIssues };

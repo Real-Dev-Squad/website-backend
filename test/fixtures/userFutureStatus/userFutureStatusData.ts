@@ -1,5 +1,5 @@
-import { REQUEST_TYPE } from "../../../constants/requests";
-import { statusState } from "../../../constants/userStatus";
+import { REQUEST_TYPE } from "../../../constants/requests.js";
+import { statusState } from "../../../constants/userStatus.js";
 
 export const userFutureStatusData = {
   requestId: "randomId",

@@ -1,4 +1,6 @@
-const firestore = require("../utils/firestore");
+import firestore from "../utils/firestore.js";
+import logger from "../utils/logger.js";
+
 const stocksModel = firestore.collection("stocks");
 const userStocksModel = firestore.collection("user-stocks");
 
@@ -8,7 +10,7 @@ const userStocksModel = firestore.collection("user-stocks");
  * @param stockData { Object }: stock data object to be stored in DB
  * @return {Promise<{id: string, stockData: Object}>}
  */
-const addStock = async (stockData) => {
+export const addStock = async (stockData) => {
   try {
     const { id } = await stocksModel.add(stockData);
     return { id, stockData };
@@ -23,7 +25,7 @@ const addStock = async (stockData) => {
  *
  * @return {Promise<stocks|Array>}
  */
-const fetchStocks = async () => {
+export const fetchStocks = async () => {
   try {
     const stockSnapshot = await stocksModel.get();
     const stocks = [];
@@ -44,7 +46,7 @@ const fetchStocks = async () => {
  * Fetches the user stocks
  * @return {Promise<userStocks|object>}
  */
-const fetchUserStocks = async (userId, stockId = null) => {
+export const fetchUserStocks = async (userId, stockId = null) => {
   try {
     let userStocksRef = "";
     const query = userStocksModel.where("userId", "==", userId);
@@ -76,7 +78,7 @@ const fetchUserStocks = async (userId, stockId = null) => {
  * Update Users Stocks
  * @return {Promise<userStocks|object>}
  */
-const updateUserStocks = async (userId, stockData) => {
+export const updateUserStocks = async (userId, stockData) => {
   try {
     const userStocks = await fetchUserStocks(userId, stockData.stockId);
     if (!userStocks.id) {
@@ -94,11 +96,4 @@ const updateUserStocks = async (userId, stockData) => {
     logger.error("Error updating users stocks", err);
     throw err;
   }
-};
-
-module.exports = {
-  addStock,
-  fetchStocks,
-  fetchUserStocks,
-  updateUserStocks,
 };

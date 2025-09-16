@@ -1,53 +1,57 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
+import chai, { expect } from "chai";
+import chaiHttp from "chai-http";
+import config from "config";
+import Sinon from "sinon";
 
-const firestore = require("../../utils/firestore");
-const app = require("../../server");
-const authService = require("../../services/authService");
-const addUser = require("../utils/addUser");
-const profileDiffs = require("../../models/profileDiffs");
-const cleanDb = require("../utils/cleanDb");
-// Import fixtures
-const userData = require("../fixtures/user/user")();
-const tasksData = require("../fixtures/tasks/tasks")();
-const profileDiffData = require("../fixtures/profileDiffs/profileDiffs")();
-const superUser = userData[4];
-const searchParamValues = require("../fixtures/user/search")();
-
-const config = require("config");
-const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
-const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
-const joinData = require("../fixtures/user/join");
-const {
-  userStatusDataForNewUser,
-  userStatusDataAfterSignup,
+import { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } from "../../constants/errorMessages.js";
+import { TASK_STATUS } from "../../constants/tasks.js";
+import { MAX_USERNAME_LENGTH } from "../../constants/users.js";
+import profileDiffs from "../../models/profileDiffs.js";
+import { addJoinData, addOrUpdate } from "../../models/users.js";
+import * as userStatusModel from "../../models/userStatus.js";
+import app from "../../server.js";
+import * as authService from "../../services/authService.js";
+import * as userService from "../../services/userService.js";
+import firestore from "../../utils/firestore.js";
+import { getDiscordMembers } from "../fixtures/discordResponse/discord-response.js";
+import profileDiffData from "../fixtures/profileDiffs/profileDiffs.js";
+import { abandonedTasksData } from "../fixtures/tasks/abandoned-tasks.js";
+import tasksData from "../fixtures/tasks/tasks.js";
+import { abandonedUsersData } from "../fixtures/user/abandoned-users.js";
+import joinData from "../fixtures/user/join.js";
+import { userPhotoVerificationData } from "../fixtures/user/photo-verification.js";
+import searchParamValues from "../fixtures/user/search.js";
+import userData from "../fixtures/user/user.js";
+import {
   userStatusDataAfterFillingJoinSection,
-} = require("../fixtures/userStatus/userStatus");
-const { addJoinData, addOrUpdate } = require("../../models/users");
-const userStatusModel = require("../../models/userStatus");
-const { MAX_USERNAME_LENGTH } = require("../../constants/users.ts");
-const { TASK_STATUS } = require("../../constants/tasks");
-const userRoleUpdate = userData[4];
-const userRoleUnArchived = userData[13];
-const userAlreadyMember = userData[0];
-const userAlreadyNotMember = userData[13];
-const userAlreadyArchived = userData[5];
-const userAlreadyUnArchived = userData[4];
-const nonSuperUser = userData[0];
-const newUser = userData[18];
+  userStatusDataAfterSignup,
+  userStatusDataForNewUser,
+} from "../fixtures/userStatus/userStatus.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
+
+// Initialize fixtures
+const userDataArray = userData();
+const tasksDataArray = tasksData();
+const searchParamValuesArray = searchParamValues();
+
+const superUser = userDataArray[4];
+const userRoleUpdate = userDataArray[4];
+const userRoleUnArchived = userDataArray[13];
+const userAlreadyMember = userDataArray[0];
+const userAlreadyNotMember = userDataArray[13];
+const userAlreadyArchived = userDataArray[5];
+const userAlreadyUnArchived = userDataArray[4];
+const nonSuperUser = userDataArray[0];
+const newUser = userDataArray[18];
+
+const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 const cookieName = config.get("userToken.cookieName");
-const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
-const Sinon = require("sinon");
-const { INTERNAL_SERVER_ERROR, SOMETHING_WENT_WRONG } = require("../../constants/errorMessages");
+
 const photoVerificationModel = firestore.collection("photo-verification");
 const userModel = firestore.collection("users");
 const taskModel = firestore.collection("tasks");
-const {
-  usersData: abandonedUsersData,
-  tasksData: abandonedTasksData,
-} = require("../fixtures/abandoned-tasks/departed-users");
-const userService = require("../../services/users");
+
 chai.use(chaiHttp);
 
 describe("Users", function () {
@@ -110,10 +114,10 @@ describe("Users", function () {
     });
 
     it("Should return verified and blocked users", async function () {
-      await addOrUpdate(userData[0]);
-      await addOrUpdate(userData[1]);
-      await addOrUpdate(userData[2]);
-      await addOrUpdate(userData[3]);
+      await addOrUpdate(userDataArray[0]);
+      await addOrUpdate(userDataArray[1]);
+      await addOrUpdate(userDataArray[2]);
+      await addOrUpdate(userDataArray[3]);
 
       const res = await chai
         .request(app)
@@ -500,15 +504,19 @@ describe("Users", function () {
     let userWithOverdueApprovedTask;
 
     beforeEach(async function () {
-      const { userId } = await addOrUpdate(userData[0]);
+      const { userId } = await addOrUpdate(userDataArray[0]);
       await userStatusModel.updateUserStatus(userId, userStatusDataForNewUser);
-      await addOrUpdate(userData[1]);
-      await addOrUpdate(userData[2]);
-      await addOrUpdate(userData[3]);
+      await addOrUpdate(userDataArray[1]);
+      await addOrUpdate(userDataArray[2]);
+      await addOrUpdate(userDataArray[3]);
 
-      const assigneeData = { ...userData[6], discordId: getDiscordMembers[0].user.id };
+      const assigneeData = { ...userDataArray[6], discordId: getDiscordMembers[0].user.id };
       userWithOverdueApprovedTask = await addUser(assigneeData);
-      await taskModel.add({ ...tasksData[0], assignee: userWithOverdueApprovedTask, status: TASK_STATUS.APPROVED });
+      await taskModel.add({
+        ...tasksDataArray[0],
+        assignee: userWithOverdueApprovedTask,
+        status: TASK_STATUS.APPROVED,
+      });
     });
 
     afterEach(async function () {
@@ -860,7 +868,7 @@ describe("Users", function () {
     });
 
     it("Should return one user with given discord id and feature flag", async function () {
-      const discordId = userData[0].discordId;
+      const discordId = userDataArray[0].discordId;
 
       const res = await chai.request(app).get(`/users?dev=true&discordId=${discordId}`);
       expect(res).to.have.status(200);
@@ -869,7 +877,7 @@ describe("Users", function () {
     });
 
     it("Should throw an error when there is no feature flag", async function () {
-      const discordId = userData[0].discordId;
+      const discordId = userDataArray[0].discordId;
       const res = await chai.request(app).get(`/users?discordId=${discordId}`).set("cookie", `${cookieName}=${jwt}`);
       expect(res).to.have.status(404);
       expect(res.body).to.be.a("object");
@@ -1086,7 +1094,7 @@ describe("Users", function () {
     it("Should return one user with given id", function (done) {
       chai
         .request(app)
-        .get(`/users/${userData[0].username}`)
+        .get(`/users/${userDataArray[0].username}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -1185,7 +1193,7 @@ describe("Users", function () {
     it("Should return isUsernameAvailable as false as we are passing existing user", function (done) {
       chai
         .request(app)
-        .get(`/users/isUsernameAvailable/${userData[0].username}`)
+        .get(`/users/isUsernameAvailable/${userDataArray[0].username}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -1205,7 +1213,7 @@ describe("Users", function () {
     const lastname = "sigdar";
 
     it("Should return unique username when passing firstname and lastname", function (done) {
-      addUser(userData[15]).then((availableUsernameUserId) => {
+      addUser(userDataArray[15]).then((availableUsernameUserId) => {
         const userJwt = authService.generateAuthToken({ userId: availableUsernameUserId });
         chai
           .request(app)
@@ -1352,7 +1360,7 @@ describe("Users", function () {
     });
 
     it("Should return given user by id", async function () {
-      const { userId } = await addOrUpdate(userData[0]);
+      const { userId } = await addOrUpdate(userDataArray[0]);
       const res = await chai.request(app).get(`/users/?id=${userId}`);
       expect(res).to.have.status(200);
       expect(res.body).to.be.a("object");
@@ -1390,8 +1398,8 @@ describe("Users", function () {
 
   describe("GET /users?search", function () {
     beforeEach(async function () {
-      await addOrUpdate(userData[0]);
-      await addOrUpdate(userData[7]);
+      await addOrUpdate(userDataArray[0]);
+      await addOrUpdate(userDataArray[7]);
     });
 
     afterEach(async function () {
@@ -1402,7 +1410,7 @@ describe("Users", function () {
       chai
         .request(app)
         .get("/users")
-        .query({ search: searchParamValues.an })
+        .query({ search: searchParamValuesArray.an })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -1421,7 +1429,7 @@ describe("Users", function () {
       chai
         .request(app)
         .get("/users")
-        .query({ search: searchParamValues.AN })
+        .query({ search: searchParamValuesArray.AN })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -1432,7 +1440,7 @@ describe("Users", function () {
           expect(res.body.message).to.equal("Users returned successfully!");
           expect(res.body.users).to.be.a("array");
           res.body.users.forEach((user) => {
-            expect(user.username.slice(0, 2)).to.equal(searchParamValues.AN.toLowerCase());
+            expect(user.username.slice(0, 2)).to.equal(searchParamValuesArray.AN.toLowerCase());
           });
           return done();
         });
@@ -1442,7 +1450,7 @@ describe("Users", function () {
       chai
         .request(app)
         .get("/users")
-        .query({ search: searchParamValues.null })
+        .query({ search: searchParamValuesArray.null })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -1458,7 +1466,7 @@ describe("Users", function () {
       chai
         .request(app)
         .get("/users")
-        .query({ search: searchParamValues.number23 })
+        .query({ search: searchParamValuesArray.number23 })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -1469,7 +1477,7 @@ describe("Users", function () {
           expect(res.body.message).to.equal("Users returned successfully!");
           expect(res.body.users).to.be.a("array");
           res.body.users.forEach((user) => {
-            expect(user.username.slice(0, 2)).to.equal(`${searchParamValues.number23}`);
+            expect(user.username.slice(0, 2)).to.equal(`${searchParamValuesArray.number23}`);
           });
           return done();
         });
@@ -1515,7 +1523,7 @@ describe("Users", function () {
       chai
         .request(app)
         .get("/users")
-        .query({ search: searchParamValues.mu })
+        .query({ search: searchParamValuesArray.mu })
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
@@ -2792,9 +2800,9 @@ describe("Users", function () {
         archived: false,
         in_discord: false,
       };
-      userId1 = await addUser({ ...userData[0], roles: rolesToBeAdded });
-      userId2 = await addUser({ ...userData[1], roles: rolesToBeAdded });
-      userId3 = await addUser({ ...userData[2], roles: rolesToBeAdded });
+      userId1 = await addUser({ ...userDataArray[0], roles: rolesToBeAdded });
+      userId2 = await addUser({ ...userDataArray[1], roles: rolesToBeAdded });
+      userId3 = await addUser({ ...userDataArray[2], roles: rolesToBeAdded });
     });
 
     afterEach(async function () {
@@ -2848,9 +2856,9 @@ describe("Users", function () {
         archived: true,
         in_discord: false,
       };
-      await addOrUpdate({ ...userData[0], roles }, userId1);
-      await addOrUpdate({ ...userData[1], roles }, userId2);
-      await addOrUpdate({ ...userData[2], roles }, userId3);
+      await addOrUpdate({ ...userDataArray[0], roles }, userId1);
+      await addOrUpdate({ ...userDataArray[1], roles }, userId2);
+      await addOrUpdate({ ...userDataArray[2], roles }, userId3);
 
       const res = await chai
         .request(app)
@@ -2922,7 +2930,7 @@ describe("Users", function () {
   describe("PATCH /:userId/update-nickname", function () {
     beforeEach(async function () {
       fetchStub = Sinon.stub(global, "fetch");
-      userId = await addUser(userData[0]);
+      userId = await addUser(userDataArray[0]);
     });
 
     afterEach(async function () {
@@ -2955,8 +2963,8 @@ describe("Users", function () {
   describe("test discord actions of nickname for unverified user", function () {
     beforeEach(async function () {
       fetchStub = Sinon.stub(global, "fetch");
-      const superUser = userData[4];
-      userId = await addUser(userData[2]);
+      const superUser = userDataArray[4];
+      userId = await addUser(userDataArray[2]);
       superUserId = await addUser(superUser);
       superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
     });

@@ -1,5 +1,5 @@
-import { logType } from "../constants/logs";
-import { 
+import { logType } from "../constants/logs.js";
+import {
     LOG_ACTION,
     OOO_STATUS_ALREADY_EXIST,
     REQUEST_LOG_TYPE,
@@ -13,16 +13,17 @@ import {
     REQUEST_REJECTED_SUCCESSFULLY,
     ERROR_WHILE_ACKNOWLEDGING_REQUEST,
     ERROR_WHILE_CREATING_REQUEST,
-} from "../constants/requests";
-import { statusState, userState } from "../constants/userStatus";
-import { createRequest, getRequests, updateRequest } from "../models/requests";
-import { AcknowledgeOooRequestBody, OooStatusRequest, oldOooStatusRequest, OooStatusRequestBody } from "../types/oooRequest";
-import { UserStatus } from "../types/userStatus";
-import { addLog } from "./logService";
-import { BadRequest, Conflict, NotFound } from "http-errors";
-import { addFutureStatus } from "../models/userStatus";
-import { createUserFutureStatus } from "../models/userFutureStatus";
-import { newOOOSchema} from "../utils/requests";
+} from "../constants/requests.js";
+import { statusState, userState } from "../constants/userStatus.js";
+import { createRequest, getRequests, updateRequest } from "../models/requests.js";
+import { AcknowledgeOooRequestBody, OooStatusRequest, oldOooStatusRequest, OooStatusRequestBody } from "../types/oooRequest.js";
+import { UserStatus } from "../types/userStatus.js";
+import { addLog } from "./logService.js";
+import createError from "http-errors";
+import { addFutureStatus } from "../models/userStatus.js";
+import { createUserFutureStatus } from "../models/userFutureStatus.js";
+import { newOOOSchema} from "../utils/requests.js";
+import logger from "../utils/logger.js";
 
 /**
  * Validates the user status.
@@ -117,17 +118,17 @@ export const validateOooAcknowledgeRequest = (
   ) => {
     if (requestType !== REQUEST_TYPE.OOO) {
       logger.error(`Invalid request type: ${requestType}`);
-      throw new BadRequest(INVALID_REQUEST_TYPE);
+      throw createError.BadRequest(INVALID_REQUEST_TYPE);
     }
   
     if (requestStatus === REQUEST_STATE.APPROVED) {
       logger.error(`Request already approved`);
-      throw new BadRequest(REQUEST_ALREADY_APPROVED);
+      throw createError.BadRequest(REQUEST_ALREADY_APPROVED);
     }
   
     if (requestStatus === REQUEST_STATE.REJECTED) {
       logger.error(`Request already rejected`);
-      throw new BadRequest(REQUEST_ALREADY_REJECTED);
+      throw createError.BadRequest(REQUEST_ALREADY_REJECTED);
     }
   };
   
@@ -150,7 +151,7 @@ export const acknowledgeOooRequest = async (
     try {
       const requestData = await getRequests({ id: requestId }) as OooStatusRequest | oldOooStatusRequest;
       if (!requestData) {
-        throw new NotFound("Request not found");
+        throw createError.NotFound("Request not found");
       }
   
       const { type, from, until, requestedBy } = requestData;
@@ -160,7 +161,7 @@ export const acknowledgeOooRequest = async (
   
       const requestResult = await updateRequest(requestId, body, superUserId, REQUEST_TYPE.OOO);
       if (requestResult.error) {
-        throw new BadRequest(requestResult.error);
+        throw createError.BadRequest(requestResult.error);
       }
   
       const [acknowledgeLogType, returnMessage] =

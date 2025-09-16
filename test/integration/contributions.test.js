@@ -1,19 +1,19 @@
 /* eslint-disable no-unused-expressions */
-const chai = require("chai");
-const sinon = require("sinon");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
+import chai from "chai";
+import sinon from "sinon";
+import chaiHttp from "chai-http";
 
-const githubService = require("../../services/githubService");
-const testModel = require("../../models/tasks");
-const userModel = require("../../models/users");
+import * as githubService from "../../services/githubService.js";
+import * as testModel from "../../models/tasks.js";
+import * as userModel from "../../models/users.js";
 
-const app = require("../../server");
-
-chai.use(chaiHttp);
+import app from "../../server.js";
 
 // Import fixtures
-const githubPRInfo = require("../fixtures/contributions/githubPRInfo")();
+import githubPRInfo from "../fixtures/contributions/githubPRInfo.js";
+const { expect } = chai;
+
+chai.use(chaiHttp);
 
 describe("Contributions", function () {
   before(async function () {

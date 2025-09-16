@@ -1,6 +1,19 @@
-const userQuery = require("../models/users");
-const members = require("../models/members");
-const { ROLE_LEVEL, KEYS_NOT_ALLOWED, ACCESS_LEVEL } = require("../constants/userDataLevels");
+import { fetchUser, fetchUsers, fetchUserByIds, fetchPaginatedUsers, getDiscordUsers, getUsersBasedOnFilter, fetchUsersListForMultipleValues, fetchUserForKeyValue } from "../models/users.js";
+import { fetchUsers as fetchMembers, fetchUsersWithRole } from "../models/members.js";
+import { ROLE_LEVEL, KEYS_NOT_ALLOWED, ACCESS_LEVEL } from "../constants/userDataLevels.js";
+import { User } from "../typeDefinitions/users.js";
+
+type RetrieveUsersParams = {
+  discordId?: string | null;
+  id?: string | null;
+  username?: string | null;
+  usernames?: string[] | null;
+  query?: string | null;
+  userdata?: User | null;
+  level?: string | null;
+  role?: string | null;
+  userIds?: string[] | null;
+}
 
 const retrieveUsers = async ({
   discordId = null,
@@ -12,19 +25,19 @@ const retrieveUsers = async ({
   level = ACCESS_LEVEL.PUBLIC,
   role = null,
   userIds = null,
-}) => {
+}: RetrieveUsersParams) => {
   let result;
   if (id || username) {
     if (id != null) {
-      result = await userQuery.fetchUser({ userId: id });
+      result = await fetchUser({ userId: id });
     } else {
-      result = await userQuery.fetchUser({ username: username });
+      result = await fetchUser({ username: username });
     }
     const user = levelSpecificAccess(result.user, level, role);
     result.user = user;
     return result;
   } else if (usernames) {
-    const { users } = await userQuery.fetchUsers(usernames);
+    const { users } = await fetchUsers(usernames);
     const result = [];
     users.forEach((userdata) => {
       const user = levelSpecificAccess(userdata, level, role);
@@ -35,13 +48,15 @@ const retrieveUsers = async ({
     if (userIds.length === 0) {
       return {};
     }
-    const userDetails = await userQuery.fetchUserByIds(userIds);
+    // @ts-ignore
+    const userDetails = await fetchUserByIds(userIds);
     Object.keys(userDetails).forEach((userId) => {
       removeSensitiveInfo(userDetails[userId]);
     });
     return userDetails;
   } else if (query) {
-    const { allUsers, nextId, prevId } = await userQuery.fetchPaginatedUsers(query);
+    // @ts-ignore
+    const { allUsers, nextId, prevId } = await fetchPaginatedUsers(query);
     const users = [];
     allUsers.forEach((userdata) => {
       const user = levelSpecificAccess(userdata, level, role);
@@ -49,10 +64,10 @@ const retrieveUsers = async ({
     });
     return { users, nextId, prevId };
   } else if (discordId !== null) {
-    result = await userQuery.fetchUser({ discordId });
+    result = await fetchUser({ discordId });
     return levelSpecificAccess(result, level, role);
   } else if (userdata) {
-    const result = await userQuery.fetchUser({ userId: userdata.id });
+    const result = await fetchUser({ userId: userdata.id });
     return levelSpecificAccess(result.user, level, role);
   } else {
     return {
@@ -62,7 +77,7 @@ const retrieveUsers = async ({
 };
 
 const retrieveDiscordUsers = async (level = ACCESS_LEVEL.PUBLIC, role = null) => {
-  const users = await userQuery.getDiscordUsers();
+  const users = await getDiscordUsers();
   const usersData = [];
   users.forEach((userdata) => {
     const user = levelSpecificAccess(userdata, level, role);
@@ -72,7 +87,7 @@ const retrieveDiscordUsers = async (level = ACCESS_LEVEL.PUBLIC, role = null) =>
 };
 
 const retreiveFilteredUsers = async (query) => {
-  const users = await userQuery.getUsersBasedOnFilter(query);
+  const users = await getUsersBasedOnFilter(query);
   users.forEach((userdata) => {
     removeSensitiveInfo(userdata);
   });
@@ -80,7 +95,8 @@ const retreiveFilteredUsers = async (query) => {
 };
 
 const retrieveMembers = async (query) => {
-  const allUsers = await members.fetchUsers(query);
+  const allUsers = await fetchMembers(query);
+  // @ts-ignore
   allUsers.forEach((userdata) => {
     removeSensitiveInfo(userdata);
   });
@@ -88,7 +104,8 @@ const retrieveMembers = async (query) => {
 };
 
 const retrieveUsersWithRole = async (role) => {
-  const users = await members.fetchUsersWithRole(role);
+  const users = await fetchUsersWithRole(role);
+  // @ts-ignore
   users.forEach((userdata) => {
     removeSensitiveInfo(userdata);
   });
@@ -119,15 +136,26 @@ const levelSpecificAccess = (user, level = ACCESS_LEVEL.PUBLIC, role = null) => 
 const fetchUsersForKeyValues = async (documentKey, value, removeSensitiveInfo = true) => {
   let userList;
   if (Array.isArray(value)) {
-    userList = await userQuery.fetchUsersListForMultipleValues(documentKey, value);
+    userList = await fetchUsersListForMultipleValues(documentKey, value);
   } else {
-    userList = await userQuery.fetchUserForKeyValue(documentKey, value);
+    userList = await fetchUserForKeyValue(documentKey, value);
   }
 
   return userList.map((user) => (removeSensitiveInfo ? levelSpecificAccess(user) : user));
 };
 
-module.exports = {
+export {
+  retrieveUsers,
+  removeSensitiveInfo,
+  retrieveDiscordUsers,
+  retrieveMembers,
+  retrieveUsersWithRole,
+  retreiveFilteredUsers,
+  levelSpecificAccess,
+  fetchUsersForKeyValues,
+};
+
+export default {
   retrieveUsers,
   removeSensitiveInfo,
   retrieveDiscordUsers,

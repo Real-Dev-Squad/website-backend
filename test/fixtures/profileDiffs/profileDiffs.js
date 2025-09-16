@@ -1,4 +1,4 @@
-module.exports = () => {
+const getProfileDiffs = () => {
   return [
     {
       approval: "PENDING",
@@ -104,3 +104,6 @@ module.exports = () => {
     },
   ];
 };
+
+export { getProfileDiffs };
+export default getProfileDiffs;

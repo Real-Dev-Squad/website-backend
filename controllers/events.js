@@ -1,14 +1,12 @@
-const { GET_ALL_EVENTS_LIMIT_MIN, UNWANTED_PROPERTIES_FROM_100MS, EVENT_ROLES } = require("../constants/events");
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const { EventTokenService, EventAPIService } = require("../services");
-const eventQuery = require("../models/events");
-
-const logger = require("../utils/logger");
-const { removeUnwantedProperties } = require("../utils/events");
-
-const crypto = require("crypto");
-const { addLog } = require("../models/logs");
-const { logType } = require("../constants/logs");
+import logger from "../utils/logger.js";
+import { GET_ALL_EVENTS_LIMIT_MIN, UNWANTED_PROPERTIES_FROM_100MS, EVENT_ROLES } from "../constants/events.js";
+import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
+import { EventTokenService, EventAPIService } from "../services/index.js";
+import { createEvent as createEventQuery, getEventCodes as getEventCodesQuery } from "../models/events.js";
+import { removeUnwantedProperties } from "../utils/events.js";
+import crypto from "crypto";
+import { addLog } from "../models/logs.js";
+import { logType } from "../constants/logs.js";
 
 const tokenService = new EventTokenService();
 const apiService = new EventAPIService(tokenService);
@@ -28,7 +26,7 @@ const createEvent = async (req, res) => {
   try {
     const eventData = await apiService.post("/rooms", payload);
     const event = removeUnwantedProperties(UNWANTED_PROPERTIES_FROM_100MS, eventData);
-    const eventDataFromDB = await eventQuery.createEvent({ room_id: eventData.id, created_by: userId, ...event });
+    const eventDataFromDB = await createEventQuery({ room_id: eventData.id, created_by: userId, ...event });
     return res.status(201).json(eventDataFromDB);
   } catch (error) {
     logger.error({ error });
@@ -99,7 +97,7 @@ const joinEvent = async (req, res) => {
 
   try {
     if (role === EVENT_ROLES.MAVEN) {
-      const eventCodes = await eventQuery.getEventCodes({ id: roomId });
+      const eventCodes = await getEventCodesQuery({ id: roomId });
       const allEventCodesArray = eventCodes.map((eventCode) => {
         return eventCode.code;
       });
@@ -203,7 +201,7 @@ const updateEvent = async (req, res) => {
   };
   try {
     const eventData = await apiService.post(`/rooms/${req.body.id}`, payload);
-    await eventQuery.updateEvent(eventData);
+    await createEventQuery.updateEvent(eventData);
     const event = removeUnwantedProperties(UNWANTED_PROPERTIES_FROM_100MS, eventData);
     return res.status(200).json({
       data: { room_id: event.id, ...event },
@@ -235,7 +233,7 @@ const endActiveEvent = async (req, res) => {
   };
   try {
     await apiService.post(`/active-rooms/${req.body.id}/end-room`, payload);
-    await eventQuery.endActiveEvent({ id: req.body.id, ...payload });
+    await createEventQuery.endActiveEvent({ id: req.body.id, ...payload });
     return res.status(200).json({ message: `Event ended successfully.` });
   } catch (error) {
     logger.error({ error });
@@ -258,7 +256,7 @@ const endActiveEvent = async (req, res) => {
  */
 const addPeerToEvent = async (req, res) => {
   try {
-    const data = await eventQuery.addPeerToEvent({
+    const data = await createEventQuery.addPeerToEvent({
       peerId: req.body.peerId,
       name: req.body.name,
       role: req.body.role,
@@ -296,9 +294,9 @@ const kickoutPeer = async (req, res) => {
   };
 
   try {
-    const peer = await eventQuery.getPeerById(payload.peer_id);
+    const peer = await createEventQuery.getPeerById(payload.peer_id);
     await apiService.post(`/active-rooms/${id}/remove-peers`, payload);
-    await eventQuery.kickoutPeer({ eventId: id, peerId: payload.peer_id, reason: req.body.reason });
+    await createEventQuery.kickoutPeer({ eventId: id, peerId: payload.peer_id, reason: req.body.reason });
     addLog(
       logType.EVENTS_REMOVE_PEER,
       { removed_by_id: req.userData.id, removed_by_username: req.userData.username },
@@ -330,7 +328,7 @@ const generateEventCode = async (req, res) => {
   }
 
   try {
-    const allEventCodeObjectFromDB = await eventQuery.createEventCode({
+    const allEventCodeObjectFromDB = await createEventQuery.createEventCode({
       id: eventCodeUuid,
       event_id: id,
       code: eventCode,
@@ -360,7 +358,7 @@ const getEventCodes = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const eventCodes = await eventQuery.getEventCodes({ id });
+    const eventCodes = await getEventCodesQuery({ id });
 
     return res.status(200).json({
       message: "Event codes is successfully fetched for the event!",
@@ -375,7 +373,7 @@ const getEventCodes = async (req, res) => {
   }
 };
 
-module.exports = {
+export default {
   createEvent,
   getAllEvents,
   joinEvent,
@@ -383,7 +381,7 @@ module.exports = {
   updateEvent,
   endActiveEvent,
   addPeerToEvent,
+  getEventCodes,
   kickoutPeer,
   generateEventCode,
-  getEventCodes,
 };

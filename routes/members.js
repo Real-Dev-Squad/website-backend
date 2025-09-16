@@ -1,18 +1,17 @@
-const express = require("express");
+import express from "express";
+import members from "../controllers/members.js";
+import { authorizeRoles } from "../middlewares/authorizeRoles.js";
+import authenticate from "../middlewares/authenticate.js";
+import recruiter from "../controllers/recruiters.js";
+import { validateRecruiter } from "../middlewares/validators/recruiter.js";
+import { validateGetMembers } from "../middlewares/validators/members.js";
+import { ROLES } from "../constants/roles.js";
+
 const router = express.Router();
-const members = require("../controllers/members");
-const authorizeRoles = require("../middlewares/authorizeRoles");
-const authenticate = require("../middlewares/authenticate");
-const { addRecruiter, fetchRecruitersInfo } = require("../controllers/recruiters");
-const { validateRecruiter } = require("../middlewares/validators/recruiter");
-const { validateGetMembers } = require("../middlewares/validators/members");
-const { SUPERUSER } = require("../constants/roles");
+const { SUPERUSER } = ROLES;
 
-router.get("/", validateGetMembers, members.getMembers);
-router.get("/idle", members.getIdleMembers);
-router.post("/intro/:username", validateRecruiter, addRecruiter);
-router.get("/intro", authenticate, authorizeRoles([SUPERUSER]), fetchRecruitersInfo);
-router.patch("/moveToMembers/:username", authenticate, authorizeRoles([SUPERUSER]), members.moveToMembers);
-router.patch("/archiveMembers/:username", authenticate, authorizeRoles([SUPERUSER]), members.archiveMembers);
+router.get("/", authenticate, authorizeRoles([SUPERUSER]), validateGetMembers, members.getMembers);
+router.get("/recruiters", authenticate, authorizeRoles([SUPERUSER]), recruiter.fetchRecruitersInfo);
+router.post("/recruiters", authenticate, authorizeRoles([SUPERUSER]), validateRecruiter, recruiter.addRecruiter);
 
-module.exports = router;
+export default router;

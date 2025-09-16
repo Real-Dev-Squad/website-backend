@@ -1,3 +1,3 @@
-const dummyResponse = { body: "test" };
+export const dummyResponse = { body: "test" };
 
-module.exports = { dummyResponse };
+export default { dummyResponse };

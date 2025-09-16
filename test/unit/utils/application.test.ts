@@ -1,6 +1,7 @@
 import chai from "chai";
 const { expect } = chai;
-const { getUserApplicationObject } = require("../../../utils/application");
+import applicationUtils from "../../../utils/application";
+const { getUserApplicationObject } = applicationUtils;
 
 describe("getUserApplicationObject", async function () {
   it("should return application object", function () {

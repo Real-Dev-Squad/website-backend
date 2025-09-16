@@ -1,20 +1,17 @@
-const chai = require("chai");
-const sinon = require("sinon");
+import chai from "chai";
+import sinon from "sinon";
+import config from "config";
 
-const firestore = require("../../utils/firestore");
-const app = require("../../server");
-const authService = require("../../services/authService");
-const progressesModel = require("../../models/progresses");
-const addUser = require("../utils/addUser");
-const cleanDb = require("../utils/cleanDb");
-const {
-  standupProgressDay1,
-  incompleteProgress,
-  stubbedModelProgressData,
-} = require("../fixtures/progress/progresses");
+import firestore from "../../utils/firestore.js";
+import app from "../../server.js";
+import { generateAuthToken } from "../../services/authService.js";
+import * as progressesModel from "../../models/progresses.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
+import { standupProgressDay1, incompleteProgress, stubbedModelProgressData } from "../fixtures/progress/progresses.js";
 
-const userData = require("../fixtures/user/user")();
-const { INTERNAL_SERVER_ERROR_MESSAGE } = require("../../constants/progresses");
+import userData from "../fixtures/user/user.js";
+import { INTERNAL_SERVER_ERROR_MESSAGE } from "../../constants/progresses.js";
 const cookieName = config.get("userToken.cookieName");
 const { expect } = chai;
 
@@ -38,9 +35,9 @@ describe("Test Progress Updates API for Users", function () {
         toFake: ["Date"],
       });
       userId = await addUser(userData[1]);
-      userToken = authService.generateAuthToken({ userId: userId });
+      userToken = generateAuthToken({ userId: userId });
       anotherUserId = await addUser(userData[8]);
-      anotherUserToken = authService.generateAuthToken({ userId: anotherUserId });
+      anotherUserToken = generateAuthToken({ userId: anotherUserId });
       const progressData = stubbedModelProgressData(anotherUserId, 1682935200000, 1682899200000);
       await firestore.collection("progresses").doc("anotherUserProgressDocument").set(progressData);
     });

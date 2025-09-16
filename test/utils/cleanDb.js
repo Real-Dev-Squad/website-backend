@@ -1,12 +1,12 @@
-const config = require("config");
-const { fetch } = require("../../utils/fetch");
-const firebaseConfig = require("../../firebase.json");
+import config from "config";
+import firebaseConfig from "../../firebase.json";
+import { fetch } from "../../utils/fetch.js";
 
 /**
  * Deletes all data from firestore emulator running locally.
  * To be used during tests for deleting the data as required.
  */
-module.exports = async () => {
+export default async () => {
   const credentialsObject = JSON.parse(config.firestore);
   const projectId = credentialsObject.project_id;
 

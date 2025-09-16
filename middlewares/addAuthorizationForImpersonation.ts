@@ -1,8 +1,8 @@
 import { NextFunction } from "express";
-import authorizeRoles from "./authorizeRoles";
-const { SUPERUSER } = require("../constants/roles");
-import { ImpersonationRequestResponse, ImpersonationSessionRequest } from "../types/impersonationRequest";
-import { INVALID_ACTION_PARAM, OPERATION_NOT_ALLOWED } from "../constants/requests";
+import {authorizeRoles} from "./authorizeRoles.js";
+import { SUPERUSER } from "../constants/roles.js";
+import { ImpersonationRequestResponse, ImpersonationSessionRequest } from "../types/impersonationRequest.js";
+import { INVALID_ACTION_PARAM, OPERATION_NOT_ALLOWED } from "../constants/requests.js";
 
 /**
  * Middleware to authorize impersonation actions based on the `action` query parameter.

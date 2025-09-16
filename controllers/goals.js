@@ -1,11 +1,11 @@
-const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
-const goals = require("../services/goalService");
+import { SOMETHING_WENT_WRONG } from "../constants/errorMessages.js";
+import { getOrCreateGoalUser } from "../services/goalService.js";
 
-const getGoalSiteToken = async (req, res) => {
+export const getGoalSiteToken = async (req, res) => {
   try {
     const { roles, id: userId } = req.userData;
 
-    const goalApiResponse = await goals.getOrCreateGoalUser({ userId, roles });
+    const goalApiResponse = await getOrCreateGoalUser({ userId, roles });
 
     if (goalApiResponse.status === 201) {
       let goalApiData = await goalApiResponse.json();
@@ -17,8 +17,4 @@ const getGoalSiteToken = async (req, res) => {
   } catch {
     return res.boom.badImplementation(SOMETHING_WENT_WRONG);
   }
-};
-
-module.exports = {
-  getGoalSiteToken,
 };

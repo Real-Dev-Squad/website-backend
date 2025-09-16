@@ -1,8 +1,10 @@
-const firestore = require("../utils/firestore");
+import firestore from "../utils/firestore.js";
+import * as usersUtils from "../utils/users.js";
+import * as walletModels from "./wallets.js";
+import logger from "../utils/logger.js";
+
 const auctionsModel = firestore.collection("auctions");
 const bidsModel = firestore.collection("bids");
-const usersUtils = require("../utils/users");
-const walletModels = require("./wallets");
 
 /**
  * Fetches auction details by auctionId
@@ -184,10 +186,4 @@ const makeNewBid = async ({ bidder, auctionId, bid }) => {
   }
 };
 
-module.exports = {
-  fetchAuctionById,
-  fetchAvailableAuctions,
-  fetchAuctionBidders,
-  createNewAuction,
-  makeNewBid,
-};
+export default { fetchAuctionById, fetchAvailableAuctions, fetchAuctionBidders, createNewAuction, makeNewBid };

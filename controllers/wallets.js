@@ -1,7 +1,8 @@
-const { fetchWallet, createWallet } = require("../models/wallets");
-const userUtils = require("../utils/users");
-const walletConstants = require("../constants/wallets");
-const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
+import { fetchWallet, createWallet } from "../models/wallets.js";
+import { getUserId } from "../utils/users.js";
+import { INITIAL_WALLET } from "../constants/wallets.js";
+import { SOMETHING_WENT_WRONG } from "../constants/errorMessages.js";
+import logger from "../utils/logger.js";
 
 /**
  * Get the wallet for userId, or create default one for
@@ -14,7 +15,7 @@ const getWallet = async (userId) => {
 
     if (!wallet) {
       // #TODO Log which users didn't have a wallet
-      wallet = await createWallet(userId, walletConstants.INITIAL_WALLET);
+      wallet = await createWallet(userId, INITIAL_WALLET);
       logger.info("Created new wallet for user");
     }
     return wallet;
@@ -52,7 +53,7 @@ const getOwnWallet = async (req, res) => {
  */
 const getUserWallet = async (req, res) => {
   const { params: { username } = {} } = req;
-  const userId = await userUtils.getUserId(username);
+  const userId = await getUserId(username);
 
   try {
     const wallet = await getWallet(userId);
@@ -67,7 +68,7 @@ const getUserWallet = async (req, res) => {
   }
 };
 
-module.exports = {
+export default {
   getOwnWallet,
   getUserWallet,
 };

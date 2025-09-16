@@ -1,14 +1,16 @@
-import firestore from "../utils/firestore";
+import firestore from "../utils/firestore.js";
+import logger from "../utils/logger.js";
+import { REQUEST_ALREADY_APPROVED, REQUEST_ALREADY_REJECTED, REQUEST_STATE } from "../constants/requests.js";
+
 const requestModel = firestore.collection("requests");
-import { REQUEST_ALREADY_APPROVED, REQUEST_ALREADY_REJECTED, REQUEST_STATE } from "../constants/requests";
 import {
   ERROR_WHILE_FETCHING_REQUEST,
   ERROR_WHILE_CREATING_REQUEST,
   ERROR_WHILE_UPDATING_REQUEST,
   REQUEST_DOES_NOT_EXIST,
-} from "../constants/requests";
-import { getUserId } from "../utils/users";
-import { transformRequestResponse } from "../utils/requests";
+} from "../constants/requests.js";
+import { getUserId } from "../utils/users.js";
+import { transformRequestResponse } from "../utils/requests.js";
 const SIZE = 5;
 
 
@@ -90,7 +92,7 @@ export const getRequests = async (query: any) => {
         ...requestDoc.data(),
       };
     }
-    
+
     if(requestedBy && dev){
       requestQuery = requestQuery.where("requestedBy", "==", requestedBy);
     }

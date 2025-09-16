@@ -1,17 +1,18 @@
-const express = require("express");
+import express from "express";
+import authenticate from "../middlewares/authenticate.js";
+import { authorizeRoles } from "../middlewares/authorizeRoles.js";
+import { ROLES } from "../constants/roles.js";
+import events from "../controllers/events.js";
+import eventsValidator from "../middlewares/validators/events.js";
+
 const router = express.Router();
-const events = require("../controllers/events");
-const authenticate = require("../middlewares/authenticate");
-const eventsValidator = require("../middlewares/validators/events");
-const { SUPERUSER, MEMBER } = require("../constants/roles");
-const authorizeRoles = require("../middlewares/authorizeRoles");
 
 router.post("/", authenticate, eventsValidator.createEvent, events.createEvent);
 router.get("/", eventsValidator.getAllEvents, events.getAllEvents);
 router.post(
   "/join-admin",
   authenticate,
-  authorizeRoles([SUPERUSER, MEMBER]),
+  authorizeRoles([ROLES.SUPERUSER, ROLES.MEMBER]),
   eventsValidator.joinEvent,
   events.joinEvent
 );
@@ -21,7 +22,7 @@ router.patch("/", authenticate, eventsValidator.updateEvent, events.updateEvent)
 router.patch(
   "/end",
   authenticate,
-  authorizeRoles([SUPERUSER, MEMBER]),
+  authorizeRoles([ROLES.SUPERUSER, ROLES.MEMBER]),
   eventsValidator.endActiveEvent,
   events.endActiveEvent
 );
@@ -29,22 +30,22 @@ router.post("/:id/peers", eventsValidator.addPeerToEvent, events.addPeerToEvent)
 router.patch(
   "/:id/peers/kickout",
   authenticate,
-  authorizeRoles([SUPERUSER, MEMBER]),
+  authorizeRoles([ROLES.SUPERUSER, ROLES.MEMBER]),
   eventsValidator.kickoutPeer,
   events.kickoutPeer
 );
 router.post(
   "/:id/codes",
   authenticate,
-  authorizeRoles([SUPERUSER]),
+  authorizeRoles([ROLES.SUPERUSER]),
   eventsValidator.generateEventCode,
   events.generateEventCode
 );
 router.get(
   "/:id/codes",
   authenticate,
-  authorizeRoles([SUPERUSER]),
+  authorizeRoles([ROLES.SUPERUSER]),
   eventsValidator.getEventCodes,
   events.getEventCodes
 );
-module.exports = router;
+export default router;

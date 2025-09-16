@@ -1,8 +1,9 @@
-const { NotFound } = require("http-errors");
-const fireStore = require("./firestore");
-const trackedProgressesCollection = fireStore.collection("trackedProgresses");
-const { RESPONSE_MESSAGES } = require("../constants/monitor");
+import httpError from "http-errors";
+import fireStore from "./firestore.js";
+import { RESPONSE_MESSAGES } from "../constants/monitor.js";
+
 const { RESOURCE_NOT_FOUND } = RESPONSE_MESSAGES;
+const trackedProgressesCollection = fireStore.collection("trackedProgresses");
 
 /**
  * Builds a Firestore query based on the provided query parameters.
@@ -42,12 +43,12 @@ const buildQueryForFetchingDocsOfType = (queryParams) => {
  * Retrieves progress documents from Firestore based on the given query.
  * @param {Query} query - A Firestore query object for fetching progress documents.
  * @returns {Array.<Object>} An array of objects representing the retrieved tracked progress documents. Each object contains the document ID and its data.
- * @throws {NotFound} If no progress documents are found based on the given query.
+ * @throws {httpError.NotFound} If no progress documents are found based on the given query.
  */
 const getTrackedProgressDocs = async (query) => {
   const progressesDocs = await query.get();
   if (!progressesDocs.size) {
-    throw new NotFound(RESOURCE_NOT_FOUND);
+    throw new httpError.NotFound(RESOURCE_NOT_FOUND);
   }
   const docsData = [];
   progressesDocs.forEach((doc) => {
@@ -56,8 +57,4 @@ const getTrackedProgressDocs = async (query) => {
   return docsData;
 };
 
-module.exports = {
-  buildQueryByTypeId,
-  buildQueryForFetchingDocsOfType,
-  getTrackedProgressDocs,
-};
+export { buildQueryByTypeId, buildQueryForFetchingDocsOfType, getTrackedProgressDocs };

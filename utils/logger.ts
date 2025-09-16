@@ -1,5 +1,7 @@
-const winston = require("winston");
-const config = require("config");
+import winston from 'winston';
+import config from 'config';
+import { Stream } from 'morgan';
+
 // define the custom settings for each transport (file, console)
 const options = {
   file: {
@@ -21,9 +23,7 @@ const options = {
 };
 
 // instantiate a new Winston Logger with the settings defined above
-// eslint-disable-line new-cap
-/* eslint new-cap: ["error", { "properties": false }] */
-const logger = new winston.createLogger({
+const logger = winston.createLogger({
   /**
    * Application defaults:
    * - File logs enabled in: [production, staging]
@@ -40,11 +40,13 @@ const logger = new winston.createLogger({
 });
 
 // create a stream object with a 'write' function that will be used by `morgan`
-logger.stream = {
-  write: function (message, encoding) {
+const stream: Stream = {
+  write: function (message: string, encoding: string) {
     // use the 'info' log level so the output will be picked up by both transports (file and console)
     logger.info(message);
   },
 };
 
-module.exports = logger;
+logger.stream = stream;
+
+export default logger;

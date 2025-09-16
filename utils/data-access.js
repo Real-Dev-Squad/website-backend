@@ -1,3 +1,5 @@
+import logger from "./logger.js";
+
 /**
  * Middleware function for removing sensitive fields from the response object
  * based on user roles and predefined rules.
@@ -108,7 +110,4 @@ function removeObjectField(path, object) {
   }
 }
 
-module.exports = {
-  removeObjectField,
-  dataAccessMiddleware,
-};
+export { removeObjectField, dataAccessMiddleware };

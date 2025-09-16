@@ -1,6 +1,6 @@
-const authService = require("../services/authService");
-const dataAccess = require("../services/dataAccessLayer");
-const logger = require("../utils/logger");
+import authService from "../services/authService.js";
+import dataAccess from "../services/dataAccessLayer.js";
+import logger from "../utils/logger.js";
 
 /**
  * Middleware to check if the user is restricted or in an impersonation session.
@@ -20,7 +20,7 @@ const logger = require("../utils/logger");
  * @param {Function} next - Express next middleware function
  * @returns {void}
  */
-const checkRestricted = async (req, res, next) => {
+export const checkRestricted = async (req, res, next) => {
   const { roles } = req.userData;
 
   if (req.isImpersonating) {
@@ -56,7 +56,7 @@ const checkRestricted = async (req, res, next) => {
  * @param {Function} next - Express next middleware function
  * @returns {Promise<void>} - Calls `next()` on successful authentication or returns an error response.
  */
-module.exports = async (req, res, next) => {
+export default async (req, res, next) => {
   try {
     let token = req.cookies[config.get("userToken.cookieName")];
 

@@ -1,9 +1,10 @@
-const express = require("express");
+import express from "express";
+import authenticate from "../middlewares/authenticate.js";
+import { fcmTokenController } from "../controllers/fcmToken.js";
+import { fcmTokenValidator } from "../middlewares/validators/fcmToken.js";
+
 const router = express.Router();
 
-const authenticate = require("../middlewares/authenticate");
-const { fcmTokenController } = require("../controllers/fcmToken");
-const { fcmTokenValidator } = require("../middlewares/validators/fcmToken");
-
 router.post("/", authenticate, fcmTokenValidator, fcmTokenController);
-module.exports = router;
+
+export default router;

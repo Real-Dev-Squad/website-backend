@@ -1,18 +1,21 @@
-const chai = require("chai");
-const sinon = require("sinon");
+import chai from "chai";
+import config from "config";
+import sinon from "sinon";
+
+import { userState } from "../../constants/userStatus.js";
+import * as userStatusModelFunction from "../../models/userStatus.js";
+import app from "../../server.js";
+import { generateAuthToken } from "../../services/authService.js";
+import firestore from "../../utils/firestore.js";
+import allTasks from "../fixtures/tasks/tasks.js";
+import userData from "../fixtures/user/user.js";
+import { generateStatusDataForState } from "../fixtures/userStatus/userStatus.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
+
 const { expect } = chai;
-const firestore = require("../../utils/firestore");
 const userStatusModel = firestore.collection("usersStatus");
-const addUser = require("../utils/addUser");
-const authService = require("../../services/authService");
-const userData = require("../fixtures/user/user")();
-const app = require("../../server");
-const cleanDb = require("../utils/cleanDb");
-const { generateStatusDataForState } = require("../fixtures/userStatus/userStatus");
-const allTasks = require("../fixtures/tasks/tasks");
-const { userState } = require("../../constants/userStatus");
 const cookieName = config.get("userToken.cookieName");
-const userStatusModelFunction = require("../../models/userStatus");
 
 describe("Task Based Status Updates", function () {
   describe("PATCH /tasks/self/:taskId - Update User Status Document on marking Task as Completed.", function () {
@@ -27,7 +30,7 @@ describe("Task Based Status Updates", function () {
 
     beforeEach(async function () {
       userId = await addUser(userData[6]);
-      userJwt = authService.generateAuthToken({ userId });
+      userJwt = generateAuthToken({ userId });
       superUserId = await addUser(userData[4]);
       taskArr = allTasks();
       const sampleTask1 = taskArr[0];
@@ -238,7 +241,7 @@ describe("Task Based Status Updates", function () {
     beforeEach(async function () {
       userId = await addUser(userData[6]);
       superUserId = await addUser(userData[4]);
-      superUserJwt = authService.generateAuthToken({ userId: superUserId });
+      superUserJwt = generateAuthToken({ userId: superUserId });
       taskArr = allTasks();
       const assignee = userData[6].username;
       reqBody.assignee = assignee;
@@ -340,7 +343,7 @@ describe("Task Based Status Updates", function () {
       userId9 = await addUser(userData[9]);
       userId10 = await addUser(userData[10]);
       userId11 = await addUser(userData[11]);
-      superUserJwt = authService.generateAuthToken({ userId: userId4 });
+      superUserJwt = generateAuthToken({ userId: userId4 });
       listUsers = [
         { userId: userId0, state: "IDLE" },
         { userId: userId1, state: "IDLE" },
@@ -466,7 +469,7 @@ describe("Task Based Status Updates", function () {
       userId2 = await addUser(userData[8]);
       userId3 = await addUser(userData[9]);
       superUserId = await addUser(userData[4]);
-      superUserJwt = authService.generateAuthToken({ userId: superUserId });
+      superUserJwt = generateAuthToken({ userId: superUserId });
 
       const taskArr = allTasks();
 
@@ -539,7 +542,7 @@ describe("Task Based Status Updates", function () {
     beforeEach(async function () {
       userId1 = await addUser(userData[6]);
       superUserId = await addUser(userData[4]);
-      superUserJwt = authService.generateAuthToken({ userId: superUserId });
+      superUserJwt = generateAuthToken({ userId: superUserId });
       await addUser(userData[0]);
       user2Name = userData[0].username;
       taskArr = allTasks();

@@ -1,16 +1,14 @@
-const chai = require("chai");
-const { expect } = chai;
+import { expect } from "chai";
 
-const cleanDb = require("../../utils/cleanDb");
-const firestore = require("../../../utils/firestore");
+import cleanDb from "../../utils/cleanDb.js";
+import firestore from "../../../utils/firestore.js";
+import * as eventQuery from "../../../models/events.js";
+import eventDataArray from "../../fixtures/events/events.js";
+import eventCodeDataArray from "../../fixtures/events/event-codes.js";
 
-const eventQuery = require("../../../models/events");
+const eventData = eventDataArray[0];
 const eventModel = firestore.collection("events");
 const peerModel = firestore.collection("peers");
-
-const eventDataArray = require("../../fixtures/events/events")();
-const eventCodeDataArray = require("../../fixtures/events/event-codes")();
-const eventData = eventDataArray[0];
 
 describe("Events", function () {
   afterEach(async function () {

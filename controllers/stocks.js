@@ -1,5 +1,7 @@
-const stocks = require("../models/stocks");
-const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
+import { addStock, fetchStocks as fetchStockModel, fetchUserStocks } from "../models/stocks.js";
+import { INTERNAL_SERVER_ERROR } from "../constants/errorMessages.js";
+import logger from "../utils/logger.js";
+
 /**
  * Creates new stock
  *
@@ -9,7 +11,7 @@ const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
  */
 const addNewStock = async (req, res) => {
   try {
-    const { id, stockData } = await stocks.addStock(req.body);
+    const { id, stockData } = await addStock(req.body);
     return res.json({
       message: "Stock created successfully!",
       stock: stockData,
@@ -20,6 +22,7 @@ const addNewStock = async (req, res) => {
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
+
 /**
  * Fetches all the stocks
  *
@@ -28,7 +31,7 @@ const addNewStock = async (req, res) => {
  */
 const fetchStocks = async (req, res) => {
   try {
-    const allStock = await stocks.fetchStocks();
+    const allStock = await fetchStockModel();
     return res.json({
       message: allStock.length > 0 ? "Stocks returned successfully!" : "No stocks found",
       stock: allStock.length > 0 ? allStock : [],
@@ -38,6 +41,7 @@ const fetchStocks = async (req, res) => {
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
+
 /**
  * Fetches all the stocks of the user
  *
@@ -54,7 +58,7 @@ const fetchStocks = async (req, res) => {
 const getSelfStocks = async (req, res) => {
   try {
     const { id: userId } = req.userData;
-    const userStocks = await stocks.fetchUserStocks(userId);
+    const userStocks = await fetchUserStocks(userId);
 
     res.set(
       "X-Deprecation-Warning",
@@ -78,7 +82,7 @@ const getSelfStocks = async (req, res) => {
  */
 const getUserStocks = async (req, res) => {
   try {
-    const userStocks = await stocks.fetchUserStocks(req.params.userId);
+    const userStocks = await fetchUserStocks(req.params.userId);
 
     return res.json({
       message: userStocks.length > 0 ? "User stocks returned successfully!" : "No stocks found",
@@ -90,9 +94,4 @@ const getUserStocks = async (req, res) => {
   }
 };
 
-module.exports = {
-  addNewStock,
-  fetchStocks,
-  getSelfStocks,
-  getUserStocks,
-};
+export { addNewStock, fetchStocks, getSelfStocks, getUserStocks };

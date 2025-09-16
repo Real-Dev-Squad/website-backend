@@ -1,11 +1,13 @@
-const Sinon = require("sinon");
-const {
+import { expect } from "chai";
+import sinon from "sinon";
+
+import {
   validateAuthStatus,
   storeUserDeviceInfo,
   validateFetchingUserDocument,
-} = require("../../../middlewares/validators/qrCodeAuth");
-const { expect } = require("chai");
-const { userDeviceInfoDataArray } = require("../../fixtures/qrCodeAuth/qrCodeAuth");
+} from "../../../middlewares/validators/qrCodeAuth.js";
+import { userDeviceInfoDataArray } from "../../fixtures/qrCodeAuth/qrCodeAuth.js";
+
 describe("qrCodeAuth", function () {
   describe("test post call validator", function () {
     it("Allows request to pass on valid params", async function () {
@@ -17,7 +19,7 @@ describe("qrCodeAuth", function () {
 
       const res = {};
 
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       await storeUserDeviceInfo(req, res, nextSpy);
       expect(nextSpy.callCount).to.be.equal(1);
     });
@@ -36,7 +38,7 @@ describe("qrCodeAuth", function () {
         },
       };
 
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       await storeUserDeviceInfo(req, res, nextSpy);
       expect(nextSpy.callCount).to.be.equal(0);
     });
@@ -52,7 +54,7 @@ describe("qrCodeAuth", function () {
 
       const res = {};
 
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       await validateAuthStatus(req, res, nextSpy);
       expect(nextSpy.callCount).to.be.equal(1);
     });
@@ -70,7 +72,7 @@ describe("qrCodeAuth", function () {
         },
       };
 
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       await validateAuthStatus(req, res, nextSpy);
       expect(nextSpy.callCount).to.be.equal(0);
     });
@@ -86,7 +88,7 @@ describe("qrCodeAuth", function () {
 
       const res = {};
 
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       await validateFetchingUserDocument(req, res, nextSpy);
       expect(nextSpy.callCount).to.be.equal(1);
     });
@@ -105,7 +107,7 @@ describe("qrCodeAuth", function () {
         },
       };
 
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       await validateFetchingUserDocument(req, res, nextSpy);
       expect(nextSpy.callCount).to.be.equal(0);
     });

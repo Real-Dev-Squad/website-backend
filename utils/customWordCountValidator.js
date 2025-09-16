@@ -15,6 +15,4 @@ const customWordCountValidator = (value, helpers, wordCount) => {
   return value;
 };
 
-module.exports = {
-  customWordCountValidator,
-};
+export { customWordCountValidator };

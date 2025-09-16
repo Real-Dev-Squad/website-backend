@@ -1,5 +1,5 @@
-const { userState } = require("../../../constants/userStatus");
-const { ONE_DAY_IN_MS } = require("../../../constants/users");
+import { userState } from "../../../constants/userStatus.js";
+import { ONE_DAY_IN_MS } from "../../../constants/users.js";
 
 const userStatusDataForNewUser = {
   currentStatus: {
@@ -218,7 +218,7 @@ const generateDefaultFutureStatus = (state, from, until) => {
   return futureStatusData;
 };
 
-module.exports = {
+export {
   userStatusDataForNewUser,
   userStatusDataAfterSignup,
   userStatusDataAfterFillingJoinSection,
@@ -234,3 +234,5 @@ module.exports = {
   OutputFixtureForFnConvertTimestampsToUTC,
   generateDefaultFutureStatus,
 };
+
+export default getStatusData();

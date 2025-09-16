@@ -1,4 +1,4 @@
-module.exports = () => {
+export default () => {
   return [
     {
       timestamp: "2023-04-20T16:23:58Z",

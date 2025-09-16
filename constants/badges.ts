@@ -39,7 +39,4 @@ const SUCCESS_MESSAGES = {
   },
 };
 
-module.exports = {
-  ERROR_MESSAGES,
-  SUCCESS_MESSAGES,
-};
+export { ERROR_MESSAGES, SUCCESS_MESSAGES };

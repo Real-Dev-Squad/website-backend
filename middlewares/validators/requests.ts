@@ -1,16 +1,17 @@
 import joi from "joi";
 import { NextFunction } from "express";
-import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/requests";
-import { AcknowledgeOooRequest, OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
-import { acknowledgeOooRequestValidator, createOooStatusRequestValidator } from "./oooRequests";
-import { createExtensionRequestValidator } from "./extensionRequestsv2";
-import {createTaskRequestValidator} from "./taskRequests";
-import { ExtensionRequestRequest, ExtensionRequestResponse } from "../../types/extensionRequests";
-import { CustomResponse } from "../../typeDefinitions/global";
-import { UpdateRequest } from "../../types/requests";
-import { TaskRequestRequest, TaskRequestResponse } from "../../types/taskRequests";
-import { createOnboardingExtensionRequestValidator, updateOnboardingExtensionRequestValidator } from "./onboardingExtensionRequest";
-import { OnboardingExtensionCreateRequest, OnboardingExtensionResponse, UpdateOnboardingExtensionRequest } from "../../types/onboardingExtension";
+import { REQUEST_STATE, REQUEST_TYPE } from "../../constants/requests.js";
+import { AcknowledgeOooRequest, OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest.js";
+import { acknowledgeOooRequestValidator, createOooStatusRequestValidator } from "./oooRequests.js";
+import { createExtensionRequestValidator } from "./extensionRequestsv2.js";
+import {createTaskRequestValidator} from "./taskRequests.js";
+import { ExtensionRequestRequest, ExtensionRequestResponse } from "../../types/extensionRequests.js";
+import { CustomResponse } from "../../typeDefinitions/global.js";
+import { UpdateRequest } from "../../types/requests.js";
+import { TaskRequestRequest, TaskRequestResponse } from "../../types/taskRequests.js";
+import { createOnboardingExtensionRequestValidator, updateOnboardingExtensionRequestValidator } from "./onboardingExtensionRequest.js";
+import { OnboardingExtensionCreateRequest, OnboardingExtensionResponse, UpdateOnboardingExtensionRequest } from "../../types/onboardingExtension.js";
+import logger from "../../utils/logger.js";
 
 export const createRequestsMiddleware = async (
   req: OooRequestCreateRequest|ExtensionRequestRequest | TaskRequestRequest | OnboardingExtensionCreateRequest,
@@ -143,7 +144,7 @@ export const updateRequestValidator = async (
   switch (type) {
       case REQUEST_TYPE.ONBOARDING:
           await updateOnboardingExtensionRequestValidator(
-            req, 
+            req,
             res as OnboardingExtensionResponse, next);
           break;
       case REQUEST_TYPE.OOO:

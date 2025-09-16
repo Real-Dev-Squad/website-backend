@@ -19,10 +19,10 @@ import { Timestamp } from "firebase-admin/firestore";
 import addUser from "../../utils/addUser";
 import cleanDb from "../../utils/cleanDb";
 import config from "config";
-const authService = require("../../../services/authService");
-const userQuery = require("../../../models/users");
+import * as authService from "../../../services/authService";
+import * as userQuery from "../../../models/users";
 const userData = userDataFixture();
-const logger = require("../../../utils/logger");
+import logger from "../../../utils/logger";
 
 describe("Tests Impersonation Requests Service", () => {
   const mockRequestBody: CreateImpersonationRequestModelDto = impersonationRequestsBodyData[0];
@@ -44,7 +44,12 @@ describe("Tests Impersonation Requests Service", () => {
 
   describe("createImpersonationRequestService", () => {
     it("should return NotFound error with USER_NOT_FOUND if createdBy does not exist", async () => {
-      sinon.stub(userQuery, "fetchUser").returns({ userExists: false });
+      sinon.stub(userQuery, "fetchUser").resolves({
+        userExists: false,
+        user: function <userModel>() {
+          throw new Error("Function not implemented.");
+        }
+      });
 
       try {
         await impersonationService.createImpersonationRequestService({
@@ -67,7 +72,7 @@ describe("Tests Impersonation Requests Service", () => {
         updatedAt: Timestamp.now()
       }));
 
-      sinon.stub(userQuery, "fetchUser").returns({ userExists: true, user: userData[20] });
+      sinon.stub(userQuery, "fetchUser").resolves({ userExists: true, user: userData[20] });
 
       sinon.stub(logService, "addLog").resolves();
 
@@ -257,7 +262,8 @@ describe("Tests Impersonation Requests Service", () => {
         await impersonationService.updateImpersonationRequestService(body);
         expect.fail("Should throw error");
       } catch (err) {
-        expect(loggerStub.calledWith(ERROR_WHILE_UPDATING_REQUEST, err)).to.be.true;
+        expect(loggerStub.called).to.be.true;
+        expect(loggerStub.firstCall.args[0]).to.equal(ERROR_WHILE_UPDATING_REQUEST);
       }
     });
   });
@@ -392,7 +398,7 @@ describe("generateImpersonationTokenService", () => {
   it("should generate jwt token for impersonation when the action is START", async () => {
     sinon.stub(impersonationModel, "getImpersonationRequestById").returns(Promise.resolve(dummyImpersonationRequest));
 
-    sinon.stub(authService, "generateImpersonationAuthToken").resolves("mockToken123");
+    sinon.stub(authService.default, "generateImpersonationAuthToken").returns("mockToken123");
 
     const response = await impersonationService.generateImpersonationTokenService("123", "START");
 

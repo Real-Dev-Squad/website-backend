@@ -1,9 +1,7 @@
-const chai = require("chai");
-const { expect } = chai;
-
-const cleanDb = require("../../utils/cleanDb");
-const externalAccountsModel = require("../../../models/external-accounts");
-const externalAccountData = require("../../fixtures/external-accounts/external-accounts")();
+import { expect } from "chai";
+import cleanDb from "../../utils/cleanDb.js";
+import * as externalAccountsModel from "../../../models/external-accounts.js";
+import externalAccountData from "../../fixtures/external-accounts/external-accounts.js";
 
 describe("External Accounts", function () {
   afterEach(async function () {

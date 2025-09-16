@@ -1,8 +1,8 @@
-const sinon = require("sinon");
-const { expect } = require("chai");
-const { cacheResponse, invalidateCache } = require("../../../utils/cache");
+import { expect } from "chai";
+import sinon from "sinon";
 
-const { dummyResponse } = require("../../fixtures/cache/cache");
+import { cacheResponse, invalidateCache } from "../../../utils/cache.js";
+import { dummyResponse } from "../../fixtures/cache/cache.js";
 
 const responseBody = JSON.stringify(dummyResponse);
 

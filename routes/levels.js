@@ -1,14 +1,15 @@
-const express = require("express");
-const { addLevel, deleteLevel, getAllLevels } = require("../controllers/levels");
-const { validateLevelBody } = require("../middlewares/validators/levels");
-const authenticate = require("../middlewares/authenticate");
-const authorizeRoles = require("../middlewares/authorizeRoles");
-const { SUPERUSER } = require("../constants/roles");
+import express from "express";
+import { addLevel, deleteLevel, getAllLevels } from "../controllers/levels.js";
+import { validateLevelBody } from "../middlewares/validators/levels.js";
+import authenticate from "../middlewares/authenticate.js";
+import { authorizeRoles } from "../middlewares/authorizeRoles.js";
+import { ROLES } from "../constants/roles.js";
 
 const router = express.Router();
+const { SUPERUSER } = ROLES;
 
-router.post("/", authenticate, authorizeRoles([SUPERUSER]), validateLevelBody, addLevel);
-router.delete("/:levelid", authenticate, authorizeRoles([SUPERUSER]), deleteLevel);
 router.get("/", getAllLevels);
+router.post("/", authenticate, authorizeRoles([SUPERUSER]), validateLevelBody, addLevel);
+router.delete("/:id", authenticate, authorizeRoles([SUPERUSER]), deleteLevel);
 
-module.exports = router;
+export default router;

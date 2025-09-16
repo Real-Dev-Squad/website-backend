@@ -1,9 +1,12 @@
-const firestore = require("../utils/firestore");
+import firestore from "../utils/firestore.js";
+import { months, discordNicknameLength } from "../constants/users.js";
+import * as dataAccessLayer from "../services/dataAccessLayer.js";
+import * as discordService from "../services/discordService.js";
+import { ROLES } from "../constants/roles.js";
+import logger from "./logger.js";
+
 const userModel = firestore.collection("users");
-const { months, discordNicknameLength } = require("../constants/users");
-const dataAccessLayer = require("../services/dataAccessLayer");
-const discordService = require("../services/discordService");
-const ROLES = require("../constants/roles");
+
 const addUserToDBForTest = async (userData) => {
   await userModel.add(userData);
 };
@@ -291,18 +294,18 @@ const updateNickname = async (userId, status = {}) => {
   }
 };
 
-module.exports = {
+export {
   addUserToDBForTest,
   getUserId,
   getUsername,
   getFullName,
-  getParticipantUserIds,
+  getUsernameElseUndefined,
+  getUserIdElseUndefined,
   getParticipantUsernames,
+  getParticipantUserIds,
   getLowestLevelSkill,
   getPaginationLink,
   getUsernamesFromPRs,
-  getUsernameElseUndefined,
-  getUserIdElseUndefined,
   getRoleToUpdate,
   parseSearchQuery,
   generateOOONickname,

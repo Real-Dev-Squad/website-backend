@@ -1,5 +1,5 @@
 import sinon from "sinon";
-import cleanDb from "../../utils/cleanDb";
+import cleanDb from "../../utils/cleanDb.js";
 import {
   INVALID_REQUEST_TYPE,
   REQUEST_ALREADY_APPROVED,

@@ -1,5 +1,7 @@
 // Import fixtures
-const githubUserInfo = require("../auth/githubUserInfo")();
+import githubUserInfoFunc from "../auth/githubUserInfo.js";
+
+export const githubUserInfo = githubUserInfoFunc();
 
 /**
  * User info for GitHub auth response
@@ -7,7 +9,7 @@ const githubUserInfo = require("../auth/githubUserInfo")();
  *
  * @return {Object}
  */
-module.exports = () => {
+export default () => {
   return [
     {
       username: "ankur",

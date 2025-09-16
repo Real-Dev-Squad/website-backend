@@ -7,4 +7,4 @@ const conditionalMiddleware = (validator) => {
   };
 };
 
-module.exports = conditionalMiddleware;
+export default  conditionalMiddleware;

@@ -1,4 +1,7 @@
 import { generateCloudFlareHeaders } from "../utils/discord-actions.js";
+import config from "config";
+import logger from "./logger.js";
+
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 
 export const sendTaskUpdate = async (completed, blockers, planned, userName, taskId, taskTitle) => {

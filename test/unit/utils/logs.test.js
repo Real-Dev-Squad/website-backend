@@ -1,5 +1,5 @@
-const { expect } = require("chai");
-const { formatLogsForFeed, mapify } = require("../../../utils/logs");
+import { expect } from "chai";
+import { formatLogsForFeed, mapify } from "../../../utils/logs.js";
 
 describe("logs utils", function () {
   describe("formatLogsForFeed", function () {

@@ -1,3 +1,5 @@
+import logger from "./logger.js";
+
 const CACHE_EXPIRY_TIME_MIN = 0.1;
 const CACHE_SIZE_MB = 10;
 const minutesToMilliseconds = (minutes) => minutes * 60000;
@@ -71,6 +73,7 @@ const cachePool = (opt = { maximumSize: CACHE_SIZE_MB }) => {
 
   return { get, set, evict, hits, cacheStore };
 };
+
 /**
  * A MultiMap implementation where each key maps to set of unique values.
  * It internally uses Map to store keys and values and to save multiple values it uses Set. Map<string,Set<string>>
@@ -105,6 +108,7 @@ const cachedKeysStore = () => {
       keyStore.set(modelKey, set);
     }
   };
+
   /**
    * removes the given key(modelKey) and all of its associated values
    * @param {string} modelKey key for the map
@@ -231,4 +235,4 @@ const invalidateCache = (options = {}) => {
   };
 };
 
-module.exports = { cacheResponse, invalidateCache, generateCacheKey, cachedKeysStore };
+export { cacheResponse, invalidateCache, generateCacheKey, cachedKeysStore, pool, cachedKeys };

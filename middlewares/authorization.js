@@ -5,7 +5,7 @@
  * - Route requiring `superUser` role is only allowed for `super_user`.
  * - Route requiring `appOwner` role is allowed for `superUser` and `app_owner`.
  */
-const REQUIRED_ROLES_PRIORITY = {
+export const REQUIRED_ROLES_PRIORITY = {
   superUser: ["super_user"],
   appOwner: ["app_owner", "super_user"],
   default: ["default", "super_user", "app_owner"],
@@ -19,7 +19,7 @@ const REQUIRED_ROLES_PRIORITY = {
  * @param {Object} userRoles - Roles information of the current user.
  * @returns {Boolean} - Whether the current user is authorized for required role level.
  */
-const userHasPermission = (requiredRole, userRoles) => {
+export const userHasPermission = (requiredRole, userRoles) => {
   const allowedRoles = REQUIRED_ROLES_PRIORITY[`${requiredRole}`] || ["default"];
   return allowedRoles.some((role) => {
     return Boolean(userRoles[`${role}`]);
@@ -35,7 +35,7 @@ const userHasPermission = (requiredRole, userRoles) => {
  * @param {String} requiredRole - The least role authority required for a route.
  * @returns {Function} - A middleware function that authorizes given role.
  */
-const authorizeUser = (requiredRole) => {
+export const authorizeUser = (requiredRole) => {
   return (req, res, next) => {
     const { roles = {} } = req.userData;
     // All users should have `default` role
@@ -48,7 +48,8 @@ const authorizeUser = (requiredRole) => {
   };
 };
 
-module.exports = {
+export default {
+  REQUIRED_ROLES_PRIORITY,
   authorizeUser,
   userHasPermission,
 };

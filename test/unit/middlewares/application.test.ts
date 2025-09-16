@@ -1,7 +1,7 @@
 import chai from "chai";
-const Sinon = require("sinon");
+import Sinon from "sinon";
 const { expect } = chai;
-const { authorizeOwnOrSuperUser } = require("../../../middlewares/authorizeOwnOrSuperUser");
+import { authorizeOwnOrSuperUser  } from "../../../middlewares/authorizeOwnOrSuperUser.js";
 
 describe("authorizeOwnOrSuperUser", function () {
   it("should call next function if user is super user", async function () {
@@ -18,7 +18,7 @@ describe("authorizeOwnOrSuperUser", function () {
     };
     const nextSpy = Sinon.spy();
 
-    await authorizeOwnOrSuperUser(req, {}, nextSpy);
+    await authorizeOwnOrSuperUser(req as any, {} as any, nextSpy);
     expect(nextSpy.callCount).to.be.equal(1);
   });
 
@@ -36,7 +36,7 @@ describe("authorizeOwnOrSuperUser", function () {
     };
     const nextSpy = Sinon.spy();
 
-    await authorizeOwnOrSuperUser(req, {}, nextSpy);
+    await authorizeOwnOrSuperUser(req as any, {} as any, nextSpy);
     expect(nextSpy.callCount).to.be.equal(1);
   });
 
@@ -59,7 +59,7 @@ describe("authorizeOwnOrSuperUser", function () {
     };
     const nextSpy = Sinon.spy();
 
-    await authorizeOwnOrSuperUser(req, res, nextSpy);
+    await authorizeOwnOrSuperUser(req as any, res as any, nextSpy);
     expect(nextSpy.callCount).to.be.equal(0);
   });
 });

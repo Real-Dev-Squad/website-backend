@@ -1,21 +1,28 @@
-const express = require("express");
-const router = express.Router();
-const extensionRequests = require("../controllers/extensionRequests");
-const authenticate = require("../middlewares/authenticate");
-const authorizeRoles = require("../middlewares/authorizeRoles");
-const { SUPERUSER, APPOWNER } = require("../constants/roles");
-const {
-  createExtensionRequest,
-  updateExtensionRequest,
-  updateExtensionRequestStatus,
-  getExtensionRequestsValidator,
-} = require("../middlewares/validators/extensionRequests");
-const skipAuthorizeRolesUnderFF = require("../middlewares/skipAuthorizeRolesWrapper");
-const { userAuthorization } = require("../middlewares/userAuthorization");
-const { devFlagMiddleware } = require("../middlewares/devFlag");
+import express from "express";
+import * as extensionRequests from "../controllers/extensionRequests.js";
+import authenticate from "../middlewares/authenticate.js";
+import { authorizeRoles } from "../middlewares/authorizeRoles.js";
+import { ROLES } from "../constants/roles.js";
+import extensionRequestValidator from "../middlewares/validators/extensionRequests.js";
+import skipAuthorizeRolesUnderFF from "../middlewares/skipAuthorizeRolesWrapper.js";
+import { userAuthorization } from "../middlewares/userAuthorization.js";
+import { devFlagMiddleware } from "../middlewares/devFlag.js";
 
-router.post("/", authenticate, createExtensionRequest, extensionRequests.createTaskExtensionRequest);
-router.get("/", authenticate, getExtensionRequestsValidator, extensionRequests.fetchExtensionRequests);
+const router = express.Router();
+const { SUPERUSER, APPOWNER } = ROLES;
+
+router.post(
+  "/",
+  authenticate,
+  extensionRequestValidator.createExtensionRequest,
+  extensionRequests.createTaskExtensionRequest
+);
+router.get(
+  "/",
+  authenticate,
+  extensionRequestValidator.getExtensionRequestsValidator,
+  extensionRequests.fetchExtensionRequests
+);
 router.get("/self", authenticate, extensionRequests.getSelfExtensionRequests); // This endpoint is being deprecated. Please use `/extension-requests/user/:userId` route to get the user extension-requests details based on userID."
 router.get(
   "/user/:userId",
@@ -30,15 +37,15 @@ router.patch(
   "/:id",
   authenticate,
   skipAuthorizeRolesUnderFF(authorizeRoles([SUPERUSER, APPOWNER])),
-  updateExtensionRequest,
+  extensionRequestValidator.updateExtensionRequest,
   extensionRequests.updateExtensionRequest
 );
 router.patch(
   "/:id/status",
   authenticate,
   authorizeRoles([SUPERUSER, APPOWNER]),
-  updateExtensionRequestStatus,
+  extensionRequestValidator.updateExtensionRequestStatus,
   extensionRequests.updateExtensionRequestStatus
 );
 
-module.exports = router;
+export default router;

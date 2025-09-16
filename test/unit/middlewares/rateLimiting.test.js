@@ -1,6 +1,7 @@
-const sinon = require("sinon");
-const { TOO_MANY_REQUESTS } = require("../../../constants/rateLimiting");
-const { commonRateLimiter } = require("../../../middlewares/rateLimiting");
+import sinon from "sinon";
+
+import { TOO_MANY_REQUESTS } from "../../../constants/rateLimiting.js";
+import { commonRateLimiter } from "../../../middlewares/rateLimiting.js";
 
 function mockRequest(ipAddress) {
   return {

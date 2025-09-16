@@ -1,9 +1,8 @@
-const chai = require("chai");
-const sinon = require("sinon");
-const { NotFound } = require("http-errors");
-const { expect } = chai;
-const { userState } = require("../../../constants/userStatus");
-const {
+import { expect } from "chai";
+import sinon from "sinon";
+import createError from "http-errors";
+import { userState } from "../../../constants/userStatus.js";
+import {
   generateAlreadyExistingStatusResponse,
   getUserIdFromUserName,
   checkIfUserHasLiveTasks,
@@ -12,7 +11,8 @@ const {
   updateCurrentStatusToState,
   updateFutureStatusToState,
   getNextDayTimeStamp,
-} = require("../../../utils/userStatus");
+} from "../../../utils/userStatus.js";
+const { NotFound } = createError;
 
 describe("Task Based User Status Update Util Functions", function () {
   it('should return an object with status "success" and message that the state is already in that state', function () {

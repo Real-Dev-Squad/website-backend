@@ -1,5 +1,5 @@
-import { REQUEST_TYPE } from "../constants/requests";
-import { OooStatusRequest, oldOooStatusRequest } from "../types/oooRequest";
+import { REQUEST_TYPE } from "../constants/requests.js";
+import { OooStatusRequest, oldOooStatusRequest } from "../types/oooRequest.js";
 
 /**
  * Calculates the new deadline based on the current date, the old end date, and the additional duration in milliseconds.

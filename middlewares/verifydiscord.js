@@ -11,7 +11,7 @@
  * @param {Function} next - Express middleware function
  * @returns {Object} - Returns unauthorized object if user has been restricted.
  */
-const checkIsVerifiedDiscord = async (req, res, next) => {
+export const checkIsVerifiedDiscord = async (req, res, next) => {
   const { discordId, roles } = req.userData;
   if (!discordId || roles.archived) {
     return res.boom.forbidden("You are restricted from performing this action");
@@ -19,4 +19,4 @@ const checkIsVerifiedDiscord = async (req, res, next) => {
   return next();
 };
 
-module.exports = checkIsVerifiedDiscord;
+export default checkIsVerifiedDiscord;

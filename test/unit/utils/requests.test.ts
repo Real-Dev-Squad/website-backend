@@ -1,5 +1,5 @@
-import { convertDateStringToMilliseconds, getNewDeadline } from "../../../utils/requests"
-import { convertDaysToMilliseconds } from "../../../utils/time";
+import { convertDateStringToMilliseconds, getNewDeadline } from "../../../utils/requests.js"
+import { convertDaysToMilliseconds } from "../../../utils/time.js";
 import {expect} from "chai";
 
 describe("Test getNewDeadline", () => {

@@ -1,14 +1,13 @@
-const chai = require("chai");
-const { expect } = chai;
+import { expect } from "chai";
+import firestore from "../../../utils/firestore.js";
+import addUser from "../../utils/addUser.js";
+import cleanDb from "../../utils/cleanDb.js";
 
-const cleanDb = require("../../utils/cleanDb");
-const firestore = require("../../../utils/firestore");
-const addUser = require("../../utils/addUser");
+import * as walletQuery from "../../../models/wallets.js";
+import currencies from "../../fixtures/currencies/currencies.js";
+import userDataArray from "../../fixtures/user/user.js";
 
 const walletModel = firestore.collection("wallets");
-const walletQuery = require("../../../models/wallets");
-const currencies = require("../../fixtures/currencies/currencies");
-const userDataArray = require("../../fixtures/user/user")();
 
 describe("wallets", function () {
   let userId;

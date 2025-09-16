@@ -1,14 +1,14 @@
-const users = require("../../models/users");
+import * as users from "../../models/users.js";
 
 // Import fixtures
-const userData = require("../fixtures/user/user")();
+import userData from "../fixtures/user/user.js";
 
 /**
  * File to be required in every test file where userId is required to generate the JWT
  *
  * @return {Promise<string>} userId - userId for the added user
  */
-module.exports = async (user) => {
+export default async (user) => {
   const isValid = user && Object.keys(user).length !== 0 && user.constructor === Object;
   // Use the user data sent as arguments, else use data from fixtures
   user = isValid ? user : userData[0];

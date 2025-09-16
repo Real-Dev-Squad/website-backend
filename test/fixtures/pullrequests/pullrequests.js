@@ -1,4 +1,4 @@
-const filteredPRs = [
+export const filteredPRs = [
   {
     title: "Redesign the discord linking page",
     username: "RitikJaiswal75",
@@ -111,7 +111,7 @@ const filteredPRs = [
   },
 ];
 
-const prDates = [
+export const prDates = [
   {
     pull_request: {
       merged_at: "2023-08-18T11:56:45Z",
@@ -128,7 +128,7 @@ const prDates = [
     },
   },
 ];
-module.exports = {
+export default {
   filteredPRs,
   prDates,
 };

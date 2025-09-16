@@ -1,6 +1,7 @@
-const joi = require("joi");
+import joi from "joi";
+import logger from "../../utils/logger.js";
 
-const storeUserDeviceInfo = async (req, res, next) => {
+export const storeUserDeviceInfo = async (req, res, next) => {
   const schema = joi.object().strict().keys({
     user_id: joi.string().required(),
     device_info: joi.string().required(),
@@ -16,7 +17,7 @@ const storeUserDeviceInfo = async (req, res, next) => {
   }
 };
 
-const validateAuthStatus = async (req, res, next) => {
+export const validateAuthStatus = async (req, res, next) => {
   const schema = joi
     .object()
     .strict()
@@ -33,7 +34,7 @@ const validateAuthStatus = async (req, res, next) => {
   }
 };
 
-const validateFetchingUserDocument = async (req, res, next) => {
+export const validateFetchingUserDocument = async (req, res, next) => {
   const schema = joi.object().strict().keys({
     device_id: joi.string().required(),
   });
@@ -47,7 +48,7 @@ const validateFetchingUserDocument = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   storeUserDeviceInfo,
   validateAuthStatus,
   validateFetchingUserDocument,

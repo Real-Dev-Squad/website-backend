@@ -1,18 +1,15 @@
-const Sinon = require("sinon");
-const { expect } = require("chai");
+import { expect } from "chai";
+import Sinon from "sinon";
+import firestore from "../../../utils/firestore.js";
+import cleanDb from "../../utils/cleanDb.js";
+import userDataArray from "../../fixtures/user/user.js";
+import { generateUniqueUsername, getUsersWithIncompleteTasks } from "../../../services/users.js";
+import { addOrUpdate, archiveUsers } from "../../../models/users.js";
+import { usersData, tasksData } from "../../fixtures/abandoned-tasks/departed-users.js";
+import tasks from "../../../models/tasks.js";
 
-const firestore = require("../../../utils/firestore");
 const userModel = firestore.collection("users");
 const tasksModel = firestore.collection("tasks");
-const cleanDb = require("../../utils/cleanDb");
-const userDataArray = require("../../fixtures/user/user")();
-const { generateUniqueUsername, getUsersWithIncompleteTasks } = require("../../../services/users");
-const { addOrUpdate, archiveUsers } = require("../../../models/users");
-const {
-  usersData: abandonedUsersData,
-  tasksData: abandonedTasksData,
-} = require("../../fixtures/abandoned-tasks/departed-users");
-const tasks = require("../../../models/tasks");
 
 describe("Users services", function () {
   describe("archive inactive discord users in bulk", function () {
@@ -111,7 +108,7 @@ describe("Users services", function () {
     beforeEach(async function () {
       await cleanDb();
 
-      const taskPromises = abandonedTasksData.map((task) => tasksModel.add(task));
+      const taskPromises = tasksData.map((task) => tasksModel.add(task));
       await Promise.all(taskPromises);
     });
 
@@ -120,7 +117,7 @@ describe("Users services", function () {
     });
 
     it("should fetch users with abandoned tasks", async function () {
-      const users = abandonedUsersData.slice(0, 2);
+      const users = usersData.slice(0, 2);
       const usersWithAbandonedTasks = await getUsersWithIncompleteTasks(users);
 
       expect(usersWithAbandonedTasks).to.be.an("array");
@@ -128,7 +125,7 @@ describe("Users services", function () {
     });
 
     it("should not include user who are present in discord or not archived", async function () {
-      const users = abandonedUsersData.slice(0, 2);
+      const users = usersData.slice(0, 2);
       const result = await getUsersWithIncompleteTasks(users);
 
       result.forEach((user) => {
@@ -140,7 +137,7 @@ describe("Users services", function () {
     it("should return an empty array if there are no users with abandoned tasks", async function () {
       await cleanDb();
 
-      const activeTask = abandonedTasksData[3];
+      const activeTask = tasksData[3];
       await tasksModel.add(activeTask);
 
       const result = await getUsersWithIncompleteTasks([]);
@@ -149,7 +146,7 @@ describe("Users services", function () {
     });
 
     it("should throw an error if fetchIncompleteTaskForUser fails", async function () {
-      const users = abandonedUsersData.slice(0, 2);
+      const users = usersData.slice(0, 2);
       Sinon.stub(tasks, "fetchIncompleteTasksByUserIds").throws(new Error("Database query failed"));
 
       try {

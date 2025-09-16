@@ -49,7 +49,7 @@ const tasksUsersStatus = {
   MISSED_UPDATES: "missed-updates",
 };
 
-module.exports = {
+export {
   TASK_TYPE,
   TASK_STATUS,
   TASK_STATUS_OLD,

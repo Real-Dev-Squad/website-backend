@@ -1,7 +1,8 @@
 import joi from "joi";
 import { NextFunction } from "express";
-import { REQUEST_STATE, REQUEST_TYPE, ERROR_WHILE_ACKNOWLEDGING_REQUEST } from "../../constants/requests";
-import { AcknowledgeOooRequest, OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest";
+import { REQUEST_STATE, REQUEST_TYPE, ERROR_WHILE_ACKNOWLEDGING_REQUEST } from "../../constants/requests.js";
+import { AcknowledgeOooRequest, OooRequestCreateRequest, OooRequestResponse } from "../../types/oooRequest.js";
+import logger from "../../utils/logger.js";
 
 export const createOooStatusRequestValidator = async (
   req: OooRequestCreateRequest,

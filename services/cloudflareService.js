@@ -1,5 +1,6 @@
-const { fetch } = require("../utils/fetch");
-const { CLOUDFLARE_PURGE_CACHE_API } = require("../constants/cloudflareCache");
+import { fetch } from "../utils/fetch.js";
+import { CLOUDFLARE_PURGE_CACHE_API } from "../constants/cloudflareCache.js";
+import config from "config";
 
 async function purgeCache(files) {
   const response = await fetch(
@@ -16,6 +17,4 @@ async function purgeCache(files) {
   return response;
 }
 
-module.exports = {
-  purgeCache,
-};
+export { purgeCache };

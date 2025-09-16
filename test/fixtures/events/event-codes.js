@@ -1,4 +1,4 @@
-module.exports = () => {
+export default () => {
   return [
     {
       message: "Event code created succesfully!",

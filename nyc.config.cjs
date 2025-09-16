@@ -1,3 +1,4 @@
+/* eslint-disable import/no-commonjs */
 /**
  * Nyc coverage config
  * Documentation: https://github.com/istanbuljs/nyc#common-configuration-options

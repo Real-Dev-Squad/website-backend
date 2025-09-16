@@ -1,4 +1,4 @@
-module.exports = (userId = " ") => {
+export default (userId = " ") => {
   return [
     {
       college: "I work at Tata Consultancy Services",

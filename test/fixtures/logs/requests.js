@@ -48,3 +48,8 @@ export const requestsLogs = [
     },
   },
 ];
+
+// Default export
+export default {
+  requestsLogs,
+};

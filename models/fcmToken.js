@@ -1,5 +1,6 @@
-const firestore = require("../utils/firestore");
-const { Conflict } = require("http-errors");
+import firestore from "../utils/firestore.js";
+import httpError from "http-errors";
+import logger from "../utils/logger.js";
 
 const fcmTokenModel = firestore.collection("fcmToken");
 
@@ -28,7 +29,7 @@ const saveFcmToken = async (fcmTokenData) => {
         });
         return fcmTokenObj.id;
       } else {
-        throw new Conflict("Device Already Registered");
+        throw new httpError.Conflict("Device Already Registered");
       }
     }
   } catch (err) {
@@ -37,4 +38,4 @@ const saveFcmToken = async (fcmTokenData) => {
   }
 };
 
-module.exports = { saveFcmToken };
+export { saveFcmToken };

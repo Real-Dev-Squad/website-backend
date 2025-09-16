@@ -1,15 +1,18 @@
-const joi = require("joi");
-const { BadRequest } = require("http-errors");
-const { DINERO, NEELAM } = require("../../constants/wallets");
-const { TASK_STATUS, TASK_STATUS_OLD, MAPPED_TASK_STATUS, tasksUsersStatus } = require("../../constants/tasks");
-const { RQLQueryParser } = require("../../utils/RQLParser");
-const { Operators } = require("../../typeDefinitions/rqlParser");
-const { daysOfWeek } = require("../../constants/constants");
-const TASK_STATUS_ENUM = Object.values(TASK_STATUS);
-const MAPPED_TASK_STATUS_ENUM = Object.keys(MAPPED_TASK_STATUS);
-const { validateMillisecondsTimestamp } = require("./utils");
+import joi from "joi";
+import httpError from "http-errors";
 
-const createTask = async (req, res, next) => {
+import { DINERO, NEELAM } from "../../constants/wallets.js";
+import { RQLQueryParser } from "../../utils/RQLParser.js";
+import { Operators } from "../../typeDefinitions/rqlParser.js";
+import { daysOfWeek } from "../../constants/constants.js";
+import { validateMillisecondsTimestamp } from "./utils.js";
+import { TASK_STATUS, TASK_STATUS_OLD, MAPPED_TASK_STATUS, tasksUsersStatus } from "../../constants/tasks.js";
+import logger from "../../utils/logger.js";
+
+export const TASK_STATUS_ENUM = Object.values(TASK_STATUS);
+export const MAPPED_TASK_STATUS_ENUM = Object.keys(MAPPED_TASK_STATUS);
+
+export const createTask = async (req, res, next) => {
   const schema = joi
     .object()
     .strict()
@@ -71,7 +74,7 @@ const createTask = async (req, res, next) => {
   }
 };
 
-const updateTask = async (req, res, next) => {
+export const updateTask = async (req, res, next) => {
   const schema = joi
     .object()
     .strict()
@@ -119,7 +122,7 @@ const updateTask = async (req, res, next) => {
   }
 };
 
-const updateSelfTask = async (req, res, next) => {
+export const updateSelfTask = async (req, res, next) => {
   const validStatus = [...TASK_STATUS_ENUM, ...Object.values(TASK_STATUS_OLD)].filter(
     (item) => item !== TASK_STATUS.AVAILABLE
   );
@@ -131,7 +134,7 @@ const updateSelfTask = async (req, res, next) => {
         .string()
         .valid(...validStatus)
         .optional()
-        .error(new BadRequest(`The value for the 'status' field is invalid.`)),
+        .error(new httpError.BadRequest(`The value for the 'status' field is invalid.`)),
       percentCompleted: joi.number().integer().min(0).max(100).optional(),
     });
   try {
@@ -139,7 +142,7 @@ const updateSelfTask = async (req, res, next) => {
     next();
   } catch (error) {
     logger.error(`Error validating updateSelfTask payload : ${error}`);
-    if (error instanceof BadRequest) {
+    if (error instanceof httpError.BadRequest) {
       res.boom.badRequest(error.message);
     } else {
       res.boom.badRequest(error.details[0].message);
@@ -147,7 +150,7 @@ const updateSelfTask = async (req, res, next) => {
   }
 };
 
-const getTasksValidator = async (req, res, next) => {
+export const getTasksValidator = async (req, res, next) => {
   const schema = joi.object().keys({
     dev: joi.bool().optional().sensitive(),
     status: joi
@@ -204,7 +207,7 @@ const getTasksValidator = async (req, res, next) => {
     res.boom.badRequest(error.details[0].message);
   }
 };
-const getUsersValidator = async (req, res, next) => {
+export const getUsersValidator = async (req, res, next) => {
   const queryParamsSchema = joi.object().keys({
     cursor: joi.string().optional(),
     q: joi.string().optional(),
@@ -266,7 +269,7 @@ const getUsersValidator = async (req, res, next) => {
   }
 };
 
-const filterOrphanTasksValidator = async (req, res, next) => {
+export const filterOrphanTasksValidator = async (req, res, next) => {
   try {
     await validateMillisecondsTimestamp(req.body, "lastOrphanTasksFilterationTimestamp");
     next();
@@ -275,7 +278,7 @@ const filterOrphanTasksValidator = async (req, res, next) => {
     res.boom.badRequest(error);
   }
 };
-module.exports = {
+export default {
   createTask,
   updateTask,
   updateSelfTask,

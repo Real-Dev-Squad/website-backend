@@ -1,7 +1,9 @@
 import express from "express";
-import authenticate from "../middlewares/authenticate";
-import auction from "../controllers/auction";
-import auctionValidator from "../middlewares/validators/auctions";
+
+import authenticate from "../middlewares/authenticate.js";
+import auction from "../controllers/auction.js";
+import auctionValidator from "../middlewares/validators/auctions.js";
+
 const router = express.Router();
 
 router.get("/:id", auction.fetchAuctionById);
@@ -9,4 +11,4 @@ router.get("/", auction.fetchAvailableAuctions);
 router.post("/bid/:id", authenticate, auctionValidator.placeBid, auction.makeNewBid);
 router.post("/", authenticate, auctionValidator.createAuction, auction.createNewAuction);
 
-module.exports = router;
+export default  router;

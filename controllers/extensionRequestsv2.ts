@@ -1,4 +1,4 @@
-import { getRequestByKeyValues, updateRequest } from "../models/requests";
+import { getRequestByKeyValues, updateRequest } from "../models/requests.js";
 import {
   ERROR_WHILE_CREATING_REQUEST,
   ERROR_WHILE_UPDATING_REQUEST,
@@ -8,13 +8,14 @@ import {
   REQUEST_REJECTED_SUCCESSFULLY,
   REQUEST_STATE,
   REQUEST_TYPE,
-} from "../constants/requests";
-import { addLog } from "../models/logs";
-import { createRequest } from "../models/requests";
-import { fetchTask } from "../models/tasks";
-import { CustomResponse } from "../typeDefinitions/global";
-import { ExtensionRequest, ExtensionRequestCreateBody, ExtensionRequestRequest } from "../types/extensionRequests";
-import { getUsernameElseUndefined } from "../utils/users";
+} from "../constants/requests.js";
+import { addLog } from "../models/logs.js";
+import { createRequest } from "../models/requests.js";
+import taskModel from "../models/tasks.js";
+import { CustomResponse } from "../typeDefinitions/global.js";
+import { ExtensionRequest, ExtensionRequestCreateBody, ExtensionRequestRequest } from "../types/extensionRequests.js";
+import { getUsernameElseUndefined } from "../utils/users.js";
+import logger from "../utils/logger.js";
 
 export const createTaskExtensionRequest = async (req: ExtensionRequestRequest, res: CustomResponse) => {
   try {
@@ -30,7 +31,7 @@ export const createTaskExtensionRequest = async (req: ExtensionRequestRequest, r
     let extensionBody: ExtensionRequestCreateBody = { ...body, requestedBy };
     let assignee: string | undefined = undefined;
 
-    const { taskData: task } = await fetchTask(taskId);
+    const { taskData: task } = await taskModel.fetchTask(taskId);
     if (!task) {
       return res.boom.badRequest("Task Not Found");
     }
@@ -112,7 +113,7 @@ export const updateTaskExtensionRequest = async (req: any, res: any) => {
   }
 
   try {
-    const requestResult = await updateRequest(requestId, requestBody, userId,REQUEST_TYPE.EXTENSION)
+    const requestResult = await updateRequest(requestId, requestBody, userId, REQUEST_TYPE.EXTENSION);
     if ("error" in requestResult) {
       return res.boom.badRequest(requestResult.error);
     }

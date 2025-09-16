@@ -5,6 +5,8 @@
  *
  * Documentation: https://github.com/lorenwest/node-config/wiki/Environment-Variables
  */
+// @ts-ignore
+// eslint-disable-next-line import/no-commonjs
 module.exports = {
   port: {
     __name: "PORT",

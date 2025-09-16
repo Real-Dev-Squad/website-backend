@@ -1,25 +1,25 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
-const cleanDb = require("../../utils/cleanDb");
-const logsQuery = require("../../../models/logs");
-const cacheData = require("../../fixtures/cloudflareCache/data");
-const logsData = require("../../fixtures/logs/archievedUsers");
-const { requestsLogs } = require("../../fixtures/logs/requests");
-const app = require("../../../server");
-const Sinon = require("sinon");
-const { INTERNAL_SERVER_ERROR } = require("../../../constants/errorMessages");
-const userData = require("../../fixtures/user/user")();
-const addUser = require("../../utils/addUser");
-const cookieName = config.get("userToken.cookieName");
-const authService = require("../../../services/authService");
-const { extensionRequestLogs } = require("../../fixtures/logs/extensionRequests");
-const { LOGS_FETCHED_SUCCESSFULLY } = require("../../../constants/logs");
-const tasks = require("../../../models/tasks");
-const tasksData = require("../../fixtures/tasks/tasks")();
+import chai, { expect } from "chai";
+import chaiHttp from "chai-http";
+import cleanDb from "../../utils/cleanDb.js";
+import logsQuery from "../../../models/logs.js";
+import cacheData from "../../fixtures/cloudflareCache/data.js";
+import logsData from "../../fixtures/logs/archievedUsers.js";
+import { requestsLogs } from "../../fixtures/logs/requests.js";
+import app from "../../../server.js";
+import Sinon from "sinon";
+import { INTERNAL_SERVER_ERROR } from "../../../constants/errorMessages.js";
+import userData from "../../fixtures/user/user.js";
+import addUser from "../../utils/addUser.js";
+import * as authService from "../../../services/authService.js";
+import { extensionRequestLogs } from "../../fixtures/logs/extensionRequests.js";
+import { LOGS_FETCHED_SUCCESSFULLY } from "../../../constants/logs.js";
+import tasks from "../../../models/tasks.js";
+import tasksData from "../../fixtures/tasks/tasks.js";
+
 chai.use(chaiHttp);
 const superUser = userData[4];
 const userToBeMadeMember = userData[1];
+const cookieName = config.get("userToken.cookieName");
 
 describe("Logs", function () {
   after(async function () {

@@ -1,4 +1,4 @@
-import firestore from "../utils/firestore";
+import firestore from "../utils/firestore.js";
 import {
   ERROR_WHILE_CREATING_REQUEST,
   REQUEST_ALREADY_PENDING,
@@ -6,12 +6,12 @@ import {
   ERROR_WHILE_FETCHING_REQUEST,
   ERROR_WHILE_UPDATING_REQUEST,
   OPERATION_NOT_ALLOWED
-} from "../constants/requests";
+} from "../constants/requests.js";
 import { Timestamp } from "firebase-admin/firestore";
 import { Query, CollectionReference } from '@google-cloud/firestore';
-import { CreateImpersonationRequestModelDto, ImpersonationRequest, UpdateImpersonationRequestModelDto, PaginatedImpersonationRequests,ImpersonationRequestQuery } from "../types/impersonationRequest";
-import { Forbidden } from "http-errors";
-const logger = require("../utils/logger");
+import { CreateImpersonationRequestModelDto, ImpersonationRequest, UpdateImpersonationRequestModelDto, PaginatedImpersonationRequests,ImpersonationRequestQuery } from "../types/impersonationRequest.js";
+import createError from "http-errors";
+import logger from "../utils/logger.js";
 const impersonationRequestModel = firestore.collection("impersonationRequests");
 const DEFAULT_PAGE_SIZE = 5;
 
@@ -39,7 +39,7 @@ export const createImpersonationRequest = async (
     const snapshot = await reqQuery.get();
 
     if (!snapshot.empty) {
-      throw new Forbidden(OPERATION_NOT_ALLOWED);
+      throw createError.Forbidden(OPERATION_NOT_ALLOWED);
     }
 
     const requestBody = {

@@ -1,9 +1,10 @@
-const logsQuery = require("../models/logs");
-const cloudflare = require("../services/cloudflareService");
-const { logType } = require("../constants/logs");
-const { MAX_CACHE_PURGE_COUNT } = require("../constants/cloudflareCache");
-const { SOMETHING_WENT_WRONG } = require("../constants/errorMessages");
-const dataAccess = require("../services/dataAccessLayer");
+import { fetchCacheLogs, addLog, fetchLastAddedCacheLog } from "../models/logs.js";
+import { purgeCache as purgeCacheService } from "../services/cloudflareService.js";
+import { logType } from "../constants/logs.js";
+import { MAX_CACHE_PURGE_COUNT } from "../constants/cloudflareCache.js";
+import { SOMETHING_WENT_WRONG } from "../constants/errorMessages.js";
+import { retrieveUsers } from "../services/dataAccessLayer.js";
+import logger from "../utils/logger.js";
 
 /**
  * Purges the Cache of Members Profile Page
@@ -14,14 +15,14 @@ const dataAccess = require("../services/dataAccessLayer");
 const purgeCache = async (req, res) => {
   try {
     const { id, username, roles } = req.userData;
-    const logs = await logsQuery.fetchCacheLogs(id);
+    const logs = await fetchCacheLogs(id);
     const logsCount = logs.length;
 
     // Cache purged by a superuser without rate limits
     if (req.body.user) {
       if (roles.super_user) {
         const { user } = req.body;
-        const userDetails = await dataAccess.retrieveUsers({ username: user });
+        const userDetails = await retrieveUsers({ username: user });
         if (!userDetails.userExists) {
           return res.boom.badRequest();
         }
@@ -47,16 +48,16 @@ const purgeCache = async (req, res) => {
 const purge = async (res, id, username, isSuperUser, userDetails) => {
   try {
     const files = [`https://members.realdevsquad.com/${username}`];
-    const response = await cloudflare.purgeCache(files);
+    const response = await purgeCacheService(files);
     if (response.status === 200) {
       if (isSuperUser) {
-        await logsQuery.addLog(
+        await addLog(
           logType.CLOUDFLARE_CACHE_PURGED,
           { userId: id, purgedFor: userDetails.user.id },
           { message: "Cache Purged" }
         );
       } else {
-        await logsQuery.addLog(logType.CLOUDFLARE_CACHE_PURGED, { userId: id }, { message: "Cache Purged" });
+        await addLog(logType.CLOUDFLARE_CACHE_PURGED, { userId: id }, { message: "Cache Purged" });
       }
     }
     return res.json({ message: "Cache purged successfully", ...response.data });
@@ -75,7 +76,7 @@ const purge = async (res, id, username, isSuperUser, userDetails) => {
 const fetchPurgedCacheMetadata = async (req, res) => {
   try {
     const { id } = req.userData;
-    const logs = await logsQuery.fetchCacheLogs(id);
+    const logs = await fetchCacheLogs(id);
     if (logs.length !== 0) {
       const latestCacheMetadata = logs[logs.length - 1];
       const { timestamp } = latestCacheMetadata;
@@ -84,8 +85,8 @@ const fetchPurgedCacheMetadata = async (req, res) => {
         remainingCount: MAX_CACHE_PURGE_COUNT - logs.length,
         timeLastCleared: timestamp._seconds,
       });
-    } else if ((await logsQuery.fetchLastAddedCacheLog(id)).length !== 0) {
-      const lastLog = await logsQuery.fetchLastAddedCacheLog(id);
+    } else if ((await fetchLastAddedCacheLog(id)).length !== 0) {
+      const lastLog = await fetchLastAddedCacheLog(id);
       const { timestamp } = lastLog[0];
       return res.json({
         message: "Purged cache metadata returned successfully!",
@@ -104,7 +105,7 @@ const fetchPurgedCacheMetadata = async (req, res) => {
   }
 };
 
-module.exports = {
+export default {
   purgeCache,
   fetchPurgedCacheMetadata,
 };

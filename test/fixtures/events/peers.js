@@ -1,7 +1,8 @@
-const eventData = require("../events/events")();
-const event1Data = eventData[0];
+import eventData from "../events/events.js";
 
-const eventOnePeerData = {
+export const event1Data = eventData[0];
+
+export const eventOnePeerData = {
   peerId: "dummyid",
   name: "Satyam Bajpai",
   eventId: event1Data.room_id,
@@ -9,4 +10,4 @@ const eventOnePeerData = {
   joinedAt: new Date(),
 };
 
-module.exports = { eventOnePeerData };
+export default { eventOnePeerData };

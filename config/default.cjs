@@ -7,6 +7,8 @@
  */
 
 const NODE_ENV = process.env.NODE_ENV;
+// @ts-ignore
+// eslint-disable-next-line import/no-commonjs
 module.exports = {
   port: 3000,
   enableFileLogs: true,

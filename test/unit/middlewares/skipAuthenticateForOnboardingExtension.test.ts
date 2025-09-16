@@ -1,6 +1,6 @@
 import sinon from "sinon";
-import { skipAuthenticateForOnboardingExtensionRequest } from "../../../middlewares/skipAuthenticateForOnboardingExtension";
-import { REQUEST_TYPE } from "../../../constants/requests";
+import { skipAuthenticateForOnboardingExtensionRequest } from "../../../middlewares/skipAuthenticateForOnboardingExtension.js";
+import { REQUEST_TYPE } from "../../../constants/requests.js";
 import { assert } from "chai";
 
 describe("skipAuthenticateForOnboardingExtensionRequest Middleware", () => {

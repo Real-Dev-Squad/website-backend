@@ -1,4 +1,4 @@
-const Joi = require("joi");
+import Joi from "joi";
 
 const validateMillisecondsTimestamp = async (reqBody, timestampProperty) => {
   const schema = Joi.object({
@@ -7,6 +7,4 @@ const validateMillisecondsTimestamp = async (reqBody, timestampProperty) => {
   return schema.validateAsync(reqBody);
 };
 
-module.exports = {
-  validateMillisecondsTimestamp
-}
+export { validateMillisecondsTimestamp };

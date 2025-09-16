@@ -1,4 +1,5 @@
-const firestore = require("../utils/firestore");
+import firestore from "../utils/firestore.js";
+
 const tagModel = firestore.collection("tags");
 
 /**
@@ -85,9 +86,4 @@ const getTagByType = async (type) => {
   }
 };
 
-module.exports = {
-  addTag,
-  deleteTag,
-  getAllTags,
-  getTagByType,
-};
+export { addTag, deleteTag, getAllTags, getTagByType };

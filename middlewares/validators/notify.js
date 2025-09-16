@@ -1,4 +1,5 @@
-const joi = require("joi");
+import joi from "joi";
+import logger from "../../utils/logger.js";
 
 export const notifyValidator = async (req, res, next) => {
   const MAX_TITLE_LENGTH = 512;

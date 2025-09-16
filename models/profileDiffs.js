@@ -1,9 +1,10 @@
-const { profileStatus } = require("../constants/users");
-const firestore = require("../utils/firestore");
+import { profileStatus } from "../constants/users.js";
+import firestore from "../utils/firestore.js";
+import * as obfuscate from "../utils/obfuscate.js";
+import { generateNextLink } from "../utils/profileDiffs.js";
+
 const userModel = firestore.collection("users");
 const profileDiffsModel = firestore.collection("profileDiffs");
-const obfuscate = require("../utils/obfuscate");
-const { generateNextLink } = require("../utils/profileDiffs");
 
 /**
  * Add profileDiff
@@ -199,11 +200,11 @@ const updateProfileDiff = async (profileDiffData, profileId) => {
   }
 };
 
-module.exports = {
+export default {
   fetchProfileDiffs,
+  fetchProfileDiffsWithPagination,
   fetchProfileDiff,
+  fetchProfileDiffUnobfuscated,
   add,
   updateProfileDiff,
-  fetchProfileDiffsWithPagination,
-  fetchProfileDiffUnobfuscated,
 };

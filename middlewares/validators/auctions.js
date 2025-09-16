@@ -1,6 +1,7 @@
-const joi = require("joi");
+import joi from "joi";
+import logger from "../../utils/logger.js";
 
-const createAuction = async (req, res, next) => {
+export const createAuction = async (req, res, next) => {
   const schema = joi.object().strict().keys({
     item_type: joi.string().required(),
     quantity: joi.number().required(),
@@ -16,7 +17,7 @@ const createAuction = async (req, res, next) => {
   }
 };
 
-const placeBid = async (req, res, next) => {
+export const placeBid = async (req, res, next) => {
   const schema = joi.object().strict().keys({
     bid: joi.number().required(),
   });
@@ -29,7 +30,7 @@ const placeBid = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   createAuction,
   placeBid,
 };

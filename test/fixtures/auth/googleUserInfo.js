@@ -4,7 +4,7 @@
  *
  * @return {Object}
  */
-module.exports = () => {
+export default () => {
   return [
     {
       id: "1234567890",

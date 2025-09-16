@@ -1,4 +1,4 @@
-const { MAX_USERNAME_LENGTH } = require("../constants/users");
+import { MAX_USERNAME_LENGTH } from "../constants/users.js";
 
 /**
  * Formats a username by sanitizing the first and last names (removing non-alphabetical characters),

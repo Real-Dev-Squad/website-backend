@@ -1,6 +1,7 @@
-const joi = require("joi");
+import joi from "joi";
+import logger from "../../utils/logger.js";
 
-const createEvent = async (req, res, next) => {
+export const createEvent = async (req, res, next) => {
   const schema = joi.object({
     name: joi.string().required(),
     description: joi.string().required(),
@@ -17,7 +18,7 @@ const createEvent = async (req, res, next) => {
   }
 };
 
-const getAllEvents = async (req, res, next) => {
+export const getAllEvents = async (req, res, next) => {
   const schema = joi.object({
     enabled: joi.boolean(),
     limit: joi.number().integer().min(10),
@@ -33,7 +34,7 @@ const getAllEvents = async (req, res, next) => {
   }
 };
 
-const joinEvent = async (req, res, next) => {
+export const joinEvent = async (req, res, next) => {
   const schema = joi.object({
     roomId: joi.string().required(),
     userId: joi.string().required(),
@@ -50,7 +51,7 @@ const joinEvent = async (req, res, next) => {
   }
 };
 
-const getEventById = async (req, res, next) => {
+export const getEventById = async (req, res, next) => {
   const { id } = req.params;
   const { isActiveRoom } = req.query;
 
@@ -70,7 +71,7 @@ const getEventById = async (req, res, next) => {
   }
 };
 
-const updateEvent = async (req, res, next) => {
+export const updateEvent = async (req, res, next) => {
   const schema = joi.object({
     id: joi.string().required(),
     enabled: joi.boolean().required(),
@@ -85,7 +86,7 @@ const updateEvent = async (req, res, next) => {
   }
 };
 
-const endActiveEvent = async (req, res, next) => {
+export const endActiveEvent = async (req, res, next) => {
   const schema = joi.object({
     id: joi.string().required(),
     reason: joi.string().required(),
@@ -101,7 +102,7 @@ const endActiveEvent = async (req, res, next) => {
   }
 };
 
-const addPeerToEvent = async (req, res, next) => {
+export const addPeerToEvent = async (req, res, next) => {
   const { id } = req.params;
   const { peerId, name, role, joinedAt } = req.body;
 
@@ -124,7 +125,7 @@ const addPeerToEvent = async (req, res, next) => {
   }
 };
 
-const kickoutPeer = async (req, res, next) => {
+export const kickoutPeer = async (req, res, next) => {
   const { id } = req.params;
   const { peerId, reason } = req.body;
 
@@ -145,7 +146,7 @@ const kickoutPeer = async (req, res, next) => {
   }
 };
 
-const generateEventCode = async (req, res, next) => {
+export const generateEventCode = async (req, res, next) => {
   const { id } = req.params;
   const { eventCode, role } = req.body;
 
@@ -166,7 +167,7 @@ const generateEventCode = async (req, res, next) => {
   }
 };
 
-const getEventCodes = async (req, res, next) => {
+export const getEventCodes = async (req, res, next) => {
   const { id } = req.params;
 
   const schema = joi.object({
@@ -184,7 +185,7 @@ const getEventCodes = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export default {
   createEvent,
   getAllEvents,
   joinEvent,

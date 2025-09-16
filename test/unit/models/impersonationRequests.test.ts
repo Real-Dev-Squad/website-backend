@@ -11,7 +11,7 @@ import { Timestamp } from "firebase-admin/firestore";
 import firestore from "../../../utils/firestore";
 
 const userData = userDataFixture();
-const logger = require("../../../utils/logger");
+import logger from "../../../utils/logger";
 
 describe("models/impersonationRequests", () => {
   let impersonationRequest;
@@ -280,7 +280,8 @@ describe("models/impersonationRequests", () => {
       } catch (err) {
         expect(loggerStub.called).to.be.true;
         expect(loggerStub.firstCall.args[0]).to.include(ERROR_WHILE_UPDATING_REQUEST);
-        expect(loggerStub.firstCall.args[1]).to.equal(err);
+        // Check if logger was called with the error as second argument
+        expect((loggerStub.firstCall.args as any)[1]).to.equal(err);
       }
     });
   });

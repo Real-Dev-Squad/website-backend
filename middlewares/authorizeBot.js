@@ -1,10 +1,10 @@
-const botVerifcation = require("../services/botVerificationService");
-const { CLOUDFLARE_WORKER, CRON_JOB_HANDLER, DISCORD_SERVICE, DiscordServiceHeader } = require("../constants/bot");
+import botVerifcation from "../services/botVerificationService.js";
+import { CLOUDFLARE_WORKER, CRON_JOB_HANDLER, DISCORD_SERVICE, DiscordServiceHeader } from "../constants/bot.js";
 
-const verifyCronJob = async (req, res, next) => {
+export const verifyCronJob = async (req, res, next) => {
   try {
     const token = req.headers.authorization.split(" ")[1];
-    const data = botVerifcation.verifyCronJob(token);
+    const data = botVerifcation.verifyCronJobService(token);
     if (data.name !== CRON_JOB_HANDLER) {
       return res.boom.unauthorized("Cron job not verified");
     }
@@ -15,7 +15,7 @@ const verifyCronJob = async (req, res, next) => {
   }
 };
 
-const verifyDiscordBot = async (req, res, next) => {
+export const verifyDiscordBot = async (req, res, next) => {
   try {
     const token = req.headers.authorization.split(" ")[1];
     const serviceName = req.headers[DiscordServiceHeader.name] || "";
@@ -37,4 +37,4 @@ const verifyDiscordBot = async (req, res, next) => {
     return res.boom.badRequest("Invalid Request");
   }
 };
-module.exports = { verifyDiscordBot, verifyCronJob };
+export default { verifyDiscordBot, verifyCronJob };

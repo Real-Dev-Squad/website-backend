@@ -3,13 +3,13 @@ const { expect } = chai;
 import chaiHttp from "chai-http";
 import _ from "lodash";
 import config from "config";
-import app from "../../server";
-import cleanDb from "../utils/cleanDb";
-import authService from "../../services/authService";
-import userDataFixture from "../fixtures/user/user";
+import app from "../../server.js";
+import cleanDb from "../utils/cleanDb.js";
+import {generateAuthToken} from "../../services/authService.js";
+import userDataFixture from "../fixtures/user/user.js";
 import sinon from "sinon";
 const cookieName = config.get("userToken.cookieName");
-import addUser from "../utils/addUser";
+import addUser from "../utils/addUser.js";
 import {
   createOooRequests,
   validOooStatusRequests,
@@ -17,8 +17,8 @@ import {
   createOooRequests2,
   testAcknowledgeOooRequest,
   createOooRequests3,
-} from "../fixtures/oooRequest/oooRequest";
-import { createRequest, updateRequest } from "../../models/requests";
+} from "../fixtures/oooRequest/oooRequest.js";
+import { createRequest, updateRequest } from "../../models/requests.js";
 import {
   REQUEST_ALREADY_APPROVED,
   REQUEST_STATE,
@@ -34,13 +34,13 @@ import {
   UNAUTHORIZED_TO_CREATE_OOO_REQUEST,
   USER_STATUS_NOT_FOUND,
   OOO_STATUS_ALREADY_EXIST,
-} from "../../constants/requests";
-import { updateTask } from "../../models/tasks";
-import { validTaskAssignmentRequest, validTaskCreqtionRequest } from "../fixtures/taskRequests/taskRequests";
-import { deleteUserStatus, updateUserStatus } from "../../models/userStatus";
-import * as requestsQuery from "../../models/requests";
-import { userState } from "../../constants/userStatus";
-import * as logUtils from "../../services/logService";
+} from "../../constants/requests.js";
+import { validTaskAssignmentRequest, validTaskCreqtionRequest } from "../fixtures/taskRequests/taskRequests.js";
+import { deleteUserStatus, updateUserStatus } from "../../models/userStatus.js";
+import * as requestsQuery from "../../models/requests.js";
+import { userState } from "../../constants/userStatus.js";
+import * as logUtils from "../../services/logService.js";
+import * as taskModel from "../../models/tasks.js";
 
 const userData = userDataFixture();
 chai.use(chaiHttp);
@@ -83,8 +83,8 @@ describe("/requests OOO", function () {
     );
     approvedOooRequestId = response?.id;
 
-    authToken = authService.generateAuthToken({ userId });
-    superUserToken = authService.generateAuthToken({ userId: superUserId });
+    authToken = generateAuthToken({ userId });
+    superUserToken = generateAuthToken({ userId: superUserId });
   });
 
   afterEach(async function () {
@@ -98,7 +98,7 @@ describe("/requests OOO", function () {
       const userIdPromises = [addUser(userData[16])];
       const [userId] = await Promise.all(userIdPromises);
 
-      authToken = authService.generateAuthToken({ userId });
+      authToken = generateAuthToken({ userId });
 
       const testUserStatus = {
         currentStatus: {
@@ -143,7 +143,7 @@ describe("/requests OOO", function () {
     });
 
     it("should return 403 if user is not part of discord", function (done) {
-      const authTokenForArchivedUserId = authService.generateAuthToken(
+      const authTokenForArchivedUserId = generateAuthToken(
         { userId: testArchivedUserId }
       );
       chai
@@ -740,12 +740,12 @@ describe("/requests Extension", function () {
     userId2 = await addUser(userData[17]);
     superUserId = await addUser(userData[4]);
 
-    userJwtToken1 = authService.generateAuthToken({ userId: userId1 });
-    userJwtToken2 = authService.generateAuthToken({ userId: userId2 });
-    superUserJwtToken = authService.generateAuthToken({ userId: superUserId });
+    userJwtToken1 = generateAuthToken({ userId: userId1 });
+    userJwtToken2 = generateAuthToken({ userId: userId2 });
+    superUserJwtToken = generateAuthToken({ userId: superUserId });
 
-    taskId1 = (await updateTask({ ...taskData[0], assigneeId: userId1 })).taskId;
-    taskId2 = (await updateTask({ ...taskData[1] })).taskId;
+    taskId1 = (await taskModel.updateTask({ ...taskData[0], assigneeId: userId1 })).taskId;
+    taskId2 = (await taskModel.updateTask({ ...taskData[1] })).taskId;
   });
 
   afterEach(async function () {
@@ -1078,7 +1078,7 @@ describe("/requests Task", function () {
 
   beforeEach(async function () {
     userId1 = await addUser(userData[16]);
-    userJwtToken1 = authService.generateAuthToken({ userId: userId1 });
+    userJwtToken1 = generateAuthToken({ userId: userId1 });
   });
 
   afterEach(async function () {

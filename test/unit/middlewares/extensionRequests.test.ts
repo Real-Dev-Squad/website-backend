@@ -2,10 +2,10 @@ import chai from "chai";
 import sinon from "sinon";
 const { expect } = chai;
 
-import { createExtensionRequestValidator } from "../../../middlewares/validators/extensionRequestsv2";
-import { extensionCreateObject } from "../../fixtures/extension-requests/extensionRequests";
-import { REQUEST_STATE } from "../../../constants/requests";
-import { ExtensionRequestRequest, ExtensionRequestResponse } from "../../../types/extensionRequests";
+import { createExtensionRequestValidator } from "../../../middlewares/validators/extensionRequestsv2.js";
+import { extensionCreateObject } from "../../fixtures/extension-requests/extensionRequests.js";
+import { REQUEST_STATE } from "../../../constants/requests.js";
+import { ExtensionRequestRequest, ExtensionRequestResponse } from "../../../types/extensionRequests.js";
 
 describe("Extension Request Validators", function () {
     describe("createExtensionRequestValidator", function () {

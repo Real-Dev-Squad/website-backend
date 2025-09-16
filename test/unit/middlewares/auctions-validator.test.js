@@ -1,6 +1,8 @@
-const Sinon = require("sinon");
-const { createAuction, placeBid } = require("../../../middlewares/validators/auctions");
-const { expect } = require("chai");
+import { expect } from "chai";
+import sinon from "sinon";
+
+import auctionsValidator from "../../../middlewares/validators/auctions.js";
+const { createAuction, placeBid } = auctionsValidator;
 
 describe("auctions validator", function () {
   describe("create auctions validator", function () {
@@ -14,7 +16,7 @@ describe("auctions validator", function () {
         },
       };
       const res = {};
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       await createAuction(req, res, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(true);
     });
@@ -30,7 +32,7 @@ describe("auctions validator", function () {
           badRequest: () => {},
         },
       };
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       await createAuction(req, res, nextSpy).catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
       });
@@ -46,7 +48,7 @@ describe("auctions validator", function () {
         },
       };
       const res = {};
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       await placeBid(req, res, nextSpy);
       expect(nextSpy.calledOnce).to.be.equal(true);
     });
@@ -62,7 +64,7 @@ describe("auctions validator", function () {
           badRequest: () => {},
         },
       };
-      const nextSpy = Sinon.spy();
+      const nextSpy = sinon.spy();
       await placeBid(req, res, nextSpy).catch((err) => {
         expect(err).to.be.an.instanceOf(Error);
         expect(nextSpy.callCount).to.be.equal(0);

@@ -1,3 +1,5 @@
+import config from 'config';
+import logger from '../utils/logger.js';
 /**
  * Middleware to attach Cache header.
  * https://support.cloudflare.com/hc/en-us/articles/200172516-Understanding-Cloudflare-s-CDN
@@ -16,7 +18,7 @@
  * If the server returns an error instead of proper revalidation responses, Cloudflare continues serving the stale resource for a total M seconds beyond the expiration of the resource.
  */
 
-module.exports = (req, res, next) => {
+export const responseHeaders = (req, res, next) => {
   try {
     const cacheExpiry = config.get("routesCacheTTL");
     let cacheControl = "private, max-age=0";

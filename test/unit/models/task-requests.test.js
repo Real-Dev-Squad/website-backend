@@ -1,7 +1,25 @@
-const chai = require("chai");
-const sinon = require("sinon");
-const { expect } = chai;
-const assert = require("chai").assert;
+import { expect, assert } from "chai";
+import sinon from "sinon";
+
+import taskRequestsModel from "./../../../models/taskRequests.js";
+import {
+  TASK_REQUEST_TYPE,
+  TASK_REQUEST_STATUS,
+  TASK_REQUEST_ERROR_MESSAGE,
+} from "./../../../constants/taskRequests.js";
+
+import mockData from "../../fixtures/task-requests/task-requests.js";
+import firestore from "../../../utils/firestore.js";
+
+import cleanDb from "../../utils/cleanDb.js";
+import * as userModel from "../../../models/users.js";
+import * as tasksModel from "../../../models/tasks.js";
+import * as usersService from "../../../services/dataAccessLayer.js";
+
+import { TASK_STATUS, DEFAULT_TASK_PRIORITY } from "../../../constants/tasks.js";
+import tasksData from "../../fixtures/tasks/tasks.js";
+import userData from "../../fixtures/user/user.js";
+
 const {
   createRequest,
   fetchTaskRequests,
@@ -12,25 +30,10 @@ const {
   removeOldField,
   addUsersCountAndCreatedAt,
   rejectTaskRequest,
-} = require("./../../../models/taskRequests");
-const {
-  TASK_REQUEST_TYPE,
-  TASK_REQUEST_STATUS,
-  TASK_REQUEST_ERROR_MESSAGE,
-} = require("./../../../constants/taskRequests");
-
-const mockData = require("../../fixtures/task-requests/task-requests");
-const firestore = require("../../../utils/firestore");
-const taskRequestsCollection = firestore.collection("taskRequests");
-const cleanDb = require("../../utils/cleanDb");
-const userModel = require("../../../models/users");
-const tasksModel = require("../../../models/tasks");
-const usersService = require("../../../services/dataAccessLayer");
+} = taskRequestsModel;
 
 const tasksCollection = firestore.collection("tasks");
-const { TASK_STATUS, DEFAULT_TASK_PRIORITY } = require("../../../constants/tasks");
-const tasksData = require("../../fixtures/tasks/tasks")();
-const userData = require("../../fixtures/user/user")();
+const taskRequestsCollection = firestore.collection("taskRequests");
 
 describe("Task requests | models", function () {
   afterEach(async function () {

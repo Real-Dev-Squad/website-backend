@@ -1,24 +1,22 @@
-const chai = require("chai");
+import chai from "chai";
+import chaiHttp from "chai-http";
+import sinon from "sinon";
+import config from "config";
+
+import firestore from "../../utils/firestore.js";
+import obfuscate from "../../utils/obfuscate.js";
+import app from "../../server.js";
+import { generateAuthToken } from "../../services/authService.js";
+import profileDiffsQuery from "../../models/profileDiffs.js";
+import addUser from "../utils/addUser.js";
+import userData from "../fixtures/user/user.js";
+import addProfileDiffs from "../utils/addProfileDiffs.js";
+
 const { expect } = chai;
-const chaiHttp = require("chai-http");
-const sinon = require("sinon");
-const firestore = require("../../utils/firestore");
 const profileDiffsModel = firestore.collection("profileDiffs");
-const obfuscate = require("../../utils/obfuscate");
-
-const app = require("../../server");
-const authService = require("../../services/authService");
-const profileDiffsQuery = require("../../models/profileDiffs");
-
-const addUser = require("../utils/addUser");
-
-const userData = require("../fixtures/user/user")();
+const cookieName = config.get("userToken.cookieName");
 const newUser = userData[3];
 const superUser = userData[4];
-
-const config = require("config");
-const addProfileDiffs = require("../utils/addProfileDiffs");
-const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);
 
@@ -30,10 +28,10 @@ describe("Profile Diffs API Behind Feature Flag", function () {
 
   before(async function () {
     newUserId = await addUser(newUser);
-    newUserAuthToken = authService.generateAuthToken({ userId: newUserId });
+    newUserAuthToken = generateAuthToken({ userId: newUserId });
 
     superUserId = await addUser(superUser);
-    superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+    superUserAuthToken = generateAuthToken({ userId: superUserId });
 
     await addProfileDiffs(newUserId);
   });

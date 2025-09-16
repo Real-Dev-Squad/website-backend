@@ -1,19 +1,19 @@
-const { expect } = require("chai");
-const firestore = require("../../../utils/firestore");
-const {
+import { expect } from "chai";
+import firestore from "../../../utils/firestore.js";
+import {
   setInDiscordFalseScript,
   addRoleToUser,
   getDiscordMembers,
   removeRoleFromUser,
   setUserDiscordNickname,
   deleteGroupRoleFromDiscord,
-} = require("../../../services/discordService");
-const { fetchAllUsers } = require("../../../models/users");
-const Sinon = require("sinon");
+} from "../../../services/discordService.js";
+import { fetchAllUsers } from "../../../models/users.js";
+import Sinon from "sinon";
+import userDataArray from "../../fixtures/user/user.js";
+import discordMembersArray from "../../fixtures/discordResponse/discord-response.js";
+
 const userModel = firestore.collection("users");
-const userDataArray = require("../../fixtures/user/user")();
-const discordMembersArray = require("../../fixtures/discordResponse/discord-response");
-// const { func } = require("joi");
 let fetchStub;
 describe("Discord services", function () {
   describe("setInDiscordFalseScript", function () {

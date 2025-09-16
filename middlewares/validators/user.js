@@ -1,14 +1,11 @@
-const { customWordCountValidator } = require("../../utils/customWordCountValidator");
+import joi from "joi";
+import logger from "../../utils/logger.js";
 
-const joi = require("joi");
-const {
-  USER_STATUS,
-  USERS_PATCH_HANDLER_ACTIONS,
-  USERS_PATCH_HANDLER_ERROR_MESSAGES,
-} = require("../../constants/users");
-const ROLES = require("../../constants/roles");
-const { IMAGE_VERIFICATION_TYPES } = require("../../constants/imageVerificationTypes");
-const { userState } = require("../../constants/userStatus");
+import { ROLES } from "../../constants/roles.js";
+import { userState } from "../../constants/userStatus.js";
+import { customWordCountValidator } from "../../utils/customWordCountValidator.js";
+import { IMAGE_VERIFICATION_TYPES } from "../../constants/imageVerificationTypes.js";
+import { USER_STATUS, USERS_PATCH_HANDLER_ACTIONS, USERS_PATCH_HANDLER_ERROR_MESSAGES } from "../../constants/users.js";
 
 const updateUser = async (req, res, next) => {
   const schema = joi
@@ -372,7 +369,7 @@ const migrationsValidator = async (req, res, next) => {
   }
 };
 
-module.exports = {
+export {
   updateUser,
   updateProfileURL,
   validateJoinData,

@@ -1,4 +1,6 @@
-const firestore = require("../utils/firestore");
+import firestore from "../utils/firestore.js";
+import logger from "../utils/logger.js";
+
 const externalAccountsModel = firestore.collection("external-accounts");
 
 const addExternalAccountData = async (data) => {
@@ -38,4 +40,4 @@ const fetchExternalAccountData = async (query, param) => {
   }
 };
 
-module.exports = { addExternalAccountData, fetchExternalAccountData };
+export { addExternalAccountData, fetchExternalAccountData };

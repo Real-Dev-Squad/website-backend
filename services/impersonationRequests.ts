@@ -14,18 +14,18 @@ import {
   REQUEST_REJECTED_SUCCESSFULLY,
   UNAUTHORIZED_TO_UPDATE_REQUEST,
   ERROR_WHILE_UPDATING_REQUEST,
-} from "../constants/requests";
-import { createImpersonationRequest, updateImpersonationRequest, getImpersonationRequestById } from "../models/impersonationRequests";
-import { fetchUser } from "../models/users";
-import { addLog } from "./logService";
-import { User } from "../typeDefinitions/users";
-import { NotFound, Forbidden, BadRequest } from "http-errors";
+} from "../constants/requests.js";
+import { createImpersonationRequest, updateImpersonationRequest, getImpersonationRequestById } from "../models/impersonationRequests.js";
+import { fetchUser } from "../models/users.js";
+import { addLog } from "./logService.js";
+import { User } from "../typeDefinitions/users.js";
+import createError from "http-errors";
 import { CreateImpersonationRequestServiceBody, ImpersonationRequest, UpdateImpersonationRequestModelDto,
-  UpdateImpersonationStatusModelResponse, ImpersonationSessionServiceBody, UpdateImpersonationRequestDataResponse } from "../types/impersonationRequest";
+  UpdateImpersonationStatusModelResponse, ImpersonationSessionServiceBody, UpdateImpersonationRequestDataResponse } from "../types/impersonationRequest.js";
 import { Timestamp } from "firebase-admin/firestore";
 import config from "config";
-const authService = require("../services/authService");
-const logger = require("../utils/logger");
+import authService from "../services/authService.js";
+import logger from "../utils/logger.js";
 
 /**
  * Service to create a new impersonation request.
@@ -43,7 +43,7 @@ export const createImpersonationRequestService = async (
   try {
     const { userExists } = await fetchUser({ userId: body.createdFor });
     if (!userExists) {
-      throw new NotFound(TASK_REQUEST_MESSAGES.USER_NOT_FOUND);
+      createError.NotFound(TASK_REQUEST_MESSAGES.USER_NOT_FOUND);
     }
 
 
@@ -97,11 +97,11 @@ export const updateImpersonationRequestService = async (
    const request = await getImpersonationRequestById(body.id);
    
     if (!request) {
-      throw new NotFound(REQUEST_DOES_NOT_EXIST);
+      createError.NotFound(REQUEST_DOES_NOT_EXIST);
     }
 
     if (request.createdFor !== body.lastModifiedBy || request.status !== REQUEST_STATE.PENDING) {
-      throw new Forbidden(OPERATION_NOT_ALLOWED);
+      createError.Forbidden(OPERATION_NOT_ALLOWED);
     }
     
     const updatedRequest = await updateImpersonationRequest(body) as UpdateImpersonationStatusModelResponse;
@@ -149,7 +149,7 @@ export const startImpersonationService = async (
   try {
     const impersonationRequest = await getImpersonationRequestById(body.requestId);
     if (!impersonationRequest) {
-      throw new NotFound(REQUEST_DOES_NOT_EXIST);
+      createError.NotFound(REQUEST_DOES_NOT_EXIST);
     }
 
     if (
@@ -157,7 +157,7 @@ export const startImpersonationService = async (
       impersonationRequest.status !== REQUEST_STATE.APPROVED ||
       impersonationRequest.isImpersonationFinished === true
     ) {
-      throw new Forbidden(OPERATION_NOT_ALLOWED);
+      createError.Forbidden(OPERATION_NOT_ALLOWED);
     }
 
     const updatePayload = {
@@ -213,10 +213,10 @@ export const stopImpersonationService = async (
   try {
     const impersonationRequest = await getImpersonationRequestById(body.requestId);
     if (!impersonationRequest) {
-      throw new NotFound(REQUEST_DOES_NOT_EXIST);
+      createError.NotFound(REQUEST_DOES_NOT_EXIST);
     }
     if ( body.userId !== impersonationRequest.createdFor ) {
-      throw new Forbidden(OPERATION_NOT_ALLOWED);
+     createError.Forbidden(OPERATION_NOT_ALLOWED);
     }
 
     const newBody = { endedAt: Timestamp.now() };
@@ -271,7 +271,7 @@ export const generateImpersonationTokenService = async (
   try {
     const request = await getImpersonationRequestById(requestId);
     if (!request) {
-      throw new NotFound(REQUEST_DOES_NOT_EXIST);
+      createError.NotFound(REQUEST_DOES_NOT_EXIST);
     }
 
     const { createdBy: userId, createdFor: impersonatedUserId } = request;

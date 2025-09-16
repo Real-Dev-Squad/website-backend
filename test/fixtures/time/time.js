@@ -1,6 +1,6 @@
-const admin = require("firebase-admin");
+import admin from "firebase-admin";
 
-const minutesToMilliseconds = [
+export const minutesToMilliseconds = [
   {
     param: 60,
     result: 3600000,
@@ -11,7 +11,7 @@ const minutesToMilliseconds = [
   },
 ];
 
-const hoursToMilliseconds = [
+export const hoursToMilliseconds = [
   {
     param: 60,
     result: 216000000,
@@ -22,7 +22,7 @@ const hoursToMilliseconds = [
   },
 ];
 
-const daysToMilliseconds = [
+export const daysToMilliseconds = [
   {
     param: 60,
     result: 5184000000,
@@ -33,7 +33,7 @@ const daysToMilliseconds = [
   },
 ];
 
-const timeInSecondsAfter = [
+export const timeInSecondsAfter = [
   {
     param: {
       timestamp: 1648370545193,
@@ -49,7 +49,7 @@ const timeInSecondsAfter = [
   },
 ];
 
-const timeBeforeHour = [
+export const timeBeforeHour = [
   {
     param: {
       timestamp: admin.firestore.Timestamp.fromDate(new Date(1671820200 * 1000)),
@@ -65,7 +65,7 @@ const timeBeforeHour = [
   },
 ];
 
-module.exports = {
+export default {
   minutesToMilliseconds,
   hoursToMilliseconds,
   daysToMilliseconds,

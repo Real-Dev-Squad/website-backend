@@ -1,8 +1,8 @@
 import express from "express"
-import { addUserToAWSGroup } from "../controllers/awsAccess";
+import { addUserToAWSGroup } from "../controllers/awsAccess.js";
 const router = express.Router();
-const { verifyDiscordBot } = require("../middlewares/authorizeBot");
+import { verifyDiscordBot } from "../middlewares/authorizeBot.js";
 
 router.post("/access", verifyDiscordBot, addUserToAWSGroup);
 
-module.exports = router;
+export default  router;

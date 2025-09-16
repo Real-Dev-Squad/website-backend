@@ -8,6 +8,4 @@ function getRetrySeconds(msBeforeNext, fallbackValue = 1) {
   return Math.round(msBeforeNext / 1000) || fallbackValue;
 }
 
-module.exports = {
-  getRetrySeconds,
-};
+export { getRetrySeconds };

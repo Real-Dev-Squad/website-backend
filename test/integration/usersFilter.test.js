@@ -1,23 +1,22 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
+import chai from "chai";
+import chaiHttp from "chai-http";
 
-const app = require("../../server");
-const authService = require("../../services/authService");
-const addUser = require("../utils/addUser");
-const cleanDb = require("../utils/cleanDb");
+import app from "../../server.js";
+import * as authService from "../../services/authService.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
 // Import fixtures
-const userData = require("../fixtures/user/user")();
-const { generateUserStatusData } = require("../fixtures/userStatus/userStatus");
+import userData from "../fixtures/user/user.js";
+import { generateUserStatusData } from "../fixtures/userStatus/userStatus.js";
+import config from "config";
+import { updateUserStatus } from "../../models/userStatus.js";
+import { addTag } from "../../models/tags.js";
+import { addLevel } from "../../models/levels.js";
+import { addTagsToItem } from "../../models/items.js";
+import { assertUserIds } from "../utils/user.js";
+import { userState } from "../../constants/userStatus.js";
 
-const config = require("config");
-const { updateUserStatus } = require("../../models/userStatus");
-const { addTag } = require("../../models/tags");
-const { addLevel } = require("../../models/levels");
-const { addTagsToItem } = require("../../models/items");
-const { assertUserIds } = require("../utils/user");
-const { userState } = require("../../constants/userStatus");
-
+const { expect } = chai;
 const cookieName = config.get("userToken.cookieName");
 
 chai.use(chaiHttp);

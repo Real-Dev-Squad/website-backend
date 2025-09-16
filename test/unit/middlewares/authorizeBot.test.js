@@ -1,15 +1,15 @@
-const authorizeBot = require("../../../middlewares/authorizeBot");
-const sinon = require("sinon");
-const expect = require("chai").expect;
-const bot = require("../../utils/generateBotToken");
-const jwt = require("jsonwebtoken");
-const {
+import authorizeBot from "../../../middlewares/authorizeBot.js";
+import sinon from "sinon";
+import { expect } from "chai";
+import bot from "../../utils/generateBotToken.js";
+import jwt from "jsonwebtoken";
+import {
   BAD_TOKEN,
   CLOUDFLARE_WORKER,
   CRON_JOB_HANDLER,
   DISCORD_SERVICE,
   DiscordServiceHeader,
-} = require("../../../constants/bot");
+} from "../../../constants/bot.js";
 
 describe("Middleware | Authorize Bot", function () {
   describe("Check authorization of bot", function (done) {

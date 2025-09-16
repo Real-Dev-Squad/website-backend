@@ -1,30 +1,30 @@
-const chai = require("chai");
+import chai from "chai";
+import chaiHttp from "chai-http";
+
+import app from "../../server.js";
+import { generateAuthToken } from "../../services/authService.js";
+import { EVENT_ROLES } from "../../constants/events.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
+
+import eventData from "../fixtures/events/events.js";
+import eventCodeData from "../fixtures/events/event-codes.js";
+
+import userData from "../fixtures/user/user.js";
+
+import eventQuery from "../../models/events.js";
+import * as logsModel from "../../models/logs.js";
+
+import config from "config";
+import sinon from "sinon";
+
+import { EventTokenService, EventAPIService } from "../../services/index.js";
+import { eventOnePeerData } from "../fixtures/events/peers.js";
 const { expect } = chai;
-const chaiHttp = require("chai-http");
-
-const app = require("../../server");
-const authService = require("../../services/authService");
-const { EVENT_ROLES } = require("../../constants/events");
-const addUser = require("../utils/addUser");
-const cleanDb = require("../utils/cleanDb");
-
-const eventData = require("../fixtures/events/events")();
-const eventCodeData = require("../fixtures/events/event-codes")();
 const eventCodeDataFirst = [...eventCodeData[0].data];
 const event1Data = eventData[0];
 
-const userData = require("../fixtures/user/user")();
-
-const eventQuery = require("../../models/events");
-const logsModel = require("../../models/logs");
-
 const defaultUser = userData[16];
-
-const config = require("config");
-const sinon = require("sinon");
-
-const { EventTokenService, EventAPIService } = require("../../services");
-const { eventOnePeerData } = require("../fixtures/events/peers");
 
 const cookieName = config.get("userToken.cookieName");
 
@@ -36,7 +36,7 @@ describe("events", function () {
 
   beforeEach(async function () {
     userId = await addUser(defaultUser);
-    authToken = authService.generateAuthToken({ userId });
+    authToken = generateAuthToken({ userId });
   });
 
   afterEach(async function () {
@@ -251,8 +251,8 @@ describe("events", function () {
       const member = userData[6];
       const memberUserId = await addUser(member);
       const superUserId = await addUser(superUser);
-      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
-      memberAuthToken = authService.generateAuthToken({ userId: memberUserId });
+      superUserAuthToken = generateAuthToken({ userId: superUserId });
+      memberAuthToken = generateAuthToken({ userId: memberUserId });
     });
 
     afterEach(function () {
@@ -490,8 +490,8 @@ describe("events", function () {
       const member = userData[6];
       const memberUserId = await addUser(member);
       const superUserId = await addUser(superUser);
-      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
-      memberAuthToken = authService.generateAuthToken({ userId: memberUserId });
+      superUserAuthToken = generateAuthToken({ userId: superUserId });
+      memberAuthToken = generateAuthToken({ userId: memberUserId });
     });
 
     afterEach(function () {
@@ -558,7 +558,7 @@ describe("events", function () {
     beforeEach(async function () {
       const superUser = userData[4];
       const superUserId = await addUser(superUser);
-      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+      superUserAuthToken = generateAuthToken({ userId: superUserId });
     });
 
     afterEach(function () {
@@ -681,7 +681,7 @@ describe("events", function () {
     beforeEach(async function () {
       const superUser = userData[4];
       const superUserId = await addUser(superUser);
-      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
+      superUserAuthToken = generateAuthToken({ userId: superUserId });
     });
 
     afterEach(function () {
@@ -738,8 +738,8 @@ describe("events", function () {
       const member = userData[6];
       const superUserId = await addUser(superUser);
       const memberUserId = await addUser(member);
-      superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
-      memberAuthToken = authService.generateAuthToken({ userId: memberUserId });
+      superUserAuthToken = generateAuthToken({ userId: superUserId });
+      memberAuthToken = generateAuthToken({ userId: memberUserId });
     });
 
     afterEach(function () {

@@ -3,7 +3,7 @@
  * @param minutes {integer} : to be converted
  * @returns {integer} : in milliseconds
  */
-const convertMinutesToMilliseconds = (minutes) => {
+export const convertMinutesToMilliseconds = (minutes) => {
   return minutes * 60 * 1000;
 };
 
@@ -12,7 +12,7 @@ const convertMinutesToMilliseconds = (minutes) => {
  * @param hours {integer} : to be converted
  * @returns {integer} : in milliseconds
  */
-const convertHoursToMilliseconds = (hours) => {
+export const convertHoursToMilliseconds = (hours) => {
   return hours * 60 * 60 * 1000;
 };
 
@@ -21,7 +21,7 @@ const convertHoursToMilliseconds = (hours) => {
  * @param days {integer} : to be converted
  * @returns {integer} : in milliseconds
  */
-const convertDaysToMilliseconds = (days) => {
+export const convertDaysToMilliseconds = (days) => {
   return days * 24 * 60 * 60 * 1000;
 };
 /**
@@ -29,7 +29,7 @@ const convertDaysToMilliseconds = (days) => {
  * @param milliseconds {number} : to be converted
  * @returns {number} : seconds
  */
-const convertMillisToSeconds = (milliseconds) => {
+export const convertMillisToSeconds = (milliseconds) => {
   if (typeof milliseconds !== "number") throw Error("Not a number");
   return Math.round(milliseconds / 1000);
 };
@@ -41,7 +41,7 @@ const convertMillisToSeconds = (milliseconds) => {
  * @param minutes {integer} : after minutes
  * @returns {integer} : in seconds
  */
-const getTimeInSecondAfter = ({ timestamp = Date.now(), days = 0, hours = 0, minutes = 0 }) => {
+export const getTimeInSecondAfter = ({ timestamp = Date.now(), days = 0, hours = 0, minutes = 0 }) => {
   const timeInMilliseconds =
     timestamp +
     convertDaysToMilliseconds(days) +
@@ -57,7 +57,7 @@ const getTimeInSecondAfter = ({ timestamp = Date.now(), days = 0, hours = 0, min
  * @param hours {integer} : before hours
  * @returns {integer} : in seconds
  */
-const getBeforeHourTime = (timestamp, hours = 0) => {
+export const getBeforeHourTime = (timestamp, hours = 0) => {
   const currentTime = timestamp;
   currentTime._seconds -= hours * 60 * 60;
   return currentTime;
@@ -70,7 +70,7 @@ const getBeforeHourTime = (timestamp, hours = 0) => {
  * @param {boolean} isEndOfDay - A flag indicating whether to convert to the end of the day (true) or the start of the day (false).
  * @returns {number} The converted timestamp.
  */
-const convertTimestampToUTCStartOrEndOfDay = (timestamp, isEndOfDay = false) => {
+export const convertTimestampToUTCStartOrEndOfDay = (timestamp, isEndOfDay = false) => {
   if (isNaN(timestamp)) {
     return null;
   }
@@ -87,11 +87,11 @@ const convertTimestampToUTCStartOrEndOfDay = (timestamp, isEndOfDay = false) => 
  * Returns Current Epoch time stamp
  * @returns {EpochTimeStamp}: Current Epoch time
  */
-const getCurrentEpochTime = () => {
+export const getCurrentEpochTime = () => {
   return Math.round(Date.now() / 1000);
 };
 
-module.exports = {
+export default {
   convertDaysToMilliseconds,
   convertHoursToMilliseconds,
   convertMinutesToMilliseconds,

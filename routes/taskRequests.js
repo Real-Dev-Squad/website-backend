@@ -1,21 +1,30 @@
-const express = require("express");
-const { SUPERUSER } = require("../constants/roles");
+import express from "express";
+import { ROLES } from "../constants/roles.js";
+import {
+  fetchTaskRequests,
+  fetchTaskRequestById,
+  updateTaskRequests,
+  migrateTaskRequests,
+  addTaskRequests,
+  addOrUpdate,
+} from "../controllers/tasksRequests.js";
+import authenticate from "../middlewares/authenticate.js";
+import { authorizeRoles } from "../middlewares/authorizeRoles.js";
+import validators from "../middlewares/validators/task-requests.js";
+import { validateUser } from "../middlewares/taskRequests.js";
+
 const router = express.Router();
-const authenticate = require("../middlewares/authenticate");
-const authorizeRoles = require("../middlewares/authorizeRoles");
-const taskRequests = require("../controllers/tasksRequests");
-const { validateUser } = require("../middlewares/taskRequests");
-const validators = require("../middlewares/validators/task-requests");
+const { SUPERUSER } = ROLES;
 
-router.get("/", authenticate, taskRequests.fetchTaskRequests);
-router.get("/:id", authenticate, taskRequests.fetchTaskRequestById);
-router.patch("/", authenticate, authorizeRoles([SUPERUSER]), validateUser, taskRequests.updateTaskRequests);
-router.post("/", authenticate, validators.postTaskRequests, taskRequests.addTaskRequests);
+router.get("/", authenticate, fetchTaskRequests);
+router.get("/:id", authenticate, fetchTaskRequestById);
+router.patch("/", authenticate, authorizeRoles([SUPERUSER]), validateUser, updateTaskRequests);
+router.post("/", authenticate, validators.postTaskRequests, addTaskRequests);
 
-router.post("/migrations", authenticate, authorizeRoles([SUPERUSER]), taskRequests.migrateTaskRequests);
+router.post("/migrations", authenticate, authorizeRoles([SUPERUSER]), migrateTaskRequests);
 
 // Deprecated | @Ajeyakrishna-k | https://github.com/Real-Dev-Squad/website-backend/issues/1597
-router.post("/addOrUpdate", authenticate, validateUser, taskRequests.addOrUpdate);
-router.patch("/approve", authenticate, authorizeRoles([SUPERUSER]), validateUser, taskRequests.updateTaskRequests);
+router.post("/addOrUpdate", authenticate, validateUser, addOrUpdate);
+router.patch("/approve", authenticate, authorizeRoles([SUPERUSER]), validateUser, updateTaskRequests);
 
-module.exports = router;
+export default router;

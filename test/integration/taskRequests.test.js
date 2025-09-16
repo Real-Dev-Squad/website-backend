@@ -1,32 +1,33 @@
-const chai = require("chai");
-const sinon = require("sinon");
+import chai from "chai";
+import sinon from "sinon";
+import chaiHttp from "chai-http";
+import config from "config";
+
+import app from "../../server.js";
+import { generateAuthToken, verifyAuthToken } from "../../services/authService.js";
+import * as tasksModel from "../../models/tasks.js";
+import * as userStatusModel from "../../models/userStatus.js";
+import * as taskRequestsModel from "../../models/taskRequests.js";
+import addUser from "../utils/addUser.js";
+import cleanDb from "../utils/cleanDb.js";
+import userData from "../fixtures/user/user.js";
+import taskData from "../fixtures/tasks/tasks.js";
+import mockData from "../fixtures/task-requests/task-requests.js";
+import userStatusData from "../fixtures/userStatus/userStatus.js";
+import firestore from "../../utils/firestore.js";
+import {
+  MIGRATION_TYPE,
+  TASK_REQUEST_TYPE,
+  TASK_REQUEST_STATUS,
+  TASK_REQUEST_ACTIONS,
+} from "../../constants/taskRequests.js";
+import usersUtils from "../../utils/users.js";
+import * as githubService from "../../services/githubService.js";
+import { userState } from "../../constants/userStatus.js";
+
 const { expect } = chai;
-const chaiHttp = require("chai-http");
-
-const app = require("../../server");
-const authService = require("../../services/authService");
-const tasksModel = require("../../models/tasks");
-const userStatusModel = require("../../models/userStatus");
-const taskRequestsModel = require("../../models/taskRequests");
-const addUser = require("../utils/addUser");
-const cleanDb = require("../utils/cleanDb");
-const userData = require("../fixtures/user/user")();
-const taskData = require("../fixtures/tasks/tasks")();
-const mockData = require("../fixtures/task-requests/task-requests");
-const userStatusData = require("../fixtures/userStatus/userStatus");
-const firestore = require("../../utils/firestore");
 const logsModel = firestore.collection("logs");
-const { MIGRATION_TYPE } = require("../../constants/taskRequests");
 const taskRequestsCollection = firestore.collection("taskRequests");
-
-chai.use(chaiHttp);
-
-const config = require("config");
-const { TASK_REQUEST_TYPE, TASK_REQUEST_STATUS, TASK_REQUEST_ACTIONS } = require("../../constants/taskRequests");
-const usersUtils = require("../../utils/users");
-const githubService = require("../../services/githubService");
-const { userState } = require("../../constants/userStatus");
-
 const cookieName = config.get("userToken.cookieName");
 
 let jwt;
@@ -43,6 +44,8 @@ const {
   userStatusDataForOooState: oooUserStatus,
 } = userStatusData;
 
+chai.use(chaiHttp);
+
 describe("Task Requests", function () {
   let userId, superUserId;
 
@@ -55,7 +58,8 @@ describe("Task Requests", function () {
   });
 
   beforeEach(async function () {
-    sinon.stub(authService, "generateAuthToken").callsFake(() => "valid_token");
+    sinon.stub(verifyAuthToken).callsFake(() => ({ userId: superUserId }));
+    jwt = generateAuthToken({ userId: superUserId });
   });
 
   describe("GET / - gets tasks requests", function () {
@@ -63,8 +67,8 @@ describe("Task Requests", function () {
       before(async function () {
         userId = await addUser(member);
         superUserId = await addUser(superUser);
-        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId: superUserId }));
-        jwt = authService.generateAuthToken({ userId: superUserId });
+        sinon.stub(verifyAuthToken).callsFake(() => ({ userId: superUserId }));
+        jwt = generateAuthToken({ userId: superUserId });
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
         await userStatusModel.updateUserStatus(userId, idleUserStatus);
@@ -120,8 +124,8 @@ describe("Task Requests", function () {
     describe("When the user is not a super user", function () {
       before(async function () {
         userId = await addUser(member);
-        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId }));
-        jwt = authService.generateAuthToken({ userId });
+        sinon.stub(verifyAuthToken).callsFake(() => ({ userId }));
+        jwt = generateAuthToken({ userId });
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
 
@@ -152,8 +156,8 @@ describe("Task Requests", function () {
 
       before(async function () {
         superUserId = await addUser(superUser);
-        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId: superUserId }));
-        jwt = authService.generateAuthToken({ userId: superUserId });
+        sinon.stub(verifyAuthToken).callsFake(() => ({ userId: superUserId }));
+        jwt = generateAuthToken({ userId: superUserId });
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
         taskRequestId = (await taskRequestsModel.addOrUpdate(taskId, userId)).id;
@@ -216,10 +220,10 @@ describe("Task Requests", function () {
 
       before(async function () {
         userId = await addUser(member);
-        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({
+        sinon.stub(verifyAuthToken).callsFake(() => ({
           userId,
         }));
-        jwt = authService.generateAuthToken({
+        jwt = generateAuthToken({
           userId,
         });
 
@@ -249,8 +253,8 @@ describe("Task Requests", function () {
     describe("When a new task requested is created", function () {
       before(async function () {
         userId = await addUser(member);
-        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId }));
-        jwt = authService.generateAuthToken({ userId });
+        sinon.stub(verifyAuthToken).callsFake(() => ({ userId }));
+        jwt = generateAuthToken({ userId });
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
       });
@@ -320,9 +324,9 @@ describe("Task Requests", function () {
 
       before(async function () {
         userId = await addUser(member);
-        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId }));
+        sinon.stub(verifyAuthToken).callsFake(() => ({ userId }));
 
-        jwt = authService.generateAuthToken({ userId });
+        jwt = generateAuthToken({ userId });
         await userStatusModel.updateUserStatus(userId, idleUserStatus);
       });
 
@@ -353,8 +357,8 @@ describe("Task Requests", function () {
       before(async function () {
         userId = await addUser(member);
         userId2 = await addUser(member2);
-        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId: userId2 }));
-        jwt = authService.generateAuthToken({ userId: userId2 });
+        sinon.stub(verifyAuthToken).callsFake(() => ({ userId: userId2 }));
+        jwt = generateAuthToken({ userId: userId2 });
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
         await userStatusModel.updateUserStatus(userId, idleUserStatus);
@@ -407,8 +411,8 @@ describe("Task Requests", function () {
       before(async function () {
         userId = await addUser(member);
         sinon.stub(userStatusModel, "getUserStatus").callsFake(() => ({ userStatusExists: false }));
-        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId }));
-        jwt = authService.generateAuthToken({ userId });
+        sinon.stub(verifyAuthToken).callsFake(() => ({ userId }));
+        jwt = generateAuthToken({ userId });
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
       });
@@ -417,8 +421,8 @@ describe("Task Requests", function () {
     describe("When the user status is not idle", function () {
       before(async function () {
         userId = await addUser(member);
-        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId }));
-        jwt = authService.generateAuthToken({ userId });
+        sinon.stub(verifyAuthToken).callsFake(() => ({ userId }));
+        jwt = generateAuthToken({ userId });
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
       });
@@ -435,8 +439,8 @@ describe("Task Requests", function () {
         oooUserId = await addUser(member2);
         superUserId = await addUser(superUser);
 
-        jwt = authService.generateAuthToken({ userId: superUserId });
-        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId: superUserId }));
+        jwt = generateAuthToken({ userId: superUserId });
+        sinon.stub(verifyAuthToken).callsFake(() => ({ userId: superUserId }));
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
 
@@ -606,8 +610,8 @@ describe("Task Requests", function () {
         userId = await addUser(member);
         superUserId = await addUser(superUser);
 
-        jwt = authService.generateAuthToken({ userId: superUserId });
-        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId: superUserId }));
+        jwt = generateAuthToken({ userId: superUserId });
+        sinon.stub(verifyAuthToken).callsFake(() => ({ userId: superUserId }));
         await userStatusModel.updateUserStatus(userId, idleUserStatus);
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
       });
@@ -651,8 +655,8 @@ describe("Task Requests", function () {
     describe("When the user is not super user", function () {
       before(async function () {
         userId = await addUser(member);
-        jwt = authService.generateAuthToken({ userId });
-        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId }));
+        jwt = generateAuthToken({ userId });
+        sinon.stub(verifyAuthToken).callsFake(() => ({ userId }));
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
         await userStatusModel.updateUserStatus(userId, idleUserStatus);
@@ -696,8 +700,8 @@ describe("Task Requests", function () {
         activeUserId = await addUser(activeMember);
         oooUserId = await addUser(member2);
         superUserId = await addUser(superUser);
-        jwt = authService.generateAuthToken({ userId: superUserId });
-        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId: superUserId }));
+        jwt = generateAuthToken({ userId: superUserId });
+        sinon.stub(verifyAuthToken).callsFake(() => ({ userId: superUserId }));
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
 
@@ -914,8 +918,8 @@ describe("Task Requests", function () {
         userId = await addUser(member);
         superUserId = await addUser(superUser);
 
-        jwt = authService.generateAuthToken({ userId: superUserId });
-        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId: superUserId }));
+        jwt = generateAuthToken({ userId: superUserId });
+        sinon.stub(verifyAuthToken).callsFake(() => ({ userId: superUserId }));
         await userStatusModel.updateUserStatus(userId, idleUserStatus);
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
       });
@@ -984,8 +988,8 @@ describe("Task Requests", function () {
     describe("When the user is not super user", function () {
       before(async function () {
         userId = await addUser(member);
-        jwt = authService.generateAuthToken({ userId });
-        sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId }));
+        jwt = generateAuthToken({ userId });
+        sinon.stub(verifyAuthToken).callsFake(() => ({ userId }));
 
         taskId = (await tasksModel.updateTask(taskData[4])).taskId;
         await userStatusModel.updateUserStatus(userId, idleUserStatus);
@@ -1028,8 +1032,8 @@ describe("Task Requests", function () {
       getUsernameStub = sinon.stub(usersUtils, "getUsername");
       getUsernameStub.resolves("abc");
       userId = await addUser({ ...member, id: "user123" });
-      sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId }));
-      jwt = authService.generateAuthToken({ userId });
+      sinon.stub(verifyAuthToken).callsFake(() => ({ userId }));
+      jwt = generateAuthToken({ userId });
     });
 
     afterEach(async function () {
@@ -1197,8 +1201,8 @@ describe("Task Requests", function () {
 
     beforeEach(async function () {
       superUserId = await addUser(superUser);
-      sinon.stub(authService, "verifyAuthToken").callsFake(() => ({ userId: superUserId }));
-      jwt = authService.generateAuthToken({ userId: superUserId });
+      sinon.stub(verifyAuthToken).callsFake(() => ({ userId: superUserId }));
+      jwt = generateAuthToken({ userId: superUserId });
     });
 
     afterEach(async function () {

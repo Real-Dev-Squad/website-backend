@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express"
-import { REQUEST_TYPE } from "../constants/requests";
+import { REQUEST_TYPE } from "../constants/requests.js";
 /**
 * Middleware to selectively authenticate or verify Discord bot based on the request type.
 * Specifically handles requests for onboarding extensions by skipping authentication.
