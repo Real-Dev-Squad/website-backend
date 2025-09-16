@@ -1,5 +1,7 @@
+import { NextFunction } from "express";
 import { logType } from "../constants/logs.js";
 import {
+  ERROR_WHILE_ACKNOWLEDGING_REQUEST,
   ERROR_WHILE_CREATING_REQUEST,
   ERROR_WHILE_UPDATING_REQUEST,
   LOG_ACTION,
@@ -19,9 +21,9 @@ import { addLog } from "../models/logs.js";
 import { getRequestByKeyValues, getRequests, updateRequest } from "../models/requests.js";
 import { createUserFutureStatus } from "../models/userFutureStatus.js";
 import { addFutureStatus, getUserStatus } from "../models/userStatus.js";
-import { createOooRequest, validateUserStatus } from "../services/oooRequest.js";
+import { acknowledgeOooRequest, createOooRequest, validateUserStatus } from "../services/oooRequest.js";
 import { CustomResponse } from "../typeDefinitions/global.js";
-import { OooRequestCreateRequest, OooRequestResponse, OooStatusRequest } from "../types/oooRequest.js";
+import { AcknowledgeOooRequest, OooRequestCreateRequest, OooRequestResponse, OooStatusRequest } from "../types/oooRequest.js";
 import { UpdateRequest } from "../types/requests.js";
 import logger from "../utils/logger.js";
 
@@ -169,7 +171,7 @@ export const acknowledgeOooRequestController = async (
       const superUserId = req.userData.id;
       const requestId = req.params.id;
 
-      const response = await acknowledgeOooRequestService(requestId, requestBody, superUserId);
+      const response = await acknowledgeOooRequest(requestId, requestBody, superUserId);
 
       return res.status(200).json({
         message: response.message,

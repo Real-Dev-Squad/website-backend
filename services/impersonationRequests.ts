@@ -14,18 +14,18 @@ import {
   REQUEST_REJECTED_SUCCESSFULLY,
   UNAUTHORIZED_TO_UPDATE_REQUEST,
   ERROR_WHILE_UPDATING_REQUEST,
-} from "../constants/requests";
-import { createImpersonationRequest, updateImpersonationRequest, getImpersonationRequestById } from "../models/impersonationRequests";
-import { fetchUser } from "../models/users";
-import { addLog } from "./logService";
-import { User } from "../typeDefinitions/users";
+} from "../constants/requests.js";
+import { createImpersonationRequest, updateImpersonationRequest, getImpersonationRequestById } from "../models/impersonationRequests.js";
+import { fetchUser } from "../models/users.js";
+import { addLog } from "./logService.js";
+import { User } from "../typeDefinitions/users.js";
 import createError from "http-errors";
 import { CreateImpersonationRequestServiceBody, ImpersonationRequest, UpdateImpersonationRequestModelDto,
-  UpdateImpersonationStatusModelResponse, ImpersonationSessionServiceBody, UpdateImpersonationRequestDataResponse } from "../types/impersonationRequest";
+  UpdateImpersonationStatusModelResponse, ImpersonationSessionServiceBody, UpdateImpersonationRequestDataResponse } from "../types/impersonationRequest.js";
 import { Timestamp } from "firebase-admin/firestore";
 import config from "config";
-import authService from "../services/authService";
-import logger from "../utils/logger";
+import authService from "../services/authService.js";
+import logger from "../utils/logger.js";
 
 /**
  * Service to create a new impersonation request.

@@ -1,8 +1,8 @@
 import express from "express";
-import {authorizeRoles} from "../middlewares/authorizeRoles";
-import { SUPERUSER } from "../constants/roles";
-import authenticate from "../middlewares/authenticate";
-import { oooRoleCheckMiddleware } from "../middlewares/oooRoleCheckMiddleware";
+import {authorizeRoles} from "../middlewares/authorizeRoles.js";
+import { SUPERUSER } from "../constants/roles.js";
+import authenticate from "../middlewares/authenticate.js";
+import { oooRoleCheckMiddleware } from "../middlewares/oooRoleCheckMiddleware.js";
 import { 
     createRequestsMiddleware, 
     updateRequestsMiddleware,

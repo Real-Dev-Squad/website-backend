@@ -6,9 +6,9 @@ import {
   ERROR_WHILE_UPDATING_REQUEST,
   REQUEST_CREATED_SUCCESSFULLY,
   OPERATION_NOT_ALLOWED
-} from "../constants/requests";
-import { createImpersonationRequestService, updateImpersonationRequestService, generateImpersonationTokenService, startImpersonationService, stopImpersonationService } from "../services/impersonationRequests";
-import { getImpersonationRequestById, getImpersonationRequests } from "../models/impersonationRequests";
+} from "../constants/requests.js";
+import { createImpersonationRequestService, updateImpersonationRequestService, generateImpersonationTokenService, startImpersonationService, stopImpersonationService } from "../services/impersonationRequests.js";
+import { getImpersonationRequestById, getImpersonationRequests } from "../models/impersonationRequests.js";
 import {
   CreateImpersonationRequest,
   CreateImpersonationRequestBody,
@@ -18,10 +18,10 @@ import {
   GetImpersonationControllerRequest,
   GetImpersonationRequestByIdRequest,
   ImpersonationSessionRequest
-} from "../types/impersonationRequest";
-import { getPaginatedLink } from "../utils/helper";
+} from "../types/impersonationRequest.js";
+import { getPaginatedLink } from "../utils/helper.js";
 import { NextFunction } from "express";
-import logger from "../utils/logger";
+import logger from "../utils/logger.js";
 
 /**
  * Controller to handle creation of an impersonation request.

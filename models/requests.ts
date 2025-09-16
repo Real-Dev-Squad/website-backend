@@ -8,9 +8,9 @@ import {
   ERROR_WHILE_CREATING_REQUEST,
   ERROR_WHILE_UPDATING_REQUEST,
   REQUEST_DOES_NOT_EXIST,
-} from "../constants/requests";
-import { getUserId } from "../utils/users";
-import { transformRequestResponse } from "../utils/requests";
+} from "../constants/requests.js";
+import { getUserId } from "../utils/users.js";
+import { transformRequestResponse } from "../utils/requests.js";
 const SIZE = 5;
 
 

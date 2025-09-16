@@ -13,16 +13,16 @@ import {
     REQUEST_REJECTED_SUCCESSFULLY,
     ERROR_WHILE_ACKNOWLEDGING_REQUEST,
     ERROR_WHILE_CREATING_REQUEST,
-} from "../constants/requests";
-import { statusState, userState } from "../constants/userStatus";
-import { createRequest, getRequests, updateRequest } from "../models/requests";
-import { AcknowledgeOooRequestBody, OooStatusRequest, oldOooStatusRequest, OooStatusRequestBody } from "../types/oooRequest";
-import { UserStatus } from "../types/userStatus";
-import { addLog } from "./logService";
+} from "../constants/requests.js";
+import { statusState, userState } from "../constants/userStatus.js";
+import { createRequest, getRequests, updateRequest } from "../models/requests.js";
+import { AcknowledgeOooRequestBody, OooStatusRequest, oldOooStatusRequest, OooStatusRequestBody } from "../types/oooRequest.js";
+import { UserStatus } from "../types/userStatus.js";
+import { addLog } from "./logService.js";
 import createError from "http-errors";
-import { addFutureStatus } from "../models/userStatus";
-import { createUserFutureStatus } from "../models/userFutureStatus";
-import { newOOOSchema} from "../utils/requests";
+import { addFutureStatus } from "../models/userStatus.js";
+import { createUserFutureStatus } from "../models/userFutureStatus.js";
+import { newOOOSchema} from "../utils/requests.js";
 import logger from "../utils/logger.js";
 
 /**

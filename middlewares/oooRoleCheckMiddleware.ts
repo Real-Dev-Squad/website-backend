@@ -1,8 +1,8 @@
 import { NextFunction } from "express";
-import { CustomRequest, CustomResponse } from "../types/global";
-import { REQUEST_TYPE } from "../constants/requests";
-import { devFlagMiddleware } from "./devFlag";
-import { authorizeRoles } from "./authorizeRoles";
+import { CustomRequest, CustomResponse } from "../types/global.d.js";
+import { REQUEST_TYPE } from "../constants/requests.js";
+import { devFlagMiddleware } from "./devFlag.js";
+import { authorizeRoles } from "./authorizeRoles.js";
 import { ROLES } from "../constants/roles.js";
 
 const { SUPERUSER } = ROLES;

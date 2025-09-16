@@ -1,4 +1,4 @@
-import { Request } from "express";
+import { NextFunction, Request } from "express";
 import {
   ERROR_WHILE_FETCHING_REQUEST,
   REQUEST_FETCHED_SUCCESSFULLY,
@@ -6,8 +6,8 @@ import {
 } from "../constants/requests.js";
 import { getRequests } from "../models/requests.js";
 import { getPaginatedLink } from "../utils/helper.js";
-import { createOooRequestController, updateOooRequestController } from "./oooRequests.js";
-import { OooRequestCreateRequest, OooRequestResponse } from "../types/oooRequest.js";
+import { acknowledgeOooRequestController, createOooRequestController, updateOooRequestController } from "./oooRequests.js";
+import { AcknowledgeOooRequest, OooRequestCreateRequest, OooRequestResponse } from "../types/oooRequest.js";
 import { CustomResponse } from "../typeDefinitions/global.js";
 import { ExtensionRequestRequest, ExtensionRequestResponse } from "../types/extensionRequests.js";
 import { createTaskExtensionRequest, updateTaskExtensionRequest } from "./extensionRequestsv2.js";

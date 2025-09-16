@@ -1,5 +1,5 @@
 import express from "express";
-import { devFlagMiddleware } from "../middlewares/devFlag";
+import { devFlagMiddleware } from "../middlewares/devFlag.js";
 
 // ESM imports
 import awsAccessRouter from "./awsAccess.js";

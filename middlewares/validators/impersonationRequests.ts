@@ -1,7 +1,7 @@
 import joi from "joi";
 import { NextFunction } from "express";
-import { CreateImpersonationRequest,GetImpersonationControllerRequest,GetImpersonationRequestByIdRequest,ImpersonationRequestResponse, UpdateImpersonationRequest, ImpersonationSessionRequest } from "../../types/impersonationRequest";
-import { REQUEST_STATE } from "../../constants/requests";
+import { CreateImpersonationRequest,GetImpersonationControllerRequest,GetImpersonationRequestByIdRequest,ImpersonationRequestResponse, UpdateImpersonationRequest, ImpersonationSessionRequest } from "../../types/impersonationRequest.js";
+import { REQUEST_STATE } from "../../constants/requests.js";
 import logger from "../../utils/logger.js";
 
 /**
