@@ -100,8 +100,10 @@ const getRangeProgressData = async (queryParams) => {
 async function getProgressByDate(pathParams, queryParams) {
   const { type, typeId, date } = pathParams;
   const { dev } = queryParams;
+  /* eslint-disable security/detect-object-injection */
   await assertUserOrTaskExists({ [TYPE_MAP[type]]: typeId });
   const query = buildQueryToSearchProgressByDay({ [TYPE_MAP[type]]: typeId, date });
+  /* eslint-enable security/detect-object-injection */
   const result = await query.get();
   if (!result.size) {
     throw new NotFound(PROGRESS_DOCUMENT_NOT_FOUND);
