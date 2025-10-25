@@ -181,10 +181,12 @@ describe("Events", function () {
       const result = await eventQuery.getEventCodes({ id });
       expect(result).to.have.lengthOf(10);
       result.forEach((elem, idx) => {
-        expect(elem.event_id).to.equal(eventCodeDataArray[1].data[idx].event_id);
-        expect(elem.code).to.equal(eventCodeDataArray[1].data[idx].code);
-        expect(elem.role).to.equal(eventCodeDataArray[1].data[idx].role);
-        expect(elem.id).to.equal(eventCodeDataArray[1].data[idx].id);
+        // eslint-disable-next-line security/detect-object-injection
+        const expectedData = eventCodeDataArray[1].data[idx] || {};
+        expect(elem.event_id).to.equal(expectedData.event_id);
+        expect(elem.code).to.equal(expectedData.code);
+        expect(elem.role).to.equal(expectedData.role);
+        expect(elem.id).to.equal(expectedData.id);
       });
     });
   });

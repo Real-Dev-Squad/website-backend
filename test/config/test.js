@@ -79,6 +79,7 @@ module.exports = {
   },
 
   cors: {
+    // eslint-disable-next-line security/detect-unsafe-regex
     allowedOrigins: /(https:\/\/([a-zA-Z0-9-_]+\.)?realdevsquad\.com$)|(localhost)/, // Allow realdevsquad.com, *.realdevsquad.com and localhost for non-production envs
   },
 

@@ -71,11 +71,13 @@ const validateUpdateTrackedProgress = async (req, res, next) => {
   const { type, typeId } = req.params;
   const { monitored, frequency } = req.body;
 
-  const key = TYPE_MAP[type];
+  const keyExists = Reflect.has(TYPE_MAP, type);
+  const resolvedKey = keyExists ? Reflect.get(TYPE_MAP, type) : null;
+
   const updatedData = { type, monitored, frequency };
 
-  if (key) {
-    updatedData[key] = typeId;
+  if (resolvedKey && typeof resolvedKey === "string") {
+    Reflect.set(updatedData, resolvedKey, typeId);
   }
 
   const monitoredSchema = joi.object({

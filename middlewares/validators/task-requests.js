@@ -3,7 +3,9 @@ const joi = require("joi");
 const { RQLQueryParser } = require("../../utils/RQLParser");
 const githubOrg = config.get("githubApi.org");
 const githubBaseUrl = config.get("githubApi.baseUrl");
+// eslint-disable-next-line security/detect-non-literal-regexp
 const githubIssuerUrlPattern = new RegExp(`^${githubBaseUrl}/repos/${githubOrg}/.+/issues/\\d+$`);
+// eslint-disable-next-line security/detect-non-literal-regexp
 const githubIssueHtmlUrlPattern = new RegExp(`^${GITHUB_URL}/${githubOrg}/.+/issues/\\d+$`); // Example: https://github.com/Real-Dev-Squad/website-status/issues/1050
 const { TASK_REQUEST_STATUS, TASK_REQUEST_TYPE } = require("../../constants/taskRequests");
 

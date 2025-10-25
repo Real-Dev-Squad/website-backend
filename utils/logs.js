@@ -123,17 +123,19 @@ function formatTaskRequestsLogs(logsSnapshot, usersMap, tasksMap) {
 }
 
 function flattenObject(obj, prefix = "") {
-  const result = {};
+  const result = Object.create(null);
+
+  if (!obj || typeof obj !== "object") return result;
 
   for (const [key, value] of Object.entries(obj)) {
     if (key === "timestamp") continue;
 
     const newKey = prefix ? `${prefix}.${key}` : key;
 
-    if (value && typeof value === "object" && !Array.isArray(value)) {
+    if (value && typeof value === "object" && !Array.isArray(value) && !(value instanceof Date)) {
       const nested = flattenObject(value, newKey);
       for (const [nestedKey, nestedValue] of Object.entries(nested)) {
-        Object.defineProperty(result, nestedKey, {
+        Reflect.defineProperty(result, nestedKey, {
           value: nestedValue,
           enumerable: true,
           writable: true,
@@ -141,7 +143,7 @@ function flattenObject(obj, prefix = "") {
         });
       }
     } else {
-      Object.defineProperty(result, newKey, {
+      Reflect.defineProperty(result, newKey, {
         value,
         enumerable: true,
         writable: true,

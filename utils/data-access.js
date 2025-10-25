@@ -79,15 +79,16 @@ function removeObjectField(path, object) {
 
   const forbiddenKeys = new Set(["__proto__", "constructor", "prototype"]);
 
-  for (let i = 0; i < pathList.length; i++) {
-    let safeKey = pathList[i];
-    if (typeof safeKey !== "string") safeKey = String(safeKey + ""); // fallback normalize
-    if (forbiddenKeys.has(safeKey)) return;
+  for (const rawKey of pathList) {
+    if (typeof rawKey !== "string") continue;
+    if (forbiddenKeys.has(rawKey)) return;
 
-    if (safeKey === "*") {
+    const key = rawKey;
+
+    if (key === "*") {
       if (typeof currentObj !== "object" || currentObj === null) continue;
 
-      const nextPath = [...pathList.slice(i + 1), lastKey].join(".");
+      const nextPath = [...pathList.slice(pathList.indexOf(key) + 1), lastKey].join(".");
       for (const child of Object.values(currentObj)) {
         if (child && typeof child === "object") {
           removeObjectField(nextPath, child);
@@ -96,8 +97,8 @@ function removeObjectField(path, object) {
       return;
     }
 
-    const nextValue = Reflect.get(currentObj, safeKey);
-    if (typeof nextValue === "object" && nextValue !== null && Reflect.has(currentObj, safeKey)) {
+    const nextValue = Reflect.get(currentObj, key);
+    if (typeof nextValue === "object" && nextValue !== null && Reflect.has(currentObj, key)) {
       currentObj = nextValue;
     } else {
       return;

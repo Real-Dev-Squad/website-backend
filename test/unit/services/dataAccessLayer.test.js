@@ -132,9 +132,13 @@ describe("Data Access Layer", function () {
       const result = await retrieveUsers({ userIds: [userData[12].id] });
       removeSensitiveInfo(userData[12]);
       Object.keys(result).forEach((id) => {
-        expect(result[id]).to.deep.equal(userData[12]);
+        // eslint-disable-next-line security/detect-object-injection
+        const resultValue = result[id];
+        // eslint-disable-next-line security/detect-object-injection
+        const expectedUser = userData[12] || {};
+        expect(resultValue).to.deep.equal(expectedUser);
         KEYS_NOT_ALLOWED[ACCESS_LEVEL.PUBLIC].forEach((key) => {
-          expect(result[id]).to.not.have.property(key);
+          expect(resultValue).to.not.have.property(key);
         });
       });
     });
@@ -188,6 +192,7 @@ describe("Data Access Layer", function () {
       const role = "super_user";
       const level = ACCESS_LEVEL.PRIVATE;
       const result = levelSpecificAccess(user, level, role);
+      // eslint-disable-next-line security/detect-object-injection
       KEYS_NOT_ALLOWED[level].forEach((key) => {
         expect(result).to.not.have.property(key);
       });
