@@ -70,19 +70,28 @@ const validateCreateTrackedProgressRecord = async (req, res, next) => {
 const validateUpdateTrackedProgress = async (req, res, next) => {
   const { type, typeId } = req.params;
   const { monitored, frequency } = req.body;
-  const updatedData = { type, [TYPE_MAP[type]]: typeId, monitored, frequency };
-  const monitoredSchema = joi.object().keys({
+
+  const key = TYPE_MAP[type];
+  const updatedData = { type, monitored, frequency };
+
+  if (key) {
+    updatedData[key] = typeId;
+  }
+
+  const monitoredSchema = joi.object({
     monitored: joi.boolean().optional().messages({
       "boolean.base": "monitored field must be a boolean value.",
     }),
   });
+
   const updateSchema = baseSchema.concat(monitoredSchema).or("monitored", "frequency");
+
   try {
     await updateSchema.validateAsync(updatedData, { abortEarly: false });
     next();
   } catch (error) {
     logger.error(`Error validating payload: ${error}`);
-    res.boom.badRequest(error.details[0].message);
+    res.boom.badRequest(error.details?.[0]?.message || "Invalid payload");
   }
 };
 

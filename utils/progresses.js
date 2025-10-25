@@ -3,6 +3,7 @@ const { fetchTask } = require("../models/tasks");
 const { fetchUser } = require("../models/users");
 const fireStore = require("../utils/firestore");
 const progressesModel = fireStore.collection("progresses");
+const { setSafe, getSafe } = require("./queryParser");
 
 const {
   PROGRESSES_RESPONSE_MESSAGES: { PROGRESS_DOCUMENT_NOT_FOUND },
@@ -235,24 +236,31 @@ const buildRangeProgressQuery = (queryParams) => {
  */
 const getProgressRecords = async (query, queryParams) => {
   const { startDate, endDate } = queryParams;
-  const docsData = {};
+
+  const docsData = Object.create(null);
   const queryResult = await query.get();
   if (!queryResult.size) {
     throw new NotFound(PROGRESS_DOCUMENT_NOT_FOUND);
   }
+
   const progressesDocs = queryResult.docs;
   progressesDocs.forEach((doc) => {
     const date = new Date(doc.data().date).toISOString().slice(0, 10);
-    docsData[date] = true;
+    setSafe(docsData, date, true);
   });
 
-  const progressRecords = {};
-  const currentDate = new Date(startDate);
-  while (currentDate <= new Date(endDate)) {
+  const progressRecords = Object.create(null);
+  let currentDate = new Date(startDate);
+  const end = new Date(endDate);
+
+  while (currentDate.getTime() <= end.getTime()) {
     const date = currentDate.toISOString().slice(0, 10);
-    progressRecords[date] = Boolean(docsData[date]);
-    currentDate.setDate(currentDate.getDate() + 1);
+    const recordExists = Boolean(getSafe(docsData, date));
+    setSafe(progressRecords, date, recordExists);
+
+    currentDate = new Date(currentDate.getTime() + 86400000);
   }
+
   return progressRecords;
 };
 

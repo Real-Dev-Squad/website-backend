@@ -123,16 +123,34 @@ function formatTaskRequestsLogs(logsSnapshot, usersMap, tasksMap) {
 }
 
 function flattenObject(obj, prefix = "") {
-  return Object.keys(obj).reduce((acc, key) => {
-    if (key !== "timestamp") {
-      if (typeof obj[key] === "object" && !Array.isArray(obj[key])) {
-        return { ...acc, ...flattenObject(obj[key], `${key}`) };
-      } else {
-        return { ...acc, [`${key}`]: obj[key] };
+  const result = {};
+
+  for (const [key, value] of Object.entries(obj)) {
+    if (key === "timestamp") continue;
+
+    const newKey = prefix ? `${prefix}.${key}` : key;
+
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      const nested = flattenObject(value, newKey);
+      for (const [nestedKey, nestedValue] of Object.entries(nested)) {
+        Object.defineProperty(result, nestedKey, {
+          value: nestedValue,
+          enumerable: true,
+          writable: true,
+          configurable: true,
+        });
       }
+    } else {
+      Object.defineProperty(result, newKey, {
+        value,
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
     }
-    return acc;
-  }, {});
+  }
+
+  return result;
 }
 
 function mapify(array, key) {
