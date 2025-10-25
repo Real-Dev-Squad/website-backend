@@ -1,0 +1,189 @@
+paths:
+  /badges:
+    get:
+      summary: Get all badges
+      description: Returns the list of all the badges
+      tags:
+        - Badges
+      responses:
+        200:
+          description: A list of badges
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  badges:
+                    type: array
+                    description: An array of badge objects
+                    items:
+                      $ref: "../components.yaml#/components/schemas/Badge"
+                  message:
+                    type: string
+                    description: A message indicating the success of the operation
+                    example: Badges retrieved successfully
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
+    post:
+      summary: Create a new badge
+      description: Creates a new badge with the provided details
+      tags:
+        - Badges
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "../components.yaml#/components/schemas/Badge"
+      responses:
+        201:
+          description: Badge created successfully
+          content:
+            application/json:
+              schema:
+                message:
+                  type: string
+                  description: A message indicating the success of the operation
+                  example: Badge created successfully
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/401-Unauthorized"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
+
+  /badges/assign:
+    post:
+      summary: Assign a badge to a user
+      description: Assigns a badge to a user based on the provided badge ID and user ID
+      tags:
+        - Badges
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                badgeIds:
+                  type: array
+                  description: An array of badge IDs to assign
+                  items:
+                    type: string
+                    description: The ID of the badge to assign
+                    example: 12345
+                userId:
+                  type: string
+                  description: The ID of the user to assign the badge to
+                  example: 67890
+      responses:
+        200:
+          description: Badge assigned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: A message indicating the success of the operation
+                    example: Badge assigned successfully
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/401-Unauthorized"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
+
+  /badges/remove:
+    delete:
+      summary: Remove a badge from a user
+      description: Removes a badge from a user based on the provided badge ID and user ID
+      tags:
+        - Badges
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                badgeIds:
+                  type: array
+                  description: An array of badge IDs to remove
+                  items:
+                    type: string
+                    description: The ID of the badge to remove
+                    example: 12345
+                userId:
+                  type: string
+                  description: The ID of the user to remove the badge from
+                  example: 67890
+      responses:
+        200:
+          description: Badge removed successfully
+          content:
+            application/json:
+              schema:
+                message:
+                  type: string
+                  description: A message indicating the success of the operation
+                  example: Badge removed successfully
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/401-Unauthorized"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
