@@ -3,7 +3,6 @@ const { fetchTask } = require("../models/tasks");
 const { fetchUser } = require("../models/users");
 const fireStore = require("../utils/firestore");
 const progressesModel = fireStore.collection("progresses");
-const { setSafe, getSafe } = require("./queryParser");
 
 const {
   PROGRESSES_RESPONSE_MESSAGES: { PROGRESS_DOCUMENT_NOT_FOUND },
@@ -236,31 +235,41 @@ const buildRangeProgressQuery = (queryParams) => {
  */
 const getProgressRecords = async (query, queryParams) => {
   const { startDate, endDate } = queryParams;
-
-  const docsData = Object.create(null);
+  const docsData = {};
   const queryResult = await query.get();
   if (!queryResult.size) {
     throw new NotFound(PROGRESS_DOCUMENT_NOT_FOUND);
   }
-
   const progressesDocs = queryResult.docs;
   progressesDocs.forEach((doc) => {
     const date = new Date(doc.data().date).toISOString().slice(0, 10);
-    setSafe(docsData, date, true);
+    // Validate that date is in YYYY-MM-DD format (e.g., "2023-05-09")
+    // ^ = start of string, \d{4} = exactly 4 digits, - = literal dash, \d{2} = exactly 2 digits, $ = end of string
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      Object.defineProperty(docsData, date, {
+        value: true,
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
+    }
   });
 
-  const progressRecords = Object.create(null);
-  let currentDate = new Date(startDate);
-  const end = new Date(endDate);
-
-  while (currentDate.getTime() <= end.getTime()) {
+  const progressRecords = {};
+  const currentDate = new Date(startDate);
+  while (currentDate <= new Date(endDate)) {
     const date = currentDate.toISOString().slice(0, 10);
-    const recordExists = Boolean(getSafe(docsData, date));
-    setSafe(progressRecords, date, recordExists);
-
-    currentDate = new Date(currentDate.getTime() + 86400000);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      const hasProgress = Object.prototype.hasOwnProperty.call(docsData, date) ? Reflect.get(docsData, date) : false;
+      Object.defineProperty(progressRecords, date, {
+        value: Boolean(hasProgress),
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
+    }
+    currentDate.setDate(currentDate.getDate() + 1);
   }
-
   return progressRecords;
 };
 

@@ -130,10 +130,8 @@ function flattenObject(obj, prefix = "") {
   for (const [key, value] of Object.entries(obj)) {
     if (key === "timestamp") continue;
 
-    const newKey = prefix ? `${prefix}.${key}` : key;
-
     if (value && typeof value === "object" && !Array.isArray(value) && !(value instanceof Date)) {
-      const nested = flattenObject(value, newKey);
+      const nested = flattenObject(value, prefix);
       for (const [nestedKey, nestedValue] of Object.entries(nested)) {
         Reflect.defineProperty(result, nestedKey, {
           value: nestedValue,
@@ -143,7 +141,7 @@ function flattenObject(obj, prefix = "") {
         });
       }
     } else {
-      Reflect.defineProperty(result, newKey, {
+      Reflect.defineProperty(result, key, {
         value,
         enumerable: true,
         writable: true,

@@ -39,7 +39,7 @@ const retrieveUsers = async ({
 
     const userDetails = await userQuery.fetchUserByIds(userIds);
 
-    for (const [userData] of Object.entries(userDetails)) {
+    for (const [, userData] of Object.entries(userDetails)) {
       if (userData && typeof userData === "object") {
         removeSensitiveInfo(userData);
       }
