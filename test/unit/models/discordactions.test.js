@@ -581,7 +581,9 @@ describe("discordactions", function () {
       addedUers = await Promise.all(addedUersPromise);
 
       const addedUsersStatusPromise = usersStatusData.map(async (data, index) => {
-        const { id } = addedUers[index];
+        // eslint-disable-next-line security/detect-object-injection
+        const user = addedUers[index] || {};
+        const { id } = user;
         const statusData = { ...data, userId: id };
         const { id: userStatusId } = await userStatusCollection.add(statusData);
         return { ...statusData, id: userStatusId };
@@ -718,10 +720,13 @@ describe("discordactions", function () {
       const tasksPromise = [];
 
       for (let index = 0; index < 4; index++) {
-        const task = tasksData[index];
+        // eslint-disable-next-line security/detect-object-injection
+        const task = tasksData[index] || {};
+        // eslint-disable-next-line security/detect-object-injection
+        const assigneeId = userIdList[index] || null;
         const validTask = {
           ...task,
-          assignee: userIdList[index],
+          assignee: assigneeId,
           startedOn: (new Date().getTime() - convertDaysToMilliseconds(7)) / 1000,
           endsOn: (new Date().getTime() + convertDaysToMilliseconds(4)) / 1000,
           status: TASK_STATUS.IN_PROGRESS,

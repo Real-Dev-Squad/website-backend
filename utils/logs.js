@@ -123,16 +123,34 @@ function formatTaskRequestsLogs(logsSnapshot, usersMap, tasksMap) {
 }
 
 function flattenObject(obj, prefix = "") {
-  return Object.keys(obj).reduce((acc, key) => {
-    if (key !== "timestamp") {
-      if (typeof obj[key] === "object" && !Array.isArray(obj[key])) {
-        return { ...acc, ...flattenObject(obj[key], `${key}`) };
-      } else {
-        return { ...acc, [`${key}`]: obj[key] };
+  const result = Object.create(null);
+
+  if (!obj || typeof obj !== "object") return result;
+
+  for (const [key, value] of Object.entries(obj)) {
+    if (key === "timestamp") continue;
+
+    if (value && typeof value === "object" && !Array.isArray(value) && !(value instanceof Date)) {
+      const nested = flattenObject(value, prefix);
+      for (const [nestedKey, nestedValue] of Object.entries(nested)) {
+        Reflect.defineProperty(result, nestedKey, {
+          value: nestedValue,
+          enumerable: true,
+          writable: true,
+          configurable: true,
+        });
       }
+    } else {
+      Reflect.defineProperty(result, key, {
+        value,
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
     }
-    return acc;
-  }, {});
+  }
+
+  return result;
 }
 
 function mapify(array, key) {

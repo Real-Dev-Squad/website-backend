@@ -78,31 +78,40 @@ const fetchTaskRequests = async (dev) => {
 const fetchPaginatedTaskRequests = async (queries = {}) => {
   try {
     let taskRequestsSnapshot = taskRequestsCollection;
-
     let { next, prev, size, q: queryString } = queries;
     if (size) size = parseInt(size);
 
     const rqlQueryParser = new RQLQueryParser(queryString);
 
-    Object.entries(rqlQueryParser.getFilterQueries()).forEach(([key, value]) => {
-      const valuesList = value.map(
-        (query) => query.operator === Operators.INCLUDE && TASK_REQUEST_FILTER_VALUES[query.value]
-      );
-      taskRequestsSnapshot = taskRequestsSnapshot.where(TASK_REQUEST_FILTER_KEYS[key], "in", valuesList);
-    });
+    const filterQueries = rqlQueryParser.getFilterQueries();
+
+    for (const [filterKey, filterValue] of Object.entries(filterQueries)) {
+      const valuesList = filterValue
+        .map((query) =>
+          query.operator === Operators.INCLUDE ? Reflect.get(TASK_REQUEST_FILTER_VALUES, query.value) : null
+        )
+        .filter(Boolean);
+
+      if (Reflect.has(TASK_REQUEST_FILTER_KEYS, filterKey)) {
+        const fieldName = Reflect.get(TASK_REQUEST_FILTER_KEYS, filterKey);
+        taskRequestsSnapshot = taskRequestsSnapshot.where(fieldName, "in", valuesList);
+      }
+    }
 
     const sortQueries = rqlQueryParser.getSortQueries();
     const sortQueryEntries = Object.entries(sortQueries);
 
     if (sortQueryEntries.length) {
-      sortQueryEntries.forEach(([key, value]) => {
-        taskRequestsSnapshot = taskRequestsSnapshot.orderBy(
-          TASK_REQUEST_SORT_KEYS[key],
-          TASK_REQUEST_SORT_VALUES[value]
-        );
-      });
+      for (const [sortKey, sortValue] of sortQueryEntries) {
+        if (Reflect.has(TASK_REQUEST_SORT_KEYS, sortKey) && Reflect.has(TASK_REQUEST_SORT_VALUES, sortValue)) {
+          const sortField = Reflect.get(TASK_REQUEST_SORT_KEYS, sortKey);
+          const orderDirection = Reflect.get(TASK_REQUEST_SORT_VALUES, sortValue);
+          taskRequestsSnapshot = taskRequestsSnapshot.orderBy(sortField, orderDirection);
+        }
+      }
     } else {
-      taskRequestsSnapshot = taskRequestsSnapshot.orderBy(TASK_REQUEST_SORT_KEYS.created, "desc");
+      const defaultField = Reflect.get(TASK_REQUEST_SORT_KEYS, "created");
+      taskRequestsSnapshot = taskRequestsSnapshot.orderBy(defaultField, "desc");
     }
 
     if (next) {
@@ -137,16 +146,13 @@ const fetchPaginatedTaskRequests = async (queries = {}) => {
     const isNextLinkRequired = size && resultDataLength === size;
     const lastVisibleDoc = isNextLinkRequired && taskRequestsSnapshot.docs[resultDataLength - 1];
     const firstDoc = taskRequestsSnapshot.docs[0];
-    const nextPageParams = {
-      ...queries,
-      next: lastVisibleDoc?.id,
-    };
+
+    const nextPageParams = { ...queries, next: lastVisibleDoc?.id };
     delete nextPageParams.prev;
-    const prevPageParams = {
-      ...queries,
-      prev: firstDoc?.id,
-    };
+
+    const prevPageParams = { ...queries, prev: firstDoc?.id };
     delete prevPageParams.next;
+
     const nextLink = lastVisibleDoc ? generateLink(nextPageParams) : "";
     const prevLink = next || prev ? generateLink(prevPageParams) : "";
 
