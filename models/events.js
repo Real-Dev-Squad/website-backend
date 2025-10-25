@@ -214,7 +214,7 @@ const createEventCode = async (eventCodeData) => {
     const data = docSnapshot.data();
 
     const previouslyPresentEventCodes = eventSnapshotData?.event_codes?.by_role?.mavens && [
-      ...eventSnapshotData?.event_codes?.by_role?.mavens,
+      ...eventSnapshotData.event_codes.by_role.mavens,
     ];
 
     if (!data) throw new Error();
