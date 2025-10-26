@@ -1852,10 +1852,13 @@ describe("Tasks", function () {
       const tasksPromise = [];
 
       for (let index = 0; index < 5; index++) {
-        const task = tasksData[index];
+        // eslint-disable-next-line security/detect-object-injection
+        const task = tasksData[index] || {};
+        // eslint-disable-next-line security/detect-object-injection
+        const assigneeId = userIdList[index] || null;
         const validTask = {
           ...task,
-          assignee: userIdList[index],
+          assignee: assigneeId,
           startedOn: (new Date().getTime() - convertDaysToMilliseconds(7)) / 1000,
           endsOn: (new Date().getTime() + convertDaysToMilliseconds(4)) / 1000,
           status: TASK_STATUS.IN_PROGRESS,

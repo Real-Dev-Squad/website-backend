@@ -520,6 +520,7 @@ const updateUsersNicknameStatus = async (lastNicknameUpdate) => {
     const usersCurrentStatus = userStatusModel
       .where("currentStatus.updatedAt", ">=", lastNicknameUpdateTimestamp)
       .get();
+
     const usersFutureStatus = userStatusModel.where("futureStatus.updatedAt", ">=", lastNicknameUpdateTimestamp).get();
 
     const [usersCurrentStatusSnapshot, usersFutureStatusSnapshots] = await Promise.all([
@@ -528,36 +529,30 @@ const updateUsersNicknameStatus = async (lastNicknameUpdate) => {
     ]);
 
     const usersCurrentStatusDocs = usersCurrentStatusSnapshot.docs;
-    let usersFutureStatusDocs = usersFutureStatusSnapshots.docs;
-    usersFutureStatusDocs = usersFutureStatusDocs.filter(({ id }) => {
-      const isIdPresent = usersCurrentStatusDocs.find((status) => {
-        return status.id === id;
-      });
-      return !isIdPresent;
+    const futureDocs = usersFutureStatusSnapshots.docs.filter(({ id }) => {
+      return !usersCurrentStatusDocs.some((status) => status.id === id);
     });
-    const usersStatusDocs = usersCurrentStatusDocs.concat(usersFutureStatusDocs);
 
-    const today = new Date().getTime();
-
-    let successfulUpdates = 0;
-    const nicknameUpdateBatches = [];
+    const usersStatusDocs = usersCurrentStatusDocs.concat(futureDocs);
     const totalUsersStatus = usersStatusDocs.length;
+    const today = Date.now();
 
-    let startIndex = 0;
-    for (let i = 0; i < Math.ceil(totalUsersStatus / SIMULTANEOUS_WORKER_CALLS); i++) {
-      const end = Math.min(totalUsersStatus, startIndex + SIMULTANEOUS_WORKER_CALLS);
-      nicknameUpdateBatches.push(usersStatusDocs.slice(startIndex, end));
-      startIndex = end;
+    const nicknameUpdateBatches = [];
+    for (let start = 0; start < totalUsersStatus; start += SIMULTANEOUS_WORKER_CALLS) {
+      const end = Math.min(totalUsersStatus, start + SIMULTANEOUS_WORKER_CALLS);
+      nicknameUpdateBatches.push(usersStatusDocs.slice(start, end));
     }
 
-    for (let i = 0; i < nicknameUpdateBatches.length; i++) {
+    let successfulUpdates = 0;
+
+    for (const usersStatusDocsBatch of nicknameUpdateBatches) {
       const promises = [];
-      const usersStatusDocsBatch = nicknameUpdateBatches[i];
-      usersStatusDocsBatch.forEach((document) => {
+
+      for (const document of usersStatusDocsBatch) {
         const doc = document.data();
         const userId = doc.userId;
-
         const { futureStatus = {}, currentStatus = {} } = doc;
+
         const { state: futureState } = futureStatus;
         const { state: currentState } = currentStatus;
 
@@ -572,17 +567,16 @@ const updateUsersNicknameStatus = async (lastNicknameUpdate) => {
         } else {
           promises.push(usersUtils.updateNickname(userId));
         }
-      });
+      }
 
-      const settledPromises = await Promise.allSettled(promises);
-
-      settledPromises.forEach((result) => {
+      const settled = await Promise.allSettled(promises);
+      for (const result of settled) {
         if (result.status === "fulfilled" && !!result.value) {
           successfulUpdates++;
         } else {
           logger.error(`Error while updating nickname: ${result.reason}`);
         }
-      });
+      }
 
       await new Promise((resolve) => setTimeout(resolve, 5000));
     }
