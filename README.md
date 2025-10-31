@@ -21,7 +21,15 @@ This Project serves the backend APIs required for [Real Dev Squad](https://reald
 ## Prerequisites
 
 - The application uses [node-config](https://github.com/lorenwest/node-config)([documentation](https://github.com/lorenwest/node-config/wiki/Configuration-Files)) for managing config.
-- Create a new file: `config/local.js`. Override the required config values from `config/development.js` and `config/default.js` into `config/local.js`.
+-Create a new file: `config/local.js`.
+
+To make setup easier, you can simply copy all the contents from `config/development.js` into `config/local.js`.  
+Then, update only the GitHub OAuth credentials with your own values:
+
+```js
+clientId: "<YOUR_GITHUB_CLIENT_ID>",
+clientSecret: "<YOUR_GITHUB_CLIENT_SECRET>
+"
 - Register the application for [GitHub OAuth](https://docs.github.com/en/developers/apps/creating-an-oauth-app) to get the `clientId` and `clientSecret`. Add the callback URL as `http://<HOSTNAME>:<PORT>/auth/github/callback`
 - Create an application on [FireStore](https://firebase.google.com/docs/firestore) and [generate a service file](https://cloud.google.com/iam/docs/creating-managing-service-account-keys). Add the service file credentials in the local config (or your env variables) as a string. Make sure you convert all the escape sequence (newline) - `\n` with `\\n` in private_key field.
 - For running the project locally, [Firebase Local Emulator Suite](https://firebase.google.com/docs/emulator-suite) can also be used instead of using the remote DB. Steps for setting it up: [CONTRIBUTING.md - Using Firebase Emulator Locally](https://github.com/Real-Dev-Squad/website-backend/blob/develop/CONTRIBUTING.md#using-firebase-emulator-locally)
