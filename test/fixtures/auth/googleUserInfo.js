@@ -34,6 +34,7 @@ module.exports = () => {
       roles: {
         in_discord: true,
         archived: false,
+        designer: true,
       },
       incompleteUserDetails: false,
       updated_at: Date.now(),

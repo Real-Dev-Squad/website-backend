@@ -404,7 +404,7 @@ describe("auth", function () {
       });
   });
 
-  it("should redirect the google user to login page if the user is a developer", async function () {
+  it("should return 403 Forbidden if a developer tries to log in using google", async function () {
     await addUserToDBForTest(googleUserInfo[3]);
     const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
     stubPassportAuthenticate(googleUserInfo[2]);
@@ -414,14 +414,13 @@ describe("auth", function () {
       .get("/auth/google/callback")
       .query({ code: "codeReturnedByGoogle", state: rdsUiUrl })
       .redirects(0);
-    expect(res).to.have.status(302);
-    const errorMessage = "Google login is restricted for developer role.";
-    const expectedUrl = `https://realdevsquad.com/?error=${encodeURIComponent(errorMessage)}`;
-    expect(res.headers.location).to.equal(expectedUrl);
+    expect(res).to.have.status(403);
+    const errorMessage = "Google Login is restricted for developers,Please use github Login";
+    expect(res.body.message).to.equal(errorMessage);
   });
 
-  it("should log in existing google user with same email via github OAuth", async function () {
-    await addUserToDBForTest(googleUserInfo[1]);
+  it("should return 403 Forbidden if a non-developer tries to login using github", async function () {
+    await addUserToDBForTest(googleUserInfo[0]);
     const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
     const userInfoFromGitHub = {
       ...githubUserInfo[0],
@@ -437,8 +436,9 @@ describe("auth", function () {
       .get("/auth/github/callback")
       .query({ code: "codeReturnedByGithub", state: rdsUiUrl })
       .redirects(0);
-    expect(res).to.have.status(302);
-    expect(res.headers.location).to.equal(rdsUiUrl);
+    expect(res).to.have.status(403);
+    const errorMessage = "GitHub Login is restricted for non-developers,Please use google Login";
+    expect(res.body.message).to.equal(errorMessage);
   });
 
   it("should log in existing github user with same email via google OAuth", async function () {

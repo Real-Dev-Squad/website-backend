@@ -8,6 +8,7 @@ const {
   DATA_ADDED_SUCCESSFULLY,
   USER_DOES_NOT_EXIST_ERROR,
 } = require("../constants/errorMessages");
+const { NON_DEVELOPMENT_ROLES } = require("../constants/users");
 
 const googleAuthLogin = (req, res, next) => {
   const { redirectURL } = req.query;
@@ -84,12 +85,11 @@ async function handleGoogleLogin(req, res, user, authRedirectionUrl) {
     };
 
     const userDataFromDB = await users.fetchUser({ email: userData.email });
-
     if (userDataFromDB.userExists) {
       if (userDataFromDB.user.roles?.developer) {
-        const errorMessage = encodeURIComponent("Google login is restricted for developer role.");
-        const separator = authRedirectionUrl.search ? "&" : "?";
-        return res.redirect(`${authRedirectionUrl}${separator}error=${errorMessage}`);
+        return res.status(403).json({
+          message: "Google Login is restricted for developers,Please use github Login",
+        });
       }
     }
 
@@ -184,6 +184,16 @@ const githubAuthCallback = (req, res, next) => {
 
         if (primaryEmails.length > 0) {
           userData.email = primaryEmails[0].email;
+        }
+      }
+
+      const userDataFromDB = await users.fetchUser({ email: userData.email });
+      if (userDataFromDB.userExists) {
+        const isNonDeveloper = NON_DEVELOPMENT_ROLES.some((role) => userDataFromDB.user.roles[role] === true);
+        if (isNonDeveloper) {
+          return res.status(403).json({
+            message: "Github Login is restricted for non-developers,Please use Google Login",
+          });
         }
       }
 

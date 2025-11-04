@@ -14,7 +14,7 @@ const dataAccess = require("../services/dataAccessLayer");
 const { isLastPRMergedWithinDays } = require("../services/githubService");
 const logger = require("../utils/logger");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const { OVERDUE_TASKS } = require("../constants/users");
+const { OVERDUE_TASKS, ALL_USER_ROLES } = require("../constants/users");
 const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../utils/users");
 const { setInDiscordFalseScript, setUserDiscordNickname } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
@@ -475,18 +475,28 @@ const updateSelf = async (req, res) => {
     const { id: userId, roles: userRoles, discordId } = req.userData;
     const devFeatureFlag = req.query.dev === "true";
     const { user } = await dataAccess.retrieveUsers({ id: userId });
+    const { username, role, stage } = req.body;
     let rolesToDisable = [];
 
-    if (req.body.username) {
-      if (!user.incompleteUserDetails) {
-        return res.boom.forbidden("Cannot update username again");
+    if (username) {
+      if (stage !== 1 || !role || !user.incompleteUserDetails) {
+        return res.boom.forbidden("You are not authorized to perform this action");
       }
       await userQuery.setIncompleteUserDetails(userId);
     }
 
-    if (req.body.roles) {
-      if (user && (user.roles.in_discord || user.roles.developer)) {
-        return res.boom.forbidden("Cannot update roles");
+    const alreadyHasRole = ALL_USER_ROLES.some((role) => userRoles[role] === true);
+
+    if (role) {
+      if (alreadyHasRole) {
+        return res.boom.forbidden("Cannot update roles again");
+      }
+      if ((stage === 1 && username) || stage === 2) {
+        req.body.roles = { [role]: true };
+        delete req.body.role;
+        delete req.body.stage;
+      } else {
+        return res.boom.forbidden("You are not authorized to perform this action");
       }
     }
 
@@ -545,6 +555,27 @@ const updateSelf = async (req, res) => {
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
+
+// if (req.body.username) {
+//   if (!user.incompleteUserDetails &&) {
+//     return res.boom.forbidden("Cannot update username again");
+//   }
+//   await userQuery.setIncompleteUserDetails(userId);
+// }
+// if (req.body.stage === 1 && !req.body.role) {
+//   return res.boom.badRequest("You are forbidden from performing this action");
+// }
+
+// const alreadyHasRole = ALL_USER_ROLES.some((role) => userRoles[role] === true);
+// if (req.body.role) {
+//   const { role, stage } = req.body;
+//   if (alreadyHasRole || stage !== 1) {
+//     return res.boom.forbidden("Cannot update role");
+//   }
+//   req.body.roles = { [role]: true };
+//   delete req.body.role;
+//   delete req.body.stage;
+// }
 
 /**
  * Post user profile picture
