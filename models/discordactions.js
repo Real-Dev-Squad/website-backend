@@ -325,20 +325,31 @@ const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
 
       const userPromises = discordIdChunks.map(async (discordIdChunk) => {
         const userSnapshot = await userModel.where("discordId", "in", discordIdChunk).get();
-        return userSnapshot.docs
-          .map((doc) => {
-            const userData = doc.data();
-            // Only include users who are active in discord (in_discord: true)
-            if (userData.roles?.in_discord === true) {
-              return userData.discordId;
-            }
-            return null;
-          })
-          .filter(Boolean);
+        return userSnapshot.docs.reduce((activeIds, doc) => {
+          const userData = doc.data();
+          if (userData.roles?.in_discord === true) {
+            activeIds.push(userData.discordId);
+          }
+          return activeIds;
+        }, []);
       });
-
       const activeDiscordIdsArrays = await Promise.all(userPromises);
-      activeDiscordIdsArrays.flat().forEach((discordId) => activeDiscordIdsSet.add(discordId));
+      activeDiscordIdsArrays.forEach((array) => {
+        array.forEach((discordId) => activeDiscordIdsSet.add(discordId));
+      });
+    } else {
+      // Early return if no discord ids to process , all groups will have memberCount: 0
+      return groups.map((group) => {
+        const groupCreator = groupCreatorsDetails.find((user) => user.id === group.createdBy);
+        return {
+          ...group,
+          firstName: groupCreator?.first_name,
+          lastName: groupCreator?.last_name,
+          image: groupCreator?.picture?.url,
+          memberCount: 0,
+          isMember: false,
+        };
+      });
     }
 
     const roleIdToCountMap = {};
