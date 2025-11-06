@@ -311,12 +311,43 @@ const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
     const groupCreatorsDetails = await retrieveUsers({ userIds: Array.from(groupCreatorIds) });
     const roleIds = groups.map((group) => group.roleid);
     const groupsToUserMappings = await fetchGroupToUserMapping(roleIds);
+
+    // Extract unique Discord ids from mappings
+    const uniqueDiscordIds = [...new Set(groupsToUserMappings.map((mapping) => mapping.userid).filter(Boolean))];
+
+    // Fetch users by discord ids in batches to check in_discord status
+    const activeDiscordIdsSet = new Set();
+    if (uniqueDiscordIds.length > 0) {
+      const discordIdChunks = [];
+      for (let i = 0; i < uniqueDiscordIds.length; i += BATCH_SIZE_IN_CLAUSE) {
+        discordIdChunks.push(uniqueDiscordIds.slice(i, i + BATCH_SIZE_IN_CLAUSE));
+      }
+
+      const userPromises = discordIdChunks.map(async (discordIdChunk) => {
+        const userSnapshot = await userModel.where("discordId", "in", discordIdChunk).get();
+        return userSnapshot.docs
+          .map((doc) => {
+            const userData = doc.data();
+            // Only include users who are active in discord (in_discord: true)
+            if (userData.roles?.in_discord === true) {
+              return userData.discordId;
+            }
+            return null;
+          })
+          .filter(Boolean);
+      });
+
+      const activeDiscordIdsArrays = await Promise.all(userPromises);
+      activeDiscordIdsArrays.flat().forEach((discordId) => activeDiscordIdsSet.add(discordId));
+    }
+
     const roleIdToCountMap = {};
 
+    // Only count users who are active in Discord (in_discord: true)
     groupsToUserMappings.forEach((groupToUserMapping) => {
-      // Count how many times roleId comes up in the array.
-      // This says how many users we have for a given roleId
-      roleIdToCountMap[groupToUserMapping.roleid] = (roleIdToCountMap[groupToUserMapping.roleid] ?? 0) + 1;
+      if (activeDiscordIdsSet.has(groupToUserMapping.userid)) {
+        roleIdToCountMap[groupToUserMapping.roleid] = (roleIdToCountMap[groupToUserMapping.roleid] ?? 0) + 1;
+      }
     });
 
     const subscribedGroupIds = findSubscribedGroupIds(discordId, groupsToUserMappings);

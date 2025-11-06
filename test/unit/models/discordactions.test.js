@@ -432,7 +432,20 @@ describe("discordactions", function () {
     let allIds = [];
 
     before(async function () {
-      const addUsersPromises = userData.map((user) => userModel.add({ ...user }));
+      // Mark the second user as active in Discord so both users are counted in the test.
+      const userDataWithInDiscord = userData.map((user, index) => {
+        if (index === 1) {
+          return {
+            ...user,
+            roles: {
+              ...(user.roles || {}),
+              in_discord: true,
+            },
+          };
+        }
+        return user;
+      });
+      const addUsersPromises = userDataWithInDiscord.map((user) => userModel.add({ ...user }));
       const responses = await Promise.all(addUsersPromises);
       allIds = responses.map((response) => response.id);
       newGroupData = groupData.map((group, index) => {
