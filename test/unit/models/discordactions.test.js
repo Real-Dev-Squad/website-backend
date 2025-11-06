@@ -16,6 +16,7 @@ const { getDiscordMembers } = require("../../fixtures/discordResponse/discord-re
 const discordService = require("../../../services/discordService");
 const { TASK_STATUS } = require("../../../constants/tasks");
 const tasksModel = firestore.collection("tasks");
+const { createUserFutureStatus } = require("../../../models/userFutureStatus");
 
 const {
   createNewRole,
@@ -63,7 +64,7 @@ const { createProgressDocument } = require("../../../models/progresses");
 const { stubbedModelTaskProgressData } = require("../../fixtures/progress/progresses");
 const { convertDaysToMilliseconds } = require("../../../utils/time");
 const { generateUserStatusData } = require("../../fixtures/userStatus/userStatus");
-const { userState } = require("../../../constants/userStatus");
+const { userState, statusState } = require("../../../constants/userStatus");
 const { REQUEST_TYPE, REQUEST_STATE } = require("../../../constants/requests");
 const { createRequest } = require("../../../models/requests");
 
@@ -692,6 +693,7 @@ describe("discordactions", function () {
     let userNotInDiscord;
     let activeUserId;
     let activeUserWithProgressUpdates;
+    let discordMembers;
 
     beforeEach(async function () {
       idleUser = { ...userData[9], discordId: getDiscordMembers[0].user.id };
@@ -743,7 +745,7 @@ describe("discordactions", function () {
       progressDataList.push(progressData);
 
       await Promise.all(progressDataList.map(async (progress) => await createProgressDocument(progress)));
-      const discordMembers = [...getDiscordMembers];
+      discordMembers = [...getDiscordMembers];
       discordMembers[0].roles.push("9876543210");
       discordMembers[1].roles.push("9876543210");
       sinon.stub(discordService, "getDiscordMembers").returns(discordMembers);
@@ -788,6 +790,7 @@ describe("discordactions", function () {
         tasks: 4,
         missedUpdatesTasks: 0,
         usersToAddRole: [],
+        filteredByOoo: 0,
       });
     });
 
@@ -800,6 +803,7 @@ describe("discordactions", function () {
         tasks: 0,
         missedUpdatesTasks: 0,
         usersToAddRole: [],
+        filteredByOoo: 0,
       });
     });
 
@@ -823,6 +827,7 @@ describe("discordactions", function () {
         tasks: 5,
         missedUpdatesTasks: 0,
         usersToAddRole: [],
+        filteredByOoo: 0,
       });
     });
 
@@ -841,6 +846,62 @@ describe("discordactions", function () {
       const nextResult = await getMissedProgressUpdatesUsers({ size: 4, cursor: result.cursor });
       expect(nextResult).to.be.an("object");
       expect(nextResult).to.not.haveOwnProperty("cursor");
+    });
+
+    it("should exclude users whose OOO ended within grace period", async function () {
+      const now = Date.now();
+      const returningDiscordId = "returning-discord-user";
+      const returningUser = { ...userData[11], discordId: returningDiscordId };
+      const returningUserId = await addUser(returningUser);
+
+      await userStatusModel.updateUserStatus(returningUserId, generateUserStatusData(userState.ACTIVE, now, now));
+
+      await createUserFutureStatus({
+        requestId: "returning-ooo",
+        status: userState.OOO,
+        state: statusState.APPLIED,
+        from: now - convertDaysToMilliseconds(5),
+        endsOn: now - convertDaysToMilliseconds(1),
+        userId: returningUserId,
+        message: "OOO",
+      });
+
+      await tasksModel.add({
+        ...tasksData[4],
+        assignee: returningUserId,
+        startedOn: Math.floor((now - convertDaysToMilliseconds(6)) / 1000),
+        endsOn: Math.floor((now + convertDaysToMilliseconds(1)) / 1000),
+        status: TASK_STATUS.IN_PROGRESS,
+      });
+
+      discordMembers.push({
+        avatar: "",
+        communication_disabled_until: "",
+        flags: 0,
+        is_pending: false,
+        joined_at: new Date(now - convertDaysToMilliseconds(30)).toISOString(),
+        nick: returningUser.username,
+        pending: false,
+        premium_since: null,
+        roles: ["9876543210"],
+        user: {
+          id: returningDiscordId,
+          username: returningUser.username,
+          global_name: returningUser.username,
+          display_name: returningUser.username,
+          avatar: "",
+          discriminator: "1234",
+          public_flags: 0,
+          avatar_decoration: null,
+        },
+        mute: false,
+        deaf: false,
+      });
+
+      discordService.getDiscordMembers.returns(discordMembers);
+
+      const result = await getMissedProgressUpdatesUsers();
+      expect(result.usersToAddRole).to.not.contain(returningDiscordId);
     });
   });
 

@@ -7,7 +7,7 @@ const admin = require("firebase-admin");
 const { findSubscribedGroupIds } = require("../utils/helper");
 const { retrieveUsers } = require("../services/dataAccessLayer");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
-const { getAllUserStatus, getGroupRole, getUserStatus } = require("./userStatus");
+const { getAllUserStatus, getGroupRole, getUserStatus, getOooTimelineForUsers } = require("./userStatus");
 const { userState } = require("../constants/userStatus");
 const { ONE_DAY_IN_MS, SIMULTANEOUS_WORKER_CALLS } = require("../constants/users");
 const userModel = firestore.collection("users");
@@ -958,6 +958,7 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
   const stats = {
     tasks: 0,
     missedUpdatesTasks: 0,
+    filteredByOoo: 0,
   };
   try {
     const discordUsersPromise = discordService.getDiscordMembers();
@@ -1029,11 +1030,8 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
       progressCountPromise.push(updateTasksIdMap());
     });
 
-    const userIdChunks = chunks(Array.from(usersMap.keys()), FIRESTORE_IN_CLAUSE_SIZE);
-    const userStatusSnapshotPromise = userIdChunks.map(
-      async (userIdList) =>
-        await userStatusModel.where("currentStatus.state", "==", userState.OOO).where("userId", "in", userIdList).get()
-    );
+    const userIds = Array.from(usersMap.keys());
+    const userIdChunks = chunks(userIds, FIRESTORE_IN_CLAUSE_SIZE);
     const userDetailsPromise = userIdChunks.map(
       async (userIdList) =>
         await userModel
@@ -1042,20 +1040,20 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
           .get()
     );
 
-    const userStatusChunks = await Promise.all(userStatusSnapshotPromise);
-
-    userStatusChunks.forEach((userStatusList) =>
-      userStatusList.forEach((doc) => {
-        usersMap.get(doc.data().userId).isOOO = true;
-      })
-    );
-
     const userDetailsListChunks = await Promise.all(userDetailsPromise);
     userDetailsListChunks.forEach((userList) => {
       userList.forEach((doc) => {
         const userData = usersMap.get(doc.id);
         userData.discordId = doc.data().discordId;
       });
+    });
+
+    const gracePeriodMs = convertDaysToMilliseconds(dateGap);
+    const oooTimelineMap = await getOooTimelineForUsers({
+      userIds,
+      gapWindowStart,
+      gapWindowEnd,
+      gracePeriodMs,
     });
 
     const discordUserList = await discordUsersPromise;
@@ -1082,6 +1080,42 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
     });
 
     await Promise.all(progressCountPromise);
+
+    for (const userId of userIds) {
+      const userData = usersMap.get(userId);
+      if (!userData) {
+        continue;
+      }
+      const timelineEntry = oooTimelineMap.get(userId);
+      if (timelineEntry) {
+        userData.isOOO = timelineEntry.isCurrentlyOoo;
+
+        const coversEntireGap = timelineEntry.intervals.some(({ from, until }) => {
+          return from <= gapWindowStart && until >= gapWindowEnd;
+        });
+
+        const withinGraceWindow =
+          timelineEntry.lastOooUntil !== null && gracePeriodMs
+            ? gapWindowEnd <= timelineEntry.lastOooUntil + gracePeriodMs
+            : false;
+
+        if (userData.latestProgressCount === 0 && (coversEntireGap || withinGraceWindow)) {
+          stats.filteredByOoo = (stats.filteredByOoo || 0) + 1;
+          logger.info("Skipped missed update due to OOO", {
+            userId,
+            gapWindowStart,
+            gapWindowEnd,
+            coversEntireGap,
+            withinGraceWindow,
+            lastOooUntil: timelineEntry.lastOooUntil,
+          });
+          usersMap.delete(userId);
+          continue;
+        }
+      } else {
+        userData.isOOO = false;
+      }
+    }
 
     for (const [userId, userData] of usersMap.entries()) {
       const discordUserData = discordUserMap.get(userData.discordId);

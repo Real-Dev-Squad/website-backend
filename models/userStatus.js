@@ -17,7 +17,10 @@ const {
   convertTimestampsToUTC,
 } = require("../utils/userStatus");
 const { TASK_STATUS } = require("../constants/tasks");
+const { FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
+const { REQUEST_TYPE } = require("../constants/requests");
 const userStatusModel = firestore.collection("usersStatus");
+const userFutureStatusModel = firestore.collection("userFutureStatus");
 const tasksModel = firestore.collection("tasks");
 const { userState } = require("../constants/userStatus");
 const discordRoleModel = firestore.collection("discord-roles");
@@ -26,6 +29,7 @@ const usersCollection = firestore.collection("users");
 const config = require("config");
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 const { generateAuthTokenForCloudflare } = require("../utils/discord-actions");
+const { chunks } = require("../utils/array");
 
 // added this function here to avoid circular dependency
 /**
@@ -705,6 +709,111 @@ const addFutureStatus = async (futureStatusData) => {
   }
 };
 
+const normalizeTimestamp = (value) => {
+  if (typeof value !== "number") {
+    return null;
+  }
+  if (Number.isNaN(value)) {
+    return null;
+  }
+  return value;
+};
+
+const registerOooInterval = (timelineEntry, from, until, fallbackUntil) => {
+  const normalizedFrom = normalizeTimestamp(from);
+  if (normalizedFrom === null) {
+    return;
+  }
+
+  let normalizedUntil = normalizeTimestamp(until);
+  if (normalizedUntil === null) {
+    normalizedUntil = normalizeTimestamp(fallbackUntil);
+  }
+
+  if (normalizedUntil === null) {
+    return;
+  }
+
+  timelineEntry.intervals.push({ from: normalizedFrom, until: normalizedUntil });
+
+  if (timelineEntry.lastOooUntil === null || timelineEntry.lastOooUntil < normalizedUntil) {
+    timelineEntry.lastOooUntil = normalizedUntil;
+  }
+};
+
+const getOooTimelineForUsers = async ({ userIds = [], gapWindowStart, gapWindowEnd, gracePeriodMs }) => {
+  const timelineMap = new Map();
+
+  if (!Array.isArray(userIds) || userIds.length === 0) {
+    return timelineMap;
+  }
+
+  userIds.forEach((userId) => {
+    timelineMap.set(userId, {
+      intervals: [],
+      lastOooUntil: null,
+      isCurrentlyOoo: false,
+    });
+  });
+
+  const userIdChunks = chunks(userIds, FIRESTORE_IN_CLAUSE_SIZE);
+
+  const userStatusSnapshots = await Promise.all(
+    userIdChunks.map((userIdChunk) => userStatusModel.where("userId", "in", userIdChunk).get())
+  );
+
+  userStatusSnapshots.forEach((snapshot) => {
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      const { userId, currentStatus = {}, futureStatus = {} } = data;
+      const timelineEntry = timelineMap.get(userId);
+      if (!timelineEntry) {
+        return;
+      }
+
+      if (currentStatus.state === userState.OOO) {
+        timelineEntry.isCurrentlyOoo = true;
+        registerOooInterval(timelineEntry, currentStatus.from, currentStatus.until, gapWindowEnd);
+      }
+
+      if (futureStatus.state === userState.OOO || futureStatus.state === REQUEST_TYPE.OOO) {
+        registerOooInterval(timelineEntry, futureStatus.from, futureStatus.until ?? futureStatus.endsOn, gapWindowEnd);
+      }
+    });
+  });
+
+  const futureStatusSnapshots = await Promise.all(
+    userIdChunks.map((userIdChunk) =>
+      userFutureStatusModel.where("userId", "in", userIdChunk).where("status", "==", userState.OOO).get()
+    )
+  );
+
+  futureStatusSnapshots.forEach((snapshot) => {
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      const { userId, from, endsOn } = data;
+      const timelineEntry = timelineMap.get(userId);
+      if (!timelineEntry) {
+        return;
+      }
+
+      const normalizedEndsOn = normalizeTimestamp(endsOn);
+      const normalizedFrom = normalizeTimestamp(from);
+      if (normalizedEndsOn !== null && normalizedFrom !== null) {
+        const isRelevant =
+          (normalizedEndsOn >= gapWindowStart && normalizedFrom <= gapWindowEnd) ||
+          (gracePeriodMs && gapWindowEnd <= normalizedEndsOn + gracePeriodMs);
+
+        if (isRelevant) {
+          registerOooInterval(timelineEntry, normalizedFrom, normalizedEndsOn, gapWindowEnd);
+        }
+      }
+    });
+  });
+
+  return timelineMap;
+};
+
 module.exports = {
   deleteUserStatus,
   getUserStatus,
@@ -719,4 +828,5 @@ module.exports = {
   cancelOooStatus,
   getGroupRole,
   addFutureStatus,
+  getOooTimelineForUsers,
 };
