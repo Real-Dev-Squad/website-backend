@@ -325,12 +325,14 @@ const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
       })
     );
 
-    const usersInDiscordSet = new Set(
-      usersSnapshots
-        .flat()
-        .filter((user) => user?.roles?.in_discord === true)
-        .map((user) => user.discordId)
-    );
+    const usersInDiscordSet = new Set();
+    for (const userList of usersSnapshots) {
+      for (const user of userList) {
+        if (user?.roles?.in_discord === true) {
+          usersInDiscordSet.add(user.discordId);
+        }
+      }
+    }
 
     const roleIdToCountMap = {};
     groupsToUserMappings.forEach((mapping) => {
