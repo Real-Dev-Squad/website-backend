@@ -52,7 +52,6 @@ const updateUser = async (req, res, next) => {
         .valid(...Object.values(USER_STATUS))
         .optional(),
       discordId: joi.string().optional(),
-      stage: joi.number().optional(),
       disabledRoles: joi.array().items(joi.string().valid("super_user", "member")).optional(),
       role: joi
         .string()

@@ -34,8 +34,8 @@ module.exports = () => {
       roles: {
         in_discord: true,
         archived: false,
-        designer: true,
       },
+      role: "designer",
       incompleteUserDetails: false,
       updated_at: Date.now(),
       created_at: Date.now(),
@@ -66,10 +66,10 @@ module.exports = () => {
     {
       email: "test123@gmail.com",
       roles: {
-        developer: true,
         in_discord: true,
         archived: false,
       },
+      role: "developer",
       incompleteUserDetails: false,
       updated_at: Date.now(),
       created_at: Date.now(),

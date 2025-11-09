@@ -95,10 +95,12 @@ module.exports = () => {
       github_display_name: "Sagar Bajpai",
       phone: "1234567890",
       email: "abc1@gmail.com",
+      incompleteUserDetails: false,
       status: "active",
       tokens: {
         githubAccessToken: "githubAccessToken",
       },
+      role: "designer",
       roles: {
         restricted: false,
         app_owner: true,
@@ -175,6 +177,8 @@ module.exports = () => {
         githubAccessToken: "githubAccessToken",
       },
       status: "active",
+      incompleteUserDetails: true,
+      role: "developer",
       roles: {
         member: true,
         archived: false,

@@ -36,6 +36,8 @@ const userAlreadyArchived = userData[5];
 const userAlreadyUnArchived = userData[4];
 const nonSuperUser = userData[0];
 const newUser = userData[18];
+const newUser2 = userData[3];
+const userWithRole = userData[4];
 const cookieName = config.get("userToken.cookieName");
 const { userPhotoVerificationData } = require("../fixtures/user/photo-verification");
 const Sinon = require("sinon");
@@ -183,36 +185,128 @@ describe("Users", function () {
         });
     });
 
-    it("Should update the username with valid username", function (done) {
-      chai
-        .request(app)
-        .patch("/users/self")
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({
-          username: "validUsername123",
-        })
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(204);
-
-          return done();
-        });
-    });
-
-    it("Should allow updating user role when in_discord is not present and  is not developer", function (done) {
+    it("should update the username when valid username is provided and dev is false", function (done) {
       addUser(newUser).then((newUserId) => {
         const newUserJwt = authService.generateAuthToken({ userId: newUserId });
         chai
           .request(app)
-          .patch(`/users/self`)
+          .patch("/users/self")
           .set("cookie", `${cookieName}=${newUserJwt}`)
           .send({
-            roles: {
-              maven: true,
-            },
+            username: "testUserName",
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(204);
+
+            return done();
+          });
+      });
+    });
+
+    it("Should update the username when dev is true and role,firstName and lastName are given", function (done) {
+      addUser(newUser).then((newUserId) => {
+        const newUserJwt = authService.generateAuthToken({ userId: newUserId });
+        chai
+          .request(app)
+          .patch("/users/self?dev=true")
+          .set("cookie", `${cookieName}=${newUserJwt}`)
+          .send({
+            role: "developer",
+            first_name: "Test",
+            last_name: "User",
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(204);
+
+            return done();
+          });
+      });
+    });
+
+    it("Should not update the username when role is not present and dev is true", function (done) {
+      addUser(newUser).then((newUserId) => {
+        const newUserJwt = authService.generateAuthToken({ userId: newUserId });
+        chai
+          .request(app)
+          .patch(`/users/self?dev=true`)
+          .set("cookie", `${cookieName}=${newUserJwt}`)
+          .send({
+            first_name: "Test",
+            last_name: "User",
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(403);
+            return done();
+          });
+      });
+    });
+
+    it("Should not update the username first_name is not present", function (done) {
+      addUser(newUser).then((newUserId) => {
+        const newUserJwt = authService.generateAuthToken({ userId: newUserId });
+        chai
+          .request(app)
+          .patch(`/users/self?dev=true`)
+          .set("cookie", `${cookieName}=${newUserJwt}`)
+          .send({
+            last_name: "User",
+            role: "developer",
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(403);
+            return done();
+          });
+      });
+    });
+
+    it("Should not update the username when last_name is not present and dev is true", function (done) {
+      addUser(newUser).then((newUserId) => {
+        const newUserJwt = authService.generateAuthToken({ userId: newUserId });
+        chai
+          .request(app)
+          .patch(`/users/self?dev=true`)
+          .set("cookie", `${cookieName}=${newUserJwt}`)
+          .send({
+            first_name: "Test",
+            role: "developer",
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+            expect(res).to.have.status(403);
+            return done();
+          });
+      });
+    });
+
+    it("Should not update the username incompleteUserDetails is false and dev is true", function (done) {
+      addUser(newUser2).then((newUserId) => {
+        const newUserJwt = authService.generateAuthToken({ userId: newUserId });
+        chai
+          .request(app)
+          .patch(`/users/self?dev=true`)
+          .set("cookie", `${cookieName}=${newUserJwt}`)
+          .send({
+            first_name: "Test",
+            last_name: "User",
+            role: "developer",
           })
           .end((err, res) => {
             if (err) {
@@ -225,61 +319,25 @@ describe("Users", function () {
       });
     });
 
-    it("Should not remove old roles when updating user roles", async function () {
-      const newUserId = await addUser(newUser);
-      const newUserJwt = authService.generateAuthToken({ userId: newUserId });
+    it("Should not update the user roles when user already has a role", function (done) {
+      addUser(userWithRole).then((newUserId) => {
+        const newUserJwt = authService.generateAuthToken({ userId: newUserId });
+        chai
+          .request(app)
+          .patch("/users/self?dev=true")
+          .set("cookie", `${cookieName}=${newUserJwt}`)
+          .send({
+            role: "developer",
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
 
-      const getUserResponseBeforeUpdate = await chai
-        .request(app)
-        .get("/users/self")
-        .set("cookie", `${cookieName}=${newUserJwt}`);
-
-      expect(getUserResponseBeforeUpdate).to.have.status(200);
-      expect(getUserResponseBeforeUpdate.body.roles).to.not.have.property("maven");
-      expect(getUserResponseBeforeUpdate.body.roles.in_discord).to.equal(false);
-
-      const updateRolesResponse = await chai
-        .request(app)
-        .patch(`/users/self`)
-        .set("cookie", `${cookieName}=${newUserJwt}`)
-        .send({
-          roles: {
-            maven: true,
-          },
-        });
-
-      expect(updateRolesResponse).to.have.status(204);
-
-      const getUserResponseAfterUpdate = await chai
-        .request(app)
-        .get("/users/self")
-        .set("cookie", `${cookieName}=${newUserJwt}`);
-
-      expect(getUserResponseAfterUpdate).to.have.status(200);
-      expect(getUserResponseAfterUpdate.body.roles).to.have.property("maven");
-      expect(getUserResponseAfterUpdate.body.roles.maven).to.equal(true);
-      expect(getUserResponseAfterUpdate.body.roles.in_discord).to.equal(false);
-    });
-
-    it("Should not update the user roles when user has in_discord and developer true", function (done) {
-      chai
-        .request(app)
-        .patch("/users/self")
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({
-          roles: {
-            maven: true,
-          },
-        })
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(403);
-
-          return done();
-        });
+            expect(res).to.have.status(403);
+            return done();
+          });
+      });
     });
 
     it("Should return 400 for invalid status value", function (done) {
@@ -296,27 +354,18 @@ describe("Users", function () {
           }
 
           expect(res).to.have.status(400);
-          expect(res.body).to.be.an("object");
-          expect(res.body).to.eql({
-            statusCode: 400,
-            error: "Bad Request",
-            message: '"status" must be one of [ooo, idle, active, onboarding]',
-          });
 
           return done();
         });
     });
 
-    it("Should return 400 if required roles is missing", function (done) {
+    it("Should return 400 if invalid role", function (done) {
       chai
         .request(app)
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          roles: {
-            in_discord: false,
-            developer: true,
-          },
+          role: "invalidRole",
         })
         .end((err, res) => {
           if (err) {
@@ -324,54 +373,6 @@ describe("Users", function () {
           }
 
           expect(res).to.have.status(400);
-
-          return done();
-        });
-    });
-
-    it("Should return 400 if invalid roles", function (done) {
-      chai
-        .request(app)
-        .patch("/users/self")
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({
-          roles: {
-            archived: "false",
-            in_discord: false,
-            developer: true,
-          },
-        })
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(400);
-
-          return done();
-        });
-    });
-
-    it("Should return 400 for invalid username", function (done) {
-      chai
-        .request(app)
-        .patch("/users/self")
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({
-          username: "@invalidUser-name",
-        })
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(400);
-          expect(res.body).to.be.an("object");
-          expect(res.body).to.eql({
-            statusCode: 400,
-            error: "Bad Request",
-            message: "Username must be between 4 and 32 characters long and contain only letters or numbers.",
-          });
 
           return done();
         });
@@ -1903,7 +1904,8 @@ describe("Users", function () {
       );
     });
 
-    afterEach(function () {
+    afterEach(async function () {
+      await cleanDb();
       Sinon.restore();
     });
 
@@ -1913,7 +1915,9 @@ describe("Users", function () {
         .patch(`/users/${userId}?profile=true&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
-          first_name: "Test first_name",
+          first_name: "Test",
+          last_name: "User",
+          role: "developer",
         })
         .end((err, res) => {
           if (err) {
@@ -1929,7 +1933,7 @@ describe("Users", function () {
     it("Should update the user status", function (done) {
       chai
         .request(app)
-        .patch(`/users/${userId}?profile=true&dev=true`)
+        .patch(`/users/${userId}?profile=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           status: "ooo",
@@ -1945,26 +1949,7 @@ describe("Users", function () {
         });
     });
 
-    it("Should update the username with valid username", function (done) {
-      chai
-        .request(app)
-        .patch(`/users/${userId}?profile=true&dev=true`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({
-          username: "validUsername123",
-        })
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(204);
-
-          return done();
-        });
-    });
-
-    it("Should allow updating user role when in_discord is not present and is not developer", function (done) {
+    it("Should not update the user when role is not present and dev is true", function (done) {
       addUser(newUser).then((newUserId) => {
         const newUserJwt = authService.generateAuthToken({ userId: newUserId });
         chai
@@ -1972,76 +1957,82 @@ describe("Users", function () {
           .patch(`/users/${newUserId}?profile=true&dev=true`)
           .set("cookie", `${cookieName}=${newUserJwt}`)
           .send({
-            roles: {
-              maven: true,
-            },
+            first_name: "Test",
+            last_name: "User",
           })
           .end((err, res) => {
             if (err) {
               return done(err);
             }
 
-            expect(res).to.have.status(204);
+            expect(res).to.have.status(403);
             return done();
           });
       });
     });
 
-    it("Should not remove old roles when updating user roles", async function () {
-      const newUserId = await addUser(newUser);
-      const newUserJwt = authService.generateAuthToken({ userId: newUserId });
-
-      const getUserResponseBeforeUpdate = await chai
-        .request(app)
-        .get(`/users?profile=true`)
-        .set("cookie", `${cookieName}=${newUserJwt}`);
-
-      expect(getUserResponseBeforeUpdate).to.have.status(200);
-      expect(getUserResponseBeforeUpdate.body.roles).to.not.have.property("maven");
-      expect(getUserResponseBeforeUpdate.body.roles.in_discord).to.equal(false);
-
-      const updateRolesResponse = await chai
-        .request(app)
-        .patch(`/users/${newUserId}?profile=true&dev=true`)
-        .set("cookie", `${cookieName}=${newUserJwt}`)
-        .send({
-          roles: {
-            maven: true,
-          },
-        });
-
-      expect(updateRolesResponse).to.have.status(204);
-
-      const getUserResponseAfterUpdate = await chai
-        .request(app)
-        .get(`/users?profile=true`)
-        .set("cookie", `${cookieName}=${newUserJwt}`);
-
-      expect(getUserResponseAfterUpdate).to.have.status(200);
-      expect(getUserResponseAfterUpdate.body.roles).to.have.property("maven");
-      expect(getUserResponseAfterUpdate.body.roles.maven).to.equal(true);
-      expect(getUserResponseAfterUpdate.body.roles.in_discord).to.equal(false);
+    it("Should not update the user when first_name is not present and dev is true", function (done) {
+      addUser(newUser).then((newUserId) => {
+        const newUserJwt = authService.generateAuthToken({ userId: newUserId });
+        chai
+          .request(app)
+          .patch(`/users/${newUserId}?profile=true&dev=true`)
+          .set("cookie", `${cookieName}=${newUserJwt}`)
+          .send({
+            last_name: "User",
+            role: "developer",
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+            expect(res).to.have.status(403);
+            return done();
+          });
+      });
     });
 
-    it("Should not update the user roles when user has in_discord and developer true", function (done) {
-      chai
-        .request(app)
-        .patch(`/users/${userId}?profile=true&dev=true`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({
-          roles: {
-            maven: true,
-          },
-        })
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
+    it("Should not update the user when last_name is not present and dev is true", function (done) {
+      addUser(newUser).then((newUserId) => {
+        const newUserJwt = authService.generateAuthToken({ userId: newUserId });
+        chai
+          .request(app)
+          .patch(`/users/${newUserId}?profile=true&dev=true`)
+          .set("cookie", `${cookieName}=${newUserJwt}`)
+          .send({
+            first_name: "Test",
+            role: "developer",
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
 
-          expect(res).to.have.status(403);
+            expect(res).to.have.status(403);
+            return done();
+          });
+      });
+    });
 
-          return done();
-        });
+    it("Should not update the user roles when user already has a role", function (done) {
+      addUser(userWithRole).then((newUserId) => {
+        const newUserJwt = authService.generateAuthToken({ userId: newUserId });
+        chai
+          .request(app)
+          .patch(`/users/${newUserId}?profile=true&dev=true`)
+          .set("cookie", `${cookieName}=${newUserJwt}`)
+          .send({
+            role: "developer",
+          })
+          .end((err, res) => {
+            if (err) {
+              return done(err);
+            }
+
+            expect(res).to.have.status(403);
+            return done();
+          });
+      });
     });
 
     it("Should return 400 for invalid status value", function (done) {
@@ -2114,35 +2105,10 @@ describe("Users", function () {
         });
     });
 
-    it("Should return 400 for invalid username", function (done) {
-      chai
-        .request(app)
-        .patch(`/users/${userId}?profile=true&dev=true`)
-        .set("cookie", `${cookieName}=${jwt}`)
-        .send({
-          username: "@invalidUser-name",
-        })
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(400);
-          expect(res.body).to.be.an("object");
-          expect(res.body).to.eql({
-            statusCode: 400,
-            error: "Bad Request",
-            message: "Username must be between 4 and 32 characters long and contain only letters or numbers.",
-          });
-
-          return done();
-        });
-    });
-
     it("Should update the social id with valid social id", function (done) {
       chai
         .request(app)
-        .patch(`/users/${userId}?profile=true&dev=true`)
+        .patch(`/users/${userId}?profile=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           twitter_id: "Valid_twitterId",

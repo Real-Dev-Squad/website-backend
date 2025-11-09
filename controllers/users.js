@@ -14,7 +14,7 @@ const dataAccess = require("../services/dataAccessLayer");
 const { isLastPRMergedWithinDays } = require("../services/githubService");
 const logger = require("../utils/logger");
 const { SOMETHING_WENT_WRONG, INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const { OVERDUE_TASKS, ALL_USER_ROLES } = require("../constants/users");
+const { OVERDUE_TASKS } = require("../constants/users");
 const { getPaginationLink, getUsernamesFromPRs, getRoleToUpdate } = require("../utils/users");
 const { setInDiscordFalseScript, setUserDiscordNickname } = require("../services/discordService");
 const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
@@ -472,35 +472,14 @@ const getSelfDetails = async (req, res) => {
 
 const updateSelf = async (req, res) => {
   try {
-    const { id: userId, roles: userRoles, discordId } = req.userData;
+    const { id: userId, roles: userRoles, discordId, incompleteUserDetails } = req.userData;
     const devFeatureFlag = req.query.dev === "true";
     const { user } = await dataAccess.retrieveUsers({ id: userId });
-    const { username, role, stage } = req.body;
+    const { first_name: firstName, last_name: lastName, role } = req.body;
     let rolesToDisable = [];
 
-    if (username) {
-      if (stage !== 1 || !role || !user.incompleteUserDetails) {
-        return res.boom.forbidden("You are not authorized to perform this action");
-      }
-      await userQuery.setIncompleteUserDetails(userId);
-    }
-
-    const alreadyHasRole = ALL_USER_ROLES.some((role) => userRoles[role] === true);
-
-    if (role) {
-      if (alreadyHasRole) {
-        return res.boom.forbidden("Cannot update roles again");
-      }
-      if ((stage === 1 && username) || stage === 2) {
-        req.body.roles = { [role]: true };
-        delete req.body.role;
-        delete req.body.stage;
-      } else {
-        return res.boom.forbidden("You are not authorized to perform this action");
-      }
-    }
-
-    if (req.body.disabledRoles) {
+    // Handle disabledRoles processing for developers
+    if (req.body.disabledRoles && devFeatureFlag) {
       const data = req.body.disabledRoles;
       if (user.disabled_roles !== undefined) {
         rolesToDisable = user.disabled_roles;
@@ -518,6 +497,31 @@ const updateSelf = async (req, res) => {
       }
     }
 
+    if (devFeatureFlag) {
+      if (incompleteUserDetails) {
+        if (!firstName || !lastName || !role) {
+          return res.boom.forbidden("You are not authorized to perform this operation");
+        }
+        const username = await generateUniqueUsername(firstName, lastName);
+        req.body.username = username;
+        req.body.role = role;
+        await userQuery.setIncompleteUserDetails(userId);
+      } else {
+        const alreadyHasRole = userRoles[role];
+        if (role && !alreadyHasRole) {
+          req.body.role = role;
+        }
+      }
+    } else {
+      if (req.body?.username) {
+        if (!user.incompleteUserDetails) {
+          return res.boom.forbidden("Cannot update username again");
+        }
+        await userQuery.setIncompleteUserDetails(userId);
+      }
+    }
+
+    // Handle developer-specific logic for disabledRoles
     if (userRoles.in_discord && !user.incompleteUserDetails) {
       const membersInDiscord = await getDiscordMembers();
       if (!Array.isArray(membersInDiscord))
@@ -526,17 +530,35 @@ const updateSelf = async (req, res) => {
       if (discordMember) {
         const { roles } = discordMember;
         if (roles && roles.includes(discordDeveloperRoleId)) {
-          if (req.body.disabledRoles && devFeatureFlag) {
-            const updatedUser = await userQuery.addOrUpdate({ disabled_roles: rolesToDisable }, userId, devFeatureFlag);
-            if (updatedUser) {
-              return res
-                .status(200)
-                .send({ message: "Privilege modified successfully!", disabled_roles: rolesToDisable });
+          // Developers can only update disabledRoles with dev flag
+          if (req.body.disabledRoles) {
+            if (devFeatureFlag) {
+              const updatedUser = await userQuery.addOrUpdate(
+                { disabled_roles: rolesToDisable },
+                userId,
+                devFeatureFlag
+              );
+              if (updatedUser) {
+                return res
+                  .status(200)
+                  .send({ message: "Privilege modified successfully!", disabled_roles: rolesToDisable });
+              }
+            } else {
+              // disabledRoles without dev flag should return 403
+              return res.boom.forbidden(
+                "Developers can only update disabled_roles. Use profile service for updating other attributes."
+              );
             }
           }
-          return res.boom.forbidden(
-            "Developers can only update disabled_roles. Use profile service for updating other attributes."
+          // Check if developer is trying to update something other than disabledRoles
+          const hasOtherFields = Object.keys(req.body).some(
+            (key) => key !== "disabledRoles" && req.body[key] !== undefined
           );
+          if (hasOtherFields) {
+            return res.boom.forbidden(
+              "Developers can only update disabled_roles. Use profile service for updating other attributes."
+            );
+          }
         }
       }
     }
@@ -555,27 +577,6 @@ const updateSelf = async (req, res) => {
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
   }
 };
-
-// if (req.body.username) {
-//   if (!user.incompleteUserDetails &&) {
-//     return res.boom.forbidden("Cannot update username again");
-//   }
-//   await userQuery.setIncompleteUserDetails(userId);
-// }
-// if (req.body.stage === 1 && !req.body.role) {
-//   return res.boom.badRequest("You are forbidden from performing this action");
-// }
-
-// const alreadyHasRole = ALL_USER_ROLES.some((role) => userRoles[role] === true);
-// if (req.body.role) {
-//   const { role, stage } = req.body;
-//   if (alreadyHasRole || stage !== 1) {
-//     return res.boom.forbidden("Cannot update role");
-//   }
-//   req.body.roles = { [role]: true };
-//   delete req.body.role;
-//   delete req.body.stage;
-// }
 
 /**
  * Post user profile picture
@@ -1156,7 +1157,7 @@ const updateProfile = async (req, res) => {
     const isSuperUser = roles[ROLES.SUPERUSER];
     const profile = req.query.profile === "true";
 
-    if (isSelf && profile && req.query.dev === "true") {
+    if (isSelf && profile) {
       return await updateSelf(req, res);
     } else if (isSuperUser) {
       return await updateUser(req, res);

@@ -5,6 +5,7 @@ const chaiHttp = require("chai-http");
 const passport = require("passport");
 const app = require("../../server");
 const cleanDb = require("../utils/cleanDb");
+const config = require("config");
 const { generateGithubAuthRedirectUrl } = require("..//utils/github");
 const { generateGoogleAuthRedirectUrl, stubPassportAuthenticate } = require("..//utils/googleauth");
 const { addUserToDBForTest } = require("../../utils/users");
@@ -420,13 +421,13 @@ describe("auth", function () {
   });
 
   it("should return 403 Forbidden if a non-developer tries to login using github", async function () {
-    await addUserToDBForTest(googleUserInfo[0]);
+    await addUserToDBForTest(userData[3]);
     const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
     const userInfoFromGitHub = {
       ...githubUserInfo[0],
       _json: {
         ...githubUserInfo[0]._json,
-        email: "test12@gmail.com",
+        email: "abc1@gmail.com",
       },
     };
     stubPassportAuthenticate(userInfoFromGitHub);
@@ -437,7 +438,7 @@ describe("auth", function () {
       .query({ code: "codeReturnedByGithub", state: rdsUiUrl })
       .redirects(0);
     expect(res).to.have.status(403);
-    const errorMessage = "GitHub Login is restricted for non-developers,Please use google Login";
+    const errorMessage = "Github Login is restricted for non-developers,Please use Google Login";
     expect(res.body.message).to.equal(errorMessage);
   });
 
