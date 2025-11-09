@@ -513,6 +513,9 @@ const updateSelf = async (req, res) => {
         }
       }
     } else {
+      if (req.body?.role) {
+        return res.boom.forbidden("You are not authorized to perform this operation");
+      }
       if (req.body?.username) {
         if (!user.incompleteUserDetails) {
           return res.boom.forbidden("Cannot update username again");
