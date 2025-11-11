@@ -10,7 +10,6 @@ const {
   DATA_ADDED_SUCCESSFULLY,
   USER_DOES_NOT_EXIST_ERROR,
 } = require("../constants/errorMessages");
-const { NON_DEVELOPMENT_ROLES } = require("../constants/users");
 const ROLES = require("../constants/roles");
 
 const googleAuthLogin = (req, res, next) => {
@@ -91,7 +90,7 @@ async function handleGoogleLogin(req, res, user, authRedirectionUrl) {
     if (userDataFromDB.userExists) {
       if (userDataFromDB.user?.role === ROLES.DEVELOPER) {
         return res.status(403).json({
-          message: "Google Login is restricted for developers,Please use github Login",
+          message: "Google Login is restricted for developers,please use github Login",
         });
       }
     }
@@ -192,10 +191,10 @@ const githubAuthCallback = (req, res, next) => {
 
       const userDataFromDB = await users.fetchUser({ email: userData.email });
       if (userDataFromDB.userExists) {
-        const isNonDeveloper = NON_DEVELOPMENT_ROLES.includes(userDataFromDB.user?.role);
+        const isNonDeveloper = userDataFromDB.user?.role !== ROLES.DEVELOPER;
         if (isNonDeveloper) {
           return res.status(403).json({
-            message: "Github Login is restricted for non-developers,Please use Google Login",
+            message: "Github Login is restricted for non-developers,please use Google Login",
           });
         }
       }

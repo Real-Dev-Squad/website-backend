@@ -25,6 +25,7 @@ module.exports = () => {
       email: "abc@gmail.com",
       discordJoinedAt: "2023-04-06T01:47:34.488000+00:00",
       joined_discord: "2023-01-13T18:21:09.278000+00:00",
+      role: "developer",
       roles: {
         member: true,
         in_discord: true,

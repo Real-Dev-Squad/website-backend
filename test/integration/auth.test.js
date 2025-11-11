@@ -416,7 +416,7 @@ describe("auth", function () {
       .query({ code: "codeReturnedByGoogle", state: rdsUiUrl })
       .redirects(0);
     expect(res).to.have.status(403);
-    const errorMessage = "Google Login is restricted for developers,Please use github Login";
+    const errorMessage = "Google Login is restricted for developers,please use github Login";
     expect(res.body.message).to.equal(errorMessage);
   });
 
@@ -438,12 +438,12 @@ describe("auth", function () {
       .query({ code: "codeReturnedByGithub", state: rdsUiUrl })
       .redirects(0);
     expect(res).to.have.status(403);
-    const errorMessage = "Github Login is restricted for non-developers,Please use Google Login";
+    const errorMessage = "Github Login is restricted for non-developers,please use Google Login";
     expect(res.body.message).to.equal(errorMessage);
   });
 
-  it("should log in existing github user with same email via google OAuth", async function () {
-    await addUserToDBForTest(userData[0]);
+  it("should log in existing github user with no role and same email via google OAuth", async function () {
+    await addUserToDBForTest(userData[1]);
     const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
     const userInfoFromGoogle = {
       ...googleUserInfo[0],

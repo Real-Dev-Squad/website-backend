@@ -478,25 +478,6 @@ const updateSelf = async (req, res) => {
     const { first_name: firstName, last_name: lastName, role } = req.body;
     let rolesToDisable = [];
 
-    // Handle disabledRoles processing for developers
-    if (req.body.disabledRoles && devFeatureFlag) {
-      const data = req.body.disabledRoles;
-      if (user.disabled_roles !== undefined) {
-        rolesToDisable = user.disabled_roles;
-
-        data.forEach((role) => {
-          const roleIndex = rolesToDisable.indexOf(role);
-          if (roleIndex !== -1) {
-            rolesToDisable.splice(roleIndex, 1);
-          } else {
-            rolesToDisable.push(role);
-          }
-        });
-      } else {
-        rolesToDisable = data;
-      }
-    }
-
     if (devFeatureFlag) {
       if (incompleteUserDetails) {
         if (!firstName || !lastName || !role) {
@@ -521,6 +502,24 @@ const updateSelf = async (req, res) => {
           return res.boom.forbidden("Cannot update username again");
         }
         await userQuery.setIncompleteUserDetails(userId);
+      }
+    }
+
+    if (req.body.disabledRoles) {
+      const data = req.body.disabledRoles;
+      if (user.disabled_roles !== undefined) {
+        rolesToDisable = user.disabled_roles;
+
+        data.forEach((role) => {
+          const roleIndex = rolesToDisable.indexOf(role);
+          if (roleIndex !== -1) {
+            rolesToDisable.splice(roleIndex, 1);
+          } else {
+            rolesToDisable.push(role);
+          }
+        });
+      } else {
+        rolesToDisable = data;
       }
     }
 
