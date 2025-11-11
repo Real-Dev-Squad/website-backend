@@ -8,6 +8,7 @@ const { findSubscribedGroupIds } = require("../utils/helper");
 const { retrieveUsers } = require("../services/dataAccessLayer");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const { getAllUserStatus, getGroupRole, getUserStatus } = require("./userStatus");
+const { normalizeTimestamp } = require("../utils/userStatus");
 const { userState } = require("../constants/userStatus");
 const { ONE_DAY_IN_MS, SIMULTANEOUS_WORKER_CALLS } = require("../constants/users");
 const userModel = firestore.collection("users");
@@ -958,6 +959,7 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
   const stats = {
     tasks: 0,
     missedUpdatesTasks: 0,
+    filteredByOoo: 0,
   };
   try {
     const discordUsersPromise = discordService.getDiscordMembers();
@@ -1031,8 +1033,7 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
 
     const userIdChunks = chunks(Array.from(usersMap.keys()), FIRESTORE_IN_CLAUSE_SIZE);
     const userStatusSnapshotPromise = userIdChunks.map(
-      async (userIdList) =>
-        await userStatusModel.where("currentStatus.state", "==", userState.OOO).where("userId", "in", userIdList).get()
+      async (userIdList) => await userStatusModel.where("userId", "in", userIdList).get()
     );
     const userDetailsPromise = userIdChunks.map(
       async (userIdList) =>
@@ -1046,7 +1047,13 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
 
     userStatusChunks.forEach((userStatusList) =>
       userStatusList.forEach((doc) => {
-        usersMap.get(doc.data().userId).isOOO = true;
+        const userStatusData = doc.data();
+        const mappedUser = usersMap.get(userStatusData.userId);
+        if (!mappedUser) {
+          return;
+        }
+        mappedUser.isOOO = userStatusData.currentStatus?.state === userState.OOO;
+        mappedUser.lastOooUntil = userStatusData.lastOooUntil ?? null;
       })
     );
 
@@ -1083,9 +1090,18 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
 
     await Promise.all(progressCountPromise);
 
+    const gracePeriodCutoff = Date.now() - convertDaysToMilliseconds(dateGap);
     for (const [userId, userData] of usersMap.entries()) {
       const discordUserData = discordUserMap.get(userData.discordId);
       const isDiscordMember = !!discordUserData;
+      const normalizedLastOooUntil = normalizeTimestamp(userData.lastOooUntil);
+      const isWithinGracePeriod = normalizedLastOooUntil !== null && normalizedLastOooUntil >= gracePeriodCutoff;
+
+      if (userData.latestProgressCount === 0 && (userData.isOOO || isWithinGracePeriod)) {
+        stats.filteredByOoo++;
+        usersMap.delete(userId);
+        continue;
+      }
       const shouldAddRole =
         userData.latestProgressCount === 0 &&
         !userData.isOOO &&

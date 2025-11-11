@@ -692,6 +692,7 @@ describe("discordactions", function () {
     let userNotInDiscord;
     let activeUserId;
     let activeUserWithProgressUpdates;
+    let activeMissedUpdatesUserId;
 
     beforeEach(async function () {
       idleUser = { ...userData[9], discordId: getDiscordMembers[0].user.id };
@@ -710,6 +711,7 @@ describe("discordactions", function () {
         await addUser(userNotInDiscord),
       ]);
       activeUserId = userIdList[2];
+      activeMissedUpdatesUserId = userIdList[1];
       await Promise.all([
         await userStatusModel.updateUserStatus(userIdList[0], idleUserStatus),
         await userStatusModel.updateUserStatus(userIdList[1], activeUserStatus),
@@ -761,6 +763,7 @@ describe("discordactions", function () {
       expect(result.tasks).to.equal(4);
       expect(result.missedUpdatesTasks).to.not.equal(undefined);
       expect(result.missedUpdatesTasks).to.equal(3);
+      expect(result.filteredByOoo).to.equal(1);
       expect(result.usersToAddRole.includes(activeUserWithMissedProgressUpdates.discordId)).to.equal(true);
       expect(result.usersToAddRole.includes(idleUser.discordId)).to.equal(true);
     });
@@ -769,6 +772,17 @@ describe("discordactions", function () {
       const result = await getMissedProgressUpdatesUsers();
       expect(result).to.be.an("object");
       expect(result.usersToAddRole).to.not.contain(userNotInDiscord.discordId);
+    });
+
+    it("should exclude users within the post-OOO grace window", async function () {
+      const graceTimestamp = Date.now() - convertDaysToMilliseconds(2);
+      const snapshot = await userStatusCollection.where("userId", "==", activeMissedUpdatesUserId).limit(1).get();
+      const [doc] = snapshot.docs;
+      await doc.ref.update({ lastOooUntil: graceTimestamp });
+
+      const result = await getMissedProgressUpdatesUsers();
+      expect(result.usersToAddRole).to.not.contain(activeUserWithMissedProgressUpdates.discordId);
+      expect(result.filteredByOoo).to.equal(2);
     });
 
     it("should not list of users when exception days are added", async function () {
@@ -788,6 +802,7 @@ describe("discordactions", function () {
         tasks: 4,
         missedUpdatesTasks: 0,
         usersToAddRole: [],
+        filteredByOoo: 0,
       });
     });
 
@@ -800,6 +815,7 @@ describe("discordactions", function () {
         tasks: 0,
         missedUpdatesTasks: 0,
         usersToAddRole: [],
+        filteredByOoo: 0,
       });
     });
 
@@ -823,6 +839,7 @@ describe("discordactions", function () {
         tasks: 5,
         missedUpdatesTasks: 0,
         usersToAddRole: [],
+        filteredByOoo: 0,
       });
     });
 
