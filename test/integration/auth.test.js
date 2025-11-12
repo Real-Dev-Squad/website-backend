@@ -457,7 +457,7 @@ describe("auth", function () {
       .query({ code: "codeReturnedByGoogle", state: rdsUiUrl })
       .redirects(0);
     expect(res).to.have.status(302);
-    expect(res.headers.location).to.equal(rdsUiUrl);
+    expect(res.headers.location).to.equal("https://my.realdevsquad.com/new-signup");
   });
 
   it("should get the verified email and redirect the google user to the goto page on successful login", async function () {

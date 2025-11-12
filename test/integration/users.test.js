@@ -2992,7 +2992,7 @@ describe("Users", function () {
     let id, jwtoken;
 
     beforeEach(async function () {
-      id = await addUser();
+      id = await addUser(userData[0]);
       jwtoken = authService.generateAuthToken({ userId: id });
       fetchStub = Sinon.stub(global, "fetch");
       const discordMembers = [...getDiscordMembers];

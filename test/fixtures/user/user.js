@@ -61,6 +61,7 @@ module.exports = () => {
       },
       nickname_synced: false,
       profileStatus: "BLOCKED",
+      incompleteUserDetails: false,
     },
     {
       username: "pranavg",
