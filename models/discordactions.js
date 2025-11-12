@@ -312,7 +312,14 @@ const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
     const roleIds = groups.map((group) => group.roleid);
     const groupsToUserMappings = await fetchGroupToUserMapping(roleIds);
 
-    const uniqueDiscordIds = Array.from(new Set(groupsToUserMappings.map((mapping) => mapping.userid).filter(Boolean)));
+    const uniqueDiscordIds = Array.from(
+      new Set(
+        groupsToUserMappings
+          .map((mapping) => mapping.userid)
+          .filter((id) => id !== undefined && id !== null)
+          .map((id) => String(id))
+      )
+    );
     const discordIdChunks = [];
     for (let i = 0; i < uniqueDiscordIds.length; i += BATCH_SIZE_IN_CLAUSE) {
       discordIdChunks.push(uniqueDiscordIds.slice(i, i + BATCH_SIZE_IN_CLAUSE));
@@ -335,7 +342,7 @@ const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
 
     const roleIdToCountMap = {};
     groupsToUserMappings.forEach((mapping) => {
-      if (usersInDiscordSet.has(mapping.userid)) {
+      if (usersInDiscordSet.has(String(mapping.userid))) {
         roleIdToCountMap[mapping.roleid] = (roleIdToCountMap[mapping.roleid] ?? 0) + 1;
       }
     });
