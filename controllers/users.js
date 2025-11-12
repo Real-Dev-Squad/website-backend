@@ -31,7 +31,7 @@ const {
   USERS_PATCH_HANDLER_SUCCESS_MESSAGES,
 } = require("../constants/users");
 const { addLog } = require("../models/logs");
-const { getUserStatus } = require("../models/userStatus");
+const { getUserStatus, runLastOooUntilMigration } = require("../models/userStatus");
 const config = require("config");
 const { generateUniqueUsername } = require("../services/users");
 const userService = require("../services/users");
@@ -1118,6 +1118,19 @@ const updateUsernames = async (req, res) => {
   }
 };
 
+const updateLastOooUntil = async (req, res) => {
+  try {
+    const summary = await runLastOooUntilMigration();
+    return res.status(200).json({
+      message: "lastOooUntil migration executed successfully",
+      data: summary,
+    });
+  } catch (error) {
+    logger.error("Error in lastOooUntil migration script", error);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 const updateProfile = async (req, res) => {
   try {
     const { id: currentUserId, roles = {} } = req.userData;
@@ -1170,5 +1183,6 @@ module.exports = {
   isDeveloper,
   getIdentityStats,
   updateUsernames,
+  updateLastOooUntil,
   updateProfile,
 };
