@@ -300,9 +300,7 @@ module.exports = {
     },
   },
 
-  routesCacheTTL: {
-    "/members": 900,
-  },
+  routesCacheTTL: {},
 
   githubAccessToken: "GITHUB_PERSONAL_ACCESS_TOKEN",
 
