@@ -9,7 +9,7 @@ const { retrieveUsers } = require("../services/dataAccessLayer");
 const { BATCH_SIZE_IN_CLAUSE } = require("../constants/firebase");
 const { getAllUserStatus, getGroupRole, getUserStatus } = require("./userStatus");
 const { normalizeTimestamp } = require("../utils/userStatus");
-const { userState } = require("../constants/userStatus");
+const { userState, POST_OOO_GRACE_PERIOD_IN_DAYS } = require("../constants/userStatus");
 const { ONE_DAY_IN_MS, SIMULTANEOUS_WORKER_CALLS } = require("../constants/users");
 const userModel = firestore.collection("users");
 const photoVerificationModel = firestore.collection("photo-verification");
@@ -1090,7 +1090,7 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
 
     await Promise.all(progressCountPromise);
 
-    const gracePeriodCutoff = Date.now() - convertDaysToMilliseconds(dateGap);
+    const gracePeriodCutoff = Date.now() - convertDaysToMilliseconds(POST_OOO_GRACE_PERIOD_IN_DAYS);
     for (const [userId, userData] of usersMap.entries()) {
       const discordUserData = discordUserMap.get(userData.discordId);
       const isDiscordMember = !!discordUserData;

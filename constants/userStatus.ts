@@ -12,3 +12,5 @@ export const statusState = {
 };
 
 export const CANCEL_OOO = "cancelOoo";
+
+export const POST_OOO_GRACE_PERIOD_IN_DAYS = 3;
