@@ -49,24 +49,35 @@ const generateUniqueUsername = async (firstName, lastName) => {
   }
 };
 
+/**
+ * Validates user signup details and handles incomplete user details flow.
+ *
+ * @async
+ * @function validateUserSignup
+ * @param {string} userId - The id for the user.
+ * @param {boolean} incompleteUserDetails - Indicates if the user has incomplete details.
+ * @param {string|null} firstName - The user's first name.
+ * @param {string|null} lastName - The user's last name.
+ * @param {string|null} role - The role to assign to the user.
+ * @param {string|null} existingRole - The user's existing role, if any.
+ * @returns {Promise<string|null>} Returns a generated username if incompleteUserDetails is true and all required fields are present, otherwise undefined.
+ */
+
 const validateUserSignup = async (userId, incompleteUserDetails, firstName, lastName, role, existingRole) => {
   try {
-    if (incompleteUserDetails) {
-      if (!firstName || !lastName || !role) {
-        throw new Forbidden("You are not authorized to perform this operation");
-      }
-      const username = await generateUniqueUsername(firstName, lastName);
-      await userQuery.setIncompleteUserDetails(userId);
-      return username;
-    } else {
-      // If user already has a role, they cannot set a new role
+    if (!incompleteUserDetails) {
       const alreadyHasRole = existingRole && ALL_USER_ROLES.includes(existingRole);
       if (role && alreadyHasRole) {
-        throw new Forbidden("You are not authorized to perform this operation");
+        throw new Forbidden("Cannot update role again");
       }
-      // Return undefined if no username needs to be generated
-      return undefined;
+      return null;
     }
+    if (!firstName || !lastName || !role) {
+      throw new Forbidden("You are not authorized to perform this operation");
+    }
+    const username = await generateUniqueUsername(firstName, lastName);
+    await userQuery.setIncompleteUserDetails(userId);
+    return username;
   } catch (err) {
     logger.error(`Error while validating user signup: ${err.message}`);
     throw err;

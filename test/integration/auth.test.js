@@ -444,7 +444,7 @@ describe("auth", function () {
 
   it("should log in existing github user with no role and same email via google OAuth", async function () {
     await addUserToDBForTest(userData[1]);
-    const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
+    const newSignupUrl = new URL(config.get("services.rdsUi.newSignupUrl")).href;
     const userInfoFromGoogle = {
       ...googleUserInfo[0],
       emails: [{ value: "abc@gmail.com", verified: true }],
@@ -454,10 +454,10 @@ describe("auth", function () {
     const res = await chai
       .request(app)
       .get("/auth/google/callback")
-      .query({ code: "codeReturnedByGoogle", state: rdsUiUrl })
+      .query({ code: "codeReturnedByGoogle", state: newSignupUrl })
       .redirects(0);
     expect(res).to.have.status(302);
-    expect(res.headers.location).to.equal("https://my.realdevsquad.com/new-signup");
+    expect(res.headers.location).to.equal(newSignupUrl);
   });
 
   it("should get the verified email and redirect the google user to the goto page on successful login", async function () {

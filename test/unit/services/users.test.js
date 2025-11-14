@@ -166,7 +166,6 @@ describe("Users services", function () {
     });
   });
 
-  /* eslint-disable no-unused-expressions */
   describe("validateUserSignup", function () {
     let setIncompleteUserDetailsStub;
 
@@ -229,7 +228,8 @@ describe("Users services", function () {
         const result = await validateUserSignup(userId, incompleteUserDetails, firstName, lastName, role, null);
         expect(result).to.be.a("string");
         expect(result.length).to.be.greaterThan(0);
-        expect(setIncompleteUserDetailsStub.calledOnceWith(userId)).to.be.true;
+        expect(setIncompleteUserDetailsStub.calledOnce).to.equal(true);
+        expect(setIncompleteUserDetailsStub.firstCall.args[0]).to.equal(userId);
       });
     });
 
@@ -248,27 +248,27 @@ describe("Users services", function () {
           expect.fail("Expected function to throw Forbidden error");
         } catch (error) {
           expect(error).to.be.instanceOf(Forbidden);
-          expect(error.message).to.equal("You are not authorized to perform this operation");
+          expect(error.message).to.equal("Cannot update role again");
         }
       });
 
-      it("should return undefined when no role is provided", async function () {
+      it("should return null when no role is provided", async function () {
         const result = await validateUserSignup(userId, incompleteUserDetails, firstName, lastName, null, null);
 
-        expect(result).to.be.undefined;
-        expect(setIncompleteUserDetailsStub.called).to.be.false;
+        expect(result).to.equal(null);
+        expect(setIncompleteUserDetailsStub.called).to.equal(false);
       });
 
-      it("should return undefined when user does not have an existing role and tries to set one", async function () {
+      it("should return null when user does not have an existing role and tries to set one", async function () {
         const newRole = "developer";
 
         const result = await validateUserSignup(userId, incompleteUserDetails, firstName, lastName, newRole, null);
 
-        expect(result).to.be.undefined;
-        expect(setIncompleteUserDetailsStub.called).to.be.false;
+        expect(result).to.equal(null);
+        expect(setIncompleteUserDetailsStub.called).to.equal(false);
       });
 
-      it("should return undefined when existingRole is not in ALL_USER_ROLES", async function () {
+      it("should return null when existingRole is not in ALL_USER_ROLES", async function () {
         const existingRole = "invalid_role";
         const newRole = "developer";
 
@@ -281,11 +281,11 @@ describe("Users services", function () {
           existingRole
         );
 
-        expect(result).to.be.undefined;
-        expect(setIncompleteUserDetailsStub.called).to.be.false;
+        expect(result).to.equal(null);
+        expect(setIncompleteUserDetailsStub.called).to.equal(false);
       });
 
-      it("should return undefined when existingRole is empty string", async function () {
+      it("should return null when existingRole is empty string", async function () {
         const existingRole = "";
         const newRole = "developer";
 
@@ -298,10 +298,9 @@ describe("Users services", function () {
           existingRole
         );
 
-        expect(result).to.be.undefined;
-        expect(setIncompleteUserDetailsStub.called).to.be.false;
+        expect(result).to.equal(null);
+        expect(setIncompleteUserDetailsStub.called).to.equal(false);
       });
     });
   });
-  /* eslint-enable no-unused-expressions */
 });

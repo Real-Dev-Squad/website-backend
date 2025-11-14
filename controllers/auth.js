@@ -87,12 +87,10 @@ async function handleGoogleLogin(req, res, user, authRedirectionUrl) {
     };
 
     const userDataFromDB = await users.fetchUser({ email: userData.email });
-    if (userDataFromDB.userExists) {
-      if (userDataFromDB.user?.role === ROLES.DEVELOPER) {
-        return res.status(403).json({
-          message: "Google Login is restricted for developers,please use github Login",
-        });
-      }
+    if (userDataFromDB.userExists && userDataFromDB.user?.role === ROLES.DEVELOPER) {
+      return res.status(403).json({
+        message: "Google Login is restricted for developers,please use github Login",
+      });
     }
 
     const { userId, incompleteUserDetails } = await users.addOrUpdate(userData);
@@ -190,13 +188,10 @@ const githubAuthCallback = (req, res, next) => {
       }
 
       const userDataFromDB = await users.fetchUser({ email: userData.email });
-      if (userDataFromDB.userExists) {
-        const isNonDeveloper = userDataFromDB.user?.role !== ROLES.DEVELOPER;
-        if (isNonDeveloper) {
-          return res.status(403).json({
-            message: "Github Login is restricted for non-developers,please use Google Login",
-          });
-        }
+      if (userDataFromDB.userExists && userDataFromDB.user?.role !== ROLES.DEVELOPER) {
+        return res.status(403).json({
+          message: "Github Login is restricted for non-developers,please use Google Login",
+        });
       }
 
       const { userId, incompleteUserDetails, role } = await users.addOrUpdate(userData);
