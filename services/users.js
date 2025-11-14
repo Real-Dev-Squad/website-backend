@@ -2,6 +2,9 @@ const firestore = require("../utils/firestore");
 const { formatUsername } = require("../utils/username");
 const userModel = firestore.collection("users");
 const tasksModel = require("../models/tasks");
+const userQuery = require("../models/users");
+const { ALL_USER_ROLES } = require("../constants/users");
+const Forbidden = require("http-errors").Forbidden;
 
 const getUsersWithIncompleteTasks = async (users) => {
   if (users.length === 0) return [];
@@ -46,7 +49,32 @@ const generateUniqueUsername = async (firstName, lastName) => {
   }
 };
 
+const validateUserSignup = async (userId, incompleteUserDetails, firstName, lastName, role, existingRole) => {
+  try {
+    if (incompleteUserDetails) {
+      if (!firstName || !lastName || !role) {
+        throw new Forbidden("You are not authorized to perform this operation");
+      }
+      const username = await generateUniqueUsername(firstName, lastName);
+      await userQuery.setIncompleteUserDetails(userId);
+      return username;
+    } else {
+      // If user already has a role, they cannot set a new role
+      const alreadyHasRole = existingRole && ALL_USER_ROLES.includes(existingRole);
+      if (role && alreadyHasRole) {
+        throw new Forbidden("You are not authorized to perform this operation");
+      }
+      // Return undefined if no username needs to be generated
+      return undefined;
+    }
+  } catch (err) {
+    logger.error(`Error while validating user signup: ${err.message}`);
+    throw err;
+  }
+};
+
 module.exports = {
   generateUniqueUsername,
   getUsersWithIncompleteTasks,
+  validateUserSignup,
 };

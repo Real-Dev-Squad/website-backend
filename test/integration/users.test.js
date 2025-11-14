@@ -223,7 +223,6 @@ describe("Users", function () {
             if (err) {
               return done(err);
             }
-
             expect(res).to.have.status(204);
 
             return done();
@@ -1942,14 +1941,13 @@ describe("Users", function () {
           if (err) {
             return done(err);
           }
-
           expect(res).to.have.status(204);
 
           return done();
         });
     });
 
-    it("Should not update the user when role is not present and dev is true", function (done) {
+    it("Should not update the user when dev is true and role is not present", function (done) {
       addUser(newUser).then((newUserId) => {
         const newUserJwt = authService.generateAuthToken({ userId: newUserId });
         chai
@@ -1964,7 +1962,6 @@ describe("Users", function () {
             if (err) {
               return done(err);
             }
-
             expect(res).to.have.status(403);
             return done();
           });
