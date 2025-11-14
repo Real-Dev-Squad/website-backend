@@ -336,7 +336,7 @@ const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
 
     usersSnapshots.forEach((userList) => {
       userList.forEach((user) => {
-        if (user?.roles?.in_discord) usersInDiscordSet.add(user.discordId);
+        if (Boolean(user?.roles?.in_discord) === true) usersInDiscordSet.add(user.discordId);
       });
     });
 
