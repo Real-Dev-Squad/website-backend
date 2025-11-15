@@ -80,6 +80,19 @@ const getUserById = async (req, res) => {
   });
 };
 
+const updateLastOooUntil = async (req, res) => {
+  try {
+    const summary = await runLastOooUntilMigration();
+    return res.status(200).json({
+      message: "lastOooUntil migration executed successfully",
+      data: summary,
+    });
+  } catch (error) {
+    logger.error(`Error while running lastOooUntil migration: ${error}`);
+    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+  }
+};
+
 /**
  * Fetches the data about our users
  *
