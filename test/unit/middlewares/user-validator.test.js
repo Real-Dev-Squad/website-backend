@@ -107,12 +107,10 @@ describe("Middleware | Validators | User", function () {
       expect(next.calledOnce).to.be.equal(true);
     });
 
-    it("lets roles update request pass to next", async function () {
+    it("lets role update request pass to next", async function () {
       const req = {
         body: {
-          roles: {
-            maven: true,
-          },
+          role: "developer",
         },
       };
 
