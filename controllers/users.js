@@ -89,7 +89,7 @@ const updateLastOooUntil = async (req, res) => {
     });
   } catch (error) {
     logger.error(`Error while running lastOooUntil migration: ${error}`);
-    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
 
