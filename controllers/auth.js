@@ -188,7 +188,8 @@ const githubAuthCallback = (req, res, next) => {
       }
 
       const userDataFromDB = await users.fetchUser({ email: userData.email });
-      if (userDataFromDB.userExists && userDataFromDB.user?.role !== ROLES.DEVELOPER) {
+      const userRole = userDataFromDB.user?.role;
+      if (userDataFromDB.userExists && userRole && userRole !== ROLES.DEVELOPER) {
         return res.status(403).json({
           message: "Github Login is restricted for non-developers,please use Google Login",
         });
