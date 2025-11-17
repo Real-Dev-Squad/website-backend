@@ -513,6 +513,9 @@ const updateSelf = async (req, res, next) => {
         }
         await userQuery.setIncompleteUserDetails(userId);
       }
+      if (role) {
+        return res.boom.forbidden("You are not authorized to perform this operation");
+      }
     }
 
     if (req.body.disabledRoles) {

@@ -10,7 +10,7 @@ const { convertTimestampToUTCStartOrEndOfDay } = require("./time");
  * @returns {number|null} Normalized timestamp in milliseconds or null if invalid.
  */
 const normalizeTimestamp = (value) => {
-  if (value === undefined || value === null) {
+  if (value == null) {
     return null;
   }
 
@@ -52,8 +52,9 @@ const resolveLastOooUntil = ({ previousState, previousUntil, nextState, fallback
     return null;
   }
 
-  if (previousState === userState.OOO && nextState && nextState !== userState.OOO) {
-    return normalizeTimestamp(previousUntil) ?? fallbackTimestamp ?? Date.now();
+  const isLeavingOOO = previousState === userState.OOO && nextState !== undefined && nextState !== userState.OOO;
+  if (isLeavingOOO) {
+    return normalizeTimestamp(previousUntil) ?? normalizeTimestamp(fallbackTimestamp) ?? Date.now();
   }
 
   return undefined;
