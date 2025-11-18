@@ -165,7 +165,6 @@ const addOrUpdate = async (userData, userId = null, devFeatureFlag) => {
     // Add new user
     /*
        Adding default archived role enables us to query for only
-       the unarchived users in the /members endpoint
        For more info : https://github.com/Real-Dev-Squad/website-backend/issues/651
      */
     userData.roles = { archived: false, in_discord: false };

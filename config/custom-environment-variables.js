@@ -126,9 +126,7 @@ module.exports = {
     },
   },
 
-  routesCacheTTL: {
-    "/members": "ROUTESCACHETTL_MEMBERS",
-  },
+  routesCacheTTL: {},
 
   Event100ms: {
     APP_ACCESS_KEY: "EVENT_100MS_APP_ACCESS_KEY",
