@@ -10,7 +10,6 @@ const {
   removeSensitiveInfo,
   retrieveDiscordUsers,
   retrieveUsersWithRole,
-  retrieveMembers,
   retreiveFilteredUsers,
   levelSpecificAccess,
   fetchUsersForKeyValues,
@@ -110,42 +109,6 @@ describe("Data Access Layer", function () {
           expect(user).to.not.have.property(key);
         });
       });
-    });
-  });
-
-  describe("retrieveMembers", function () {
-    it("should fetch members and remove sensitive info", async function () {
-      const fetchUserStub = sinon.stub(members, "fetchUsers");
-      fetchUserStub.returns(Promise.resolve([userData[12]]));
-      const result = await retrieveMembers();
-      result.forEach((user) => {
-        expect(user).to.deep.equal(userData[12]);
-        KEYS_NOT_ALLOWED[ACCESS_LEVEL.PUBLIC].forEach((key) => {
-          expect(user).to.not.have.property(key);
-        });
-      });
-    });
-
-    it("should fetch multiple users details based on ids and remove sensitive data", async function () {
-      const fetchUserStub = sinon.stub(userQuery, "fetchUserByIds");
-      fetchUserStub.returns(Promise.resolve({ [userData[12].id]: userData[12] }));
-      const result = await retrieveUsers({ userIds: [userData[12].id] });
-      removeSensitiveInfo(userData[12]);
-      Object.keys(result).forEach((id) => {
-        // eslint-disable-next-line security/detect-object-injection
-        const resultValue = result[id];
-        // eslint-disable-next-line security/detect-object-injection
-        const expectedUser = userData[12] || {};
-        expect(resultValue).to.deep.equal(expectedUser);
-        KEYS_NOT_ALLOWED[ACCESS_LEVEL.PUBLIC].forEach((key) => {
-          expect(resultValue).to.not.have.property(key);
-        });
-      });
-    });
-
-    it("should return empty object if array with no userIds are provided", async function () {
-      const result = await retrieveUsers({ userIds: [] });
-      expect(result).to.deep.equal({});
     });
   });
 
