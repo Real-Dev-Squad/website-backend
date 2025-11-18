@@ -1,8 +1,9 @@
-import express from "express";
-const app = express.Router();
 import { devFlagMiddleware } from "../middlewares/devFlag";
 
-app.use("/aws/groups", devFlagMiddleware, require("./awsAccess"))
+import express from "express";
+const app = express.Router();
+
+app.use("/aws/groups", devFlagMiddleware, require("./awsAccess"));
 app.use("/answers", require("./answers"));
 app.use("/auctions", require("./auctions"));
 app.use("/arts", require("./arts"));
@@ -12,7 +13,6 @@ app.use("/challenges", require("./challenges"));
 app.use("/contributions", require("./contributions"));
 app.use("/healthcheck", require("./healthCheck"));
 app.use("/logs", require("./logs.js"));
-app.use("/members", require("./members.js"));
 app.use("/pullrequests", require("./pullrequests"));
 app.use("/questions", require("./questions"));
 app.use("/stocks", require("./stocks.js"));

@@ -85,14 +85,6 @@ const retreiveFilteredUsers = async (query) => {
   return users;
 };
 
-const retrieveMembers = async (query) => {
-  const allUsers = await members.fetchUsers(query);
-  allUsers.forEach((userdata) => {
-    removeSensitiveInfo(userdata);
-  });
-  return allUsers;
-};
-
 const retrieveUsersWithRole = async (role) => {
   const users = await members.fetchUsersWithRole(role);
   users.forEach((userdata) => {
@@ -173,7 +165,6 @@ module.exports = {
   retrieveUsers,
   removeSensitiveInfo,
   retrieveDiscordUsers,
-  retrieveMembers,
   retrieveUsersWithRole,
   retreiveFilteredUsers,
   levelSpecificAccess,
