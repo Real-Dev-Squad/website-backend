@@ -25,6 +25,7 @@ module.exports = () => {
       email: "abc@gmail.com",
       discordJoinedAt: "2023-04-06T01:47:34.488000+00:00",
       joined_discord: "2023-01-13T18:21:09.278000+00:00",
+      role: "developer",
       roles: {
         member: true,
         in_discord: true,
@@ -60,6 +61,7 @@ module.exports = () => {
       },
       nickname_synced: false,
       profileStatus: "BLOCKED",
+      incompleteUserDetails: false,
     },
     {
       username: "pranavg",
@@ -95,10 +97,12 @@ module.exports = () => {
       github_display_name: "Sagar Bajpai",
       phone: "1234567890",
       email: "abc1@gmail.com",
+      incompleteUserDetails: false,
       status: "active",
       tokens: {
         githubAccessToken: "githubAccessToken",
       },
+      role: "designer",
       roles: {
         restricted: false,
         app_owner: true,
@@ -175,6 +179,8 @@ module.exports = () => {
         githubAccessToken: "githubAccessToken",
       },
       status: "active",
+      incompleteUserDetails: true,
+      role: "developer",
       roles: {
         member: true,
         archived: false,

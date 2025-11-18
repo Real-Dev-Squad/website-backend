@@ -59,6 +59,7 @@ module.exports = {
     },
     rdsUi: {
       baseUrl: "https://realdevsquad.com",
+      newSignupUrl: "https://my.realdevsquad.com/new-signup",
       routes: {
         authRedirection: "/goto",
       },
@@ -300,9 +301,7 @@ module.exports = {
     },
   },
 
-  routesCacheTTL: {
-    "/members": 900,
-  },
+  routesCacheTTL: {},
 
   githubAccessToken: "GITHUB_PERSONAL_ACCESS_TOKEN",
 
