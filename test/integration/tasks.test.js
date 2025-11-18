@@ -1925,6 +1925,7 @@ describe("Tasks", function () {
           usersToAddRole: [],
           tasks: 5,
           missedUpdatesTasks: 0,
+          filteredByOoo: 0,
         },
       });
       expect(response.status).to.be.equal(200);

@@ -15,6 +15,7 @@ const authenticateProfile = require("../middlewares/authenticateProfile");
 const { devFlagMiddleware } = require("../middlewares/devFlag");
 const { userAuthorization } = require("../middlewares/userAuthorization");
 const conditionalMiddleware = require("../middlewares/conditionalMiddleware");
+const { commonRateLimiter } = require("../middlewares/rateLimiting");
 
 router.post("/", authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]), users.markUnverified);
 router.post("/update-in-discord", authenticate, authorizeRoles([SUPERUSER]), users.setInDiscordScript);
@@ -78,6 +79,12 @@ router.patch("/profileURL", authenticate, userValidator.updateProfileURL, users.
 router.patch("/rejectDiff", authenticate, authorizeRoles([SUPERUSER]), users.rejectProfileDiff);
 router.patch("/:userId", authenticate, conditionalMiddleware(userValidator.updateUser), users.updateProfile);
 router.get("/suggestedUsers/:skillId", authenticate, authorizeRoles([SUPERUSER]), users.getSuggestedUsers);
-module.exports = router;
 router.post("/batch-username-update", authenticate, authorizeRoles([SUPERUSER]), users.updateUsernames);
+router.post(
+  "/migration/update-last-ooo-until",
+  authenticate,
+  authorizeRoles([SUPERUSER]),
+  commonRateLimiter,
+  users.updateLastOooUntil
+);
 module.exports = router;
