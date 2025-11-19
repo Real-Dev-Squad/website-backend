@@ -28,6 +28,7 @@ const { addJoinData, addOrUpdate } = require("../../models/users");
 const userStatusModel = require("../../models/userStatus");
 const { MAX_USERNAME_LENGTH } = require("../../constants/users.ts");
 const { TASK_STATUS } = require("../../constants/tasks");
+const { userState } = require("../../constants/userStatus");
 const userRoleUpdate = userData[4];
 const userRoleUnArchived = userData[13];
 const userAlreadyMember = userData[0];
@@ -2420,6 +2421,49 @@ describe("Users", function () {
           expect(res.body.message).to.equal("An internal server error occurred");
           return done();
         });
+    });
+  });
+
+  describe("POST /users/migration/update-last-ooo-until", function () {
+    it("should backfill lastOooUntil for eligible users", async function () {
+      const migrationUser = userData[7];
+      const migrationUserId = await addUser(migrationUser);
+      const twoDaysAgo = new Date().setUTCHours(0, 0, 0, 0) - 2 * 24 * 60 * 60 * 1000;
+
+      await firestore.collection("usersStatus").add({
+        userId: migrationUserId,
+        currentStatus: {
+          state: userState.ACTIVE,
+          message: "",
+          from: twoDaysAgo,
+          until: twoDaysAgo,
+          updatedAt: twoDaysAgo,
+        },
+      });
+
+      const res = await chai
+        .request(app)
+        .post("/users/migration/update-last-ooo-until")
+        .set("cookie", `${cookieName}=${superUserAuthToken}`)
+        .send();
+
+      expect(res).to.have.status(200);
+      expect(res.body.message).to.equal("lastOooUntil migration executed successfully");
+      expect(res.body.data.updated).to.be.greaterThan(0);
+
+      const snapshot = await firestore.collection("usersStatus").where("userId", "==", migrationUserId).limit(1).get();
+      const [statusDoc] = snapshot.docs;
+      expect(statusDoc.data().lastOooUntil).to.equal(twoDaysAgo);
+    });
+
+    it("should reject migration for non super users", async function () {
+      const res = await chai
+        .request(app)
+        .post("/users/migration/update-last-ooo-until")
+        .set("cookie", `${cookieName}=${jwt}`)
+        .send();
+
+      expect(res).to.have.status(401);
     });
   });
 
