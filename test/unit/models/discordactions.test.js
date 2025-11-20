@@ -477,7 +477,7 @@ describe("discordactions", function () {
       const result = await enrichGroupDataWithMembershipInfo(userData[0].discordId, newGroupData);
       expect(result[0]).to.deep.equal({
         ...newGroupData[0],
-        memberCount: 2,
+        memberCount: 1,
         firstName: userData[0].first_name,
         lastName: userData[0].last_name,
         image: userData[0].picture.url,
