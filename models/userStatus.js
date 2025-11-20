@@ -16,21 +16,17 @@ const {
   getNextDayTimeStamp,
   convertTimestampsToUTC,
   resolveLastOooUntil,
-  normalizeTimestamp,
 } = require("../utils/userStatus");
 const { TASK_STATUS } = require("../constants/tasks");
 const userStatusModel = firestore.collection("usersStatus");
 const tasksModel = firestore.collection("tasks");
-const { userState, statusState } = require("../constants/userStatus");
+const { userState } = require("../constants/userStatus");
 const discordRoleModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
 const usersCollection = firestore.collection("users");
-const userFutureStatusCollection = firestore.collection("userFutureStatus");
 const config = require("config");
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 const { generateAuthTokenForCloudflare } = require("../utils/discord-actions");
-
-const LAST_OOO_MIGRATION_BATCH_SIZE = 450;
 
 // added this function here to avoid circular dependency
 /**
@@ -126,98 +122,6 @@ const addGroupIdleRoleToDiscordUser = async (userId) => {
     }
   } catch (error) {
     logger.error(`error in adding role to discord user. Reason - ${error}`);
-    throw error;
-  }
-};
-
-const getLatestAppliedOooTimestamp = async (userId) => {
-  const snapshot = await userFutureStatusCollection
-    .where("userId", "==", userId)
-    .where("status", "==", userState.OOO)
-    .where("state", "==", statusState.APPLIED)
-    .get();
-
-  let latestIntervalEnd = null;
-  snapshot.forEach((doc) => {
-    const futureData = doc.data();
-    const candidate = normalizeTimestamp(futureData.endsOn) ?? normalizeTimestamp(futureData.from);
-    if (candidate && (!latestIntervalEnd || candidate > latestIntervalEnd)) {
-      latestIntervalEnd = candidate;
-    }
-  });
-
-  return latestIntervalEnd;
-};
-
-const determineLastOooUntilUpdate = async (docData) => {
-  const currentState = docData.currentStatus?.state;
-  const normalizedExisting = normalizeTimestamp(docData.lastOooUntil);
-
-  if (currentState === userState.OOO) {
-    return docData.lastOooUntil === null ? undefined : null;
-  }
-
-  if (normalizedExisting !== null) {
-    return undefined;
-  }
-
-  const currentUntil = normalizeTimestamp(docData.currentStatus?.until);
-  if (currentUntil) {
-    return currentUntil;
-  }
-
-  return await getLatestAppliedOooTimestamp(docData.userId);
-};
-
-const runLastOooUntilMigration = async () => {
-  const summary = {
-    processed: 0,
-    updated: 0,
-    skipped: 0,
-    failed: 0,
-    failedUserIds: [],
-  };
-
-  try {
-    const snapshot = await userStatusModel.get();
-    let batch = firestore.batch();
-    let batchOperations = 0;
-
-    for (const document of snapshot.docs) {
-      summary.processed++;
-      const docData = document.data();
-
-      try {
-        const updateValue = await determineLastOooUntilUpdate(docData);
-        if (updateValue !== undefined) {
-          batch.update(document.ref, { lastOooUntil: updateValue });
-          batchOperations++;
-          summary.updated++;
-        } else {
-          summary.skipped++;
-        }
-      } catch (error) {
-        summary.failed++;
-        summary.failedUserIds.push(docData.userId);
-        logger.error(
-          `Error while updating lastOooUntil for user ${docData.userId}: ${error.message ?? error.toString()}`
-        );
-      }
-
-      if (batchOperations && batchOperations % LAST_OOO_MIGRATION_BATCH_SIZE === 0) {
-        await batch.commit();
-        batch = firestore.batch();
-        batchOperations = 0;
-      }
-    }
-
-    if (batchOperations) {
-      await batch.commit();
-    }
-
-    return summary;
-  } catch (error) {
-    logger.error(`Error while running last OOO backfill migration: ${error}`);
     throw error;
   }
 };
@@ -868,5 +772,4 @@ module.exports = {
   cancelOooStatus,
   getGroupRole,
   addFutureStatus,
-  runLastOooUntilMigration,
 };
