@@ -22,7 +22,11 @@ const discordMissedUpdatesRoleId = config.get("discordMissedUpdatesRoleId");
 const userStatusModel = firestore.collection("usersStatus");
 const usersUtils = require("../utils/users");
 const { getUsersBasedOnFilter, fetchUser } = require("./users");
-const { convertDaysToMilliseconds, convertMillisToSeconds } = require("../utils/time");
+const {
+  convertDaysToMilliseconds,
+  convertMillisToSeconds,
+  convertTimestampToUTCStartOrEndOfDay,
+} = require("../utils/time");
 const { chunks } = require("../utils/array");
 const tasksModel = firestore.collection("tasks");
 const { FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
@@ -965,23 +969,66 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
     const discordUsersPromise = discordService.getDiscordMembers();
     const missedUpdatesRoleId = discordMissedUpdatesRoleId;
 
-    let gapWindowStart = Date.now() - convertDaysToMilliseconds(dateGap);
-    const gapWindowEnd = Date.now();
-    excludedDates.forEach((timestamp) => {
-      if (timestamp > gapWindowStart && timestamp < gapWindowEnd) {
-        gapWindowStart -= convertDaysToMilliseconds(1);
-      }
-    });
+    const normalizedExcludedWeekdays = new Set(
+      excludedDays.map((day) => Number(day)).filter((day) => Number.isInteger(day) && day >= 0 && day <= 6)
+    );
 
-    if (excludedDays.length === 7) {
+    if (normalizedExcludedWeekdays.size === 7) {
       return { usersToAddRole: [], ...stats };
     }
 
-    for (let i = gapWindowEnd; i >= gapWindowStart; i -= convertDaysToMilliseconds(1)) {
-      const day = new Date(i).getDay();
-      if (excludedDays.includes(day)) {
-        gapWindowStart -= convertDaysToMilliseconds(1);
+    const normalizedExcludedDates = excludedDates.reduce((set, timestamp) => {
+      const normalizedTimestamp = convertTimestampToUTCStartOrEndOfDay(Number(timestamp));
+      if (normalizedTimestamp !== null) {
+        set.add(normalizedTimestamp);
       }
+      return set;
+    }, new Set());
+
+    const currentTimestamp = Date.now();
+    const gapWindowEnd = convertTimestampToUTCStartOrEndOfDay(currentTimestamp, true);
+    let gapWindowStart = convertTimestampToUTCStartOrEndOfDay(currentTimestamp, false);
+    let remainingWorkingDays = Number.isInteger(dateGap) && dateGap > 0 ? dateGap : 0;
+
+    while (remainingWorkingDays > 0 && gapWindowStart !== null) {
+      const dayOfWeek = new Date(gapWindowStart).getUTCDay();
+      const isExcludedDay = normalizedExcludedWeekdays.has(dayOfWeek);
+      const isExcludedDate = normalizedExcludedDates.has(gapWindowStart);
+
+      if (!isExcludedDay && !isExcludedDate) {
+        remainingWorkingDays--;
+      }
+
+      const previousDayTimestamp = gapWindowStart - convertDaysToMilliseconds(1);
+      const previousDayStart = convertTimestampToUTCStartOrEndOfDay(previousDayTimestamp, false);
+
+      if (remainingWorkingDays === 0) {
+        gapWindowStart = previousDayStart ?? gapWindowStart;
+        break;
+      }
+
+      gapWindowStart = previousDayStart;
+    }
+
+    if (gapWindowStart === null || remainingWorkingDays > 0) {
+      return { usersToAddRole: [], ...stats };
+    }
+
+    while (gapWindowStart !== null) {
+      const dayOfWeek = new Date(gapWindowStart).getUTCDay();
+      const isExcludedDay = normalizedExcludedWeekdays.has(dayOfWeek);
+      const isExcludedDate = normalizedExcludedDates.has(gapWindowStart);
+
+      if (!isExcludedDay && !isExcludedDate) {
+        break;
+      }
+
+      const previousDayTimestamp = gapWindowStart - convertDaysToMilliseconds(1);
+      gapWindowStart = convertTimestampToUTCStartOrEndOfDay(previousDayTimestamp, false);
+    }
+
+    if (gapWindowStart === null) {
+      return { usersToAddRole: [], ...stats };
     }
 
     let taskQuery = buildTasksQueryForMissedUpdates(size);
