@@ -372,10 +372,11 @@ const updateTaskStatus = async (req, res, next) => {
         const isCurrentTaskStatusBlock = task.taskData.status === TASK_STATUS.BLOCKED;
         const isNewTaskStatusInProgress = status === TASK_STATUS.IN_PROGRESS;
         const isNewTaskStatusBlock = status === TASK_STATUS.BLOCKED;
-        const isCurrProgress100 = parseInt(task.taskData.percentCompleted || 0) === 100;
-        const isCurrProgress0 = parseInt(task.taskData.percentCompleted || 0) === 0;
-        const isNewProgress100 = !!req.body.percentCompleted && parseInt(req.body.percentCompleted) === 100;
-        const isNewProgress0 = !!req.body.percentCompleted !== undefined && parseInt(req.body.percentCompleted) === 0;
+        const isCurrProgress100 = Number.parseInt(task.taskData.percentCompleted || 0) === 100;
+        const isCurrProgress0 = Number.parseInt(task.taskData.percentCompleted || 0) === 0;
+        const isNewProgress100 = !!req.body.percentCompleted && Number.parseInt(req.body.percentCompleted) === 100;
+        const isNewProgress0 =
+          req.body.percentCompleted !== undefined && Number.parseInt(req.body.percentCompleted) === 0;
 
         if (
           !isCurrProgress100 &&
