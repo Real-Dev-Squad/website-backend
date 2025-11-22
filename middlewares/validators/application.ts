@@ -46,7 +46,7 @@ const validateApplicationData = async (req: CustomRequest, res: CustomResponse, 
 };
 
 const validateApplicationUpdateData = async (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
-  const devFeatureFlag = req?.query?.dev === "true"
+  const devFeatureFlag = req?.query?.dev === "true";
   const schema = joi
     .object()
     .strict()
@@ -54,19 +54,23 @@ const validateApplicationUpdateData = async (req: CustomRequest, res: CustomResp
       status: joi
         .string()
         .min(1)
-        .optional()
         .custom((value, helper) => {
-          const allowedStatus= devFeatureFlag? NEW_APPLICATION_STATUS_TYPES: APPLICATION_STATUS_TYPES
+          const allowedStatus = devFeatureFlag ? NEW_APPLICATION_STATUS_TYPES : APPLICATION_STATUS_TYPES;
           if (!allowedStatus.includes(value)) {
             return helper.message("Status is not valid");
           }
           return value;
+        })
+        .when("$devFlag", {
+          is: true,
+          then: joi.required(),
+          otherwise: joi.optional(),
         }),
       feedback: joi.string().min(1).optional(),
     });
 
   try {
-    await schema.validateAsync(req.body);
+    await schema.validateAsync(req.body, {context: {devFlag: devFeatureFlag}});
     next();
   } catch (error) {
     logger.error(`Error in validating recruiter data: ${error}`);

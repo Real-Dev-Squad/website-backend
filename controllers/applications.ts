@@ -111,7 +111,7 @@ const updateApplication = async (req: CustomRequest, res: CustomResponse) => {
           status: rawBody.status,
           adminFeedback: admin.firestore.FieldValue.arrayUnion({
             status: rawBody.status,
-            feedback: rawBody.feedback,
+            ...(rawBody.feedback !== undefined && { feedback: rawBody.feedback }),
             createdAt: admin.firestore.Timestamp.now(),
           }),
         }
