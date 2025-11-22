@@ -366,25 +366,20 @@ const updateDiscordNicknames = async (req, res) => {
     const totalNicknamesNotUpdated = { count: 0, errors: [] };
     const nickNameUpdatedUsers = [];
     let counter = 0;
-    for (let i = 0; i < usersToBeEffected.length; i++) {
-      const { discordId, username, first_name: firstName } = usersToBeEffected[i];
+    for (const user of usersToBeEffected) {
+      const { discordId, username, first_name: firstName, id } = user;
       try {
         if (counter % 10 === 0 && counter !== 0) {
           await new Promise((resolve) => setTimeout(resolve, 5500));
         }
-        if (!discordId) {
-          throw new Error("user not verified");
-        } else if (!username) {
-          throw new Error(`does not have a username`);
-        }
+        if (!discordId) throw new Error("user not verified");
+        if (!username) throw new Error("does not have a username");
+
         const response = await setUserDiscordNickname(username.toLowerCase(), discordId);
-        if (response) {
-          const message = await response.message;
-          if (message) {
-            counter++;
-            totalNicknamesUpdated.count++;
-            nickNameUpdatedUsers.push(usersToBeEffected[i].id);
-          }
+        if (response?.message) {
+          counter++;
+          totalNicknamesUpdated.count++;
+          nickNameUpdatedUsers.push(id);
         }
       } catch (error) {
         totalNicknamesNotUpdated.count++;
@@ -392,6 +387,7 @@ const updateDiscordNicknames = async (req, res) => {
         logger.error(`Error in updating discord Nickname: ${error}`);
       }
     }
+
     return res.json({
       totalNicknamesUpdated,
       totalNicknamesNotUpdated,

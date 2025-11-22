@@ -14,6 +14,7 @@ const getIssues = async (req, res) => {
     const { q: queryString } = req.query;
     let issues = {};
     const githubOrg = config.get("githubApi.org");
+    // eslint-disable-next-line security/detect-non-literal-regexp
     const githubIssuerUrlPattern = new RegExp(`^https://github.com/${githubOrg}/.+/issues/\\d+$`);
 
     if (githubIssuerUrlPattern.test(queryString)) {

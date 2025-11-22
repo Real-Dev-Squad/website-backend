@@ -90,34 +90,23 @@ const addOrUpdate = async (userData, userId = null, devFeatureFlag) => {
     if (userId !== null) {
       const user = await userModel.doc(userId).get();
       const isNewUser = !user.data();
+
       // user exists update user
       if (user.data()) {
         // remove id field if exist in fetched data or profileDiff
         if ("id" in userData) {
           delete userData.id;
         }
-        if (devFeatureFlag) {
-          await userModel.doc(userId).set(
-            {
-              ...userData,
-              updated_at: Date.now(),
-            },
-            { merge: true }
-          );
-        } else {
-          await userModel.doc(userId).set(
-            {
-              ...user.data(),
-              ...userData,
-              updated_at: Date.now(),
-            },
-            { merge: true }
-          );
-        }
+
+        const updatedData = devFeatureFlag
+          ? { ...userData, updated_at: Date.now() }
+          : { ...user.data(), ...userData, updated_at: Date.now() };
+
+        await userModel.doc(userId).set(updatedData, { merge: true });
 
         const logData = {
           type: logType.USER_DETAILS_UPDATED,
-          meta: { userId: userId },
+          meta: { userId },
           body: userData,
         };
         await addLog(logData.type, logData.meta, logData.body);
@@ -143,33 +132,45 @@ const addOrUpdate = async (userData, userId = null, devFeatureFlag) => {
 
     if (user && !user.empty && user.docs !== null) {
       const { created_at: createdAt, ...updatedUserData } = userData;
-      await userModel.doc(user.docs[0].id).set({ ...updatedUserData, updated_at: Date.now() }, { merge: true });
+      const userIdToUpdate = user.docs[0].id;
+
+      await userModel.doc(userIdToUpdate).set({ ...updatedUserData, updated_at: Date.now() }, { merge: true });
 
       const logData = {
         type: logType.USER_DETAILS_UPDATED,
-        meta: { userId: user.docs[0].id },
+        meta: { userId: userIdToUpdate },
         body: userData,
       };
       await addLog(logData.type, logData.meta, logData.body);
 
       const data = user.docs[0].data();
+
+      const rolesList = Object.values(AUTHORITIES);
+      const validRole = rolesList.find((roleKey) => {
+        if (typeof roleKey !== "string") return false;
+        const hasKey = Object.prototype.hasOwnProperty.call(data.roles, roleKey);
+        return hasKey && Boolean(Reflect.get(data.roles, roleKey));
+      });
+      const finalRole = validRole || AUTHORITIES.USER;
+
       return {
         isNewUser: false,
-        userId: user.docs[0].id,
-        incompleteUserDetails: user.docs[0].data().incompleteUserDetails,
+        userId: userIdToUpdate,
+        incompleteUserDetails: data.incompleteUserDetails,
         updated_at: Date.now(),
-        role: Object.values(AUTHORITIES).find((role) => data.roles[role]) || AUTHORITIES.USER,
+        role: finalRole,
       };
     }
+
     // Add new user
     /*
        Adding default archived role enables us to query for only
-       the unarchived users in the /members endpoint
        For more info : https://github.com/Real-Dev-Squad/website-backend/issues/651
      */
     userData.roles = { archived: false, in_discord: false };
     userData.incompleteUserDetails = true;
     const userInfo = await userModel.add(userData);
+
     return {
       isNewUser: true,
       role: AUTHORITIES.USER,
@@ -844,35 +845,34 @@ const fetchUserByIds = async (userIds = []) => {
 
 const removeGitHubToken = async (users) => {
   try {
-    const length = users.length;
+    const totalUsers = Array.isArray(users) ? users.length : 0;
+    if (!totalUsers) return;
 
-    let numberOfBatches = length / 500;
-    const remainder = length % 500;
-
-    if (remainder) {
-      numberOfBatches = numberOfBatches + 1;
-    }
-
-    const batchArray = [];
-    for (let i = 0; i < numberOfBatches; i++) {
-      const batch = firestore.batch();
-      batchArray.push(batch);
-    }
+    const batchSize = 500;
+    const numberOfBatches = Math.ceil(totalUsers / batchSize);
+    const batches = Array.from({ length: numberOfBatches }, () => firestore.batch());
 
     let batchIndex = 0;
-    let operations = 0;
+    let count = 0;
 
-    for (let i = 0; i < length; i++) {
-      batchArray[batchIndex].update(users[i], { tokens: admin.firestore.FieldValue.delete() });
-      operations++;
+    for (const userRef of users) {
+      // use for...of instead of index access
+      const currentBatch = batches.at(batchIndex);
 
-      if (operations === 500) {
+      // Only allow valid Firestore DocumentReferences to update
+      if (userRef && typeof userRef.update === "function") {
+        currentBatch.update(userRef, { tokens: admin.firestore.FieldValue.delete() });
+      }
+
+      count++;
+      if (count === batchSize) {
         batchIndex++;
-        operations = 0;
+        count = 0;
       }
     }
 
-    await Promise.all(batchArray.map(async (batch) => await batch.commit()));
+    // Commit all batches concurrently
+    await Promise.all(batches.map((batch) => batch.commit()));
   } catch (err) {
     logger.error(`Error while deleting tokens field: ${err}`);
     throw err;

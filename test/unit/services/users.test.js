@@ -6,8 +6,12 @@ const userModel = firestore.collection("users");
 const tasksModel = firestore.collection("tasks");
 const cleanDb = require("../../utils/cleanDb");
 const userDataArray = require("../../fixtures/user/user")();
-const { generateUniqueUsername, getUsersWithIncompleteTasks } = require("../../../services/users");
+const userServices = require("../../../services/users");
+const { generateUniqueUsername, getUsersWithIncompleteTasks, validateUserSignup } = userServices;
 const { addOrUpdate, archiveUsers } = require("../../../models/users");
+const userQuery = require("../../../models/users");
+const { ALL_USER_ROLES } = require("../../../constants/users");
+const Forbidden = require("http-errors").Forbidden;
 const {
   usersData: abandonedUsersData,
   tasksData: abandonedTasksData,
@@ -159,6 +163,144 @@ describe("Users services", function () {
         expect(error.message).to.equal("Database query failed");
       }
       Sinon.restore();
+    });
+  });
+
+  describe("validateUserSignup", function () {
+    let setIncompleteUserDetailsStub;
+
+    beforeEach(function () {
+      setIncompleteUserDetailsStub = Sinon.stub(userQuery, "setIncompleteUserDetails").resolves({});
+    });
+
+    afterEach(function () {
+      Sinon.restore();
+    });
+
+    describe("when incompleteUserDetails is true", function () {
+      const userId = "test-user-id";
+      const incompleteUserDetails = true;
+      const firstName = "John";
+      const lastName = "Doe";
+      const role = "developer";
+
+      it("should throw Forbidden error when firstName is missing", async function () {
+        try {
+          await validateUserSignup(userId, incompleteUserDetails, null, lastName, role, null);
+          expect.fail("Expected function to throw Forbidden error");
+        } catch (error) {
+          expect(error).to.be.instanceOf(Forbidden);
+          expect(error.message).to.equal("You are not authorized to perform this operation");
+        }
+      });
+
+      it("should throw Forbidden error when lastName is missing", async function () {
+        try {
+          await validateUserSignup(userId, incompleteUserDetails, firstName, null, role, null);
+          expect.fail("Expected function to throw Forbidden error");
+        } catch (error) {
+          expect(error).to.be.instanceOf(Forbidden);
+          expect(error.message).to.equal("You are not authorized to perform this operation");
+        }
+      });
+
+      it("should throw Forbidden error when role is missing", async function () {
+        try {
+          await validateUserSignup(userId, incompleteUserDetails, firstName, lastName, null, null);
+          expect.fail("Expected function to throw Forbidden error");
+        } catch (error) {
+          expect(error).to.be.instanceOf(Forbidden);
+          expect(error.message).to.equal("You are not authorized to perform this operation");
+        }
+      });
+
+      it("should throw Forbidden error when firstName is empty string", async function () {
+        try {
+          await validateUserSignup(userId, incompleteUserDetails, "", lastName, role, null);
+          expect.fail("Expected function to throw Forbidden error");
+        } catch (error) {
+          expect(error).to.be.instanceOf(Forbidden);
+          expect(error.message).to.equal("You are not authorized to perform this operation");
+        }
+      });
+
+      it("should generate username and call setIncompleteUserDetails when all required fields are present", async function () {
+        const result = await validateUserSignup(userId, incompleteUserDetails, firstName, lastName, role, null);
+        expect(result).to.be.a("string");
+        expect(result.length).to.be.greaterThan(0);
+        expect(setIncompleteUserDetailsStub.calledOnce).to.equal(true);
+        expect(setIncompleteUserDetailsStub.firstCall.args[0]).to.equal(userId);
+      });
+    });
+
+    describe("when incompleteUserDetails is false", function () {
+      const userId = "test-user-id";
+      const incompleteUserDetails = false;
+      const firstName = "John";
+      const lastName = "Doe";
+
+      it("should throw Forbidden error when user already has a role and tries to set a new role", async function () {
+        const existingRole = ALL_USER_ROLES[0];
+        const newRole = "designer";
+
+        try {
+          await validateUserSignup(userId, incompleteUserDetails, firstName, lastName, newRole, existingRole);
+          expect.fail("Expected function to throw Forbidden error");
+        } catch (error) {
+          expect(error).to.be.instanceOf(Forbidden);
+          expect(error.message).to.equal("Cannot update role again");
+        }
+      });
+
+      it("should return null when no role is provided", async function () {
+        const result = await validateUserSignup(userId, incompleteUserDetails, firstName, lastName, null, null);
+
+        expect(result).to.equal(null);
+        expect(setIncompleteUserDetailsStub.called).to.equal(false);
+      });
+
+      it("should return null when user does not have an existing role and tries to set one", async function () {
+        const newRole = "developer";
+
+        const result = await validateUserSignup(userId, incompleteUserDetails, firstName, lastName, newRole, null);
+
+        expect(result).to.equal(null);
+        expect(setIncompleteUserDetailsStub.called).to.equal(false);
+      });
+
+      it("should return null when existingRole is not in ALL_USER_ROLES", async function () {
+        const existingRole = "invalid_role";
+        const newRole = "developer";
+
+        const result = await validateUserSignup(
+          userId,
+          incompleteUserDetails,
+          firstName,
+          lastName,
+          newRole,
+          existingRole
+        );
+
+        expect(result).to.equal(null);
+        expect(setIncompleteUserDetailsStub.called).to.equal(false);
+      });
+
+      it("should return null when existingRole is empty string", async function () {
+        const existingRole = "";
+        const newRole = "developer";
+
+        const result = await validateUserSignup(
+          userId,
+          incompleteUserDetails,
+          firstName,
+          lastName,
+          newRole,
+          existingRole
+        );
+
+        expect(result).to.equal(null);
+        expect(setIncompleteUserDetailsStub.called).to.equal(false);
+      });
     });
   });
 });

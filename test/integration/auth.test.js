@@ -5,6 +5,7 @@ const chaiHttp = require("chai-http");
 const passport = require("passport");
 const app = require("../../server");
 const cleanDb = require("../utils/cleanDb");
+const config = require("config");
 const { generateGithubAuthRedirectUrl } = require("..//utils/github");
 const { generateGoogleAuthRedirectUrl, stubPassportAuthenticate } = require("..//utils/googleauth");
 const { addUserToDBForTest } = require("../../utils/users");
@@ -404,7 +405,7 @@ describe("auth", function () {
       });
   });
 
-  it("should redirect the google user to login page if the user is a developer", async function () {
+  it("should return 403 Forbidden if a developer tries to log in using google", async function () {
     await addUserToDBForTest(googleUserInfo[3]);
     const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
     stubPassportAuthenticate(googleUserInfo[2]);
@@ -414,20 +415,19 @@ describe("auth", function () {
       .get("/auth/google/callback")
       .query({ code: "codeReturnedByGoogle", state: rdsUiUrl })
       .redirects(0);
-    expect(res).to.have.status(302);
-    const errorMessage = "Google login is restricted for developer role.";
-    const expectedUrl = `https://realdevsquad.com/?error=${encodeURIComponent(errorMessage)}`;
-    expect(res.headers.location).to.equal(expectedUrl);
+    expect(res).to.have.status(403);
+    const errorMessage = "Google Login is restricted for developers,please use github Login";
+    expect(res.body.message).to.equal(errorMessage);
   });
 
-  it("should log in existing google user with same email via github OAuth", async function () {
-    await addUserToDBForTest(googleUserInfo[1]);
+  it("should return 403 Forbidden if a non-developer tries to login using github", async function () {
+    await addUserToDBForTest(userData[3]);
     const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
     const userInfoFromGitHub = {
       ...githubUserInfo[0],
       _json: {
         ...githubUserInfo[0]._json,
-        email: "test12@gmail.com",
+        email: "abc1@gmail.com",
       },
     };
     stubPassportAuthenticate(userInfoFromGitHub);
@@ -437,13 +437,14 @@ describe("auth", function () {
       .get("/auth/github/callback")
       .query({ code: "codeReturnedByGithub", state: rdsUiUrl })
       .redirects(0);
-    expect(res).to.have.status(302);
-    expect(res.headers.location).to.equal(rdsUiUrl);
+    expect(res).to.have.status(403);
+    const errorMessage = "Github Login is restricted for non-developers,please use Google Login";
+    expect(res.body.message).to.equal(errorMessage);
   });
 
-  it("should log in existing github user with same email via google OAuth", async function () {
-    await addUserToDBForTest(userData[0]);
-    const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
+  it("should log in existing github user with no role and same email via google OAuth", async function () {
+    await addUserToDBForTest(userData[1]);
+    const newSignupUrl = new URL(config.get("services.rdsUi.newSignupUrl")).href;
     const userInfoFromGoogle = {
       ...googleUserInfo[0],
       emails: [{ value: "abc@gmail.com", verified: true }],
@@ -453,10 +454,10 @@ describe("auth", function () {
     const res = await chai
       .request(app)
       .get("/auth/google/callback")
-      .query({ code: "codeReturnedByGoogle", state: rdsUiUrl })
+      .query({ code: "codeReturnedByGoogle", state: newSignupUrl })
       .redirects(0);
     expect(res).to.have.status(302);
-    expect(res.headers.location).to.equal(rdsUiUrl);
+    expect(res.headers.location).to.equal(newSignupUrl);
   });
 
   it("should get the verified email and redirect the google user to the goto page on successful login", async function () {

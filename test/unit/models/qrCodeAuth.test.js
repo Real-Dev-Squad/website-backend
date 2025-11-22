@@ -67,7 +67,11 @@ describe("mobile auth", function () {
       const data = (await qrCodeAuthModel.doc(userId).get()).data();
 
       Object.keys(updatedData).forEach((key) => {
-        expect(updatedData[key]).to.deep.equal(data[key]);
+        // eslint-disable-next-line security/detect-object-injection
+        const updatedValue = updatedData[key];
+        // eslint-disable-next-line security/detect-object-injection
+        const dataValue = data[key];
+        expect(updatedValue).to.deep.equal(dataValue);
       });
 
       expect(response).to.be.an("object");
@@ -106,7 +110,11 @@ describe("mobile auth", function () {
       const data = (await qrCodeAuthModel.doc(userId).get()).data();
 
       Object.keys(userDeviceInfo).forEach((key) => {
-        expect(userDeviceInfo[key]).to.deep.equal(data[key]);
+        // eslint-disable-next-line security/detect-object-injection
+        const userDeviceValue = userDeviceInfo[key];
+        // eslint-disable-next-line security/detect-object-injection
+        const dataValue = data[key];
+        expect(userDeviceValue).to.deep.equal(dataValue);
       });
 
       expect(response).to.be.an("object");
@@ -144,7 +152,11 @@ describe("mobile auth", function () {
       const data = (await qrCodeAuthModel.doc(userId).get()).data();
 
       Object.keys(userDeviceInfo).forEach((key) => {
-        expect(userDeviceInfo[key]).to.deep.equal(data[key]);
+        // eslint-disable-next-line security/detect-object-injection
+        const userDeviceValue = userDeviceInfo[key];
+        // eslint-disable-next-line security/detect-object-injection
+        const dataValue = data[key];
+        expect(userDeviceValue).to.deep.equal(dataValue);
       });
 
       expect(response).to.be.an("object");
