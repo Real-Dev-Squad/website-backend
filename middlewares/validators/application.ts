@@ -2,7 +2,7 @@ import { NextFunction } from "express";
 import { CustomRequest, CustomResponse } from "../../types/global";
 import { customWordCountValidator } from "../../utils/customWordCountValidator";
 const joi = require("joi");
-const { APPLICATION_STATUS_TYPES } = require("../../constants/application");
+const { APPLICATION_STATUS_TYPES, NEW_APPLICATION_STATUS_TYPES } = require("../../constants/application");
 const logger = require("../../utils/logger");
 
 const validateApplicationData = async (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
@@ -46,6 +46,7 @@ const validateApplicationData = async (req: CustomRequest, res: CustomResponse, 
 };
 
 const validateApplicationUpdateData = async (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
+  const devFeatureFlag = req?.query?.dev === "true"
   const schema = joi
     .object()
     .strict()
@@ -55,7 +56,8 @@ const validateApplicationUpdateData = async (req: CustomRequest, res: CustomResp
         .min(1)
         .optional()
         .custom((value, helper) => {
-          if (!APPLICATION_STATUS_TYPES.includes(value)) {
+          const allowedStatus= devFeatureFlag? NEW_APPLICATION_STATUS_TYPES: APPLICATION_STATUS_TYPES
+          if (!allowedStatus.includes(value)) {
             return helper.message("Status is not valid");
           }
           return value;

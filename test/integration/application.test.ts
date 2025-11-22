@@ -207,7 +207,7 @@ describe("Application", function () {
         });
     });
 
-        it("should return application with status accepted if status accepted is passed in query params", function (done) {
+    it("should return application with status accepted if status accepted is passed in query params", function (done) {
       chai
         .request(app)
         .get("/applications?status=accepted")
@@ -247,7 +247,7 @@ describe("Application", function () {
         });
     });
 
-
+    
     it("should return application with status rejected and the total count of the rejected applications if  dev = true ", function (done) {
       chai
         .request(app)
@@ -271,7 +271,7 @@ describe("Application", function () {
         });
     });
 
-        it("should return application with status accepted and the total count of the accepted applications if  dev = true ", function (done) {
+    it("should return application with status accepted and the total count of the accepted applications if  dev = true ", function (done) {
       chai
         .request(app)
         .get("/applications?status=accepted&dev=true")
@@ -372,11 +372,11 @@ describe("Application", function () {
     });
   });
 
-  describe("PATCH /application/:applicationId", function () {
+  describe("PATCH /application/:applicationId/feedback", function () {
     it("should return 200 if the user is super user and application is updated", function (done) {
       chai
         .request(app)
-        .patch(`/applications/${applicationId1}`)
+        .patch(`/applications/${applicationId1}/feedback`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
           status: "accepted",
@@ -395,7 +395,7 @@ describe("Application", function () {
     it("should return 401 if the user is not super user", function (done) {
       chai
         .request(app)
-        .patch(`/applications/${applicationId1}`)
+        .patch(`/applications/${applicationId1}/feedback`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           status: "accepted",
@@ -414,7 +414,7 @@ describe("Application", function () {
     it("should return 400 if anything other than status and feedback is passed in the body", function (done) {
       chai
         .request(app)
-        .patch(`/applications/${applicationId1}`)
+        .patch(`/applications/${applicationId1}/feedback`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
           status: "accepted",
@@ -432,10 +432,48 @@ describe("Application", function () {
         });
     });
 
-    it("should return 400 if any status other than accepted, reject or pending is passed", function (done) {
+    it("should return 400 if any status other than accepted, reject or pending is passed when dev flag is not present", function (done) {
       chai
         .request(app)
-        .patch(`/applications/${applicationId1}`)
+        .patch(`/applications/${applicationId1}/feedback`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          status: "something",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body.error).to.be.equal("Bad Request");
+          expect(res.body.message).to.be.equal("Status is not valid");
+          return done();
+        });
+    });
+
+    it("should return 200 if status is from not_submitted, pending, accepted, rejected, requested_changes when dev flag is present", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/${applicationId1}/feedback?dev=true`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          status: "not_submitted",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal("Application updated successfully!");
+          return done();
+        });
+    });
+    it("should return 400 if any status other than not_submitted, pending, accepted, rejected, requested_changes is passed when dev flag is present", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/${applicationId1}/feedback?dev=true`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
           status: "something",

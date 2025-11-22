@@ -23,6 +23,13 @@ export type application = {
   status?: string;
   createdAt?: string;
   foundFrom: string;
+  adminFeedback?: AdminFeedbackItem[];
+};
+
+export type AdminFeedbackItem = {
+  status: string;
+  feedback?: string | null;
+  createdAt: string;
 };
 
 export type applicationPayload = {

@@ -102,9 +102,20 @@ const addApplication = async (req: CustomRequest, res: CustomResponse) => {
 
 const updateApplication = async (req: CustomRequest, res: CustomResponse) => {
   try {
+    const devFeatureFlag = req?.query?.dev === "true";
     const { applicationId } = req.params;
     const rawBody = req.body;
 
+    const updatePayload = devFeatureFlag
+      ? {
+          status: rawBody.status,
+          adminFeedback: admin.firestore.FieldValue.arrayUnion({
+            status: rawBody.status,
+            feedback: rawBody.feedback,
+            createdAt: admin.firestore.Timestamp.now(),
+          }),
+        }
+      : rawBody;
     const applicationLog = {
       type: logType.APPLICATION_UPDATED,
       meta: {
@@ -112,11 +123,11 @@ const updateApplication = async (req: CustomRequest, res: CustomResponse) => {
         username: req.userData.username,
         userId: req.userData.id,
       },
-      body: rawBody,
+      body: updatePayload,
     };
 
     const promises = [
-      ApplicationModel.updateApplication(rawBody, applicationId),
+      ApplicationModel.updateApplication(updatePayload, applicationId),
       addLog(applicationLog.type, applicationLog.meta, applicationLog.body),
     ];
 
