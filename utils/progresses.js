@@ -243,14 +243,31 @@ const getProgressRecords = async (query, queryParams) => {
   const progressesDocs = queryResult.docs;
   progressesDocs.forEach((doc) => {
     const date = new Date(doc.data().date).toISOString().slice(0, 10);
-    docsData[date] = true;
+    // Validate that date is in YYYY-MM-DD format (e.g., "2023-05-09")
+    // ^ = start of string, \d{4} = exactly 4 digits, - = literal dash, \d{2} = exactly 2 digits, $ = end of string
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      Object.defineProperty(docsData, date, {
+        value: true,
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
+    }
   });
 
   const progressRecords = {};
   const currentDate = new Date(startDate);
   while (currentDate <= new Date(endDate)) {
     const date = currentDate.toISOString().slice(0, 10);
-    progressRecords[date] = Boolean(docsData[date]);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      const hasProgress = Object.prototype.hasOwnProperty.call(docsData, date) ? Reflect.get(docsData, date) : false;
+      Object.defineProperty(progressRecords, date, {
+        value: Boolean(hasProgress),
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
+    }
     currentDate.setDate(currentDate.getDate() + 1);
   }
   return progressRecords;

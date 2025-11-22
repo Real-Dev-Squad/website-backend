@@ -2,6 +2,64 @@ const { NotFound } = require("http-errors");
 const { userState } = require("../constants/userStatus");
 const { convertTimestampToUTCStartOrEndOfDay } = require("./time");
 
+/**
+ * Normalizes various timestamp representations into a millisecond number.
+ * Returns null when the value is empty or cannot be parsed into a finite timestamp.
+ *
+ * @param {number|string|admin.firestore.Timestamp|undefined|null} value - Timestamp in different formats.
+ * @returns {number|null} Normalized timestamp in milliseconds or null if invalid.
+ */
+const normalizeTimestamp = (value) => {
+  if (value == null) {
+    return null;
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (trimmed === "") {
+      return null;
+    }
+    const parsed = Number(trimmed);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : null;
+  }
+
+  if (value?.toMillis && typeof value.toMillis === "function") {
+    return value.toMillis();
+  }
+
+  return null;
+};
+
+/**
+ * Determines the timestamp to persist in the `lastOooUntil` field based on state transitions.
+ * If the user is moving out of OOO, the previous `until` is used (with fallbacks). If they are
+ * headed into OOO, the stored value is cleared.
+ *
+ * @param {Object} params
+ * @param {string|undefined} params.previousState - The state prior to the transition.
+ * @param {number|string|admin.firestore.Timestamp|null|undefined} params.previousUntil - Previous OOO `until` value.
+ * @param {string|undefined} params.nextState - The state being transitioned to.
+ * @param {number|undefined} params.fallbackTimestamp - Optional fallback timestamp to use when `previousUntil` is invalid.
+ * @returns {number|null|undefined} Millisecond timestamp when leaving OOO, null when entering OOO,
+ * or undefined when no change to `lastOooUntil` is required.
+ */
+const resolveLastOooUntil = ({ previousState, previousUntil, nextState, fallbackTimestamp }) => {
+  if (nextState === userState.OOO) {
+    return null;
+  }
+
+  const isLeavingOOO = previousState === userState.OOO && nextState !== undefined && nextState !== userState.OOO;
+  if (isLeavingOOO) {
+    return normalizeTimestamp(previousUntil) ?? normalizeTimestamp(fallbackTimestamp) ?? Date.now();
+  }
+
+  return undefined;
+};
+
 /* returns the User Id based on the route path
  *  @param req {Object} : Express request object
  *  @returns userId {Number | undefined} : the user id incase it exists
@@ -118,11 +176,10 @@ const generateAlreadyExistingStatusResponse = (state) => {
 const updateCurrentStatusToState = async (collection, latestStatusData, newState) => {
   const {
     id,
-    data: {
-      currentStatus: { state },
-      ...docData
-    },
+    data: { currentStatus = {}, ...docData },
   } = latestStatusData;
+  const previousState = currentStatus.state;
+  const previousUntil = currentStatus.until;
   const currentTimeStamp = new Date().getTime();
   const updatedStatusData = {
     ...docData,
@@ -134,6 +191,15 @@ const updateCurrentStatusToState = async (collection, latestStatusData, newState
       updatedAt: currentTimeStamp,
     },
   };
+  const lastOooUntilUpdate = resolveLastOooUntil({
+    previousState,
+    previousUntil,
+    nextState: newState,
+    fallbackTimestamp: currentTimeStamp,
+  });
+  if (lastOooUntilUpdate !== undefined) {
+    updatedStatusData.lastOooUntil = lastOooUntilUpdate;
+  }
   try {
     await collection.doc(id).update(updatedStatusData);
   } catch (err) {
@@ -145,7 +211,7 @@ const updateCurrentStatusToState = async (collection, latestStatusData, newState
     status: "success",
     message: `The status has been updated to ${newState}`,
     data: {
-      previousStatus: state,
+      previousStatus: previousState,
       currentStatus: newState,
     },
   };
@@ -217,6 +283,7 @@ const createUserStatusWithState = async (userId, collection, state) => {
   try {
     await collection.add({
       userId,
+      lastOooUntil: null,
       currentStatus: {
         state,
         message: "",
@@ -331,22 +398,26 @@ function getFilteredPaginationLink(query, cursor, documentId) {
  * @returns {Object} The modified input object with timestamps converted to UTC time.
  */
 const convertTimestampsToUTC = (obj) => {
-  const statusKeys = ["currentStatus", "futureStatus"];
+  const processStatus = (statusObj, isEndOfDay) => {
+    if (!statusObj || typeof statusObj !== "object") return;
 
-  for (const key of statusKeys) {
-    if (obj[key]) {
-      const { from, until } = obj[key];
-      const fromType = typeof from;
-      const untilType = typeof until;
+    const { from, until } = statusObj;
 
-      if ((fromType === "string" || fromType === "number") && String(from).trim() !== "") {
-        obj[key].from = convertTimestampToUTCStartOrEndOfDay(from, false);
-      }
-
-      if ((untilType === "string" || untilType === "number") && String(until).trim() !== "") {
-        obj[key].until = convertTimestampToUTCStartOrEndOfDay(until, true);
-      }
+    if (from && (typeof from === "string" || typeof from === "number") && String(from).trim() !== "") {
+      statusObj.from = convertTimestampToUTCStartOrEndOfDay(from, false);
     }
+
+    if (until && (typeof until === "string" || typeof until === "number") && String(until).trim() !== "") {
+      statusObj.until = convertTimestampToUTCStartOrEndOfDay(until, true);
+    }
+  };
+
+  if (Object.prototype.hasOwnProperty.call(obj, "currentStatus")) {
+    processStatus(obj.currentStatus, false);
+  }
+
+  if (Object.prototype.hasOwnProperty.call(obj, "futureStatus")) {
+    processStatus(obj.futureStatus, true);
   }
 
   return obj;
@@ -368,4 +439,6 @@ module.exports = {
   getNextDayTimeStamp,
   getFilteredPaginationLink,
   convertTimestampsToUTC,
+  normalizeTimestamp,
+  resolveLastOooUntil,
 };

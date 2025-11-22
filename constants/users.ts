@@ -1,3 +1,5 @@
+const ROLES = require("./roles");
+
 const profileStatus = {
   PENDING: "PENDING",
   APPROVED: "APPROVED",
@@ -32,6 +34,16 @@ const USERS_PATCH_HANDLER_ERROR_MESSAGES = {
   },
 };
 
+export const ALL_USER_ROLES = [
+  ROLES.DEVELOPER,
+  ROLES.DESIGNER,
+  ROLES.PRODUCT_MANAGER,
+  ROLES.PROJECT_MANAGER,
+  ROLES.QA,
+  ROLES.SOCIAL_MEDIA,
+  ROLES.MAVEN,
+];
+
 const USERS_PATCH_HANDLER_SUCCESS_MESSAGES = {
   ARCHIVE_USERS: {
     SUCCESSFULLY_UPDATED_DATA: "Successfully updated users archived role to true if in_discord role is false",
@@ -64,4 +76,5 @@ module.exports = {
   discordNicknameLength,
   SIMULTANEOUS_WORKER_CALLS,
   MAX_USERNAME_LENGTH,
+  ALL_USER_ROLES
 };

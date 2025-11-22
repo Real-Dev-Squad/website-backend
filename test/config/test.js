@@ -59,6 +59,7 @@ module.exports = {
     },
     rdsUi: {
       baseUrl: "https://realdevsquad.com",
+      newSignupUrl: "https://my.realdevsquad.com/new-signup",
       routes: {
         authRedirection: "/goto",
       },
@@ -79,6 +80,7 @@ module.exports = {
   },
 
   cors: {
+    // eslint-disable-next-line security/detect-unsafe-regex
     allowedOrigins: /(https:\/\/([a-zA-Z0-9-_]+\.)?realdevsquad\.com$)|(localhost)/, // Allow realdevsquad.com, *.realdevsquad.com and localhost for non-production envs
   },
 
@@ -299,9 +301,7 @@ module.exports = {
     },
   },
 
-  routesCacheTTL: {
-    "/members": 900,
-  },
+  routesCacheTTL: {},
 
   githubAccessToken: "GITHUB_PERSONAL_ACCESS_TOKEN",
 

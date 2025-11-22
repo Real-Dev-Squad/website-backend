@@ -470,23 +470,38 @@ const getSelfDetails = async (req, res) => {
  * @param res {Object} - Express response object
  */
 
-const updateSelf = async (req, res) => {
+const updateSelf = async (req, res, next) => {
   try {
-    const { id: userId, roles: userRoles, discordId } = req.userData;
+    const { id: userId, roles: userRoles, discordId, incompleteUserDetails, role: existingRole } = req.userData;
     const devFeatureFlag = req.query.dev === "true";
     const { user } = await dataAccess.retrieveUsers({ id: userId });
+    const { first_name: firstName, last_name: lastName, role } = req.body;
     let rolesToDisable = [];
 
-    if (req.body.username) {
-      if (!user.incompleteUserDetails) {
-        return res.boom.forbidden("Cannot update username again");
+    if (devFeatureFlag) {
+      if (req.body.username) {
+        return res.boom.forbidden("You are not authorized to perform this operation");
       }
-      await userQuery.setIncompleteUserDetails(userId);
-    }
-
-    if (req.body.roles) {
-      if (user && (user.roles.in_discord || user.roles.developer)) {
-        return res.boom.forbidden("Cannot update roles");
+      const username = await userService.validateUserSignup(
+        userId,
+        incompleteUserDetails,
+        firstName,
+        lastName,
+        role,
+        existingRole
+      );
+      if (username) {
+        req.body.username = username;
+      }
+    } else {
+      if (req.body?.username) {
+        if (!user.incompleteUserDetails) {
+          return res.boom.forbidden("Cannot update username again");
+        }
+        await userQuery.setIncompleteUserDetails(userId);
+      }
+      if (role) {
+        return res.boom.forbidden("You are not authorized to perform this operation");
       }
     }
 
@@ -542,7 +557,7 @@ const updateSelf = async (req, res) => {
     return res.boom.notFound("User not found");
   } catch (error) {
     logger.error(`Error while updating user: ${error}`);
-    return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
+    return next(error);
   }
 };
 
@@ -1118,15 +1133,15 @@ const updateUsernames = async (req, res) => {
   }
 };
 
-const updateProfile = async (req, res) => {
+const updateProfile = async (req, res, next) => {
   try {
     const { id: currentUserId, roles = {} } = req.userData;
     const isSelf = req.params.userId === currentUserId;
     const isSuperUser = roles[ROLES.SUPERUSER];
     const profile = req.query.profile === "true";
 
-    if (isSelf && profile && req.query.dev === "true") {
-      return await updateSelf(req, res);
+    if (isSelf && profile) {
+      return await updateSelf(req, res, next);
     } else if (isSuperUser) {
       return await updateUser(req, res);
     }
