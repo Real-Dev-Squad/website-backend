@@ -18,7 +18,7 @@ router.get(
 router.get("/:applicationId", authenticate, authorizeRoles([SUPERUSER]), applications.getApplicationById);
 router.post("/", authenticate, applicationValidator.validateApplicationData, applications.addApplication);
 router.patch(
-  "/:applicationId",
+  "/:applicationId/feedback",
   authenticate,
   authorizeRoles([SUPERUSER]),
   applicationValidator.validateApplicationUpdateData,
