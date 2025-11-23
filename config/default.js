@@ -138,6 +138,8 @@ module.exports = {
   },
   githubAccessToken: "GITHUB_PERSONAL_ACCESS_TOKEN",
 
+  googleGenerativeAiApiKey: "<GOOGLE_GENERATIVE_AI_API_KEY>",
+
   externalServices: {
     EXTERNAL_SERVICE_PUBLIC_KEY: "EXTERNAL_SERVICE_PUBLIC_KEY",
   },

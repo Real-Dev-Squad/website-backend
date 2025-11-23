@@ -90,8 +90,38 @@ const validateApplicationQueryParam = async (req: CustomRequest, res: CustomResp
   }
 };
 
+const applicationReviewSchema = joi
+  .object()
+  .strict()
+  .keys({
+    score: joi.number().required(),
+    message: joi.string().required(),
+    detailedReview: joi.string().required(),
+    strength: joi.array().items(joi.string()).required(),
+    improvement: joi.array().items(joi.string()).required(),
+  });
+
+const validateReviewApplicationRequest = async (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
+  const schema = joi
+    .object()
+    .strict()
+    .keys({
+      applicationId: joi.string().required(),
+    });
+
+  try {
+    await schema.validateAsync(req.body);
+    next();
+  } catch (error) {
+    logger.error(`Error in validating review application request: ${error}`);
+    res.boom.badRequest(error.details[0].message);
+  }
+};
+
 module.exports = {
   validateApplicationData,
   validateApplicationUpdateData,
   validateApplicationQueryParam,
+  applicationReviewSchema,
+  validateReviewApplicationRequest,
 };
