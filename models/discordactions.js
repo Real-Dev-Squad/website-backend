@@ -995,15 +995,19 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
       const isExcludedDay = normalizedExcludedWeekdays.has(dayOfWeek);
       const isExcludedDate = normalizedExcludedDates.has(gapWindowStart);
 
-      if (!isExcludedDay && !isExcludedDate) {
+      const shouldCountDay = !isExcludedDay && !isExcludedDate;
+      if (shouldCountDay) {
         remainingWorkingDays--;
+        if (remainingWorkingDays === 0) {
+          break;
+        }
       }
 
       const previousDayTimestamp = gapWindowStart - convertDaysToMilliseconds(1);
       const previousDayStart = convertTimestampToUTCStartOrEndOfDay(previousDayTimestamp, false);
 
-      if (remainingWorkingDays === 0) {
-        gapWindowStart = previousDayStart ?? gapWindowStart;
+      if (previousDayStart === null) {
+        gapWindowStart = null;
         break;
       }
 
@@ -1024,7 +1028,14 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
       }
 
       const previousDayTimestamp = gapWindowStart - convertDaysToMilliseconds(1);
-      gapWindowStart = convertTimestampToUTCStartOrEndOfDay(previousDayTimestamp, false);
+      const previousDayStart = convertTimestampToUTCStartOrEndOfDay(previousDayTimestamp, false);
+
+      if (previousDayStart === null) {
+        gapWindowStart = null;
+        break;
+      }
+
+      gapWindowStart = previousDayStart;
     }
 
     if (gapWindowStart === null) {
