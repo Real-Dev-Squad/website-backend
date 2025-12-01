@@ -44,6 +44,8 @@ module.exports = {
 
   githubAccessToken: "GITHUB_PERSONAL_ACCESS_TOKEN",
 
+  googleGenerativeAiApiKey: "GOOGLE_GENERATIVE_AI_API_KEY",
+
   firestore: "FIRESTORE_CONFIG",
 
   services: {

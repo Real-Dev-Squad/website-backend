@@ -24,5 +24,12 @@ router.patch(
   applicationValidator.validateApplicationUpdateData,
   applications.updateApplication
 );
+router.post(
+  "/review-application",
+  // authenticate,
+  // authorizeRoles([SUPERUSER]),
+  applicationValidator.validateReviewApplicationRequest,
+  applications.reviewApplication
+);
 
 module.exports = router;
