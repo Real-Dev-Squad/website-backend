@@ -28,7 +28,7 @@ This Project serves the backend APIs required for [Real Dev Squad](https://reald
 
 ## Starting Local Development
 
-Please install `yarn` and `volta`
+Please install `pnpm` and `volta`
 
 [Why Volta?](https://docs.volta.sh/guide/#why-volta)
 
@@ -39,12 +39,12 @@ To install Volta, please follow the [process](https://docs.volta.sh/guide/gettin
 Install all the packages using the following command:
 
 ```shell
-yarn
+pnpm install
 ```
-Now if one runs yarn install. The yarn.lock will be unexpectedly updated with an unknown future version of a dependency, potentially breaking the build in the future. To ensure that the yarn.lock file is not update, you will need to use the --frozen-lockfile flag.
+Now if one runs pnpm install. The pnpm-lock.yaml will be unexpectedly updated with an unknown future version of a dependency, potentially breaking the build in the future. To ensure that the pnpm-lock.yaml file is not update, you will need to use the --frozen-lockfile flag.
 
 ```shell
-yarn install --frozen-lockfile
+pnpm install --frozen-lockfile
 ```
 
 #### Confirm correct configuration setup
@@ -53,7 +53,7 @@ This command should be successful, before moving to development.
 
 
 ```shell
-yarn validate-setup
+pnpm validate-setup
 ```
 
 #### TDD Local Development
@@ -65,13 +65,13 @@ Head over to [TDD Tests Files List](scripts/tests/tdd-files-list.txt), and add t
 Run TDD in watch mode. Exiting this command will print the coverage report. Try to achieve 100% coverage.
 
 ```shell
-yarn tdd:watch
+pnpm tdd:watch
 ```
 
 #### Running a server in Dev mode
 
 ```shell
-yarn dev
+pnpm dev
 ```
 
 ## What happens in production:
@@ -79,13 +79,13 @@ yarn dev
 - Install packages
 
 ```
-yarn
+pnpm install
 ```
 
 - Run tests
 
 ```
-yarn run test
+pnpm test
 ```
 
 - Prune dev dependencies
@@ -97,7 +97,7 @@ npm prune --production
 - Run start command (with port information)
 
 ```
-yarn start
+pnpm start
 ```
 
 Note: These are handled automatically behind the scene when pushing to [Heroku](https://devcenter.heroku.com/)
