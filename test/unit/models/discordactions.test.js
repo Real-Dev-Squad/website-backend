@@ -56,6 +56,9 @@ const cleanDb = require("../../utils/cleanDb");
 const { userPhotoVerificationData } = require("../../fixtures/user/photo-verification");
 const userData = require("../../fixtures/user/user")();
 const userStatusModel = require("../../../models/userStatus");
+const { editGroupRoles } = require("../../../controllers/discordactions");
+const discordRolesModel = require("../../../models/discordactions");
+const discordServices = require("../../../services/discordService");
 const { getStatusData } = require("../../fixtures/userStatus/userStatus");
 const usersStatusData = getStatusData();
 const dataAccessLayer = require("../../../services/dataAccessLayer");
@@ -96,6 +99,108 @@ describe("discordactions", function () {
         expect(err).to.be.an.instanceOf(Error);
         expect(err.message).to.equal("Database error");
       });
+    });
+  });
+
+  describe("editGroupRoles", function () {
+    let req, res;
+
+    beforeEach(function () {
+      req = {
+        params: {
+          groupId: "group1",
+        },
+        query: {
+          dev: "true",
+        },
+        body: {},
+        userData: {
+          id: "user1",
+        },
+      };
+
+      res = {
+        boom: {
+          badRequest: sinon.stub(),
+          notFound: sinon.stub(),
+          badImplementation: sinon.stub(),
+        },
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub(),
+      };
+
+      sinon.restore();
+    });
+
+    it("should return 400 if neither roleName nor description is provided", async function () {
+      await editGroupRoles(req, res);
+
+      expect(res.boom.badRequest.calledWith("At least one field (roleName or description) must be provided")).to.equal(
+        true
+      );
+    });
+
+    it("should return 400 if roleName is less than 3 characters", async function () {
+      req.body.roleName = "ab";
+
+      await editGroupRoles(req, res);
+
+      expect(res.boom.badRequest.calledWith("Role name must be between 3 and 50 characters")).to.equal(true);
+    });
+
+    it("should return 400 if description exceeds 200 characters", async function () {
+      req.body.description = "a".repeat(201);
+
+      await editGroupRoles(req, res);
+
+      expect(res.boom.badRequest.calledWith("Description must not exceed 200 characters")).to.equal(true);
+    });
+
+    it("should return 404 if group role does not exist", async function () {
+      req.body.roleName = "new-role-name";
+      sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
+        roleExists: false,
+      });
+
+      await editGroupRoles(req, res);
+
+      expect(res.boom.notFound.calledWith("Group role not found")).to.equal(true);
+    });
+
+    it("should return 500 if Discord update fails", async function () {
+      req.body.roleName = "new-role-name";
+      sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
+        roleExists: true,
+        existingRoles: {
+          data: () => ({
+            roleid: "12345",
+          }),
+        },
+      });
+      sinon.stub(discordServices, "updateDiscordGroupRole").resolves({
+        success: false,
+      });
+
+      await editGroupRoles(req, res);
+
+      expect(res.boom.badImplementation.calledWith("Partial update failed. Check logs for details.")).to.equal(true);
+    });
+
+    it("should return 500 if Firestore update fails", async function () {
+      req.body.description = "Updated description";
+      sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
+        roleExists: true,
+        existingRoles: {
+          data: () => ({
+            roleid: "12345",
+          }),
+        },
+      });
+      sinon.stub(discordRolesModel, "updateGroupRole").rejects(new Error("Firestore update failed"));
+
+      await editGroupRoles(req, res);
+
+      expect(res.boom.badImplementation.calledWith("Partial update failed. Check logs for details.")).to.equal(true);
     });
   });
 
