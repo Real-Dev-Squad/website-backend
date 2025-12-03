@@ -1,6 +1,7 @@
 const chai = require("chai");
 const expect = chai.expect;
 const sinon = require("sinon");
+const config = require("config");
 const firestore = require("../../../utils/firestore");
 const photoVerificationModel = firestore.collection("photo-verification");
 const discordRoleModel = firestore.collection("discord-roles");
@@ -66,6 +67,7 @@ const { generateUserStatusData } = require("../../fixtures/userStatus/userStatus
 const { userState } = require("../../../constants/userStatus");
 const { REQUEST_TYPE, REQUEST_STATE } = require("../../../constants/requests");
 const { createRequest } = require("../../../models/requests");
+const getSundayGapFixture = require("../../fixtures/missedUpdates/sundayGap");
 
 chai.should();
 
@@ -1439,6 +1441,74 @@ describe("discordactions", function () {
       expect(users.length).to.equal(2);
       expect(users[0].id).to.equal(userId0);
       expect(users[1].id).to.equal(userId1);
+    });
+  });
+
+  describe("getMissedProgressUpdatesUsers working days window", function () {
+    let dateNowStub;
+    let developerDiscordId;
+    let developerUserId;
+    let developerTaskId;
+    let sundayFixture;
+
+    beforeEach(async function () {
+      await cleanDb();
+
+      sundayFixture = getSundayGapFixture();
+      dateNowStub = sinon.stub(Date, "now").returns(sundayFixture.evaluationTime);
+
+      developerDiscordId = sundayFixture.developer.discordId;
+      developerUserId = await addUser(sundayFixture.developer);
+
+      await userStatusModel.updateUserStatus(developerUserId, userStatusData.activeStatus);
+
+      const taskPayload = {
+        ...sundayFixture.task,
+        assignee: developerUserId,
+      };
+
+      const taskDocRef = await tasksModel.add(taskPayload);
+      developerTaskId = taskDocRef.id;
+
+      const saturdayProgress = stubbedModelTaskProgressData(
+        developerUserId,
+        developerTaskId,
+        sundayFixture.saturdayProgressTimestamp,
+        sundayFixture.saturdayProgressTimestamp
+      );
+
+      await firestore.collection("progresses").add(saturdayProgress);
+
+      sinon.stub(discordService, "getDiscordMembers").resolves([
+        {
+          user: { id: developerDiscordId },
+          roles: [config.get("discordDeveloperRoleId")],
+        },
+      ]);
+    });
+
+    afterEach(async function () {
+      if (dateNowStub) {
+        dateNowStub.restore();
+      }
+      sinon.restore();
+      await cleanDb();
+    });
+
+    it("should not flag users when the only gap falls on Sunday", async function () {
+      const result = await getMissedProgressUpdatesUsers();
+
+      expect(result).to.be.an("object");
+      expect(result.usersToAddRole).to.not.include(developerDiscordId);
+      expect(result.missedUpdatesTasks).to.equal(0);
+    });
+
+    it("should flag users when Sunday is treated as a working day", async function () {
+      const result = await getMissedProgressUpdatesUsers({ excludedDays: [], dateGap: 1 });
+
+      expect(result).to.be.an("object");
+      expect(result.usersToAddRole).to.include(developerDiscordId);
+      expect(result.missedUpdatesTasks).to.equal(1);
     });
   });
 });
