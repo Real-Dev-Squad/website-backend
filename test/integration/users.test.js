@@ -1344,6 +1344,22 @@ describe("Users", function () {
           return done();
         });
     });
+    it("Should have created_at field", function (done) {
+      chai
+        .request(app)
+        .get(`/users/${userId}/intro`)
+        .set("Cookie", `${cookieName}=${superUserAuthToken}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+          const {
+            body: { data },
+          } = res;
+          expect(data[0]).to.haveOwnProperty("created_at");
+          return done();
+        });
+    });
   });
 
   describe("GET /users/?id", function () {
