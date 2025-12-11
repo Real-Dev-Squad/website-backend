@@ -19,7 +19,7 @@
     "@aws-sdk/client-identitystore": "^3.665.0",
     "@types/nodemailer": "^6.4.15",
     "axios": "1.7.4",
-    "cloudinary": "2.0.3",
+    "cloudinary": "2.7.0",
     "config": "3.3.7",
     "cookie-parser": "1.4.6",
     "cors": "2.8.5",
