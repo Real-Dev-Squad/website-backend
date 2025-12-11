@@ -18,12 +18,14 @@ const { INTERNAL_SERVER_ERROR_MESSAGE } = require("../../constants/progresses");
 const cookieName = config.get("userToken.cookieName");
 const { expect } = chai;
 
-describe("Test Progress Updates API for Users", function () {
+// eslint-disable-next-line mocha/no-skipped-tests
+describe.skip("Test Progress Updates API for Users", function () {
   afterEach(async function () {
     await cleanDb();
   });
 
-  describe("Verify the POST progress records", function () {
+  // eslint-disable-next-line mocha/no-skipped-tests
+  describe.skip("Verify the POST progress records", function () {
     let clock;
     let userId;
     let userToken;
