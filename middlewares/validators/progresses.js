@@ -1,7 +1,8 @@
 const joi = require("joi");
 const { VALID_PROGRESS_TYPES, PROGRESS_VALID_SORT_FIELDS } = require("../../constants/progresses");
 
-const validateCreateProgressRecords = async (req, res, next) => {
+// Create a reusable progress record schema
+const createProgressRecordSchema = () => {
   const baseSchema = joi
     .object()
     .strict()
@@ -30,12 +31,19 @@ const validateCreateProgressRecords = async (req, res, next) => {
     })
     .messages({ "object.unknown": "Invalid field provided." });
 
+  return baseSchema;
+};
+
+const validateCreateProgressRecords = async (req, res, next) => {
+  const baseSchema = createProgressRecordSchema();
+  
   const taskSchema = joi.object().keys({
     taskId: joi.string().trim().required().messages({
       "any.required": "Required field 'taskId' is missing.",
       "string.trim": "taskId must not have leading or trailing whitespace",
     }),
   });
+  
   const schema = req.body.type === "task" ? baseSchema.concat(taskSchema) : baseSchema;
 
   try {
@@ -144,9 +152,78 @@ const validateGetDayProgressParams = async (req, res, next) => {
     res.boom.badRequest(error.details[0].message);
   }
 };
+/**
+ * Validates bulk creation of progress records
+ * Ensures the request contains an array of valid progress records
+ * with a minimum of 1 and maximum of 50 records
+ */
+const validateBulkCreateProgressRecords = async (req, res, next) => {
+  const baseProgressSchema = createProgressRecordSchema();
+  
+  const bulkSchema = joi
+    .object()
+    .keys({
+      records: joi
+        .array()
+        .min(1)
+        .max(50)
+        .items(
+          joi.object().keys({
+            type: joi
+              .string()
+              .trim()
+              .valid(...VALID_PROGRESS_TYPES)
+              .required()
+              .messages({
+                "any.required": "Required field 'type' is missing.",
+                "any.only": "Type field is restricted to either 'user' or 'task'.",
+              }),
+            completed: joi.string().trim().required().messages({
+              "any.required": "Required field 'completed' is missing.",
+              "string.trim": "completed must not have leading or trailing whitespace",
+            }),
+            planned: joi.string().trim().required().messages({
+              "any.required": "Required field 'planned' is missing.",
+              "string.trim": "planned must not have leading or trailing whitespace",
+            }),
+            blockers: joi.string().trim().allow("").required().messages({
+              "any.required": "Required field 'blockers' is missing.",
+              "string.trim": "blockers must not have leading or trailing whitespace",
+            }),
+            taskId: joi.string().trim().when("type", {
+              is: "task",
+              then: joi.required().messages({
+                "any.required": "Required field 'taskId' is missing for task type.",
+                "string.trim": "taskId must not have leading or trailing whitespace",
+              }),
+              otherwise: joi.forbidden().messages({
+                "any.unknown": "taskId should not be provided for user type.",
+              }),
+            }),
+          })
+        )
+        .required()
+        .messages({
+          "array.min": "At least one progress record is required.",
+          "array.max": "Maximum of 50 progress records can be created at once.",
+          "any.required": "Progress records array is required.",
+        }),
+    })
+    .messages({ "object.unknown": "Invalid field provided." });
+
+  try {
+    await bulkSchema.validateAsync(req.body, { abortEarly: false });
+    next();
+  } catch (error) {
+    logger.error(`Error validating bulk payload: ${error}`);
+    res.boom.badRequest(error.details[0].message);
+  }
+};
+
 module.exports = {
   validateCreateProgressRecords,
   validateGetProgressRecordsQuery,
   validateGetRangeProgressRecordsParams,
   validateGetDayProgressParams,
+  validateBulkCreateProgressRecords,
 };
