@@ -15,15 +15,11 @@ const {
 } = require("../fixtures/progress/progresses");
 
 const userData = require("../fixtures/user/user")();
+const withDiscordMembership = require("../utils/withDiscordMembership");
 const taskData = require("../fixtures/tasks/tasks")();
 const { INTERNAL_SERVER_ERROR_MESSAGE, UNAUTHORIZED_WRITE } = require("../../constants/progresses");
 const cookieName = config.get("userToken.cookieName");
 const { expect } = chai;
-
-const withDiscordMembership = (user) => ({
-  ...user,
-  roles: { ...(user.roles || {}), archived: false, in_discord: true },
-});
 
 describe("Test Progress Updates API for Tasks", function () {
   afterEach(async function () {
