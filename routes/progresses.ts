@@ -12,10 +12,8 @@ import {
   getProgressRangeData,
   getProgressBydDateController,
 } from "../controllers/progresses";
-import { disableRoute } from "../middlewares/shortCircuit";
 const router = express.Router();
-// DISABLE ROUTE FOR NOW as there is a security issue to be resolved
-router.post("/", authenticate, disableRoute, validateCreateProgressRecords, createProgress);
+router.post("/", authenticate, validateCreateProgressRecords, createProgress);
 router.get("/", validateGetProgressRecordsQuery, getProgress);
 router.get("/:type/:typeId/date/:date", validateGetDayProgressParams, getProgressBydDateController);
 router.get("/range", validateGetRangeProgressRecordsParams, getProgressRangeData);
