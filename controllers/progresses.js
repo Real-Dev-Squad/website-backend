@@ -46,7 +46,7 @@ const { PROGRESS_DOCUMENT_RETRIEVAL_SUCCEEDED, PROGRESS_DOCUMENT_CREATED_SUCCEED
  */
 
 const createProgress = async (req, res) => {
-  if (req.userData.roles.archived) {
+  if (req.userData.roles?.archived || req.userData.roles?.in_discord !== true) {
     return res.boom.forbidden(UNAUTHORIZED_WRITE);
   }
 

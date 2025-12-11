@@ -14,7 +14,8 @@ const {
 } = require("../fixtures/progress/progresses");
 
 const userData = require("../fixtures/user/user")();
-const { INTERNAL_SERVER_ERROR_MESSAGE } = require("../../constants/progresses");
+const withDiscordMembership = require("../utils/withDiscordMembership");
+const { INTERNAL_SERVER_ERROR_MESSAGE, UNAUTHORIZED_WRITE } = require("../../constants/progresses");
 const cookieName = config.get("userToken.cookieName");
 const { expect } = chai;
 
@@ -37,9 +38,9 @@ describe("Test Progress Updates API for Users", function () {
         now: new Date(Date.UTC(2023, 4, 2, 0, 25)).getTime(), // UTC time equivalent to 5:55 AM IST
         toFake: ["Date"],
       });
-      userId = await addUser(userData[1]);
+      userId = await addUser(withDiscordMembership(userData[1]));
       userToken = authService.generateAuthToken({ userId: userId });
-      anotherUserId = await addUser(userData[8]);
+      anotherUserId = await addUser(withDiscordMembership(userData[8]));
       anotherUserToken = authService.generateAuthToken({ userId: anotherUserId });
       const progressData = stubbedModelProgressData(anotherUserId, 1682935200000, 1682899200000);
       await firestore.collection("progresses").doc("anotherUserProgressDocument").set(progressData);
@@ -157,6 +158,26 @@ describe("Test Progress Updates API for Users", function () {
           return done();
         });
     });
+
+    it("Returns forbidden error when user is not in discord", async function () {
+      const nonDiscordFixture = {
+        ...userData[1],
+        username: `${(userData[1].username || "user").split("-")[0]}-non-discord`,
+        github_id: `${userData[1].github_id || "github"}-non-discord-${Date.now()}`,
+        roles: { ...(userData[1].roles || {}), archived: false, in_discord: false },
+      };
+      const nonDiscordUserId = await addUser(nonDiscordFixture);
+      const nonDiscordToken = authService.generateAuthToken({ userId: nonDiscordUserId });
+
+      const res = await chai
+        .request(app)
+        .post("/progresses")
+        .set("Cookie", `${cookieName}=${nonDiscordToken}`)
+        .send(standupProgressDay1);
+
+      expect(res).to.have.status(403);
+      expect(res.body.message).to.equal(UNAUTHORIZED_WRITE);
+    });
   });
 
   describe("Verify the GET progress records", function () {
@@ -165,9 +186,9 @@ describe("Test Progress Updates API for Users", function () {
     let userId3;
 
     beforeEach(async function () {
-      userId1 = await addUser(userData[0]);
-      userId2 = await addUser(userData[1]);
-      userId3 = await addUser(userData[2]);
+      userId1 = await addUser(withDiscordMembership(userData[0]));
+      userId2 = await addUser(withDiscordMembership(userData[1]));
+      userId3 = await addUser(withDiscordMembership(userData[2]));
       const progressData1 = stubbedModelProgressData(userId1, 1683957764140, 1683936000000);
       const progressData2 = stubbedModelProgressData(userId2, 1683957764140, 1683936000000);
       await firestore.collection("progresses").doc("progressDoc1").set(progressData1);
@@ -270,8 +291,8 @@ describe("Test Progress Updates API for Users", function () {
     let userId2;
 
     beforeEach(async function () {
-      userId = await addUser(userData[1]);
-      userId2 = await addUser(userData[2]);
+      userId = await addUser(withDiscordMembership(userData[1]));
+      userId2 = await addUser(withDiscordMembership(userData[2]));
       const progressData1 = stubbedModelProgressData(userId, 1683626400000, 1683590400000); // 2023-05-09
       const progressData2 = stubbedModelProgressData(userId, 1683885600000, 1683849600000); // 2023-05-12
       await firestore.collection("progresses").doc("progressDoc1").set(progressData1);
@@ -342,8 +363,8 @@ describe("Test Progress Updates API for Users", function () {
     let anotherUserId;
 
     beforeEach(async function () {
-      userId = await addUser(userData[0]);
-      anotherUserId = await addUser(userData[1]);
+      userId = await addUser(withDiscordMembership(userData[0]));
+      anotherUserId = await addUser(withDiscordMembership(userData[1]));
       const progressData = stubbedModelProgressData(userId, 1683072000000, 1682985600000);
       await firestore.collection("progresses").doc("progressDoc").set(progressData);
     });
@@ -425,8 +446,8 @@ describe("Test Progress Updates API for Users", function () {
 
   describe("GET /progresses (getPaginatedProgressDocument)", function () {
     beforeEach(async function () {
-      const userId1 = await addUser(userData[0]);
-      const userId2 = await addUser(userData[1]);
+      const userId1 = await addUser(withDiscordMembership(userData[0]));
+      const userId2 = await addUser(withDiscordMembership(userData[1]));
       const progressData1 = stubbedModelProgressData(userId1, 1683957764140, 1683936000000);
       const progressData2 = stubbedModelProgressData(userId2, 1683957764140, 1683936000000);
       await firestore.collection("progresses").doc("progressDoc1").set(progressData1);
