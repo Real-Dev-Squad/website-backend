@@ -20,6 +20,11 @@ const { INTERNAL_SERVER_ERROR_MESSAGE, UNAUTHORIZED_WRITE } = require("../../con
 const cookieName = config.get("userToken.cookieName");
 const { expect } = chai;
 
+const withDiscordMembership = (user) => ({
+  ...user,
+  roles: { ...(user.roles || {}), archived: false, in_discord: true },
+});
+
 describe("Test Progress Updates API for Tasks", function () {
   afterEach(async function () {
     await cleanDb();
@@ -41,7 +46,7 @@ describe("Test Progress Updates API for Tasks", function () {
         now: new Date(Date.UTC(2023, 4, 2, 0, 25)).getTime(), // UTC time equivalent to 5:55 AM IST
         toFake: ["Date"],
       });
-      userId = await addUser(userData[1]);
+      userId = await addUser(withDiscordMembership(userData[1]));
       archivedUserId = await addUser(userData[5]);
       archivedUserToken = authService.generateAuthToken({ userId: archivedUserId });
       userToken = authService.generateAuthToken({ userId: userId });
@@ -196,8 +201,8 @@ describe("Test Progress Updates API for Tasks", function () {
     let taskId3;
 
     beforeEach(async function () {
-      userId1 = await addUser(userData[1]);
-      userId2 = await addUser(userData[2]);
+      userId1 = await addUser(withDiscordMembership(userData[1]));
+      userId2 = await addUser(withDiscordMembership(userData[2]));
       const taskObject1 = await tasks.updateTask(taskData[0]);
       taskId1 = taskObject1.taskId;
       const taskObject2 = await tasks.updateTask(taskData[1]);
@@ -393,7 +398,7 @@ describe("Test Progress Updates API for Tasks", function () {
     let taskId2;
 
     beforeEach(async function () {
-      userId = await addUser(userData[1]);
+      userId = await addUser(withDiscordMembership(userData[1]));
       taskObject1 = await tasks.updateTask(taskData[0]);
       taskId1 = taskObject1.taskId;
       taskObject2 = await tasks.updateTask(taskData[1]);
@@ -469,7 +474,7 @@ describe("Test Progress Updates API for Tasks", function () {
     let anotherTaskId;
 
     beforeEach(async function () {
-      userId = await addUser(userData[0]);
+      userId = await addUser(withDiscordMembership(userData[0]));
       const taskObject = await tasks.updateTask(taskData[0]);
       taskId = taskObject.taskId;
       const anotherTaskObject = await tasks.updateTask(taskData[0]);
@@ -556,7 +561,7 @@ describe("Test Progress Updates API for Tasks", function () {
 
   describe("GET /progresses (getPaginatedProgressDocument)", function () {
     beforeEach(async function () {
-      const userId = await addUser(userData[1]);
+      const userId = await addUser(withDiscordMembership(userData[1]));
       const taskObject1 = await tasks.updateTask(taskData[0]);
       const taskId1 = taskObject1.taskId;
       const progressData1 = stubbedModelTaskProgressData(userId, taskId1, 1683626400000, 1683590400000); // 2023-05-09
