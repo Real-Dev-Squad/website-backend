@@ -17,7 +17,7 @@ module.exports = {
   discordMissedUpdatesRoleId: "<discordMissedUpdatesRoleId>",
   githubApi: {
     baseUrl: "https://api.github.com",
-    org: "Real-Dev-Squad",
+    org: "RealDevSquad",
   },
 
   aws: {
