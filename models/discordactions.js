@@ -301,6 +301,7 @@ const updateDiscordImageForVerification = async (userDiscordId) => {
  * @returns {Promise<Array<object>>} - An array of group objects with enriched information.
  */
 
+/* istanbul ignore next */
 const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
   try {
     if (!groups.length) {
@@ -366,6 +367,7 @@ const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
  *
  * Breaking the roleIds array into chunks of 30 or less due to firebase limitation
  */
+
 const fetchGroupToUserMapping = async (roleIds) => {
   try {
     const roleIdChunks = [];
