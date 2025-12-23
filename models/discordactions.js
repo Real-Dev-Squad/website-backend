@@ -349,7 +349,7 @@ const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
         firstName: groupCreator?.first_name,
         lastName: groupCreator?.last_name,
         image: groupCreator?.picture?.url,
-        memberCount: liveRoleIdToCountMap[group.roleid] || 0, // fixed
+        memberCount: liveRoleIdToCountMap.get(group.roleid) || 0, // Live count from Discord role membership
         isMember: subscribedGroupIds.has(group.roleid),
       };
     });
@@ -358,49 +358,6 @@ const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
     throw err;
   }
 };
-
-// const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
-//   try {
-//     if (!groups.length) {
-//       return [];
-//     }
-
-//     const groupCreatorIds = groups.reduce((ids, group) => {
-//       if (group.createdBy) {
-//         ids.add(group.createdBy);
-//       }
-//       return ids;
-//     }, new Set());
-
-//     const groupCreatorsDetails = await retrieveUsers({ userIds: Array.from(groupCreatorIds) });
-//     const roleIds = groups.map((group) => group.roleid);
-//     const groupsToUserMappings = await fetchGroupToUserMapping(roleIds);
-//     const roleIdToCountMap = {};
-
-//     groupsToUserMappings.forEach((groupToUserMapping) => {
-//       // Count how many times roleId comes up in the array.
-//       // This says how many users we have for a given roleId
-//       roleIdToCountMap[groupToUserMapping.roleid] = (roleIdToCountMap[groupToUserMapping.roleid] ?? 0) + 1;
-//     });
-
-//     const subscribedGroupIds = findSubscribedGroupIds(discordId, groupsToUserMappings);
-
-//     return groups.map((group) => {
-//       const groupCreator = groupCreatorsDetails.find((user) => user.id === group.createdBy);
-//       return {
-//         ...group,
-//         firstName: groupCreator?.first_name,
-//         lastName: groupCreator?.last_name,
-//         image: groupCreator?.picture?.url,
-//         memberCount: roleIdToCountMap[group.roleid] || 0, // Number of users joined this group
-//         isMember: subscribedGroupIds.has(group.roleid), // Is current loggedIn user is a member of this group
-//       };
-//     });
-//   } catch (err) {
-//     logger.error("Error while enriching group data with membership info", err);
-//     throw err;
-//   }
-// };
 
 /**
  *
