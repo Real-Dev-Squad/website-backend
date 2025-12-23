@@ -1,6 +1,8 @@
 const jwt = require("jsonwebtoken");
 const config = require("config");
-const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
+
+const rawBaseUrl = config.get("services.discordBot.baseUrl");
+const DISCORD_BASE_URL = rawBaseUrl && rawBaseUrl !== "DISCORD_BASE_URL" ? rawBaseUrl : "http://localhost:8080";
 
 /**
  * Extracts the discord data of a user
