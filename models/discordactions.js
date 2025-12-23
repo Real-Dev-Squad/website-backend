@@ -329,13 +329,13 @@ const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
 
     // Discord live role membership (used for memberCount)
     const discordMembers = await getDiscordMembers();
-    const liveRoleIdToCountMap = {};
+    const liveRoleIdToCountMap = new Map();
 
     discordMembers.forEach((member) => {
       if (!member.roles) return;
 
       member.roles.forEach((roleId) => {
-        liveRoleIdToCountMap[roleId] = (liveRoleIdToCountMap[roleId] || 0) + 1;
+        liveRoleIdToCountMap.set(roleId, (liveRoleIdToCountMap.get(roleId) || 0) + 1);
       });
     });
 
