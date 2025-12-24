@@ -127,13 +127,17 @@ describe("test discord actions", function () {
       await cleanDb();
     });
 
-    it("returns 200 for active users get method", function () {
-      return chai
+    it("returns 200 for active users get method", function (done) {
+      chai
         .request(app)
         .get("/discord-actions/groups")
-        .set("cookie", `rds-session=${jwt}`)
-        .then((res) => {
+        .set("Cookie", `${cookieName}=${jwt}`)
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
           expect(res).to.have.status(200);
+          return done();
         });
     });
   });
