@@ -460,6 +460,7 @@ describe("discordactions", function () {
     });
 
     after(async function () {
+      sinon.restore();
       await cleanDb();
     });
 

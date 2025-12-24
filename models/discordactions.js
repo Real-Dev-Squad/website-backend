@@ -30,7 +30,7 @@ const {
 const { chunks } = require("../utils/array");
 const tasksModel = firestore.collection("tasks");
 const { FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
-const discordService = require("../services/discordService");
+
 const { buildTasksQueryForMissedUpdates } = require("../utils/tasks");
 const { buildProgressQueryForMissedUpdates } = require("../utils/progresses");
 const { getRequestByKeyValues } = require("./requests");
@@ -350,7 +350,8 @@ const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
         firstName: groupCreator?.first_name,
         lastName: groupCreator?.last_name,
         image: groupCreator?.picture?.url,
-        memberCount: liveRoleIdToCountMap.get(group.roleid) || 0, // Live count from Discord role membership
+        // Member count from Firestore mapping
+        memberCount: roleIdToCountMap[group.roleid] || 0,
         isMember: subscribedGroupIds.has(group.roleid),
       };
     });
@@ -984,7 +985,7 @@ const getMissedProgressUpdatesUsers = async (options = {}) => {
     filteredByOoo: 0,
   };
   try {
-    const discordUsersPromise = discordService.getDiscordMembers();
+    const discordUsersPromise = getDiscordMembers();
     const missedUpdatesRoleId = discordMissedUpdatesRoleId;
 
     const normalizedExcludedWeekdays = new Set(
