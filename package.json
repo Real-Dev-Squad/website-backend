@@ -78,7 +78,7 @@
     "typescript": "5.3.3"
   },
   "engines": {
-    "node": "22.10.0"
+    "node": "^22.10.0"
   },
   "pre-commit": [
     "lint"

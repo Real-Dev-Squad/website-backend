@@ -16,6 +16,10 @@ const discordMembersArray = require("../../fixtures/discordResponse/discord-resp
 // const { func } = require("joi");
 let fetchStub;
 describe("Discord services", function () {
+  before(function () {
+    process.env.DISCORD_BASE_URL = "http://localhost:8080";
+  });
+
   describe("setInDiscordFalseScript", function () {
     beforeEach(async function () {
       const addUsersPromises = [];
