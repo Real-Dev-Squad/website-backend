@@ -15,6 +15,7 @@ const {
   syncDiscordGroupRolesInFirestore,
   setRoleToUsersWith31DaysPlusOnboarding,
   deleteGroupRole,
+  updateGroupRoleDetails,
   getPaginatedAllGroupRoles,
 } = require("../controllers/discordactions");
 const {
@@ -22,6 +23,7 @@ const {
   validateMemberRoleBody,
   validateUpdateUsersNicknameStatusBody,
   validateLazyLoadingParams,
+  validateGroupRoleUpdateBody,
 } = require("../middlewares/validators/discordactions");
 const checkIsVerifiedDiscord = require("../middlewares/verifydiscord");
 const checkCanGenerateDiscordLink = require("../middlewares/checkCanGenerateDiscordLink");
@@ -37,6 +39,14 @@ const router = express.Router();
 router.post("/groups", authenticate, checkIsVerifiedDiscord, validateGroupRoleBody, createGroupRole);
 router.get("/groups", authenticate, checkIsVerifiedDiscord, validateLazyLoadingParams, getPaginatedAllGroupRoles);
 router.delete("/groups/:groupId", authenticate, checkIsVerifiedDiscord, authorizeRoles([SUPERUSER]), deleteGroupRole);
+router.patch(
+  "/groups/:groupId",
+  authenticate,
+  checkIsVerifiedDiscord,
+  authorizeRoles([SUPERUSER]),
+  validateGroupRoleUpdateBody,
+  updateGroupRoleDetails
+);
 router.post("/roles", authenticate, checkIsVerifiedDiscord, validateMemberRoleBody, addGroupRoleToMember);
 /**
  * Short-circuit the GET method for this endpoint
