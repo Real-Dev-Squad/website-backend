@@ -430,10 +430,16 @@ describe("discordactions", function () {
   });
 
   describe("enrichGroupDataWithMembershipInfo", function () {
+    let fetchStub;
     let newGroupData;
     let allIds = [];
 
     before(async function () {
+      fetchStub = sinon.stub(global, "fetch").resolves({
+        status: 200,
+        json: async () => getDiscordMembers,
+      });
+
       const addUsersPromises = userData.map((user) => userModel.add({ ...user }));
       const responses = await Promise.all(addUsersPromises);
       allIds = responses.map((response) => response.id);
@@ -460,6 +466,7 @@ describe("discordactions", function () {
     });
 
     after(async function () {
+      fetchStub.restore();
       sinon.restore();
       await cleanDb();
     });
