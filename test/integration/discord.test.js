@@ -1,6 +1,7 @@
 const chai = require("chai");
 const { expect } = chai;
-
+const sinon = require("sinon");
+const discordService = require("../../services/discordService");
 const app = require("../../server");
 const addUser = require("../utils/addUser");
 const cleanDb = require("../utils/cleanDb");
@@ -11,6 +12,10 @@ const { requestRoleData } = require("../fixtures/discordactions/discordactions")
 const firestore = require("../../utils/firestore");
 const discordRoleModel = firestore.collection("discord-roles");
 const userModel = firestore.collection("users");
+
+const userStatusModel = require("../../models/userStatus");
+const { generateUserStatusData } = require("../fixtures/userStatus/userStatus");
+const { userState } = require("../../constants/userStatus");
 
 const { addGroupRoleToMember } = require("../../models/discordactions");
 
@@ -63,47 +68,72 @@ describe("test discord actions", function () {
   });
 
   describe("test discord actions for active users", function () {
+    let getDiscordMembersStub;
+    let userId;
+    let jwt;
+
     beforeEach(async function () {
-      const user = { ...userData[4], discordId: "123456789" };
+      getDiscordMembersStub = sinon.stub(discordService, "getDiscordMembers").resolves([]);
+
+      const user = {
+        ...userData[4],
+        discordId: "123456789",
+        roles: {
+          in_discord: true,
+          archived: false,
+        },
+      };
       userId = await addUser(user);
+      await userStatusModel.updateUserStatus(userId, generateUserStatusData(userState.ACTIVE, Date.now(), Date.now()));
+
       jwt = authService.generateAuthToken({ userId });
 
-      let allIds = [];
+      const addUsersPromises = userData.map((u) => userModel.add({ ...u }));
 
-      const addUsersPromises = userData.map((user) => userModel.add({ ...user }));
       const responses = await Promise.all(addUsersPromises);
-      allIds = responses.map((response) => response.id);
+      const allIds = responses.map((r) => r.id);
 
-      const addRolesPromises = [
-        discordRoleModel.add({ roleid: groupData[0].roleid, rolename: groupData[0].rolename, createdBy: allIds[1] }),
-        discordRoleModel.add({ roleid: groupData[1].roleid, rolename: groupData[1].rolename, createdBy: allIds[0] }),
-      ];
-      await Promise.all(addRolesPromises);
+      await Promise.all([
+        discordRoleModel.add({
+          roleid: groupData[0].roleid,
+          rolename: groupData[0].rolename,
+          createdBy: allIds[1],
+        }),
+        discordRoleModel.add({
+          roleid: groupData[1].roleid,
+          rolename: groupData[1].rolename,
+          createdBy: allIds[0],
+        }),
+      ]);
 
-      const addGroupRolesPromises = [
-        addGroupRoleToMember({ roleid: groupData[0].roleid, userid: allIds[0] }),
-        addGroupRoleToMember({ roleid: groupData[0].roleid, userid: allIds[1] }),
-        addGroupRoleToMember({ roleid: groupData[0].roleid, userid: allIds[1] }),
-        addGroupRoleToMember({ roleid: groupData[1].roleid, userid: allIds[0] }),
-      ];
-      await Promise.all(addGroupRolesPromises);
+      await Promise.all([
+        addGroupRoleToMember({
+          roleid: groupData[0].roleid,
+          userid: allIds[0],
+        }),
+        addGroupRoleToMember({
+          roleid: groupData[0].roleid,
+          userid: allIds[1],
+        }),
+        addGroupRoleToMember({
+          roleid: groupData[1].roleid,
+          userid: allIds[0],
+        }),
+      ]);
     });
 
     afterEach(async function () {
+      getDiscordMembersStub.restore();
       await cleanDb();
     });
 
-    it("returns 200 for active users get method", function (done) {
-      chai
+    it("returns 200 for active users get method", function () {
+      return chai
         .request(app)
         .get("/discord-actions/groups")
-        .set("Cookie", `${cookieName}=${jwt}`)
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
+        .set("cookie", `rds-session=${jwt}`)
+        .then((res) => {
           expect(res).to.have.status(200);
-          return done();
         });
     });
   });
