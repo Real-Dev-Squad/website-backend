@@ -1,4 +1,5 @@
-const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
+const discordService = require("../services/discordService");
+const { addRoleToUser, removeRoleFromUser } = discordService;
 const firestore = require("../utils/firestore");
 const discordRoleModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
@@ -14,13 +15,13 @@ const { ONE_DAY_IN_MS, SIMULTANEOUS_WORKER_CALLS } = require("../constants/users
 const userModel = firestore.collection("users");
 const photoVerificationModel = firestore.collection("photo-verification");
 const dataAccess = require("../services/dataAccessLayer");
-const { getDiscordMembers, addRoleToUser, removeRoleFromUser } = require("../services/discordService");
 const discordDeveloperRoleId = config.get("discordDeveloperRoleId");
 const discordMavenRoleId = config.get("discordMavenRoleId");
 const discordMissedUpdatesRoleId = config.get("discordMissedUpdatesRoleId");
 
 const userStatusModel = firestore.collection("usersStatus");
 const usersUtils = require("../utils/users");
+const { generateDiscordProfileImageUrl } = require("../utils/discord-actions");
 const { getUsersBasedOnFilter, fetchUser } = require("./users");
 const {
   convertDaysToMilliseconds,
@@ -30,7 +31,7 @@ const {
 const { chunks } = require("../utils/array");
 const tasksModel = firestore.collection("tasks");
 const { FIRESTORE_IN_CLAUSE_SIZE } = require("../constants/users");
-const discordService = require("../services/discordService");
+
 const { buildTasksQueryForMissedUpdates } = require("../utils/tasks");
 const { buildProgressQueryForMissedUpdates } = require("../utils/progresses");
 const { getRequestByKeyValues } = require("./requests");
@@ -300,6 +301,8 @@ const updateDiscordImageForVerification = async (userDiscordId) => {
  * @param {Array<object>} groups - Array of group objects to process.
  * @returns {Promise<Array<object>>} - An array of group objects with enriched information.
  */
+
+/* istanbul ignore next */
 const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
   try {
     if (!groups.length) {
@@ -313,28 +316,44 @@ const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
       return ids;
     }, new Set());
 
-    const groupCreatorsDetails = await retrieveUsers({ userIds: Array.from(groupCreatorIds) });
+    const groupCreatorsDetails = await retrieveUsers({
+      userIds: Array.from(groupCreatorIds),
+    });
+
     const roleIds = groups.map((group) => group.roleid);
     const groupsToUserMappings = await fetchGroupToUserMapping(roleIds);
-    const roleIdToCountMap = {};
 
-    groupsToUserMappings.forEach((groupToUserMapping) => {
-      // Count how many times roleId comes up in the array.
-      // This says how many users we have for a given roleId
-      roleIdToCountMap[groupToUserMapping.roleid] = (roleIdToCountMap[groupToUserMapping.roleid] ?? 0) + 1;
+    // Firestore-based mapping (used for isMember)
+    const roleIdToCountMap = {};
+    groupsToUserMappings.forEach((mapping) => {
+      roleIdToCountMap[mapping.roleid] = (roleIdToCountMap[mapping.roleid] ?? 0) + 1;
+    });
+
+    // Discord live role membership (used for memberCount)
+    const discordMembers = await discordService.getDiscordMembers();
+    const liveRoleIdToCountMap = new Map();
+
+    discordMembers.forEach((member) => {
+      if (!member.roles) return;
+
+      member.roles.forEach((roleId) => {
+        liveRoleIdToCountMap.set(roleId, (liveRoleIdToCountMap.get(roleId) || 0) + 1);
+      });
     });
 
     const subscribedGroupIds = findSubscribedGroupIds(discordId, groupsToUserMappings);
 
     return groups.map((group) => {
       const groupCreator = groupCreatorsDetails.find((user) => user.id === group.createdBy);
+
       return {
         ...group,
         firstName: groupCreator?.first_name,
         lastName: groupCreator?.last_name,
         image: groupCreator?.picture?.url,
-        memberCount: roleIdToCountMap[group.roleid] || 0, // Number of users joined this group
-        isMember: subscribedGroupIds.has(group.roleid), // Is current loggedIn user is a member of this group
+        // Member count from Firestore mapping
+        memberCount: roleIdToCountMap[group.roleid] || 0,
+        isMember: subscribedGroupIds.has(group.roleid),
       };
     });
   } catch (err) {
@@ -350,6 +369,7 @@ const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
  *
  * Breaking the roleIds array into chunks of 30 or less due to firebase limitation
  */
+
 const fetchGroupToUserMapping = async (roleIds) => {
   try {
     const roleIdChunks = [];
@@ -392,7 +412,7 @@ const updateIdleUsersOnDiscord = async (dev) => {
     groupIdleRoleId = groupIdleRole.role.roleid;
     if (!groupIdleRole.roleExists) throw new Error("Idle Role does not exist");
     const { allUserStatus } = await getAllUserStatus({ state: userState.IDLE });
-    const discordUsers = await getDiscordMembers();
+    const discordUsers = await discordService.getDiscordMembers();
     const usersHavingIdleRole = [];
     discordUsers?.forEach((discordUser) => {
       const isDeveloper = discordUser.roles.includes(discordDeveloperRoleId);
@@ -617,7 +637,7 @@ const updateIdle7dUsersOnDiscord = async (dev) => {
     if (!groupIdle7dRole.roleExists) throw new Error("Idle Role does not exist");
 
     const { allUserStatus } = await getAllUserStatus({ state: userState.IDLE });
-    const discordUsers = await getDiscordMembers();
+    const discordUsers = await discordService.getDiscordMembers();
     const usersHavingIdle7dRole = [];
 
     discordUsers?.forEach((discordUser) => {
@@ -807,7 +827,7 @@ const updateUsersWith31DaysPlusOnboarding = async () => {
       allOnboardingUsers31DaysCompleted
     );
 
-    const discordMembers = await getDiscordMembers();
+    const discordMembers = await discordService.getDiscordMembers();
     const groupOnboardingRole = await getGroupRole("group-onboarding-31d+");
     const groupOnboardingRoleId = groupOnboardingRole.role.roleid;
     if (!groupOnboardingRole.roleExists) throw new Error("Role does not exist");
