@@ -51,23 +51,23 @@ export const updateRequestsMiddleware = async (
   next: NextFunction
 ) => {
   const schema = joi
-  .object()
-  .strict()
-  .keys({
-    reason: joi.string().optional()
-      .messages({
-        "string.empty": "reason cannot be empty",
-      }),
-    state: joi
-      .string()
-      .valid(REQUEST_STATE.APPROVED, REQUEST_STATE.REJECTED)
-      .required()
-      .messages({
-        "any.only": "state must be APPROVED or REJECTED",
-      }),
-    type: joi.string().valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION, REQUEST_TYPE.ONBOARDING).required(),
-    message: joi.string().optional()
-  });
+    .object()
+    .strict()
+    .keys({
+      reason: joi.string().optional()
+        .messages({
+          "string.empty": "reason cannot be empty",
+        }),
+      state: joi
+        .string()
+        .valid(REQUEST_STATE.APPROVED, REQUEST_STATE.REJECTED)
+        .required()
+        .messages({
+          "any.only": "state must be APPROVED or REJECTED",
+        }),
+      type: joi.string().valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION, REQUEST_TYPE.ONBOARDING).required(),
+      message: joi.string().optional()
+    });
 
   try {
     await schema.validateAsync(req.body, { abortEarly: false });
@@ -88,7 +88,7 @@ export const getRequestsMiddleware = async (req: OooRequestCreateRequest, res: O
       .valid(REQUEST_TYPE.OOO, REQUEST_TYPE.EXTENSION, REQUEST_TYPE.TASK, REQUEST_TYPE.ALL, REQUEST_TYPE.ONBOARDING)
       .optional(),
     requestedBy: joi.string().insensitive().optional(),
-    state: joi 
+    state: joi
       .string()
       .valid(REQUEST_STATE.APPROVED, REQUEST_STATE.PENDING, REQUEST_STATE.REJECTED)
       .optional(),
@@ -138,18 +138,18 @@ export const updateRequestValidator = async (
   req: UpdateOnboardingExtensionRequest | AcknowledgeOooRequest,
   res: CustomResponse,
   next: NextFunction
-  ): Promise<void> => {
+): Promise<void> => {
   const type = req.body.type;
   switch (type) {
-      case REQUEST_TYPE.ONBOARDING:
-          await updateOnboardingExtensionRequestValidator(
-            req, 
-            res as OnboardingExtensionResponse, next);
-          break;
-      case REQUEST_TYPE.OOO:
-          await acknowledgeOooRequestValidator(req as AcknowledgeOooRequest, res as OooRequestResponse, next);
-          break;
-      default:
-          return res.boom.badRequest("Invalid type");
+    case REQUEST_TYPE.ONBOARDING:
+      await updateOnboardingExtensionRequestValidator(
+        req,
+        res as OnboardingExtensionResponse, next);
+      break;
+    case REQUEST_TYPE.OOO:
+      await acknowledgeOooRequestValidator(req as AcknowledgeOooRequest, res as OooRequestResponse, next);
+      break;
+    default:
+      return res.boom.badRequest("Invalid type");
   }
 };
