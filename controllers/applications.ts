@@ -3,9 +3,15 @@ const { logType } = require("../constants/logs");
 import { CustomRequest, CustomResponse } from "../types/global";
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const ApplicationModel = require("../models/applications");
-const { API_RESPONSE_MESSAGES } = require("../constants/application");
+const { API_RESPONSE_MESSAGES, APPLICATION_REVIEW_SYSTEM_PROMPT } = require("../constants/application");
 const { getUserApplicationObject } = require("../utils/application");
 const admin = require("firebase-admin");
+const logger = require("../utils/logger");
+const config = require("config");
+const { generateObject } = require("ai");
+const { google } = require("@ai-sdk/google");
+const joiToJsonSchema = require("joi-to-json-schema");
+const { applicationReviewSchema } = require("../middlewares/validators/application");
 
 const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse): Promise<any> => {
   try {
@@ -149,9 +155,93 @@ const getApplicationById = async (req: CustomRequest, res: CustomResponse) => {
   }
 };
 
+const generateReview = async (
+  introduction: string,
+  whyRds: string,
+  forFun: string,
+  funFact: string
+): Promise<any> => {
+  try {
+    const apiKey = config.get("googleGenerativeAiApiKey");
+    if (!apiKey) {
+      throw new Error("GOOGLE_GENERATIVE_AI_API_KEY is not configured");
+    }
+
+    const jsonSchema = joiToJsonSchema(applicationReviewSchema);
+    const userPrompt = `Please review the following application:
+      Introduction:
+      ${introduction}
+
+      Why RDS:
+      ${whyRds}
+
+      Hobbies/Interests (forFun):
+      ${forFun}
+
+      Fun Fact:
+      ${funFact}
+
+      Provide a comprehensive review based on the evaluation criteria.`;
+
+    const { object } = await generateObject({
+      model: google("gemini-2.5-flash-lite", {
+        apiKey: apiKey,
+      }),
+      schema: jsonSchema,
+      system: APPLICATION_REVIEW_SYSTEM_PROMPT,
+      prompt: userPrompt,
+    });
+
+    const { error, value } = applicationReviewSchema.validate(object);
+
+    if (error) {
+      throw new Error(`AI output validation failed: ${error.details[0].message}`);
+    }
+
+    return value;
+  } catch (err) {
+    logger.error(`Error in generating review: ${err}`);
+    throw err;
+  }
+};
+
+const reviewApplication = async (req: CustomRequest, res: CustomResponse) => {
+  try {
+    const { applicationId } = req.body;
+    const application = await ApplicationModel.getApplicationById(applicationId);
+
+    if (application.notFound) {
+      return res.boom.notFound("Application not found");
+    }
+
+    const { introduction, whyRds, forFun, funFact } = application.intro;
+
+    if (!introduction || !whyRds || !forFun || !funFact) {
+      return res.boom.badRequest("Application is missing required fields for review");
+    }
+
+    const review = await generateReview(introduction, whyRds, forFun, funFact);
+
+    return res.json({
+      message: "Application review generated successfully",
+      review,
+    });
+  } catch (err) {
+    logger.error(`Error in reviewing application: ${err}`);
+    if (err.message && err.message.includes("not found")) {
+      return res.boom.notFound(err.message);
+    }
+    if (err.message && err.message.includes("missing required")) {
+      return res.boom.badRequest(err.message);
+    }
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   getAllOrUserApplication,
   addApplication,
   updateApplication,
   getApplicationById,
+  reviewApplication,
 };
