@@ -160,7 +160,7 @@ describe("/requests OOO", function () {
         });
     });
 
-    it("should create a new request when dev is true", function (done) {
+    it("should create a new", function (done) {
       chai
         .request(app)
         .post(requestsEndpoint)
