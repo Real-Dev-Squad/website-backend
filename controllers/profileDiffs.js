@@ -22,7 +22,7 @@ const getProfileDiffs = async (req, res) => {
       const { profileDiffs, next } = await profileDiffsQuery.fetchProfileDiffsWithPagination(
         status,
         order,
-        parseInt(size),
+        Number.parseInt(size),
         username,
         cursor
       );

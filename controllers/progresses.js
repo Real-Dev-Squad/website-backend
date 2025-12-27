@@ -116,10 +116,11 @@ const getProgress = async (req, res) => {
   try {
     if (dev === "true") {
       const { progressDocs, totalProgressCount } = await progressesModel.getPaginatedProgressDocument(req.query);
-      const limit = parseInt(size, 10);
-      const offset = parseInt(page, 10) * limit;
-      const nextPage = offset + limit < totalProgressCount ? parseInt(page, 10) + 1 : null;
-      const prevPage = page > 0 ? parseInt(page, 10) - 1 : null;
+      const limit = Number.parseInt(size, 10) || 100;
+      const pageNumber = Number.isNaN(Number.parseInt(page, 10)) ? 0 : Number.parseInt(page, 10);
+      const offset = pageNumber * limit;
+      const nextPage = offset + limit < totalProgressCount ? pageNumber + 1 : null;
+      const prevPage = pageNumber > 0 ? pageNumber - 1 : null;
       let baseUrl = `${req.baseUrl}`;
       if (type) {
         baseUrl += `?type=${type}`;
