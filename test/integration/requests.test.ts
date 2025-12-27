@@ -145,7 +145,7 @@ describe("/requests OOO", function () {
 
     it("should return 500 response when creating OOO request fails", function (done) {
       sinon.stub(requestsQuery, "createRequest")
-      .throws("Error while creating OOO request");
+        .throws("Error while creating OOO request");
       chai.request(app)
         .post(requestsEndpoint)
         .set("cookie", `${cookieName}=${authToken}`)
