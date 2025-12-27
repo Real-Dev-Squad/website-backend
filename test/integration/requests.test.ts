@@ -113,6 +113,11 @@ describe("/requests OOO", function () {
       await cleanDb();
     });
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 6685c0c8 (feature flag removed for OOO creation)
     it("should return 401 if user is not logged in", function (done) {
       chai
         .request(app)
@@ -145,7 +150,7 @@ describe("/requests OOO", function () {
 
     it("should return 500 response when creating OOO request fails", function (done) {
       sinon.stub(requestsQuery, "createRequest")
-      .throws("Error while creating OOO request");
+        .throws("Error while creating OOO request");
       chai.request(app)
         .post(requestsEndpoint)
         .set("cookie", `${cookieName}=${authToken}`)
@@ -426,6 +431,10 @@ describe("/requests OOO", function () {
         });
     });
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 6685c0c8 (feature flag removed for OOO creation)
     it("should approve OOO request", function (done) {
       chai
         .request(app)
