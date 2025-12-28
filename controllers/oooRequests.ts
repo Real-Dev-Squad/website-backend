@@ -46,6 +46,9 @@ export const createOooRequestController = async (
   const requestBody = req.body;
   const { id: userId, username } = req.userData;
   const isUserPartOfDiscord = req.userData.roles.in_discord;
+  const dev = req.query.dev === "true";
+
+  if (!dev) return res.boom.notImplemented("Feature not implemented");
 
   if (!isUserPartOfDiscord) {
     return res.boom.forbidden(UNAUTHORIZED_TO_CREATE_OOO_REQUEST);
@@ -57,10 +60,10 @@ export const createOooRequestController = async (
 
     if (validationResponse) {
       if (validationResponse.error === USER_STATUS_NOT_FOUND) {
-        return res.boom.notFound(validationResponse.error);
+          return res.boom.notFound(validationResponse.error);
       }
       if (validationResponse.error === OOO_STATUS_ALREADY_EXIST) {
-        return res.boom.forbidden(validationResponse.error);
+          return res.boom.forbidden(validationResponse.error);
       }
     }
 
@@ -71,11 +74,11 @@ export const createOooRequestController = async (
     });
 
     if (latestOooRequest) {
-      await addLog(logType.PENDING_REQUEST_FOUND,
-        { userId, oooRequestId: latestOooRequest.id },
-        { message: REQUEST_ALREADY_PENDING }
-      );
-      return res.boom.conflict(REQUEST_ALREADY_PENDING);
+        await addLog(logType.PENDING_REQUEST_FOUND,
+            { userId, oooRequestId: latestOooRequest.id },
+            { message: REQUEST_ALREADY_PENDING }
+        );
+        return res.boom.conflict(REQUEST_ALREADY_PENDING);
     }
 
     await createOooRequest(requestBody, userId);
@@ -162,21 +165,21 @@ export const acknowledgeOooRequestController = async (
   next: NextFunction
 )
   : Promise<OooRequestResponse> => {
-  try {
+    try {
 
-    const requestBody = req.body;
-    const superUserId = req.userData.id;
-    const requestId = req.params.id;
+      const requestBody = req.body;
+      const superUserId = req.userData.id;
+      const requestId = req.params.id;
 
-    const response = await acknowledgeOooRequestService(requestId, requestBody, superUserId);
+      const response = await acknowledgeOooRequestService(requestId, requestBody, superUserId);
 
-    return res.status(200).json({
-      message: response.message,
-    });
-  }
-  catch(error){
-    logger.error(ERROR_WHILE_ACKNOWLEDGING_REQUEST, error);
-    next(error);
-    return;
+      return res.status(200).json({
+        message: response.message,
+      });
+    }
+    catch(error){
+      logger.error(ERROR_WHILE_ACKNOWLEDGING_REQUEST, error);
+      next(error);
+      return;
   }
 };
