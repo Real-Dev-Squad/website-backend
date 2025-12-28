@@ -58,7 +58,7 @@ let testArchivedUserId: string;
 
 describe("/requests OOO", function () {
 
-  const requestsEndpoint: string = "/requests?dev=true";
+  const requestsEndpoint: string = "/requests";
 
   beforeEach(async function () {
     const userIdPromises = [addUser(userData[16]), addUser(userData[4]), addUser(userData[18])];
@@ -114,10 +114,13 @@ describe("/requests OOO", function () {
     });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 
 >>>>>>> 6685c0c8 (feature flag removed for OOO creation)
+=======
+>>>>>>> d6fb005e (changes for feature flag  removal)
     it("should return 401 if user is not logged in", function (done) {
       chai
         .request(app)
@@ -163,7 +166,7 @@ describe("/requests OOO", function () {
         });
     });
 
-    it("should create a new", function (done) {
+    it("should create a new request", function (done) {
       chai
         .request(app)
         .post(requestsEndpoint)
@@ -207,7 +210,7 @@ describe("/requests OOO", function () {
         .request(app)
         .post(requestsEndpoint)
         .set("cookie", `${cookieName}=${authToken}`)
-        .send({...validOooStatusRequests, until: Date.now()})
+        .send({ ...validOooStatusRequests, until: Date.now() })
         .end(function (err, res) {
           if (err) return done(err);
           expect(res).to.have.status(400);
@@ -222,7 +225,7 @@ describe("/requests OOO", function () {
         .request(app)
         .post(requestsEndpoint)
         .set("cookie", `${cookieName}=${authToken}`)
-        .send({...validOooStatusRequests, from: Date.now() - 1 * 24 * 60 * 60 * 1000 })
+        .send({ ...validOooStatusRequests, from: Date.now() - 1 * 24 * 60 * 60 * 1000 })
         .end(function (err, res) {
           if (err) return done(err);
           expect(res).to.have.status(400);
@@ -339,7 +342,7 @@ describe("/requests OOO", function () {
     it("should return 401 if user is not logged in", function (done) {
       chai
         .request(app)
-        .patch(`/requests/${testOooRequest.id}?dev=true`)
+        .patch(`/requests/${testOooRequest.id}`)
         .send(testAcknowledgeOooRequest)
         .end(function (err, res) {
           expect(res).to.have.status(401);
@@ -354,7 +357,7 @@ describe("/requests OOO", function () {
     it("should return 404 if request does not exist", function (done) {
       chai
         .request(app)
-        .patch(`/requests/11111111111111?dev=true`)
+        .patch(`/requests/11111111111111`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(testAcknowledgeOooRequest)
         .end(function (err, res) {
@@ -370,7 +373,7 @@ describe("/requests OOO", function () {
     it("should return 403 if user does not have super user permission", function (done) {
       chai
         .request(app)
-        .patch(`/requests/${testOooRequest.id}?dev=true`)
+        .patch(`/requests/${testOooRequest.id}`)
         .set("cookie", `${cookieName}=${authToken}`)
         .send(testAcknowledgeOooRequest)
         .end(function (err, res) {
@@ -386,7 +389,7 @@ describe("/requests OOO", function () {
     it("should return 409 if OOO request is already approved", function (done) {
       chai
         .request(app)
-        .patch(`/requests/${approvedOooRequest.id}?dev=true`)
+        .patch(`/requests/${approvedOooRequest.id}`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(testAcknowledgeOooRequest)
         .end(function (err, res) {
@@ -402,7 +405,7 @@ describe("/requests OOO", function () {
     it("should return 409 if OOO request is already rejected", function (done) {
       chai
         .request(app)
-        .patch(`/requests/${rejectedOooRequest.id}?dev=true`)
+        .patch(`/requests/${rejectedOooRequest.id}`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(testAcknowledgeOooRequest)
         .end(function (err, res) {
@@ -418,7 +421,7 @@ describe("/requests OOO", function () {
     it("should return 400 when the request type for the given ID is not 'OOO'", function (done) {
       chai
         .request(app)
-        .patch(`/requests/${onboardingRequest.id}?dev=true`)
+        .patch(`/requests/${onboardingRequest.id}`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(testAcknowledgeOooRequest)
         .end(function (err, res) {
@@ -432,13 +435,16 @@ describe("/requests OOO", function () {
     });
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> 6685c0c8 (feature flag removed for OOO creation)
+=======
+>>>>>>> d6fb005e (changes for feature flag  removal)
     it("should approve OOO request", function (done) {
       chai
         .request(app)
-        .patch(`/requests/${testOooRequest.id}?dev=true`)
+        .patch(`/requests/${testOooRequest.id}`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(testAcknowledgeOooRequest)
         .end(function (err, res) {
@@ -451,12 +457,12 @@ describe("/requests OOO", function () {
         });
     });
 
-    it("should reject OOO request when dev is true", function (done) {
+    it("should reject OOO request", function (done) {
       chai
         .request(app)
-        .patch(`/requests/${testOooRequest.id}?dev=true`)
+        .patch(`/requests/${testOooRequest.id}`)
         .set("cookie", `${cookieName}=${superUserToken}`)
-        .send({...testAcknowledgeOooRequest, status: REQUEST_STATE.REJECTED})
+        .send({ ...testAcknowledgeOooRequest, status: REQUEST_STATE.REJECTED })
         .end(function (err, res) {
           if (err) {
             return done(err);
@@ -471,7 +477,7 @@ describe("/requests OOO", function () {
       sinon.stub(logUtils, "addLog").throws("Error");
       chai
         .request(app)
-        .patch(`/requests/${testOooRequest.id}?dev=true`)
+        .patch(`/requests/${testOooRequest.id}`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(testAcknowledgeOooRequest)
         .end(function (err, res) {
@@ -558,7 +564,7 @@ describe("/requests OOO", function () {
     it("should return all requests", function (done) {
       chai
         .request(app)
-        .get("/requests?dev=true")
+        .get("/requests")
         .end(function (err, res) {
           expect(res).to.have.status(200);
           expect(res.body.data).to.have.lengthOf(2);
