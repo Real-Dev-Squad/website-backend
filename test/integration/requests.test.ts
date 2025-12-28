@@ -158,7 +158,7 @@ describe("/requests OOO", function () {
         });
     });
 
-    it("should create a new request", function (done) {
+    it("should create a new OOO request", function (done) {
       chai
         .request(app)
         .post(requestsEndpoint)
@@ -556,8 +556,8 @@ describe("/requests OOO", function () {
           expect(res.body.data[0]).to.have.property("id");
           expect(res.body.data[0]).to.have.property("requestedBy");
           expect(res.body.data[0]).to.have.property("type");
-          expect(res.body.data[0]).to.have.property("state");
-          expect(res.body.data[0]).to.have.property("message");
+          expect(res.body.data[0]).to.have.property("status");
+          expect(res.body.data[0]).to.have.property("reason");
           done();
         });
     });
@@ -590,7 +590,7 @@ describe("/requests OOO", function () {
         .get(`/requests?state=APPROVED&requestedBy=${userData[16].username}`)
         .end(function (err, res) {
           expect(res).to.have.status(200);
-          expect(res.body.data.every((e: any) => e.state === "APPROVED"));
+          expect(res.body.data.every((e: any) => e.status === "APPROVED"));
           expect(res.body.data.every((e: any) => e.requestedBy === testUserId));
           done();
         });
