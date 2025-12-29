@@ -44,7 +44,7 @@ export const validateUserStatus = async (
             };
         }
 
-         if (userStatus.data.currentStatus.state=== userState.OOO) {
+        if (userStatus.data?.currentStatus?.state=== userState.OOO) {
             await addLog(logType.OOO_STATUS_FOUND,
                 { userId, userStatus: userState.OOO },
                 { message: OOO_STATUS_ALREADY_EXIST }
