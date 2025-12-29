@@ -113,7 +113,7 @@ describe("models/oooRequests", () => {
       expect(oooRequestData.allRequests).to.be.have.length(2);
     });
 
-    it("Should return APPROVED state in old schema when dev=false", async () => {
+    it("Should return APPROVED state", async () => {
       const oooRequest: OooStatusRequest = await createRequest(createOooStatusRequests);
       await updateRequest(
         oooRequest.id,
@@ -146,7 +146,7 @@ describe("models/oooRequests", () => {
       expect(oooRequestData.allRequests[0].status).to.be.equal(REQUEST_STATE.PENDING);
     });
 
-    it("Should return PENDING status in new schema when dev=true", async () => {
+    it("Should return PENDING status ", async () => {
       await createRequest(createOooStatusRequests);
       const query = { dev: "true", status: REQUEST_STATE.PENDING };
       const oooRequestData = await getRequests(query);

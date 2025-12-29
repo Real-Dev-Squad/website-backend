@@ -70,7 +70,7 @@ export const newOOOSchema = (request: oldOooStatusRequest) => ({
  */
 export const transformRequestResponse = (allRequests: (OooStatusRequest | oldOooStatusRequest)[], dev: boolean = false): (OooStatusRequest | oldOooStatusRequest)[] => {
   return allRequests.map(request => {
-    
+
     if (request.type !== REQUEST_TYPE.OOO) {
       return request;
     }
@@ -78,6 +78,10 @@ export const transformRequestResponse = (allRequests: (OooStatusRequest | oldOoo
     if (dev && 'status' in request) {
       return oldOOOSchema(request as OooStatusRequest);
     }
+    if (!dev && 'state' in request) {
+      return newOOOSchema(request as oldOooStatusRequest);
+    }
     return request;
   });
+
 };
