@@ -94,13 +94,13 @@ describe("models/oooRequests", () => {
   describe("getRequests", () => {
     it("Should return the request with the specified ID", async () => {
       const oooRequest = await createRequest(createOooRequests2);
-      const query = { id: oooRequest.id, dev: "true" };
+      const query = { id: oooRequest.id };
       const oooRequestData: any = await getRequests(query);
       expect(oooRequestData.id).to.be.equal(oooRequest.id);
     });
 
     it("Should return null if the request with the specified ID does not exist", async () => {
-      const query = { id: "randomId", dev: "true" };
+      const query = { id: "randomId" };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData).to.be.equal(null);
     });
@@ -108,12 +108,12 @@ describe("models/oooRequests", () => {
     it("Should return a list of all the GET requests", async () => {
       await createRequest(createOooRequests);
       await createRequest(createOooRequests2);
-      const query = { dev: "true" };
+      const query = { };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData.allRequests).to.be.have.length(2);
     });
 
-    it("Should return APPROVED state in old schema when dev=false", async () => {
+    it("Should return APPROVED state", async () => {
       const oooRequest: OooStatusRequest = await createRequest(createOooStatusRequests);
       await updateRequest(
         oooRequest.id,
@@ -126,7 +126,7 @@ describe("models/oooRequests", () => {
       expect(oooRequestData.allRequests[0].status).to.be.equal(REQUEST_STATE.APPROVED);
     });
 
-    it("Should return APPROVED status in new schema when dev=true", async () => {
+    it("Should return APPROVED status in new schema", async () => {
       const oooRequest: OooStatusRequest = await createRequest(createOooStatusRequests);
       await updateRequest(
         oooRequest.id,
@@ -134,23 +134,23 @@ describe("models/oooRequests", () => {
         updateOooApprovedRequests.lastModifiedBy,
         REQUEST_TYPE.OOO
       );
-      const query = { dev: "true", state: REQUEST_STATE.APPROVED };
+      const query = { state: REQUEST_STATE.APPROVED };
       const oooRequestData = await getRequests(query);
-      expect(oooRequestData.allRequests[0].state).to.be.equal(REQUEST_STATE.APPROVED);
+      expect(oooRequestData.allRequests[0].status).to.be.equal(REQUEST_STATE.APPROVED);
     });
 
-    it("Should return PENDING state in old schema when dev=false", async () => {
+    it("Should return PENDING state in new schema", async () => {
       await createRequest(createOooStatusRequests);
-      const query = { dev: "false", status: REQUEST_STATE.PENDING };
+      const query = { status: REQUEST_STATE.PENDING };
+      const oooRequestData = await getRequests(query);
+      expect(oooRequestData.allRequests[0].status ).to.be.equal(REQUEST_STATE.PENDING);
+    });
+
+    it("Should return PENDING status", async () => {
+      await createRequest(createOooStatusRequests);
+      const query = { status: REQUEST_STATE.PENDING };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData.allRequests[0].status).to.be.equal(REQUEST_STATE.PENDING);
-    });
-
-    it("Should return PENDING status in new schema when dev=true", async () => {
-      await createRequest(createOooStatusRequests);
-      const query = { dev: "true", status: REQUEST_STATE.PENDING };
-      const oooRequestData = await getRequests(query);
-      expect(oooRequestData.allRequests[0].state).to.be.equal(REQUEST_STATE.PENDING);
     });
 
     it("Should return a list of all the requests by specific user ", async () => {
@@ -164,13 +164,13 @@ describe("models/oooRequests", () => {
 
     it("Should return a list of all the requests for specific type ", async () => {
       await createRequest(createOooRequests);
-      const query = { dev: "true", type: REQUEST_TYPE.OOO };
+      const query = {  type: REQUEST_TYPE.OOO };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData.allRequests[0].type).to.be.equal(REQUEST_TYPE.OOO);
     });
 
     it("Should return empty array if no data is found", async () => {
-      const query = { dev: "true", status: REQUEST_STATE.PENDING };
+      const query = {  status: REQUEST_STATE.PENDING };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData).to.be.equal(null);
     });
@@ -178,7 +178,7 @@ describe("models/oooRequests", () => {
     it("Should return a list of all the requests by page ", async () => {
       await createRequest(createOooRequests);
       await createRequest(createOooRequests2);
-      const query = { dev: "true", page: 1 };
+      const query = { page: 1 };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData.page).to.be.equal(2);
     });
@@ -186,7 +186,7 @@ describe("models/oooRequests", () => {
     it("Should return a list of all the requests by size ", async () => {
       await createRequest(createOooRequests);
       await createRequest(createOooRequests2);
-      const query = { dev: "true", size: 1 };
+      const query = {  size: 1 };
       const oooRequestData = await getRequests(query);
       expect(oooRequestData.allRequests).to.have.lengthOf(1);
     });
