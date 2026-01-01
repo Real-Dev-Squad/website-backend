@@ -14,16 +14,11 @@ export const oooRoleCheckMiddleware = (
   const requestType = req.body?.type;
 
   if (requestType === REQUEST_TYPE.OOO) {
-    // TODO: Remove this middleware once the OOO feature is tested and ready 
-    return devFlagMiddleware(req, res, (err) => {
-      if (err) return next(err);
-
-      try {
-        return authorizeRoles([SUPERUSER])(req, res, next);
-      } catch (authErr) {
-        return next(authErr);
-      }
-    });
+    try {
+      return authorizeRoles([SUPERUSER])(req, res, next);
+    } catch (authErr) {
+      return next(authErr);
+    }
   }
 
   return next();
