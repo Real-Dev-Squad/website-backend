@@ -300,9 +300,8 @@ const updateDiscordImageForVerification = async (userDiscordId) => {
  * @param {string} discordId - The Discord ID of the user.
  * @param {Array<object>} groups - Array of group objects to process.
  * @returns {Promise<Array<object>>} - An array of group objects with enriched information.
- */
+ **/
 
-/* istanbul ignore next */
 const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
   try {
     if (!groups.length) {
