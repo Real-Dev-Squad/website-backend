@@ -31,7 +31,7 @@ describe("OOO Status Request Validators", function () {
       res = {};
 
       await createOooStatusRequestValidator(req as any, res as any, nextSpy);
-      expect(nextSpy.calledOnce);
+      expect(nextSpy.notCalled).to.be.true;
     });
 
     it("should not validate for an invalid request on wrong type", async function () {
@@ -82,7 +82,7 @@ describe("OOO Status Request Validators", function () {
 
     it("should not validate for an invalid request if all until date is greater than from", async function () {
       req = {
-        body: { ...validOooStatusRequests, from: Date.now() + 5000000, until: Date.now() + 1000000 },
+        body: { ...validOooStatusRequests, from: new Date().setUTCHours(0, 0, 0, 0) + 5000000, until: new Date().setUTCHours(0, 0, 0, 0) + 1000000 },
       };
       try {
         await createOooStatusRequestValidator(req as any, res as any, nextSpy);
