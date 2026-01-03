@@ -316,12 +316,40 @@ const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
     const groupCreatorsDetails = await retrieveUsers({ userIds: Array.from(groupCreatorIds) });
     const roleIds = groups.map((group) => group.roleid);
     const groupsToUserMappings = await fetchGroupToUserMapping(roleIds);
-    const roleIdToCountMap = {};
 
-    groupsToUserMappings.forEach((groupToUserMapping) => {
-      // Count how many times roleId comes up in the array.
-      // This says how many users we have for a given roleId
-      roleIdToCountMap[groupToUserMapping.roleid] = (roleIdToCountMap[groupToUserMapping.roleid] ?? 0) + 1;
+    const uniqueDiscordIds = Array.from(
+      new Set(
+        groupsToUserMappings
+          .map((mapping) => mapping.userid)
+          .filter((id) => id !== undefined && id !== null)
+          .map((id) => String(id))
+      )
+    );
+    const discordIdChunks = [];
+    for (let i = 0; i < uniqueDiscordIds.length; i += BATCH_SIZE_IN_CLAUSE) {
+      discordIdChunks.push(uniqueDiscordIds.slice(i, i + BATCH_SIZE_IN_CLAUSE));
+    }
+
+    const usersSnapshots = await Promise.all(
+      discordIdChunks.map(async (chunk) => {
+        const snap = await userModel.where("discordId", "in", chunk).get();
+        return snap.docs.map((doc) => doc.data());
+      })
+    );
+
+    const usersInDiscordSet = new Set();
+
+    usersSnapshots.forEach((userList) => {
+      userList.forEach((user) => {
+        if (Boolean(user?.roles?.in_discord) === true) usersInDiscordSet.add(user.discordId);
+      });
+    });
+
+    const roleIdToCountMap = {};
+    groupsToUserMappings.forEach((mapping) => {
+      if (usersInDiscordSet.has(String(mapping.userid))) {
+        roleIdToCountMap[mapping.roleid] = (roleIdToCountMap[mapping.roleid] ?? 0) + 1;
+      }
     });
 
     const subscribedGroupIds = findSubscribedGroupIds(discordId, groupsToUserMappings);
@@ -333,8 +361,8 @@ const enrichGroupDataWithMembershipInfo = async (discordId, groups = []) => {
         firstName: groupCreator?.first_name,
         lastName: groupCreator?.last_name,
         image: groupCreator?.picture?.url,
-        memberCount: roleIdToCountMap[group.roleid] || 0, // Number of users joined this group
-        isMember: subscribedGroupIds.has(group.roleid), // Is current loggedIn user is a member of this group
+        memberCount: roleIdToCountMap[group.roleid] ?? 0,
+        isMember: Boolean(subscribedGroupIds?.has(group.roleid)),
       };
     });
   } catch (err) {
