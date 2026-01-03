@@ -113,14 +113,6 @@ describe("/requests OOO", function () {
       await cleanDb();
     });
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-
-
->>>>>>> 6685c0c8 (feature flag removed for OOO creation)
-=======
->>>>>>> d6fb005e (changes for feature flag  removal)
     it("should return 401 if user is not logged in", function (done) {
       chai
         .request(app)
@@ -433,14 +425,6 @@ describe("/requests OOO", function () {
           done();
         });
     });
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-
->>>>>>> 6685c0c8 (feature flag removed for OOO creation)
-=======
->>>>>>> d6fb005e (changes for feature flag  removal)
     it("should approve OOO request", function (done) {
       chai
         .request(app)
