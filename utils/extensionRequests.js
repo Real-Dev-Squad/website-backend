@@ -28,7 +28,7 @@ const transformQuery = (size, status, dev = false) => {
 
   let transformedSize;
   if (size) {
-    transformedSize = parseInt(size);
+    transformedSize = Number.parseInt(size);
   }
   let transformedStatus;
 
