@@ -425,7 +425,6 @@ describe("/requests OOO", function () {
           done();
         });
     });
-
     it("should approve OOO request", function (done) {
       chai
         .request(app)
