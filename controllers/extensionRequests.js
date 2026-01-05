@@ -277,6 +277,12 @@ const updateExtensionRequestStatus = async (req, res) => {
       return res.boom.notFound("Extension Request not found");
     }
     const { status: extensionStatus } = req.body;
+    const updateApprover = {
+      status: extensionStatus,
+      approver: req.userData.username,
+      approverId: req.userData.id,
+      approvalTime: Number((new Date().getTime() / 1000).toFixed(0)),
+    };
 
     const extensionLog = {
       type: "extensionRequests",
@@ -292,7 +298,7 @@ const updateExtensionRequestStatus = async (req, res) => {
     };
 
     const promises = [
-      extensionRequestsQuery.updateExtensionRequest(req.body, req.params.id),
+      extensionRequestsQuery.updateExtensionRequest(updateApprover, req.params.id),
       addLog(extensionLog.type, extensionLog.meta, extensionLog.body),
     ];
 
