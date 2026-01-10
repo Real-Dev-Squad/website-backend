@@ -56,7 +56,7 @@ describe("auth", function () {
   });
 
   it("should redirect the user to new sign up flow if they are have incomplete user details true", async function () {
-    const redirectURL = "https://www.realdevsquad.com/new-signup";
+    const redirectURL = config.get("services.rdsUi.newSignupUrl");
 
     sinon.stub(passport, "authenticate").callsFake((strategy, options, callback) => {
       callback(null, "accessToken", githubUserInfo[0]);
@@ -308,7 +308,7 @@ describe("auth", function () {
   });
 
   it("should redirect the google user to new sign up flow if they are have incomplete user details true", async function () {
-    const redirectURL = "https://www.realdevsquad.com/new-signup";
+    const redirectURL = config.get("services.rdsUi.newSignupUrl");
     stubPassportAuthenticate(googleUserInfo[0]);
 
     const res = await chai

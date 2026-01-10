@@ -102,7 +102,7 @@ async function handleGoogleLogin(req, res, user, authRedirectionUrl) {
     res.cookie(config.get("userToken.cookieName"), token, cookieOptions);
 
     if (incompleteUserDetails) {
-      authRedirectionUrl = "https://www.realdevsquad.com/new-signup";
+      authRedirectionUrl = config.get("services.rdsUi.newSignupUrl");
     }
 
     return res.redirect(authRedirectionUrl);
@@ -211,7 +211,7 @@ const githubAuthCallback = (req, res, next) => {
 
       if (!devMode) {
         // TODO: Revisit incompleteUserDetails redirect condition
-        if (incompleteUserDetails) authRedirectionUrl = "https://www.realdevsquad.com/new-signup";
+        if (incompleteUserDetails) authRedirectionUrl = config.get("services.rdsUi.newSignupUrl");
       }
 
       if (isMobileApp) {
