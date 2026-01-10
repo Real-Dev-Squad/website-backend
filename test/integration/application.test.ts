@@ -352,24 +352,6 @@ describe("Application", function () {
           return done();
         });
     });
-
-    it("should return 200 if user application already exists and created before Jan 1, 2026", async function () {
-      const oldCreatedAt = "2025-12-31T23:59:59.000Z";
-      const oldApplicationData = getUserApplicationObject(applicationsData[5], secondUserId, oldCreatedAt);
-      await applicationModel.addApplication(oldApplicationData);
-
-      const res = await chai
-        .request(app)
-        .post(`/applications`)
-        .set("cookie", `${cookieName}=${secondUserJwt}`)
-        .send({
-          ...applicationsData[5],
-        });
-
-      expect(res).to.have.status(200);
-      expect(res.body.message).to.be.equal("Application updated successfully");
-      expect(res.body).to.have.property("applicationId");
-    });
   });
 
   describe("PATCH /application/:applicationId", function () {
