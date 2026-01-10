@@ -13,6 +13,7 @@ module.exports = {
   enableConsoleLogs: false,
   discordUnverifiedRoleId: "<discordUnverifiedRoleId>",
   discordDeveloperRoleId: "<discordDeveloperRoleId>",
+  discordNewRoleId: "<discordNewRoleId>",
   discordMavenRoleId: "<discordMavenRoleId>",
   discordMissedUpdatesRoleId: "<discordMissedUpdatesRoleId>",
   githubApi: {
