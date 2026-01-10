@@ -1,3 +1,5 @@
+const config = require("config");
+const logger = require("../utils/logger");
 const firestore = require("../utils/firestore");
 const { fetchAllUsers } = require("../models/users");
 const { generateAuthTokenForCloudflare, generateCloudFlareHeaders } = require("../utils/discord-actions");

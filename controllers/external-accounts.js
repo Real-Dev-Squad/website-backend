@@ -5,6 +5,7 @@ const { addOrUpdate, getUsersByRole, updateUsersInBatch } = require("../models/u
 const { retrieveDiscordUsers, fetchUsersForKeyValues } = require("../services/dataAccessLayer");
 const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../constants/external-accounts");
 const removeDiscordRoleUtils = require("../utils/removeDiscordRoleFromUser");
+const addDiscordRoleUtils = require("../utils/addDiscordRoleToUser");
 const config = require("config");
 const logger = require("../utils/logger");
 const { markUnDoneTasksOfArchivedUsersBacklog } = require("../models/tasks");
@@ -22,6 +23,23 @@ const addExternalAccountData = async (req, res) => {
     }
 
     await externalAccountsModel.addExternalAccountData(data);
+
+    const attributes = req.body.attributes;
+    if (attributes && attributes.discordId) {
+      const developerRoleId = config.get("discordDeveloperRoleId");
+      const newRoleId = config.get("discordNewRoleId");
+
+      (async () => {
+        try {
+          await addDiscordRoleUtils.addDiscordRoleToUser(attributes.discordId, developerRoleId, "Developer");
+          await addDiscordRoleUtils.addDiscordRoleToUser(attributes.discordId, newRoleId, "New");
+
+          logger.info(`Roles (Developer, New) assigned automatically for Discord ID: ${attributes.discordId}`);
+        } catch (roleError) {
+          logger.error(`Error automating role assignment: ${roleError}`);
+        }
+      })();
+    }
 
     return res.status(201).json({ message: "Added external account data successfully" });
   } catch (error) {
