@@ -16,7 +16,7 @@ interface CreateApplicationServiceResponse {
 }
 
 const transformPayloadToApplication = (payload: applicationPayload, userId: string): Partial<application> => {
-  return {
+  const transformed: Partial<application> = {
     userId,
     biodata: {
       firstName: payload.firstName,
@@ -40,9 +40,17 @@ const transformPayloadToApplication = (payload: applicationPayload, userId: stri
     },
     foundFrom: payload.foundFrom,
     role: payload.role,
-    imageUrl: payload.imageUrl,
-    socialLink: payload.socialLink,
   };
+
+  if (payload.imageUrl) {
+    transformed.imageUrl = payload.imageUrl;
+  }
+
+  if (payload.socialLink) {
+    transformed.socialLink = payload.socialLink;
+  }
+
+  return transformed;
 };
 
 /**

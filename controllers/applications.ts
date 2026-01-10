@@ -6,6 +6,7 @@ const ApplicationModel = require("../models/applications");
 const { API_RESPONSE_MESSAGES } = require("../constants/application");
 const { createApplicationService } = require("../services/applicationService");
 const { Conflict } = require("http-errors");
+const logger = require("../utils/logger");
 
 const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse): Promise<any> => {
   try {
@@ -89,10 +90,10 @@ const addApplication = async (req: CustomRequest, res: CustomResponse) => {
 
     await addLog(applicationLog.type, applicationLog.meta, applicationLog.body);
 
-    const statusCode = result.isNew && !result.migratedAt ? 201 : 200;
-    const message = result.isNew && !result.migratedAt
-      ? API_RESPONSE_MESSAGES.APPLICATION_CREATED_SUCCESS
-      : API_RESPONSE_MESSAGES.APPLICATION_UPDATED_SUCCESS;
+    const statusCode = result.migratedAt ? 200 : 201;
+    const message = result.migratedAt
+      ? API_RESPONSE_MESSAGES.APPLICATION_UPDATED_SUCCESS
+      : API_RESPONSE_MESSAGES.APPLICATION_CREATED_SUCCESS;
 
     return res.status(statusCode).json({
       message,
