@@ -64,6 +64,7 @@ module.exports = {
 
     rdsUi: {
       baseUrl: "https://realdevsquad.com",
+      newSignupUrl: "https://www.realdevsquad.com/new-signup",
       routes: {
         authRedirection: "/goto",
       },
