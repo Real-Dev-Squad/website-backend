@@ -4,8 +4,9 @@ import { CustomRequest, CustomResponse } from "../types/global";
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const ApplicationModel = require("../models/applications");
 const { API_RESPONSE_MESSAGES } = require("../constants/application");
-const { getUserApplicationObject } = require("../utils/application");
-const admin = require("firebase-admin");
+const { createApplicationService } = require("../services/applicationService");
+const { Conflict } = require("http-errors");
+const logger = require("../utils/logger");
 
 const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse): Promise<any> => {
   try {
@@ -66,35 +67,42 @@ const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse):
 const addApplication = async (req: CustomRequest, res: CustomResponse) => {
   try {
     const rawData = req.body;
-    const { applications } = await ApplicationModel.getApplicationsBasedOnStatus("pending", 1, "", req.userData.id);
-    if (applications.length) {
-      return res.status(409).json({
-        message: "User application is already present!",
-      });
-    }
-    const createdAt = new Date().toISOString();
-    const data = getUserApplicationObject(rawData, req.userData.id, createdAt);
+    const userId = req.userData.id;
+
+    const result = await createApplicationService({
+      userId,
+      payload: rawData,
+    });
 
     const applicationLog = {
       type: logType.APPLICATION_ADDED,
       meta: {
         username: req.userData.username,
-        userId: req.userData.id,
+        userId: userId,
+        applicationId: result.applicationId,
+        isNew: result.isNew,
       },
-      body: data,
+      body: {
+        ...rawData,
+        ...(result.migratedAt && { migratedAt: result.migratedAt }),
+      },
     };
 
-    const promises = [
-      ApplicationModel.addApplication(data),
-      addLog(applicationLog.type, applicationLog.meta, applicationLog.body),
-    ];
+    await addLog(applicationLog.type, applicationLog.meta, applicationLog.body);
 
-    await Promise.all(promises);
+    const statusCode = result.migratedAt ? 200 : 201;
+    const message = result.migratedAt
+      ? API_RESPONSE_MESSAGES.APPLICATION_UPDATED_SUCCESS
+      : API_RESPONSE_MESSAGES.APPLICATION_CREATED_SUCCESS;
 
-    return res.status(201).json({
-      message: "User application added.",
+    return res.status(statusCode).json({
+      message,
+      applicationId: result.applicationId,
     });
   } catch (err) {
+    if (err instanceof Conflict) {
+      return res.boom.conflict(err.message);
+    }
     logger.error(`Error while adding application: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }

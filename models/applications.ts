@@ -1,5 +1,6 @@
 import { application } from "../types/application";
 const firestore = require("../utils/firestore");
+const logger = require("../utils/logger");
 const ApplicationsModel = firestore.collection("applicants");
 
 const getAllApplications = async (limit: number, lastDocId?: string) => {
@@ -115,6 +116,25 @@ const getUserApplications = async (userId: string) => {
   }
 };
 
+const getApplicationByUserId = async (userId: string) => {
+  try {
+    const applications = await ApplicationsModel.where("userId", "==", userId).get();
+
+    if (applications.empty) {
+      return null;
+    }
+
+    const applicationDoc = applications.docs[0];
+    return {
+      id: applicationDoc.id,
+      ...applicationDoc.data(),
+    };
+  } catch (err) {
+    logger.log("error in getting application by userId", err);
+    throw err;
+  }
+};
+
 const addApplication = async (data: application) => {
   try {
     const application = await ApplicationsModel.add(data);
@@ -141,4 +161,5 @@ module.exports = {
   updateApplication,
   getApplicationsBasedOnStatus,
   getApplicationById,
+  getApplicationByUserId,
 };

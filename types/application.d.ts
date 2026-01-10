@@ -1,3 +1,29 @@
+export type ApplicationRole =
+  | "developer"
+  | "designer"
+  | "product_manager"
+  | "project_manager"
+  | "qa"
+  | "social_media";
+
+export type SocialLink = {
+  phoneNo?: string;
+  github?: string;
+  instagram?: string;
+  linkedin?: string;
+  twitter?: string;
+  peerlist?: string;
+  behance?: string;
+  dribble?: string;
+};
+
+export type feedback = {
+  status: "rejected" | "accepted" | "changes_requested";
+  feedback?: string;
+  reviewerName: string;
+  createdAt: string | Date;
+};
+
 export type application = {
   userId: string;
   biodata: {
@@ -23,6 +49,16 @@ export type application = {
   status?: string;
   createdAt?: string;
   foundFrom: string;
+  role?: ApplicationRole;
+  isNew?: boolean;
+  imageUrl?: string;
+  nudgeCount?: number;
+  lastNudgeAt?: string | Date;
+  migratedAt?: string | Date;
+  lastEditAt?: string | Date;
+  socialLink?: SocialLink;
+  score?: number;
+  feedback?: feedback[];
 };
 
 export type applicationPayload = {
@@ -39,4 +75,8 @@ export type applicationPayload = {
   numberOfHours: number;
   whyRds: string;
   foundFrom: string;
+  role: ApplicationRole;
+  imageUrl?: string;
+  socialLink?: SocialLink;
+  answers?: Record<string, any>;
 };
