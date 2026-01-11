@@ -23,20 +23,22 @@ export const addDiscordRoleToUser = async (
 
         if (!response.success) {
             const message = `Adding ${roleName} role to discord failed: ${response.message || "Unknown error"}`;
-            await addLog(logType.ADD_ROLE_TO_USER_FAILED, { roleId, userid: discordId }, { message });
-            throw new Error(message);
+            await addLog(logType.ADD_ROLE_TO_USER_FAILED, { roleId, discordId }, { message });
+            return { success: false, message };
         }
 
         await addLog(
             logType.ADD_ROLE_TO_USER_SUCCESS,
-            { roleId, userid: discordId },
+            { roleId, discordId },
             { message: `${roleName} role added successfully to user` }
         );
 
         return { success: true, message: `${roleName} role added successfully` };
     } catch (error) {
-        logger.error(`Error adding role ${roleId} for user ${discordId}: ${error.message}`);
+        const msg = error instanceof Error ? error.message : String(error);
+        logger.error(`Error adding role ${roleId} for user ${discordId}: ${msg}`);
+        await addLog(logType.ADD_ROLE_TO_USER_FAILED, { roleId, discordId }, { message: msg });
 
-        return { success: false, message: error.message };
+        return { success: false, message: msg };
     }
 };
