@@ -13,7 +13,7 @@ This document provides an explanation for the flow diagram representing the user
 
 ### OOO (Out of Office)
 
-- **Change Status to OOO:** If user want to change their status to OOO, they can go to the `https://my.realdevsquad.com` link and change their status to OOO.
+- **Change Status to OOO:** If user want to change their status to OOO, they can go to the `https://www.realdevsquad.com` link and change their status to OOO.
 - **Transition to Idle:** If the user is in the "OOO" state and does not have an active task after a specified time, they transition to the "Idle" state.
 - **Transition to Active:** If the user is in the "OOO" state and has an active task after a specified time, they transition to the "Active" state.
 
@@ -42,7 +42,7 @@ flowchart TD
     style OO fill:#ff8a80,stroke:#ff5252,stroke-width:2px
     style AT fill:#7cb342,stroke:#000,stroke-width:2px
     style NAT fill:#bdbdbd,stroke:#000,stroke-width:2px
-    
+
     U[fa:fa-user User] -->|Initiate| OB(Onboarding)
     OB -->TA{Task Assigned}
     TA -->A("`**Active**`")
