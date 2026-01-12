@@ -340,6 +340,7 @@ describe("Application", function () {
         .set("cookie", `${cookieName}=${secondUserJwt}`)
         .send({
           ...applicationsData[5],
+          imageUrl: "https://example.com/image.jpg",
         })
         .end((err, res) => {
           if (err) {
