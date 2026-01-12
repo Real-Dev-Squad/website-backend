@@ -1,6 +1,7 @@
 import { application } from "../types/application";
 const firestore = require("../utils/firestore");
 const ApplicationsModel = firestore.collection("applicants");
+const { DOCUMENT_WRITE_SIZE } = require("../constants/constants");
 
 const getAllApplications = async (limit: number, lastDocId?: string) => {
   try {
@@ -64,7 +65,7 @@ const getApplicationsBasedOnStatus = async (status: string, limit: number, lastD
       lastDoc = await ApplicationsModel.doc(lastDocId).get();
     }
 
-  dbQuery = dbQuery.orderBy("createdAt", "desc");
+    dbQuery = dbQuery.orderBy("createdAt", "desc");
 
     if (lastDoc) {
       dbQuery = dbQuery.startAfter(lastDoc);
@@ -97,9 +98,9 @@ const getUserApplications = async (userId: string) => {
   try {
     const applicationsResult = [];
     const applications = await ApplicationsModel.where("userId", "==", userId)
-    .orderBy("createdAt", "desc")
-    .limit(1)
-    .get();
+      .orderBy("createdAt", "desc")
+      .limit(1)
+      .get();
 
     applications.forEach((application) => {
       applicationsResult.push({
@@ -135,13 +136,14 @@ const updateApplication = async (dataToUpdate: object, applicationId: string) =>
 };
 
 const addIsNewField = async () => {
-  const batchSize = 450;
+  const batchSize = DOCUMENT_WRITE_SIZE;
   let lastDoc = null;
   let isCompleted = false;
 
   const summary = {
     totalApplicationsProcessed: 0,
     totalApplicationsUpdated: 0,
+    totalApplicationsSkipped: 0,
     totalOperationsFailed: 0,
     failedApplicationDetails: [],
   };
@@ -166,17 +168,21 @@ const addIsNewField = async () => {
         if (applicationData.isNew === undefined) {
           batch.update(doc.ref, { isNew: false });
           documentsToUpdate.push(doc.id);
+        } else {
+          summary.totalApplicationsSkipped++;
         }
         summary.totalApplicationsProcessed++;
       });
 
-      try {
-        await batch.commit();
-        summary.totalApplicationsUpdated += documentsToUpdate.length;
-      } catch (err) {
-        logger.error("Batch update failed for applications collection:", err);
-        summary.totalOperationsFailed += documentsToUpdate.length;
-        summary.failedApplicationDetails.push(...documentsToUpdate);
+      if (documentsToUpdate.length > 0) {
+        try {
+          await batch.commit();
+          summary.totalApplicationsUpdated += documentsToUpdate.length;
+        } catch (err) {
+          logger.error("Batch update failed for applications collection:", err);
+          summary.totalOperationsFailed += documentsToUpdate.length;
+          summary.failedApplicationDetails.push(...documentsToUpdate);
+        }
       }
 
       lastDoc = snapshot.docs[snapshot.docs.length - 1];
