@@ -24,6 +24,6 @@ router.patch(
   applicationValidator.validateApplicationUpdateData,
   applications.updateApplication
 );
-router.post("/migrations/:action", authenticate, authorizeRoles([SUPERUSER]), applications.migrateApplications);
+router.post("/migrations/add-is-new-field", authenticate, authorizeRoles([SUPERUSER]), applications.addIsNewFieldMigration);
 
 module.exports = router;

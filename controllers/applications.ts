@@ -149,19 +149,9 @@ const getApplicationById = async (req: CustomRequest, res: CustomResponse) => {
   }
 };
 
-const migrateApplications = async (req: CustomRequest, res: CustomResponse) => {
+const addIsNewFieldMigration = async (req: CustomRequest, res: CustomResponse) => {
   try {
-    const { action } = req.params;
-    let responseData;
-    switch (action) {
-      case "add-is-new-field": {
-        responseData = await ApplicationModel.addIsNewField();
-        break;
-      }
-      default: {
-        return res.boom.badRequest("Unknown action");
-      }
-    }
+    const responseData = await ApplicationModel.addIsNewField();
     return res.json({ message: "Applications migration successful", ...responseData });
   } catch (err) {
     logger.error("Error in migration scripts", err);
@@ -174,5 +164,5 @@ module.exports = {
   addApplication,
   updateApplication,
   getApplicationById,
-  migrateApplications,
+  addIsNewFieldMigration,
 };
