@@ -24,5 +24,6 @@ router.patch(
   applicationValidator.validateApplicationUpdateData,
   applications.updateApplication
 );
+router.post("/migrations/:action", authenticate, authorizeRoles([SUPERUSER]), applications.migrateApplications);
 
 module.exports = router;
