@@ -143,7 +143,6 @@ const addIsNewField = async () => {
   const summary = {
     totalApplicationsProcessed: 0,
     totalApplicationsUpdated: 0,
-    totalApplicationsSkipped: 0,
     totalOperationsFailed: 0,
     failedApplicationDetails: [],
   };
@@ -158,31 +157,22 @@ const addIsNewField = async () => {
 
       if (snapshot.empty) {
         isCompleted = true;
-        continue;
+        break;
       }
 
       const batch = firestore.batch();
-      const documentsToUpdate: string[] = [];
-      snapshot.forEach((doc) => {
-        const applicationData = doc.data();
-        if (applicationData.isNew === undefined) {
-          batch.update(doc.ref, { isNew: false });
-          documentsToUpdate.push(doc.id);
-        } else {
-          summary.totalApplicationsSkipped++;
-        }
-        summary.totalApplicationsProcessed++;
+      snapshot.docs.forEach((doc) => {
+        batch.update(doc.ref, { isNew: false });
       });
+      summary.totalApplicationsProcessed += snapshot.docs.length;
 
-      if (documentsToUpdate.length > 0) {
-        try {
-          await batch.commit();
-          summary.totalApplicationsUpdated += documentsToUpdate.length;
-        } catch (err) {
-          logger.error("Batch update failed for applications collection:", err);
-          summary.totalOperationsFailed += documentsToUpdate.length;
-          summary.failedApplicationDetails.push(...documentsToUpdate);
-        }
+      try {
+        await batch.commit();
+        summary.totalApplicationsUpdated += snapshot.docs.length;
+      } catch (err) {
+        logger.error("Batch update failed for applications collection:", err);
+        summary.totalOperationsFailed += snapshot.docs.length;
+        summary.failedApplicationDetails.push(...snapshot.docs.map((doc) => doc.id));
       }
 
       lastDoc = snapshot.docs[snapshot.docs.length - 1];
