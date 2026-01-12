@@ -160,21 +160,23 @@ const addIsNewField = async () => {
       }
 
       const batch = firestore.batch();
+      const documentsToUpdate: string[] = [];
       snapshot.forEach((doc) => {
         const applicationData = doc.data();
         if (applicationData.isNew === undefined) {
           batch.update(doc.ref, { isNew: false });
-          summary.totalApplicationsUpdated++;
+          documentsToUpdate.push(doc.id);
         }
         summary.totalApplicationsProcessed++;
       });
 
       try {
         await batch.commit();
+        summary.totalApplicationsUpdated += documentsToUpdate.length;
       } catch (err) {
         logger.error("Batch update failed for applications collection:", err);
-        summary.totalOperationsFailed += snapshot.docs.length;
-        summary.failedApplicationDetails.push(...snapshot.docs.map((doc) => doc.id));
+        summary.totalOperationsFailed += documentsToUpdate.length;
+        summary.failedApplicationDetails.push(...documentsToUpdate);
       }
 
       lastDoc = snapshot.docs[snapshot.docs.length - 1];
