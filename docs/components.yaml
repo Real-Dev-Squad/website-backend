@@ -1,0 +1,469 @@
+components:
+  schemas:
+    Recruiter:
+      type: object
+      properties:
+        company:
+          type: string
+          description: Company of the recruiter
+        first_name:
+          type: string
+          description: First name of the recruiter
+        last_name:
+          type: string
+          description: Last name of the recruiter
+        designation:
+          type: string
+          description: Designation of the recruiter
+        reason:
+          type: string
+          description: Reason for hiring
+        email:
+          type: string
+          description: Email of the recruiter
+        currency:
+          type: string
+          description: Currency of the recruiter
+        package:
+          type: number
+          description: Salary of the recruiter
+    Log:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Type of the log
+        timestamp:
+          type: object
+          description: Timestamp of the log
+          properties:
+            _seconds:
+              type: integer
+            _nanoseconds:
+              type: integer
+        meta:
+          type: object
+          description: Meta data of the log
+        body:
+          type: string
+          description: Body of the request
+    Auction:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the auction
+          example: 1234567890
+        item_type:
+          type: string
+          description: Type of the item
+          example: Car
+        quantity:
+          type: integer
+          description: Quantity of the item
+          example: 1
+        initial_price:
+          type: number
+          description: Initial price of the item
+          example: 1000
+        end_time:
+          type: number
+          description: End time of the auction
+          example: 1620000000
+    AuctionInput:
+      type: object
+      properties:
+        item_type:
+          type: string
+          description: Type of the item
+          example: Car
+        quantity:
+          type: integer
+          description: Quantity of the item
+          example: 1
+        initial_price:
+          type: number
+          description: Initial price of the item
+          example: 1000
+        end_time:
+          type: number
+          description: End time of the auction
+          example: 1620000000
+    Art:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the art
+          example: 1234567890
+        title:
+          type: string
+          description: Title of the art
+          example: Mona Lisa
+        price:
+          type: number
+          description: Price of the art
+          example: 1000000
+        css:
+          type: string
+          description: CSS of the art
+          example: https://example.com/mona-lisa.css
+        userId:
+          type: string
+          description: ID of the user
+          example: 1234567890
+    QrCodeAuth:
+      type: object
+      properties:
+        device_id:
+          type: string
+          description: The device ID
+          example: 123456789
+        user_id:
+          type: string
+          description: The user ID
+          example: 123456789
+        device_info:
+          type: string
+          description: The device information
+          example: Windows 10, Chrome 91.0.4472.124
+        authorization_status:
+          type: string
+          description: The authorization status
+          example: authorized
+    Badge:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the badge
+          example: 1234567890
+        name:
+          type: string
+          description: Name of the badge
+          example: Bronze
+        description:
+          type: string
+          description: Description of the badge
+          example: Bronze badge
+        imageUrl:
+          type: string
+          description: Image of the badge
+          example: https://example.com/bronze.png
+        createdBy:
+          type: string
+          description: ID of the user who created the badge
+          example: 1234567890
+        createdAt:
+          type: object
+          properties:
+            _seconds:
+              type: string
+              description: Date of the badge creation
+              example: 2021-01-01
+            _nanoseconds:
+              type: string
+              description: Time of the badge creation
+              example: 12:00:00
+    Challenge:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the challenge
+          example: 1234567890
+        participants:
+          type: array
+          description: Participants of the challenge
+          items:
+            type: string
+            example: 1234567890
+        title:
+          type: string
+          description: Title of the challenge
+          example: Challenge 1
+        level:
+          type: string
+          description: Level of the challenge
+          example: Easy
+        start_date:
+          type: object
+          properties:
+            _seconds:
+              type: string
+              description: Date of the challenge start
+              example: 2021-01-01
+            _nanoseconds:
+              type: string
+              description: Time of the challenge start
+              example: 12:00:00
+        end_date:
+          type: object
+          properties:
+            _seconds:
+              type: string
+              description: Date of the challenge start
+              example: 2021-01-01
+            _nanoseconds:
+              type: string
+              description: Time of the challenge start
+              example: 12:00:00
+        is_active:
+          type: boolean
+          desciption: Is the challenge active
+          example: true
+    Contributions:
+      type: object
+      description: Represents contributions made, categorized into noteworthy and all contributions.
+      properties:
+        noteworthy:
+          type: array
+          description: List of noteworthy tasks and associated pull requests.
+          items:
+            type: object
+            properties:
+              task:
+                type: object
+                description: Details of the specific task.
+                properties:
+                  title:
+                    type: string
+                    description: Title of the task.
+                  purpose:
+                    type: string
+                    description: The objective or purpose of the task.
+                  featureUrl:
+                    type: string
+                    description: URL to the feature or project this task is part of.
+                  endsOn:
+                    type: string
+                    description: End date of the task.
+                  startedOn:
+                    type: string
+                    description: Start date of the task.
+                  status:
+                    type: string
+                    description: Current status of the task.
+                  dependsOn:
+                    type: array
+                    description: List of dependencies required for this task.
+                    items:
+                      type: string
+                  participants:
+                    type: array
+                    description: List of participants involved in the task.
+                    items:
+                      type: object
+                      properties:
+                        firstname:
+                          type: string
+                          description: First name of the participant.
+                        lastname:
+                          type: string
+                          description: Last name of the participant.
+                        img:
+                          type: string
+                          description: URL to the participant's image.
+                        username:
+                          type: string
+                          description: Username of the participant.
+                  isNoteworthy:
+                    type: boolean
+                    description: Indicates whether the task is noteworthy.
+              prList:
+                type: array
+                description: List of pull requests related to the task.
+                items:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                      description: Title of the pull request.
+                    url:
+                      type: string
+                      description: URL of the pull request.
+                    state:
+                      type: string
+                      description: Current state of the pull request (e.g., open, closed).
+                    createdAt:
+                      type: string
+                      description: Creation date of the pull request.
+                    updatedAt:
+                      type: string
+                      description: Last update date of the pull request.
+                    raisedBy:
+                      type: string
+                      description: Username of the person who raised the pull request.
+        all:
+          type: array
+          description: List of all tasks and associated pull requests, not limited to noteworthy tasks.
+          items:
+            type: object
+            properties:
+              task:
+                type: object
+                description: Details of the specific task.
+                properties:
+                  title:
+                    type: string
+                    description: Title of the task.
+                  purpose:
+                    type: string
+                    description: The objective or purpose of the task.
+                  featureUrl:
+                    type: string
+                    description: URL to the feature or project this task is part of.
+                  endsOn:
+                    type: string
+                    description: End date of the task.
+                  startedOn:
+                    type: string
+                    description: Start date of the task.
+                  status:
+                    type: string
+                    description: Current status of the task.
+                  dependsOn:
+                    type: array
+                    description: List of dependencies required for this task.
+                    items:
+                      type: string
+                      description: A dependency required for this task.
+                  participants:
+                    type: array
+                    description: List of participants involved in the task.
+                    items:
+                      type: object
+                      properties:
+                        firstname:
+                          type: string
+                          description: First name of the participant.
+                        lastname:
+                          type: string
+                          description: Last name of the participant.
+                        img:
+                          type: string
+                          description: URL to the participant's image.
+                        username:
+                          type: string
+                          description: Username of the participant.
+                  isNoteworthy:
+                    type: boolean
+                    description: Indicates whether the task is noteworthy.
+              prList:
+                type: array
+                description: List of pull requests related to the task.
+                items:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                      description: Title of the pull request.
+                    url:
+                      type: string
+                      description: URL of the pull request.
+                    state:
+                      type: string
+                      description: Current state of the pull request (e.g., open, closed).
+                    createdAt:
+                      type: string
+                      description: Creation date of the pull request.
+                    updatedAt:
+                      type: string
+                      description: Last update date of the pull request.
+                    raisedBy:
+                      type: string
+                      description: Username of the person who raised the pull request.
+    PullRequests:
+      type: object
+      properties:
+        title:
+          type: string
+        url:
+          type: string
+        state:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+        readyForReview:
+          type: boolean
+        labels:
+          type: array
+          items: []
+        assignees:
+          type: array
+          items: []
+
+  responses:
+    400-BadRequest:
+      description: Bad Request
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: Bad Request
+        message:
+          type: string
+          example: Bad Request
+    401-Unauthorized:
+      description: Unauthorized
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 401
+        error:
+          type: string
+          example: Unauthorized
+        message:
+          type: string
+          example: Unauthenticated User
+    403-Forbidden:
+      description: Forbidden
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 403
+        error:
+          type: string
+          example: Forbidden
+        message:
+          type: string
+          example: Forbidden
+    404-NotFound:
+      description: Not Found
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 404
+        error:
+          type: string
+          example: Not Found
+        message:
+          type: string
+          example: Not Found
+    500-InternalServerError:
+      description: Internal Server Error
+      type: object
+      properties:
+        statusCode:
+          type: integer
+          example: 500
+        error:
+          type: string
+          example: Internal Server Error
+        message:
+          type: string
+          example: Internal Server Error
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

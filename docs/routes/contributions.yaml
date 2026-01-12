@@ -1,0 +1,32 @@
+paths:
+  /contributions/{username}:
+    get:
+      summary: Used to get all the contributions of user
+      tags:
+        - Contributions
+      parameters:
+        - in: path
+          name: username
+          schema:
+            type: string
+          required: true
+          description: username of user
+      responses:
+        200:
+          description: Return contributions
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/schemas/Contributions"
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/404-NotFound"
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "../components.yaml#/components/responses/500-InternalServerError"
