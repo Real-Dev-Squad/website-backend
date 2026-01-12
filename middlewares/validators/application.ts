@@ -2,10 +2,28 @@ import { NextFunction } from "express";
 import { CustomRequest, CustomResponse } from "../../types/global";
 import { customWordCountValidator } from "../../utils/customWordCountValidator";
 const joi = require("joi");
-const { APPLICATION_STATUS_TYPES } = require("../../constants/application");
+const { APPLICATION_STATUS_TYPES, APPLICATION_ROLES } = require("../../constants/application");
+const { phoneNumberRegex } = require("../../constants/subscription-validator");
 const logger = require("../../utils/logger");
 
 const validateApplicationData = async (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
+  if (req.body.socialLink?.phoneNo) {
+    req.body.socialLink.phoneNo = req.body.socialLink.phoneNo.trim();
+  }
+
+  const socialLinkSchema = joi
+    .object({
+      phoneNo: joi.string().optional().regex(phoneNumberRegex).message('"phoneNo" must be in a valid format'),
+      github: joi.string().min(1).optional(),
+      instagram: joi.string().min(1).optional(),
+      linkedin: joi.string().min(1).optional(),
+      twitter: joi.string().min(1).optional(),
+      peerlist: joi.string().min(1).optional(),
+      behance: joi.string().min(1).optional(),
+      dribbble: joi.string().min(1).optional(),
+    })
+    .optional();
+
   const schema = joi
     .object()
     .strict()
@@ -34,13 +52,19 @@ const validateApplicationData = async (req: CustomRequest, res: CustomResponse, 
         .required(),
       flowState: joi.string().optional(),
       numberOfHours: joi.number().min(1).max(100).required(),
+      role: joi
+        .string()
+        .valid(...Object.values(APPLICATION_ROLES))
+        .required(),
+      imageUrl: joi.string().uri().required(),
+      socialLink: socialLinkSchema,
     });
 
   try {
     await schema.validateAsync(req.body);
     next();
   } catch (error) {
-    logger.error(`Error in validating recruiter data: ${error}`);
+    logger.error(`Error in validating application data: ${error}`);
     res.boom.badRequest(error.details[0].message);
   }
 };
@@ -55,7 +79,7 @@ const validateApplicationUpdateData = async (req: CustomRequest, res: CustomResp
         .min(1)
         .optional()
         .custom((value, helper) => {
-          if (!APPLICATION_STATUS_TYPES.includes(value)) {
+          if (!Object.values(APPLICATION_STATUS_TYPES).includes(value)) {
             return helper.message("Status is not valid");
           }
           return value;
