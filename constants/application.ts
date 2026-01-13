@@ -15,20 +15,23 @@ const APPLICATION_ROLES = {
 };
 
 const API_RESPONSE_MESSAGES = {
-  APPLICATION_RETURN_SUCCESS: "Applications returned successfully",
   APPLICATION_CREATED_SUCCESS: "Application created successfully",
-  APPLICATION_UPDATED_SUCCESS: "Application updated successfully",
 };
 
 const APPLICATION_ERROR_MESSAGES = {
-  APPLICATION_ALREADY_REVIEWED: "Application has already been reviewed and cannot be modified",
-  APPLICATION_NOT_FOUND: "Application not found",
-  INVALID_ROLE: "Invalid role specified",
+  APPLICATION_ALREADY_REVIEWED: "Application has already been reviewed",
 };
+
+/**
+ * Business requirement: Applications created after this date are considered reviewed
+ * and cannot be resubmitted. This date marks the start of the new application review cycle.
+ */
+const APPLICATION_REVIEW_CYCLE_START_DATE = new Date("2026-01-01T00:00:00.000Z");
 
 module.exports = {
   APPLICATION_STATUS_TYPES,
   APPLICATION_ROLES,
   API_RESPONSE_MESSAGES,
   APPLICATION_ERROR_MESSAGES,
+  APPLICATION_REVIEW_CYCLE_START_DATE,
 };
