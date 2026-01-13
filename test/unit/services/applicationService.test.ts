@@ -201,10 +201,9 @@ describe("createApplicationService", () => {
       }
     });
 
-    it("should handle optional fields (imageUrl and socialLink) when not provided", async () => {
-      const payloadWithoutOptionalFields: applicationPayload = {
+    it("should handle optional field (socialLink) when not provided", async () => {
+      const payloadWithoutSocialLink: applicationPayload = {
         ...mockPayload,
-        imageUrl: undefined,
         socialLink: undefined,
       };
 
@@ -214,12 +213,12 @@ describe("createApplicationService", () => {
 
       await applicationService.createApplicationService({
         userId: mockUserId,
-        payload: payloadWithoutOptionalFields,
+        payload: payloadWithoutSocialLink,
       });
 
       const applicationData = addApplicationStub.getCall(0).args[0];
 
-      expect(applicationData).to.not.have.property("imageUrl");
+      expect(applicationData).to.have.property("imageUrl", mockPayload.imageUrl);
       expect(applicationData).to.not.have.property("socialLink");
       expect(applicationData.biodata.firstName).to.equal(mockPayload.firstName);
       expect(applicationData.foundFrom).to.equal(mockPayload.foundFrom);
