@@ -45,9 +45,7 @@ const transformPayloadToApplication = (payload: applicationPayload, userId: stri
     role: payload.role,
   };
 
-  if (payload.imageUrl) {
-    transformed.imageUrl = payload.imageUrl;
-  }
+  transformed.imageUrl = payload.imageUrl;
 
   if (payload.socialLink) {
     transformed.socialLink = payload.socialLink;

@@ -12,7 +12,6 @@ const { requestRoleData } = require("../fixtures/discordactions/discordactions")
 
 const applicationsData = require("../fixtures/applications/applications")();
 const cookieName = config.get("userToken.cookieName");
-const { getUserApplicationObject } = require("../../utils/application");
 
 const appOwner = userData[3];
 const superUser = userData[4];
