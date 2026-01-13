@@ -29,6 +29,9 @@ const addExternalAccountData = async (req, res) => {
       const developerRoleId = config.get("discordDeveloperRoleId");
       const newRoleId = config.get("discordNewRoleId");
 
+      // TODO: Temporary auto-assignment of Developer and New roles.
+      // This is a fire-and-forget implementation for quick rollout.
+      // Consider proper error handling and retry mechanism if this becomes permanent.
       (async () => {
         try {
           await addDiscordRoleUtils.addDiscordRoleToUser(attributes.discordId, developerRoleId, "Developer");
