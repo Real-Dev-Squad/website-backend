@@ -16,6 +16,7 @@ const APPLICATION_ROLES = {
 
 const API_RESPONSE_MESSAGES = {
   APPLICATION_CREATED_SUCCESS: "Application created successfully",
+  APPLICATION_RETURN_SUCCESS: "Applications returned successfully",
 };
 
 const APPLICATION_ERROR_MESSAGES = {
