@@ -20,6 +20,7 @@ module.exports = () => {
         numberOfHours: 20,
       },
       createdAt: null,
+      role: "developer",
     },
     {
       userId: "xyajkdfsfsd",
@@ -42,6 +43,7 @@ module.exports = () => {
         numberOfHours: 20,
       },
       createdAt: null,
+      role: "developer",
     },
     {
       college: "Groww",
@@ -65,6 +67,7 @@ module.exports = () => {
       numberOfHours: 20,
       status: "rejected",
       createdAt: null,
+      role: "developer",
     },
     {
       college: "Groww",
@@ -88,6 +91,7 @@ module.exports = () => {
       numberOfHours: 20,
       status: "rejected",
       createdAt: null,
+      role: "developer",
     },
     {
       college: "Groww",
@@ -111,6 +115,7 @@ module.exports = () => {
       numberOfHours: 20,
       status: "rejected",
       createdAt: null,
+      role: "developer",
     },
     {
       college: "Groww",
@@ -132,6 +137,7 @@ module.exports = () => {
         "mattis aliquam faucibus purus in massa tempor nec feugiat nisl pretium fusce id velit ut tortor pretium viverra suspendisse potenti nullam ac tortor vitae purus faucibus ornare suspendisse sed nisi lacus sed viverra tellus in hac habitasse platea dictumst vestibulum rhoncus est pellentesque elit ullamcorper dignissim cras tincidunt lobortis feugiat vivamus at augue eget arcu dictum varius duis at consectetur lorem donec massa sapien faucibus et molestie ac feugiat sed lectus vestibulum mattis ullamcorper velit sed ullamcorper morbi tincidunt ornare massa eget egestas purus viverra accumsan in nisl nisi scelerisque eu ultrices vitae auctor eu augue ut lectus arcu bibendum at",
       country: "India",
       numberOfHours: 20,
+      role: "developer",
     },
     {
       firstName: "vinayak",
@@ -151,6 +157,7 @@ module.exports = () => {
       whyRds:
         "mattis aliquam faucibus purus in massa tempor nec feugiat nisl pretium fusce id velit ut tortor pretium viverra suspendisse potenti nullam ac tortor vitae purus faucibus ornare suspendisse sed nisi lacus sed viverra tellus in hac habitasse platea dictumst vestibulum rhoncus est pellentesque elit ullamcorper dignissim cras tincidunt lobortis feugiat vivamus at augue eget arcu dictum varius duis at consectetur lorem donec massa sapien faucibus et molestie ac feugiat sed lectus vestibulum mattis ullamcorper velit sed ullamcorper morbi tincidunt ornare massa eget egestas purus viverra accumsan in nisl nisi scelerisque eu ultrices vitae auctor eu augue ut lectus arcu bibendum at",
       foundFrom: "twitter",
+      role: "developer",
     },
   ];
 };

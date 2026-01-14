@@ -20,6 +20,9 @@ module.exports = {
     rdsApi: {
       baseUrl: "https://staging-api.realdevsquad.com",
     },
+    rdsUi: {
+      newSignupUrl: "https://staging-www.realdevsquad.com/new-signup",
+    },
     goalAPI: {
       baseUrl: "https://staging-goals-api.realdevsquad.com",
       secretKey: "123456789",
