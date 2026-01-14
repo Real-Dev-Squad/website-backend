@@ -604,10 +604,11 @@ describe("External Accounts", function () {
       );
 
       expect(removeDiscordRoleStub.calledOnce).to.equal(true);
-      expect(removeDiscordRoleStub.firstCall.args[2]).to.equal("Unverified");
-      expect(addDiscordRoleStub.called).to.equal(true);
+      expect(removeDiscordRoleStub.firstCall.args[1]).to.equal(externalAccountData[2].attributes.discordId);
+      expect(addDiscordRoleStub.calledTwice).to.equal(false);
+      expect(addDiscordRoleStub.firstCall.args[0]).to.equal(externalAccountData[2].attributes.discordId);
       expect(addDiscordRoleStub.firstCall.args[2]).to.equal("Developer");
-      expect(addDiscordRoleStub.calledOnce).to.equal(true);
+      expect(addDiscordRoleStub.secondCall).to.equal(null);
 
       removeDiscordRoleStub.restore();
       addDiscordRoleStub.restore();
