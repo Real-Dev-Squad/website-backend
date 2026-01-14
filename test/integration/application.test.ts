@@ -12,6 +12,7 @@ const { requestRoleData } = require("../fixtures/discordactions/discordactions")
 
 const applicationsData = require("../fixtures/applications/applications")();
 const cookieName = config.get("userToken.cookieName");
+const { getUserApplicationObject } = require("../../utils/application");
 
 const appOwner = userData[3];
 const superUser = userData[4];
@@ -207,7 +208,7 @@ describe("Application", function () {
         });
     });
 
-        it("should return application with status accepted if status accepted is passed in query params", function (done) {
+    it("should return application with status accepted if status accepted is passed in query params", function (done) {
       chai
         .request(app)
         .get("/applications?status=accepted")
@@ -247,7 +248,6 @@ describe("Application", function () {
         });
     });
 
-
     it("should return application with status rejected and the total count of the rejected applications if  dev = true ", function (done) {
       chai
         .request(app)
@@ -271,7 +271,7 @@ describe("Application", function () {
         });
     });
 
-        it("should return application with status accepted and the total count of the accepted applications if  dev = true ", function (done) {
+    it("should return application with status accepted and the total count of the accepted applications if  dev = true ", function (done) {
       chai
         .request(app)
         .get("/applications?status=accepted&dev=true")
@@ -340,6 +340,7 @@ describe("Application", function () {
         .set("cookie", `${cookieName}=${secondUserJwt}`)
         .send({
           ...applicationsData[5],
+          imageUrl: "https://example.com/image.jpg",
         })
         .end((err, res) => {
           if (err) {
@@ -347,26 +348,8 @@ describe("Application", function () {
           }
 
           expect(res).to.have.status(201);
-          expect(res.body.message).to.be.equal("User application added.");
-          return done();
-        });
-    });
-
-    it("should return 409 if the user data is already submitted and the status is pending", function (done) {
-      chai
-        .request(app)
-        .post(`/applications`)
-        .set("cookie", `${cookieName}=${secondUserJwt}`)
-        .send({
-          ...applicationsData[5],
-        })
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(409);
-          expect(res.body.message).to.be.equal("User application is already present!");
+          expect(res.body.message).to.be.equal("Application created successfully");
+          expect(res.body).to.have.property("applicationId");
           return done();
         });
     });

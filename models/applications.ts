@@ -1,5 +1,6 @@
 import { application } from "../types/application";
 const firestore = require("../utils/firestore");
+const logger = require("../utils/logger");
 const ApplicationsModel = firestore.collection("applicants");
 const { DOCUMENT_WRITE_SIZE } = require("../constants/constants");
 
