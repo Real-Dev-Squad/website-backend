@@ -13,6 +13,7 @@ const { usersFromRds, getDiscordMembers } = require("../fixtures/discordResponse
 const Sinon = require("sinon");
 const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
 const removeDiscordRoleUtils = require("../../utils/removeDiscordRoleFromUser");
+const addDiscordRoleUtils = require("../../utils/addDiscordRoleToUser");
 const firestore = require("../../utils/firestore");
 const userData = require("../fixtures/user/user")();
 const userModel = firestore.collection("users");
@@ -526,7 +527,7 @@ describe("External Accounts", function () {
         });
     });
 
-    it("Should return 204 when valid action is provided", async function () {
+    it("Should return 204 when valid action is provided and assign Developer and New roles", async function () {
       await externalAccountsModel.addExternalAccountData(externalAccountData[2]);
       const getUserResponseBeforeUpdate = await chai
         .request(app)
@@ -543,13 +544,24 @@ describe("External Accounts", function () {
         message: "Role deleted successfully",
       });
 
+      const addDiscordRoleStub = Sinon.stub(addDiscordRoleUtils, "addDiscordRoleToUser").resolves({
+        success: true,
+        message: "Role added successfully",
+      });
+
       const response = await chai
         .request(app)
         .patch(`/external-accounts/link/${externalAccountData[2].token}`)
         .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
         .set("Cookie", `${cookieName}=${newUserJWT}`);
 
-      expect(response).to.have.status(204);
+      expect(response).to.have.status(200);
+      expect(response.body).to.have.property("message");
+      expect(response.body.message).to.equal("Your discord profile has been linked successfully");
+
+      expect(addDiscordRoleStub.calledTwice).to.equal(true);
+      expect(addDiscordRoleStub.firstCall.args[2]).to.equal("Developer");
+      expect(addDiscordRoleStub.secondCall.args[2]).to.equal("New");
 
       const updatedUserDetails = await chai
         .request(app)
@@ -561,6 +573,36 @@ describe("External Accounts", function () {
       expect(updatedUserDetails.body).to.have.property("discordJoinedAt");
 
       removeDiscordRoleStub.restore();
+      addDiscordRoleStub.restore();
+    });
+
+    it("Should return 500 when addDiscordRole fails after successful verification", async function () {
+      await externalAccountsModel.addExternalAccountData(externalAccountData[2]);
+
+      const removeDiscordRoleStub = Sinon.stub(removeDiscordRoleUtils, "removeDiscordRoleFromUser").resolves({
+        success: true,
+        message: "Role deleted successfully",
+      });
+
+      const addDiscordRoleStub = Sinon.stub(addDiscordRoleUtils, "addDiscordRoleToUser").rejects(
+        new Error("Role assignment failed")
+      );
+
+      const response = await chai
+        .request(app)
+        .patch(`/external-accounts/link/${externalAccountData[2].token}`)
+        .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
+        .set("Cookie", `${cookieName}=${newUserJWT}`);
+
+      expect(response).to.have.status(500);
+      expect(response.body).to.be.an("object");
+      expect(response.body).to.have.property("message");
+      expect(response.body.message).to.equal(
+        "Your discord profile has been linked but role assignment failed. Please contact admin"
+      );
+
+      removeDiscordRoleStub.restore();
+      addDiscordRoleStub.restore();
     });
 
     it("Should return 500 when removeDiscordRole fails because role doesn't exist", async function () {

@@ -24,23 +24,6 @@ const addExternalAccountData = async (req, res) => {
 
     await externalAccountsModel.addExternalAccountData(data);
 
-    const attributes = req.body.attributes;
-    if (attributes && attributes.discordId) {
-      const developerRoleId = config.get("discordDeveloperRoleId");
-      const newRoleId = config.get("discordNewRoleId");
-
-      // TODO: Temporary auto-assignment of Developer and New roles.
-      // Consider proper error handling and retry mechanism if this becomes permanent.
-      try {
-        await addDiscordRoleUtils.addDiscordRoleToUser(attributes.discordId, developerRoleId, "Developer");
-        await addDiscordRoleUtils.addDiscordRoleToUser(attributes.discordId, newRoleId, "New");
-
-        logger.info(`Roles (Developer, New) assigned automatically for Discord ID: ${attributes.discordId}`);
-      } catch (roleError) {
-        logger.error(`Error automating role assignment: ${roleError}`);
-      }
-    }
-
     return res.status(201).json({ message: "Added external account data successfully" });
   } catch (error) {
     logger.error(`Error adding data: ${error}`);
@@ -101,7 +84,20 @@ const linkExternalAccount = async (req, res) => {
       return res.boom.internal(message, { message });
     }
 
-    return res.status(204).json({ message: "Your discord profile has been linked successfully" });
+    const developerRoleId = config.get("discordDeveloperRoleId");
+    const newRoleId = config.get("discordNewRoleId");
+
+    try {
+      await addDiscordRoleUtils.addDiscordRoleToUser(attributes.discordId, developerRoleId, "Developer");
+      await addDiscordRoleUtils.addDiscordRoleToUser(attributes.discordId, newRoleId, "New");
+      logger.info(`Roles (Developer, New) assigned successfully for Discord ID: ${attributes.discordId}`);
+    } catch (roleError) {
+      logger.error(`Error assigning roles after verification: ${roleError}`);
+      const message = `Your discord profile has been linked but role assignment failed. Please contact admin`;
+      return res.boom.internal(message, { message });
+    }
+
+    return res.status(200).json({ message: "Your discord profile has been linked successfully" });
   } catch (error) {
     logger.error(`Error getting external account data: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
