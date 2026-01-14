@@ -2,6 +2,7 @@ import chai from "chai";
 import chaiHttp from "chai-http";
 const { expect } = chai;
 import config from "config";
+import sinon from "sinon";
 const app = require("../../server");
 const addUser = require("../utils/addUser");
 const cleanDb = require("../utils/cleanDb");
@@ -65,6 +66,7 @@ describe("Application", function () {
 
   after(async function () {
     await cleanDb();
+    sinon.restore();
   });
 
   describe("GET /applications", function () {
@@ -485,6 +487,136 @@ describe("Application", function () {
           expect(res.body.error).to.be.equal("Not Found");
           expect(res.body.message).to.be.equal("Application not found");
           return done();
+        });
+    });
+  });
+
+  describe("PATCH /applications/:applicationId/nudge", function () {
+    let nudgeApplicationId: string;
+
+    beforeEach(async function () {
+      const applicationData = { ...applicationsData[0], userId };
+      nudgeApplicationId = await applicationModel.addApplication(applicationData);
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+    });
+
+    it("should successfully nudge an application when user owns it and no previous nudge exists", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/${nudgeApplicationId}/nudge`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal("Application nudged successfully");
+          expect(res.body.nudgeCount).to.be.equal(1);
+          expect(res.body.lastNudgeAt).to.be.a("string");
+          done();
+        });
+    });
+
+    it("should successfully nudge an application when 24 hours have passed since last nudge", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/${nudgeApplicationId}/nudge`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          expect(res).to.have.status(200);
+          expect(res.body.nudgeCount).to.be.equal(1);
+
+          const twentyFiveHoursAgo = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString();
+          applicationModel.updateApplication({ lastNudgeAt: twentyFiveHoursAgo }, nudgeApplicationId).then(() => {
+            chai
+              .request(app)
+              .patch(`/applications/${nudgeApplicationId}/nudge`)
+              .set("cookie", `${cookieName}=${jwt}`)
+              .end(function (err, res) {
+                if (err) return done(err);
+
+                expect(res).to.have.status(200);
+                expect(res.body.message).to.be.equal("Application nudged successfully");
+                expect(res.body.nudgeCount).to.be.equal(2);
+                expect(res.body.lastNudgeAt).to.be.a("string");
+                done();
+              });
+          });
+        });
+    });
+
+    it("should return 404 if the application doesn't exist", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/non-existent-id/nudge`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          expect(res).to.have.status(404);
+          expect(res.body.error).to.be.equal("Not Found");
+          expect(res.body.message).to.be.equal("Application not found");
+          done();
+        });
+    });
+
+    it("should return 401 if user is not authenticated", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/${nudgeApplicationId}/nudge`)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          expect(res).to.have.status(401);
+          expect(res.body.error).to.be.equal("Unauthorized");
+          expect(res.body.message).to.be.equal("Unauthenticated User");
+          done();
+        });
+    });
+
+    it("should return 401 if user does not own the application", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/${nudgeApplicationId}/nudge`)
+        .set("cookie", `${cookieName}=${secondUserJwt}`)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          expect(res).to.have.status(401);
+          expect(res.body.error).to.be.equal("Unauthorized");
+          expect(res.body.message).to.be.equal("You are not authorized to nudge this application");
+          done();
+        });
+    });
+
+    it("should return 429 when trying to nudge within 24 hours", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/${nudgeApplicationId}/nudge`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          expect(res).to.have.status(200);
+
+          chai
+            .request(app)
+            .patch(`/applications/${nudgeApplicationId}/nudge`)
+            .set("cookie", `${cookieName}=${jwt}`)
+            .end(function (err, res) {
+              if (err) return done(err);
+
+              expect(res).to.have.status(429);
+              expect(res.body.error).to.be.equal("Too Many Requests");
+              expect(res.body.message).to.be.equal(
+                "Cannot nudge application. Please wait 24 hours since the last nudge."
+              );
+              done();
+            });
         });
     });
   });

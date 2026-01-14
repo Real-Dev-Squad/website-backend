@@ -179,7 +179,7 @@ const nudgeApplication = async (req: CustomRequest, res: CustomResponse) => {
       const lastNudgeTimestamp = new Date(lastNudgeAt).getTime();
       const timeDifference = currentTime - lastNudgeTimestamp;
 
-      if (timeDifference < twentyFourHoursInMilliseconds) {
+      if (timeDifference <= twentyFourHoursInMilliseconds) {
         return res.boom.tooManyRequests(APPLICATION_ERROR_MESSAGES.NUDGE_TOO_SOON);
       }
     }
