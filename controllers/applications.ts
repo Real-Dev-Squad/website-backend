@@ -164,21 +164,23 @@ const nudgeApplication = async (req: CustomRequest, res: CustomResponse) => {
   try {
     const { applicationId } = req.params;
     const application = await ApplicationModel.getApplicationById(applicationId);
-
     if (application.notFound) {
       return res.boom.notFound("Application not found");
+    }
+    if (req.userData.id !== application.userId) {
+      return res.boom.unauthorized("You are not authorized to nudge this application");
     }
 
     const currentTime = Date.now();
     const lastNudgeAt = application.lastNudgeAt;
-    const twentyFourHoursInMilliseconds = convertDaysToMilliseconds(1);
 
     if (lastNudgeAt) {
+      const twentyFourHoursInMilliseconds = convertDaysToMilliseconds(1);
       const lastNudgeTimestamp = new Date(lastNudgeAt).getTime();
       const timeDifference = currentTime - lastNudgeTimestamp;
 
       if (timeDifference < twentyFourHoursInMilliseconds) {
-        return res.boom.badRequest(APPLICATION_ERROR_MESSAGES.NUDGE_TOO_SOON);
+        return res.boom.tooManyRequests(APPLICATION_ERROR_MESSAGES.NUDGE_TOO_SOON);
       }
     }
 
