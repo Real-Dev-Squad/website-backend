@@ -560,7 +560,9 @@ describe("External Accounts", function () {
       expect(response.body.message).to.equal("Your discord profile has been linked successfully");
 
       expect(addDiscordRoleStub.calledTwice).to.equal(true);
+      expect(addDiscordRoleStub.firstCall.args[0]).to.equal(externalAccountData[2].attributes.discordId);
       expect(addDiscordRoleStub.firstCall.args[2]).to.equal("Developer");
+      expect(addDiscordRoleStub.secondCall.args[0]).to.equal(externalAccountData[2].attributes.discordId);
       expect(addDiscordRoleStub.secondCall.args[2]).to.equal("New");
 
       const updatedUserDetails = await chai
