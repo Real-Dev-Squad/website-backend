@@ -601,6 +601,9 @@ describe("External Accounts", function () {
         "Your discord profile has been linked but role assignment failed. Please contact admin"
       );
 
+      expect(removeDiscordRoleStub.calledOnce).to.equal(true);
+      expect(addDiscordRoleStub.called).to.equal(true);
+
       removeDiscordRoleStub.restore();
       addDiscordRoleStub.restore();
     });
