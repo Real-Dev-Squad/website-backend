@@ -30,5 +30,6 @@ router.post(
   authorizeRoles([SUPERUSER]),
   applications.addIsNewFieldMigration
 );
+router.patch("/:applicationId/nudge", authenticate, applications.nudgeApplication);
 
 module.exports = router;

@@ -17,10 +17,12 @@ const APPLICATION_ROLES = {
 const API_RESPONSE_MESSAGES = {
   APPLICATION_CREATED_SUCCESS: "Application created successfully",
   APPLICATION_RETURN_SUCCESS: "Applications returned successfully",
+  NUDGE_SUCCESS: "Application nudged successfully",
 };
 
 const APPLICATION_ERROR_MESSAGES = {
   APPLICATION_ALREADY_REVIEWED: "Application has already been reviewed",
+  NUDGE_TOO_SOON: "Cannot nudge application. Please wait 24 hours since the last nudge.",
 };
 
 /**

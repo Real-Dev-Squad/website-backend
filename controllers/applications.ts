@@ -3,10 +3,11 @@ const { logType } = require("../constants/logs");
 import { CustomRequest, CustomResponse } from "../types/global";
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const ApplicationModel = require("../models/applications");
-const { API_RESPONSE_MESSAGES } = require("../constants/application");
+const { API_RESPONSE_MESSAGES, APPLICATION_ERROR_MESSAGES } = require("../constants/application");
 const { createApplicationService } = require("../services/applicationService");
 const { Conflict } = require("http-errors");
 const logger = require("../utils/logger");
+const { convertDaysToMilliseconds } = require("../utils/time");
 
 const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse): Promise<any> => {
   try {
@@ -159,10 +160,55 @@ const addIsNewFieldMigration = async (req: CustomRequest, res: CustomResponse) =
   }
 };
 
+const nudgeApplication = async (req: CustomRequest, res: CustomResponse) => {
+  try {
+    const { applicationId } = req.params;
+    const application = await ApplicationModel.getApplicationById(applicationId);
+
+    if (application.notFound) {
+      return res.boom.notFound("Application not found");
+    }
+
+    const currentTime = Date.now();
+    const lastNudgeAt = application.lastNudgeAt;
+    const twentyFourHoursInMilliseconds = convertDaysToMilliseconds(1);
+
+    if (lastNudgeAt) {
+      const lastNudgeTimestamp = new Date(lastNudgeAt).getTime();
+      const timeDifference = currentTime - lastNudgeTimestamp;
+
+      if (timeDifference < twentyFourHoursInMilliseconds) {
+        return res.boom.badRequest(APPLICATION_ERROR_MESSAGES.NUDGE_TOO_SOON);
+      }
+    }
+
+    const currentNudgeCount = application.nudgeCount || 0;
+    const updatedNudgeCount = currentNudgeCount + 1;
+    const newLastNudgeAt = new Date().toISOString();
+
+    const updateData = {
+      nudgeCount: updatedNudgeCount,
+      lastNudgeAt: newLastNudgeAt,
+    };
+
+    await ApplicationModel.updateApplication(updateData, applicationId);
+
+    return res.json({
+      message: API_RESPONSE_MESSAGES.NUDGE_SUCCESS,
+      nudgeCount: updatedNudgeCount,
+      lastNudgeAt: newLastNudgeAt,
+    });
+  } catch (err) {
+    logger.error(`Error while nudging application: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   getAllOrUserApplication,
   addApplication,
   updateApplication,
   getApplicationById,
   addIsNewFieldMigration,
+  nudgeApplication,
 };
