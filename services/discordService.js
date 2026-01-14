@@ -1,6 +1,8 @@
 const firestore = require("../utils/firestore");
 const { fetchAllUsers } = require("../models/users");
 const { generateAuthTokenForCloudflare, generateCloudFlareHeaders } = require("../utils/discord-actions");
+const logger = require("../utils/logger");
+const config = require("config");
 const userModel = firestore.collection("users");
 const DISCORD_BASE_URL = config.get("services.discordBot.baseUrl");
 
