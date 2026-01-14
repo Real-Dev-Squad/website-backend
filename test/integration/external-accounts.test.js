@@ -604,7 +604,10 @@ describe("External Accounts", function () {
       );
 
       expect(removeDiscordRoleStub.calledOnce).to.equal(true);
+      expect(removeDiscordRoleStub.firstCall.args[2]).to.equal("Unverified");
       expect(addDiscordRoleStub.called).to.equal(true);
+      expect(addDiscordRoleStub.firstCall.args[2]).to.equal("Developer");
+      expect(addDiscordRoleStub.calledOnce).to.equal(true);
 
       removeDiscordRoleStub.restore();
       addDiscordRoleStub.restore();
