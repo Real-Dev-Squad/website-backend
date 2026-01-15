@@ -179,6 +179,7 @@ const nudgeApplication = async (req: CustomRequest, res: CustomResponse) => {
     const currentTime = Date.now();
     const lastNudgeAt = application.lastNudgeAt;
 
+    // Business requirement: Users can only nudge an application once per 24 hours
     if (lastNudgeAt) {
       const twentyFourHoursInMilliseconds = convertDaysToMilliseconds(1);
       const lastNudgeTimestamp = new Date(lastNudgeAt).getTime();
@@ -191,19 +192,18 @@ const nudgeApplication = async (req: CustomRequest, res: CustomResponse) => {
 
     const currentNudgeCount = application.nudgeCount || 0;
     const updatedNudgeCount = currentNudgeCount + 1;
-    const newLastNudgeAt = new Date().toISOString();
+    const newLastNudgeAt = new Date(currentTime).toISOString();
 
-    const updateData = {
+    const updatedData = {
       nudgeCount: updatedNudgeCount,
       lastNudgeAt: newLastNudgeAt,
     };
 
-    await ApplicationModel.updateApplication(updateData, applicationId);
+    await ApplicationModel.updateApplication(updatedData, applicationId);
 
     return res.json({
       message: API_RESPONSE_MESSAGES.NUDGE_SUCCESS,
-      nudgeCount: updatedNudgeCount,
-      lastNudgeAt: newLastNudgeAt,
+      ...updatedData,
     });
   } catch (err) {
     logger.error(`Error while nudging application: ${err}`);
