@@ -24,12 +24,6 @@ router.patch(
   applicationValidator.validateApplicationUpdateData,
   applications.updateApplication
 );
-router.post(
-  "/migrations/add-is-new-field",
-  authenticate,
-  authorizeRoles([SUPERUSER]),
-  applications.addIsNewFieldMigration
-);
 router.patch("/:applicationId/nudge", authenticate, applications.nudgeApplication);
 
 module.exports = router;
