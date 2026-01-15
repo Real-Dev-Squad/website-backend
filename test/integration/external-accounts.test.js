@@ -615,12 +615,17 @@ describe("External Accounts", function () {
       addDiscordRoleStub.restore();
     });
 
-    it("Should return 500 when removeDiscordRole fails because role doesn't exist", async function () {
+    it("Should continue with role assignment when removeDiscordRole fails because role doesn't exist (tolerable error)", async function () {
       await externalAccountsModel.addExternalAccountData(externalAccountData[2]);
 
       const removeDiscordRoleStub = Sinon.stub(removeDiscordRoleUtils, "removeDiscordRoleFromUser").resolves({
         success: false,
         message: "Role doesn't exist",
+      });
+
+      const addDiscordRoleStub = Sinon.stub(addDiscordRoleUtils, "addDiscordRoleToUser").resolves({
+        success: true,
+        message: "Role added successfully",
       });
 
       const response = await chai
@@ -629,16 +634,13 @@ describe("External Accounts", function () {
         .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
         .set("Cookie", `${cookieName}=${newUserJWT}`);
 
-      const unverifiedRoleRemovalResponse = await removeDiscordRoleStub();
-
-      expect(response).to.have.status(500);
+      expect(response).to.have.status(200);
       expect(response.body).to.be.an("object");
       expect(response.body).to.have.property("message");
-      expect(response.body.message).to.equal(
-        `User details updated but ${unverifiedRoleRemovalResponse.message}. Please contact admin`
-      );
+      expect(response.body.message).to.equal("Your discord profile has been linked successfully");
 
       removeDiscordRoleStub.restore();
+      addDiscordRoleStub.restore();
     });
 
     it("Should return 500 when removeDiscordRole fails because role deletion from discord failed", async function () {
@@ -667,12 +669,17 @@ describe("External Accounts", function () {
       removeDiscordRoleStub.restore();
     });
 
-    it("Should return 500 when removeDiscordRole fails because role deletion from database failed", async function () {
+    it("Should continue with role assignment when removeDiscordRole fails because role deletion from database failed (tolerable error)", async function () {
       await externalAccountsModel.addExternalAccountData(externalAccountData[2]);
 
       const removeDiscordRoleStub = Sinon.stub(removeDiscordRoleUtils, "removeDiscordRoleFromUser").resolves({
         success: false,
         message: "Role deletion from database failed",
+      });
+
+      const addDiscordRoleStub = Sinon.stub(addDiscordRoleUtils, "addDiscordRoleToUser").resolves({
+        success: true,
+        message: "Role added successfully",
       });
 
       const response = await chai
@@ -681,16 +688,13 @@ describe("External Accounts", function () {
         .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
         .set("Cookie", `${cookieName}=${newUserJWT}`);
 
-      const unverifiedRoleRemovalResponse = await removeDiscordRoleStub();
-
-      expect(response).to.have.status(500);
+      expect(response).to.have.status(200);
       expect(response.body).to.be.an("object");
       expect(response.body).to.have.property("message");
-      expect(response.body.message).to.equal(
-        `User details updated but ${unverifiedRoleRemovalResponse.message}. Please contact admin`
-      );
+      expect(response.body.message).to.equal("Your discord profile has been linked successfully");
 
       removeDiscordRoleStub.restore();
+      addDiscordRoleStub.restore();
     });
   });
 });
