@@ -136,62 +136,6 @@ const updateApplication = async (dataToUpdate: object, applicationId: string) =>
   }
 };
 
-const addIsNewField = async () => {
-  const batchSize = DOCUMENT_WRITE_SIZE;
-  let lastDoc = null;
-  let isCompleted = false;
-
-  const summary = {
-    totalApplicationsProcessed: 0,
-    totalApplicationsUpdated: 0,
-    totalOperationsFailed: 0,
-    failedApplicationDetails: [],
-  };
-
-  try {
-    while (!isCompleted) {
-      let query = ApplicationsModel.orderBy("createdAt", "desc").limit(batchSize);
-      if (lastDoc) {
-        query = query.startAfter(lastDoc);
-      }
-      const snapshot = await query.get();
-
-      if (snapshot.empty) {
-        isCompleted = true;
-        break;
-      }
-
-      const batch = firestore.batch();
-      snapshot.docs.forEach((doc) => {
-        batch.update(doc.ref, { isNew: false });
-      });
-      summary.totalApplicationsProcessed += snapshot.docs.length;
-
-      try {
-        await batch.commit();
-        summary.totalApplicationsUpdated += snapshot.docs.length;
-      } catch (err) {
-        logger.error("Batch update failed for applications collection:", err);
-        summary.totalOperationsFailed += snapshot.docs.length;
-        summary.failedApplicationDetails.push(...snapshot.docs.map((doc) => doc.id));
-      }
-
-      lastDoc = snapshot.docs[snapshot.docs.length - 1];
-      isCompleted = snapshot.docs.length < batchSize;
-    }
-
-    logger.info("Applications migration completed:", summary);
-    return {
-      documentsModified: summary.totalApplicationsUpdated,
-      totalDocuments: summary.totalApplicationsProcessed,
-      ...summary,
-    };
-  } catch (error) {
-    logger.error("Error during applications migration:", error);
-    throw error;
-  }
-};
-
 module.exports = {
   getAllApplications,
   getUserApplications,
@@ -199,5 +143,4 @@ module.exports = {
   updateApplication,
   getApplicationsBasedOnStatus,
   getApplicationById,
-  addIsNewField,
 };
