@@ -3,7 +3,11 @@ import sinon from "sinon";
 import { CustomRequest, CustomResponse } from "../../../types/global";
 const applicationsController = require("../../../controllers/applications");
 const ApplicationModel = require("../../../models/applications");
-const { API_RESPONSE_MESSAGES, APPLICATION_ERROR_MESSAGES } = require("../../../constants/application");
+const {
+  API_RESPONSE_MESSAGES,
+  APPLICATION_ERROR_MESSAGES,
+  APPLICATION_STATUS_TYPES,
+} = require("../../../constants/application");
 const { convertDaysToMilliseconds } = require("../../../utils/time");
 
 describe("nudgeApplication", () => {
@@ -13,6 +17,7 @@ describe("nudgeApplication", () => {
     boom: {
       notFound: sinon.SinonSpy;
       unauthorized: sinon.SinonSpy;
+      badRequest: sinon.SinonSpy;
       tooManyRequests: sinon.SinonSpy;
       badImplementation: sinon.SinonSpy;
     };
@@ -20,6 +25,7 @@ describe("nudgeApplication", () => {
   let jsonSpy: sinon.SinonSpy;
   let boomNotFound: sinon.SinonSpy;
   let boomUnauthorized: sinon.SinonSpy;
+  let boomBadRequest: sinon.SinonSpy;
   let boomTooManyRequests: sinon.SinonSpy;
   let boomBadImplementation: sinon.SinonSpy;
 
@@ -31,6 +37,7 @@ describe("nudgeApplication", () => {
     jsonSpy = sinon.spy();
     boomNotFound = sinon.spy();
     boomUnauthorized = sinon.spy();
+    boomBadRequest = sinon.spy();
     boomTooManyRequests = sinon.spy();
     boomBadImplementation = sinon.spy();
 
@@ -49,6 +56,7 @@ describe("nudgeApplication", () => {
       boom: {
         notFound: boomNotFound,
         unauthorized: boomUnauthorized,
+        badRequest: boomBadRequest,
         tooManyRequests: boomTooManyRequests,
         badImplementation: boomBadImplementation,
       },
@@ -65,6 +73,7 @@ describe("nudgeApplication", () => {
         id: mockApplicationId,
         userId: mockUserId,
         notFound: false,
+        status: APPLICATION_STATUS_TYPES.PENDING,
         lastNudgeAt: null,
         nudgeCount: 0,
       };
@@ -95,6 +104,7 @@ describe("nudgeApplication", () => {
         id: mockApplicationId,
         userId: mockUserId,
         notFound: false,
+        status: APPLICATION_STATUS_TYPES.PENDING,
         lastNudgeAt: twentyFourHoursAgo,
         nudgeCount: 2,
       };
@@ -122,6 +132,7 @@ describe("nudgeApplication", () => {
         id: mockApplicationId,
         userId: mockUserId,
         notFound: false,
+        status: APPLICATION_STATUS_TYPES.PENDING,
         lastNudgeAt: null,
         nudgeCount: undefined,
       };
@@ -175,6 +186,7 @@ describe("nudgeApplication", () => {
         id: mockApplicationId,
         userId: mockUserId,
         notFound: false,
+        status: APPLICATION_STATUS_TYPES.PENDING,
         lastNudgeAt: oneHourAgo,
         nudgeCount: 1,
       };
@@ -194,6 +206,7 @@ describe("nudgeApplication", () => {
         id: mockApplicationId,
         userId: mockUserId,
         notFound: false,
+        status: APPLICATION_STATUS_TYPES.PENDING,
         lastNudgeAt: exactlyTwentyFourHoursAgo,
         nudgeCount: 1,
       };
@@ -204,6 +217,25 @@ describe("nudgeApplication", () => {
 
       expect(boomTooManyRequests.calledOnce).to.be.true;
       expect(boomTooManyRequests.firstCall.args[0]).to.equal(APPLICATION_ERROR_MESSAGES.NUDGE_TOO_SOON);
+      expect(jsonSpy.notCalled).to.be.true;
+    });
+
+    it("should return 400 when trying to nudge an application that is not in pending status", async () => {
+      const mockApplication = {
+        id: mockApplicationId,
+        userId: mockUserId,
+        notFound: false,
+        status: APPLICATION_STATUS_TYPES.ACCEPTED,
+        lastNudgeAt: null,
+        nudgeCount: 0,
+      };
+
+      sinon.stub(ApplicationModel, "getApplicationById").resolves(mockApplication);
+
+      await applicationsController.nudgeApplication(req as CustomRequest, res as CustomResponse);
+
+      expect(boomBadRequest.calledOnce).to.be.true;
+      expect(boomBadRequest.firstCall.args[0]).to.equal(APPLICATION_ERROR_MESSAGES.APPLICATION_NOT_PENDING);
       expect(jsonSpy.notCalled).to.be.true;
     });
   });

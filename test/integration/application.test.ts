@@ -503,7 +503,7 @@ describe("Application", function () {
       sinon.restore();
     });
 
-    it("should successfully nudge an application when user owns it and no previous nudge exists", function (done) {
+    it("should successfully nudge a pending application when user owns it and no previous nudge exists", function (done) {
       chai
         .request(app)
         .patch(`/applications/${nudgeApplicationId}/nudge`)
@@ -618,6 +618,26 @@ describe("Application", function () {
               done();
             });
         });
+    });
+
+    it("should return 400 when trying to nudge an application that is not in pending status", function (done) {
+      const nonPendingApplicationData = { ...applicationsData[1], userId };
+      applicationModel.addApplication(nonPendingApplicationData).then((nonPendingApplicationId: string) => {
+        chai
+          .request(app)
+          .patch(`/applications/${nonPendingApplicationId}/nudge`)
+          .set("cookie", `${cookieName}=${jwt}`)
+          .end(function (err, res) {
+            if (err) return done(err);
+
+            expect(res).to.have.status(400);
+            expect(res.body.error).to.be.equal("Bad Request");
+            expect(res.body.message).to.be.equal(
+              "Application is not pending. You can only nudge pending applications."
+            );
+            done();
+          });
+      });
     });
   });
 });
