@@ -2,7 +2,6 @@ import firestore from "../utils/firestore";
 const logsModel = firestore.collection("logs");
 import admin from "firebase-admin";
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const logger = require("../utils/logger");
 
 interface LogMeta {
   userId?: string;
@@ -20,7 +19,11 @@ interface LogBody {
  * @param meta { LogMeta }: Meta data of the log
  * @param body { LogBody }: Body of the log
  */
-export const addLog = async (type: string, meta: LogMeta, body: LogBody): Promise<FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>> => {
+export const addLog = async (
+  type: string,
+  meta: LogMeta,
+  body: LogBody
+): Promise<FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>> => {
   try {
     const log = {
       type,
