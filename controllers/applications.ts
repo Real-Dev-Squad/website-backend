@@ -151,16 +151,6 @@ const getApplicationById = async (req: CustomRequest, res: CustomResponse) => {
   }
 };
 
-const addIsNewFieldMigration = async (req: CustomRequest, res: CustomResponse) => {
-  try {
-    const responseData = await ApplicationModel.addIsNewField();
-    return res.json({ message: "Applications migration successful", ...responseData });
-  } catch (err) {
-    logger.error("Error in migration scripts", err);
-    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
-  }
-};
-
 const nudgeApplication = async (req: CustomRequest, res: CustomResponse) => {
   try {
     const { applicationId } = req.params;
@@ -216,6 +206,5 @@ module.exports = {
   addApplication,
   updateApplication,
   getApplicationById,
-  addIsNewFieldMigration,
   nudgeApplication,
 };
