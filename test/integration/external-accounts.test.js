@@ -605,7 +605,7 @@ describe("External Accounts", function () {
 
       expect(removeDiscordRoleStub.calledOnce).to.equal(true);
       expect(removeDiscordRoleStub.firstCall.args[1]).to.equal(externalAccountData[2].attributes.discordId);
-      expect(removeDiscordRoleStub.firstCall.args[2]).to.equal("Unverified");
+      expect(removeDiscordRoleStub.firstCall.args[2]).to.equal(config.get("discordUnverifiedRoleId"));
       expect(addDiscordRoleStub.calledTwice).to.not.equal(true);
       expect(addDiscordRoleStub.firstCall.args[0]).to.equal(externalAccountData[2].attributes.discordId);
       expect(addDiscordRoleStub.firstCall.args[2]).to.equal("Developer");
