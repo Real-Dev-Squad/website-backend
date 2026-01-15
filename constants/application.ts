@@ -23,6 +23,7 @@ const API_RESPONSE_MESSAGES = {
 const APPLICATION_ERROR_MESSAGES = {
   APPLICATION_ALREADY_REVIEWED: "Application has already been reviewed",
   NUDGE_TOO_SOON: "Cannot nudge application. Please wait 24 hours since the last nudge.",
+  APPLICATION_NOT_PENDING: "Application is not pending. You can only nudge pending applications.",
 };
 
 /**
