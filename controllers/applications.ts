@@ -8,6 +8,7 @@ const { createApplicationService } = require("../services/applicationService");
 const { Conflict } = require("http-errors");
 const logger = require("../utils/logger");
 const { convertDaysToMilliseconds } = require("../utils/time");
+const { APPLICATION_STATUS_TYPES } = require("../constants/application");
 
 const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse): Promise<any> => {
   try {
@@ -171,6 +172,10 @@ const nudgeApplication = async (req: CustomRequest, res: CustomResponse) => {
       return res.boom.unauthorized("You are not authorized to nudge this application");
     }
 
+    if (application.status !== APPLICATION_STATUS_TYPES.PENDING) {
+      return res.boom.badRequest(APPLICATION_ERROR_MESSAGES.APPLICATION_NOT_PENDING);
+    }
+
     const currentTime = Date.now();
     const lastNudgeAt = application.lastNudgeAt;
 
@@ -179,7 +184,7 @@ const nudgeApplication = async (req: CustomRequest, res: CustomResponse) => {
       const lastNudgeTimestamp = new Date(lastNudgeAt).getTime();
       const timeDifference = currentTime - lastNudgeTimestamp;
 
-      if (timeDifference < twentyFourHoursInMilliseconds) {
+      if (timeDifference <= twentyFourHoursInMilliseconds) {
         return res.boom.tooManyRequests(APPLICATION_ERROR_MESSAGES.NUDGE_TOO_SOON);
       }
     }
