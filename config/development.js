@@ -19,6 +19,7 @@ module.exports = {
 
     rdsUi: {
       baseUrl: localUrl,
+      newSignupUrl: "https://staging-www.realdevsquad.com/new-signup",
       routes: {
         authRedirection: "/healthcheck",
       },

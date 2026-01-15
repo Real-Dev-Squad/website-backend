@@ -5,6 +5,7 @@ const { addOrUpdate, getUsersByRole, updateUsersInBatch } = require("../models/u
 const { retrieveDiscordUsers, fetchUsersForKeyValues } = require("../services/dataAccessLayer");
 const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../constants/external-accounts");
 const removeDiscordRoleUtils = require("../utils/removeDiscordRoleFromUser");
+const addDiscordRoleUtils = require("../utils/addDiscordRoleToUser");
 const config = require("config");
 const logger = require("../utils/logger");
 const { markUnDoneTasksOfArchivedUsersBacklog } = require("../models/tasks");
@@ -79,11 +80,33 @@ const linkExternalAccount = async (req, res) => {
     );
 
     if (!unverifiedRoleRemovalResponse.success) {
-      const message = `User details updated but ${unverifiedRoleRemovalResponse.message}. Please contact admin`;
+      // Tolerable errors that should not block role assignment
+      const tolerableErrors = ["Role doesn't exist", "Role deletion from database failed"];
+      const isTolerableError = tolerableErrors.some((err) => unverifiedRoleRemovalResponse.message.includes(err));
+
+      if (!isTolerableError) {
+        const message = `User details updated but ${unverifiedRoleRemovalResponse.message}. Please contact admin`;
+        return res.boom.internal(message, { message });
+      }
+      logger.info(
+        `Tolerable error during unverified role removal for Discord ID: ${attributes.discordId}: ${unverifiedRoleRemovalResponse.message}`
+      );
+    }
+
+    const developerRoleId = config.get("discordDeveloperRoleId");
+    const newRoleId = config.get("discordNewRoleId");
+
+    try {
+      await addDiscordRoleUtils.addDiscordRoleToUser(attributes.discordId, developerRoleId, "Developer");
+      await addDiscordRoleUtils.addDiscordRoleToUser(attributes.discordId, newRoleId, "New");
+      logger.info(`Roles (Developer, New) assigned successfully for Discord ID: ${attributes.discordId}`);
+    } catch (roleError) {
+      logger.error(`Error assigning roles after verification: ${roleError}`);
+      const message = `Your discord profile has been linked but role assignment failed. Please contact admin`;
       return res.boom.internal(message, { message });
     }
 
-    return res.status(204).json({ message: "Your discord profile has been linked successfully" });
+    return res.status(200).json({ message: "Your discord profile has been linked successfully" });
   } catch (error) {
     logger.error(`Error getting external account data: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
