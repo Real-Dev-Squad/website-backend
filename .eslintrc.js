@@ -29,6 +29,15 @@ module.exports = {
 
     // Prettier for formatting
     "prettier/prettier": "error",
+    // Import with extension
+    "import/extensions": [
+      "error",
+      {
+        pattern: {
+          json: "always",
+        },
+      },
+    ],
   },
   ignorePatterns: ["public/*", "dist/*"],
 };
