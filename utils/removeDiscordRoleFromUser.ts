@@ -4,6 +4,8 @@ import { addLog } from "../models/logs";
 import discordServices from "../services/discordService";
 import { userData } from "../types/global";
 
+const logger = require("./logger");
+
 /**
  * Removes a Discord role from a user using Discord Id.
  *
@@ -25,8 +27,8 @@ export const removeDiscordRoleFromUser = async (
       const message = "Role doesn't exist";
       await addLog(logType.REMOVE_ROLE_FROM_USER_FAILED, { roleId }, { message, userid: discordId, userData });
       throw new Error(message);
-    }
-
+    } 
+    
     try {
       await discordServices.removeRoleFromUser(roleId, discordId, userData);
     } catch (error) {
@@ -35,11 +37,16 @@ export const removeDiscordRoleFromUser = async (
       throw new Error(message);
     }
 
-    const deleteResponse = await discordActions.removeMemberGroup(roleId, discordId);
-    if (deleteResponse && !deleteResponse.wasSuccess) {
-      const message = "Role deletion from database failed";
-      await addLog(logType.REMOVE_ROLE_FROM_USER_FAILED, { roleId, userid: discordId }, { message, userData });
-      throw new Error(message);
+    const userDiscordRoles = await discordActions.getGroupRolesForUser(discordId);
+    const userHasUnverifiedRole = userDiscordRoles.groups.some((group: { roleId: string }) => group.roleId === roleId);
+
+    if (userHasUnverifiedRole) {
+      const deleteResponse = await discordActions.removeMemberGroup(roleId, discordId);
+      if (deleteResponse && !deleteResponse.wasSuccess) {
+        const message = "Role deletion from database failed";
+        await addLog(logType.REMOVE_ROLE_FROM_USER_FAILED, { roleId, userid: discordId }, { message, userData });
+        throw new Error(message);
+      }
     }
 
     await addLog(
