@@ -3,12 +3,7 @@ import sinon from "sinon";
 import { CustomRequest, CustomResponse } from "../../../types/global";
 const applicationsController = require("../../../controllers/applications");
 const ApplicationModel = require("../../../models/applications");
-const {
-  API_RESPONSE_MESSAGES,
-  APPLICATION_ERROR_MESSAGES,
-  APPLICATION_STATUS_TYPES,
-} = require("../../../constants/application");
-const { convertDaysToMilliseconds } = require("../../../utils/time");
+const { API_RESPONSE_MESSAGES, APPLICATION_ERROR_MESSAGES } = require("../../../constants/application");
 
 describe("nudgeApplication", () => {
   let req: Partial<CustomRequest>;
@@ -31,7 +26,6 @@ describe("nudgeApplication", () => {
 
   const mockApplicationId = "test-application-id-123";
   const mockUserId = "test-user-id-456";
-  const mockOtherUserId = "other-user-id-789";
 
   beforeEach(() => {
     jsonSpy = sinon.spy();
@@ -69,28 +63,21 @@ describe("nudgeApplication", () => {
 
   describe("Success cases", () => {
     it("should successfully nudge an application when no previous nudge exists", async () => {
-      const mockApplication = {
-        id: mockApplicationId,
-        userId: mockUserId,
-        notFound: false,
-        status: APPLICATION_STATUS_TYPES.PENDING,
-        lastNudgeAt: null,
-        nudgeCount: 0,
+      const mockResult = {
+        status: "success",
+        nudgeCount: 1,
+        lastNudgeAt: new Date().toISOString(),
       };
 
-      const getApplicationByIdStub = sinon.stub(ApplicationModel, "getApplicationById").resolves(mockApplication);
-      const updateApplicationStub = sinon.stub(ApplicationModel, "updateApplication").resolves();
+      const nudgeApplicationStub = sinon.stub(ApplicationModel, "nudgeApplication").resolves(mockResult);
 
       await applicationsController.nudgeApplication(req as CustomRequest, res as CustomResponse);
 
-      expect(getApplicationByIdStub.calledOnce).to.be.true;
-      expect(getApplicationByIdStub.calledWith(mockApplicationId)).to.be.true;
-      expect(updateApplicationStub.calledOnce).to.be.true;
-
-      const updateData = updateApplicationStub.firstCall.args[0];
-      expect(updateData.nudgeCount).to.equal(1);
-      expect(updateData.lastNudgeAt).to.be.a("string");
-      expect(new Date(updateData.lastNudgeAt).getTime()).to.be.closeTo(Date.now(), 1000);
+      expect(nudgeApplicationStub.calledOnce).to.be.true;
+      expect(nudgeApplicationStub.firstCall.args[0]).to.deep.equal({
+        applicationId: mockApplicationId,
+        userId: mockUserId,
+      });
 
       expect(jsonSpy.calledOnce).to.be.true;
       expect(jsonSpy.firstCall.args[0].message).to.equal(API_RESPONSE_MESSAGES.NUDGE_SUCCESS);
@@ -99,61 +86,51 @@ describe("nudgeApplication", () => {
     });
 
     it("should successfully nudge an application when 24 hours have passed since last nudge", async () => {
-      const twentyFourHoursAgo = new Date(Date.now() - convertDaysToMilliseconds(1) - 1000).toISOString();
-      const mockApplication = {
-        id: mockApplicationId,
-        userId: mockUserId,
-        notFound: false,
-        status: APPLICATION_STATUS_TYPES.PENDING,
-        lastNudgeAt: twentyFourHoursAgo,
-        nudgeCount: 2,
+      const mockResult = {
+        status: "success",
+        nudgeCount: 3,
+        lastNudgeAt: new Date().toISOString(),
       };
 
-      const getApplicationByIdStub = sinon.stub(ApplicationModel, "getApplicationById").resolves(mockApplication);
-      const updateApplicationStub = sinon.stub(ApplicationModel, "updateApplication").resolves();
+      const nudgeApplicationStub = sinon.stub(ApplicationModel, "nudgeApplication").resolves(mockResult);
 
       await applicationsController.nudgeApplication(req as CustomRequest, res as CustomResponse);
 
-      expect(getApplicationByIdStub.calledOnce).to.be.true;
-      expect(getApplicationByIdStub.calledWith(mockApplicationId)).to.be.true;
-      expect(updateApplicationStub.calledOnce).to.be.true;
-
-      const updateData = updateApplicationStub.firstCall.args[0];
-      expect(updateData.nudgeCount).to.equal(3);
-      expect(updateData.lastNudgeAt).to.be.a("string");
+      expect(nudgeApplicationStub.calledOnce).to.be.true;
+      expect(nudgeApplicationStub.firstCall.args[0]).to.deep.equal({
+        applicationId: mockApplicationId,
+        userId: mockUserId,
+      });
 
       expect(jsonSpy.calledOnce).to.be.true;
       expect(jsonSpy.firstCall.args[0].message).to.equal(API_RESPONSE_MESSAGES.NUDGE_SUCCESS);
       expect(jsonSpy.firstCall.args[0].nudgeCount).to.equal(3);
+      expect(jsonSpy.firstCall.args[0].lastNudgeAt).to.be.a("string");
     });
 
     it("should increment nudgeCount correctly when nudgeCount is undefined", async () => {
-      const mockApplication = {
-        id: mockApplicationId,
-        userId: mockUserId,
-        notFound: false,
-        status: APPLICATION_STATUS_TYPES.PENDING,
-        lastNudgeAt: null,
-        nudgeCount: undefined,
+      const mockResult = {
+        status: "success",
+        nudgeCount: 1,
+        lastNudgeAt: new Date().toISOString(),
       };
 
-      sinon.stub(ApplicationModel, "getApplicationById").resolves(mockApplication);
-      const updateApplicationStub = sinon.stub(ApplicationModel, "updateApplication").resolves();
+      sinon.stub(ApplicationModel, "nudgeApplication").resolves(mockResult);
 
       await applicationsController.nudgeApplication(req as CustomRequest, res as CustomResponse);
 
-      const updateData = updateApplicationStub.firstCall.args[0];
-      expect(updateData.nudgeCount).to.equal(1);
+      expect(jsonSpy.calledOnce).to.be.true;
+      expect(jsonSpy.firstCall.args[0].nudgeCount).to.equal(1);
     });
   });
 
   describe("Error cases", () => {
     it("should return 404 when application is not found", async () => {
-      const mockApplication = {
-        notFound: true,
+      const mockResult = {
+        status: "notFound",
       };
 
-      sinon.stub(ApplicationModel, "getApplicationById").resolves(mockApplication);
+      sinon.stub(ApplicationModel, "nudgeApplication").resolves(mockResult);
 
       await applicationsController.nudgeApplication(req as CustomRequest, res as CustomResponse);
 
@@ -163,15 +140,11 @@ describe("nudgeApplication", () => {
     });
 
     it("should return 401 when user is not authorized (not the owner)", async () => {
-      const mockApplication = {
-        id: mockApplicationId,
-        userId: mockOtherUserId,
-        notFound: false,
-        lastNudgeAt: null,
-        nudgeCount: 0,
+      const mockResult = {
+        status: "unauthorized",
       };
 
-      sinon.stub(ApplicationModel, "getApplicationById").resolves(mockApplication);
+      sinon.stub(ApplicationModel, "nudgeApplication").resolves(mockResult);
 
       await applicationsController.nudgeApplication(req as CustomRequest, res as CustomResponse);
 
@@ -181,17 +154,11 @@ describe("nudgeApplication", () => {
     });
 
     it("should return 429 when trying to nudge within 24 hours", async () => {
-      const oneHourAgo = new Date(Date.now() - convertDaysToMilliseconds(1) / 24).toISOString();
-      const mockApplication = {
-        id: mockApplicationId,
-        userId: mockUserId,
-        notFound: false,
-        status: APPLICATION_STATUS_TYPES.PENDING,
-        lastNudgeAt: oneHourAgo,
-        nudgeCount: 1,
+      const mockResult = {
+        status: "tooSoon",
       };
 
-      sinon.stub(ApplicationModel, "getApplicationById").resolves(mockApplication);
+      sinon.stub(ApplicationModel, "nudgeApplication").resolves(mockResult);
 
       await applicationsController.nudgeApplication(req as CustomRequest, res as CustomResponse);
 
@@ -201,17 +168,11 @@ describe("nudgeApplication", () => {
     });
 
     it("should return 429 when trying to nudge exactly at 24 hours", async () => {
-      const exactlyTwentyFourHoursAgo = new Date(Date.now() - convertDaysToMilliseconds(1)).toISOString();
-      const mockApplication = {
-        id: mockApplicationId,
-        userId: mockUserId,
-        notFound: false,
-        status: APPLICATION_STATUS_TYPES.PENDING,
-        lastNudgeAt: exactlyTwentyFourHoursAgo,
-        nudgeCount: 1,
+      const mockResult = {
+        status: "tooSoon",
       };
 
-      sinon.stub(ApplicationModel, "getApplicationById").resolves(mockApplication);
+      sinon.stub(ApplicationModel, "nudgeApplication").resolves(mockResult);
 
       await applicationsController.nudgeApplication(req as CustomRequest, res as CustomResponse);
 
@@ -221,21 +182,16 @@ describe("nudgeApplication", () => {
     });
 
     it("should return 400 when trying to nudge an application that is not in pending status", async () => {
-      const mockApplication = {
-        id: mockApplicationId,
-        userId: mockUserId,
-        notFound: false,
-        status: APPLICATION_STATUS_TYPES.ACCEPTED,
-        lastNudgeAt: null,
-        nudgeCount: 0,
+      const mockResult = {
+        status: "notPending",
       };
 
-      sinon.stub(ApplicationModel, "getApplicationById").resolves(mockApplication);
+      sinon.stub(ApplicationModel, "nudgeApplication").resolves(mockResult);
 
       await applicationsController.nudgeApplication(req as CustomRequest, res as CustomResponse);
 
       expect(boomBadRequest.calledOnce).to.be.true;
-      expect(boomBadRequest.firstCall.args[0]).to.equal(APPLICATION_ERROR_MESSAGES.APPLICATION_NOT_PENDING);
+      expect(boomBadRequest.firstCall.args[0]).to.equal(APPLICATION_ERROR_MESSAGES.NUDGE_ONLY_PENDING_ALLOWED);
       expect(jsonSpy.notCalled).to.be.true;
     });
   });

@@ -9,11 +9,10 @@ const cleanDb = require("../utils/cleanDb");
 const authService = require("../../services/authService");
 const userData = require("../fixtures/user/user")();
 const applicationModel = require("../../models/applications");
-const { requestRoleData } = require("../fixtures/discordactions/discordactions");
 
 const applicationsData = require("../fixtures/applications/applications")();
 const cookieName = config.get("userToken.cookieName");
-const { getUserApplicationObject } = require("../../utils/application");
+const { APPLICATION_ERROR_MESSAGES, API_RESPONSE_MESSAGES } = require("../../constants/application");
 
 const appOwner = userData[3];
 const superUser = userData[4];
@@ -512,7 +511,7 @@ describe("Application", function () {
           if (err) return done(err);
 
           expect(res).to.have.status(200);
-          expect(res.body.message).to.be.equal("Application nudged successfully");
+          expect(res.body.message).to.be.equal(API_RESPONSE_MESSAGES.NUDGE_SUCCESS);
           expect(res.body.nudgeCount).to.be.equal(1);
           expect(res.body.lastNudgeAt).to.be.a("string");
           done();
@@ -540,7 +539,7 @@ describe("Application", function () {
                 if (err) return done(err);
 
                 expect(res).to.have.status(200);
-                expect(res.body.message).to.be.equal("Application nudged successfully");
+                expect(res.body.message).to.be.equal(API_RESPONSE_MESSAGES.NUDGE_SUCCESS);
                 expect(res.body.nudgeCount).to.be.equal(2);
                 expect(res.body.lastNudgeAt).to.be.a("string");
                 done();
@@ -612,9 +611,7 @@ describe("Application", function () {
 
               expect(res).to.have.status(429);
               expect(res.body.error).to.be.equal("Too Many Requests");
-              expect(res.body.message).to.be.equal(
-                "Cannot nudge application. Please wait 24 hours since the last nudge."
-              );
+              expect(res.body.message).to.be.equal(APPLICATION_ERROR_MESSAGES.NUDGE_TOO_SOON);
               done();
             });
         });
@@ -632,9 +629,7 @@ describe("Application", function () {
 
             expect(res).to.have.status(400);
             expect(res.body.error).to.be.equal("Bad Request");
-            expect(res.body.message).to.be.equal(
-              "Application is not pending. You can only nudge pending applications."
-            );
+            expect(res.body.message).to.be.equal(APPLICATION_ERROR_MESSAGES.NUDGE_ONLY_PENDING_ALLOWED);
             done();
           });
       });

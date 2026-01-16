@@ -2,7 +2,8 @@ import { application } from "../types/application";
 const firestore = require("../utils/firestore");
 const logger = require("../utils/logger");
 const ApplicationsModel = firestore.collection("applicants");
-const { DOCUMENT_WRITE_SIZE } = require("../constants/constants");
+const { APPLICATION_STATUS_TYPES } = require("../constants/application");
+const { convertDaysToMilliseconds } = require("../utils/time");
 
 const getAllApplications = async (limit: number, lastDocId?: string) => {
   try {
@@ -136,6 +137,62 @@ const updateApplication = async (dataToUpdate: object, applicationId: string) =>
   }
 };
 
+const nudgeApplication = async ({ applicationId, userId }: { applicationId: string; userId: string }) => {
+  try {
+    const currentTime = Date.now();
+    const twentyFourHoursInMilliseconds = convertDaysToMilliseconds(1);
+
+    const result = await firestore.runTransaction(async (transaction) => {
+      const applicationRef = ApplicationsModel.doc(applicationId);
+      const applicationDoc = await transaction.get(applicationRef);
+
+      if (!applicationDoc.exists) {
+        return { status: "notFound" };
+      }
+
+      const application = applicationDoc.data();
+
+      if (application.userId !== userId) {
+        return { status: "unauthorized" };
+      }
+
+      if (application.status !== APPLICATION_STATUS_TYPES.PENDING) {
+        return { status: "notPending" };
+      }
+
+      const lastNudgeAt = application.lastNudgeAt;
+      if (lastNudgeAt) {
+        const lastNudgeTimestamp = new Date(lastNudgeAt).getTime();
+        const timeDifference = currentTime - lastNudgeTimestamp;
+
+        if (timeDifference <= twentyFourHoursInMilliseconds) {
+          return { status: "tooSoon" };
+        }
+      }
+
+      const currentNudgeCount = application.nudgeCount || 0;
+      const updatedNudgeCount = currentNudgeCount + 1;
+      const newLastNudgeAt = new Date(currentTime).toISOString();
+
+      transaction.update(applicationRef, {
+        nudgeCount: updatedNudgeCount,
+        lastNudgeAt: newLastNudgeAt,
+      });
+
+      return {
+        status: "success",
+        nudgeCount: updatedNudgeCount,
+        lastNudgeAt: newLastNudgeAt,
+      };
+    });
+
+    return result;
+  } catch (err) {
+    logger.error("Error while nudging application", err);
+    throw err;
+  }
+};
+
 module.exports = {
   getAllApplications,
   getUserApplications,
@@ -143,4 +200,5 @@ module.exports = {
   updateApplication,
   getApplicationsBasedOnStatus,
   getApplicationById,
+  nudgeApplication,
 };

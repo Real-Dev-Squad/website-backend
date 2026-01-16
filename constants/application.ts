@@ -17,13 +17,13 @@ const APPLICATION_ROLES = {
 const API_RESPONSE_MESSAGES = {
   APPLICATION_CREATED_SUCCESS: "Application created successfully",
   APPLICATION_RETURN_SUCCESS: "Applications returned successfully",
-  NUDGE_SUCCESS: "Application nudged successfully",
+  NUDGE_SUCCESS: "Nudge sent successfully",
 };
 
 const APPLICATION_ERROR_MESSAGES = {
   APPLICATION_ALREADY_REVIEWED: "Application has already been reviewed",
-  NUDGE_TOO_SOON: "Cannot nudge application. Please wait 24 hours since the last nudge.",
-  APPLICATION_NOT_PENDING: "Application is not pending. You can only nudge pending applications.",
+  NUDGE_TOO_SOON: "Nudge unavailable. You'll be able to nudge again after 24 hours.",
+  NUDGE_ONLY_PENDING_ALLOWED: "Nudge unavailable. Only pending applications can be nudged.",
 };
 
 /**
