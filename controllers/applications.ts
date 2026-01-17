@@ -3,7 +3,7 @@ const { logType } = require("../constants/logs");
 import { CustomRequest, CustomResponse } from "../types/global";
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const ApplicationModel = require("../models/applications");
-const { API_RESPONSE_MESSAGES, APPLICATION_ERROR_MESSAGES, APPLICATION_LOG_MESSAGES, NUDGE_APPLICATION_STATUS, FEEDBACK_APPLICATION_STATUS } = require("../constants/application");
+const { API_RESPONSE_MESSAGES, APPLICATION_ERROR_MESSAGES, APPLICATION_LOG_MESSAGES, APPLICATION_STATUS } = require("../constants/application");
 const { createApplicationService } = require("../services/applicationService");
 const { Conflict } = require("http-errors");
 const logger = require("../utils/logger");
@@ -144,9 +144,9 @@ const submitApplicationFeedback = async (req: CustomRequest, res: CustomResponse
     });
 
     switch (result.status) {
-      case FEEDBACK_APPLICATION_STATUS.notFound:
+      case APPLICATION_STATUS.notFound:
         return res.boom.notFound("Application not found");
-      case FEEDBACK_APPLICATION_STATUS.success:
+      case APPLICATION_STATUS.success:
         return res.json({
           message: API_RESPONSE_MESSAGES.FEEDBACK_SUBMITTED_SUCCESS,
         });
@@ -188,15 +188,15 @@ const nudgeApplication = async (req: CustomRequest, res: CustomResponse) => {
     });
 
     switch (result.status) {
-      case NUDGE_APPLICATION_STATUS.notFound:
+      case APPLICATION_STATUS.notFound:
         return res.boom.notFound("Application not found");
-      case NUDGE_APPLICATION_STATUS.unauthorized:
+      case APPLICATION_STATUS.unauthorized:
         return res.boom.unauthorized("You are not authorized to nudge this application");
-      case NUDGE_APPLICATION_STATUS.notPending:
+      case APPLICATION_STATUS.notPending:
         return res.boom.badRequest(APPLICATION_ERROR_MESSAGES.NUDGE_ONLY_PENDING_ALLOWED);
-      case NUDGE_APPLICATION_STATUS.tooSoon:
+      case APPLICATION_STATUS.tooSoon:
         return res.boom.tooManyRequests(APPLICATION_ERROR_MESSAGES.NUDGE_TOO_SOON);
-      case NUDGE_APPLICATION_STATUS.success:
+      case APPLICATION_STATUS.success:
         return res.json({
           message: API_RESPONSE_MESSAGES.NUDGE_SUCCESS,
           nudgeCount: result.nudgeCount,

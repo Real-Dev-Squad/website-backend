@@ -31,7 +31,7 @@ const APPLICATION_LOG_MESSAGES = {
   ERROR_SUBMITTING_FEEDBACK: "Error while submitting the application feedback",
 };
 
-const NUDGE_APPLICATION_STATUS = {
+const APPLICATION_STATUS = {
   notFound: "notFound",
   unauthorized: "unauthorized",
   notPending: "notPending",
@@ -52,5 +52,5 @@ module.exports = {
   APPLICATION_ERROR_MESSAGES,
   APPLICATION_LOG_MESSAGES,
   APPLICATION_REVIEW_CYCLE_START_DATE,
-  NUDGE_APPLICATION_STATUS
+  APPLICATION_STATUS
 };
