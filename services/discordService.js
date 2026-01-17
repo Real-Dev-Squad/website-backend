@@ -1,3 +1,5 @@
+const config = require("config");
+const logger = require("../utils/logger");
 const firestore = require("../utils/firestore");
 const { fetchAllUsers } = require("../models/users");
 const { generateAuthTokenForCloudflare, generateCloudFlareHeaders } = require("../utils/discord-actions");
@@ -60,14 +62,19 @@ const setInDiscordFalseScript = async () => {
 };
 
 const addRoleToUser = async (userid, roleid) => {
-  const authToken = generateAuthTokenForCloudflare();
-  const data = await fetch(`${DISCORD_BASE_URL}/roles/add`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
-    body: JSON.stringify({ userid, roleid }),
-  });
-  const response = await data.json();
-  return response;
+  try {
+    const authToken = generateAuthTokenForCloudflare();
+    const data = await fetch(`${DISCORD_BASE_URL}/roles/add`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({ userid, roleid }),
+    });
+    const response = await data.json();
+    return response;
+  } catch (error) {
+    logger.error(`Error adding role: ${error}`);
+    return { success: false, message: error.message };
+  }
 };
 
 const removeRoleFromUser = async (roleId, discordId, userData) => {

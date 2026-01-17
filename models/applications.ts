@@ -1,6 +1,9 @@
 import { application } from "../types/application";
 const firestore = require("../utils/firestore");
+const logger = require("../utils/logger");
 const ApplicationsModel = firestore.collection("applicants");
+const { APPLICATION_STATUS_TYPES, NUDGE_APPLICATION_STATUS } = require("../constants/application");
+const { convertDaysToMilliseconds } = require("../utils/time");
 
 const getAllApplications = async (limit: number, lastDocId?: string) => {
   try {
@@ -64,7 +67,7 @@ const getApplicationsBasedOnStatus = async (status: string, limit: number, lastD
       lastDoc = await ApplicationsModel.doc(lastDocId).get();
     }
 
-  dbQuery = dbQuery.orderBy("createdAt", "desc");
+    dbQuery = dbQuery.orderBy("createdAt", "desc");
 
     if (lastDoc) {
       dbQuery = dbQuery.startAfter(lastDoc);
@@ -97,9 +100,9 @@ const getUserApplications = async (userId: string) => {
   try {
     const applicationsResult = [];
     const applications = await ApplicationsModel.where("userId", "==", userId)
-    .orderBy("createdAt", "desc")
-    .limit(1)
-    .get();
+      .orderBy("createdAt", "desc")
+      .limit(1)
+      .get();
 
     applications.forEach((application) => {
       applicationsResult.push({
@@ -134,6 +137,57 @@ const updateApplication = async (dataToUpdate: object, applicationId: string) =>
   }
 };
 
+const nudgeApplication = async ({ applicationId, userId }: { applicationId: string; userId: string }) => {
+  const currentTime = Date.now();
+  const twentyFourHoursInMilliseconds = convertDaysToMilliseconds(1);
+
+  const result = await firestore.runTransaction(async (transaction) => {
+    const applicationRef = ApplicationsModel.doc(applicationId);
+    const applicationDoc = await transaction.get(applicationRef);
+
+    if (!applicationDoc.exists) {
+      return { status: NUDGE_APPLICATION_STATUS.notFound };
+    }
+
+    const application = applicationDoc.data();
+
+    if (application.userId !== userId) {
+      return { status: NUDGE_APPLICATION_STATUS.unauthorized };
+    }
+
+    if (application.status !== APPLICATION_STATUS_TYPES.PENDING) {
+      return { status: NUDGE_APPLICATION_STATUS.notPending };
+    }
+
+    const lastNudgeAt = application.lastNudgeAt;
+    if (lastNudgeAt) {
+      const lastNudgeTimestamp = new Date(lastNudgeAt).getTime();
+      const timeDifference = currentTime - lastNudgeTimestamp;
+
+      if (timeDifference <= twentyFourHoursInMilliseconds) {
+        return { status: NUDGE_APPLICATION_STATUS.tooSoon };
+      }
+    }
+
+    const currentNudgeCount = application.nudgeCount || 0;
+    const updatedNudgeCount = currentNudgeCount + 1;
+    const newLastNudgeAt = new Date(currentTime).toISOString();
+
+    transaction.update(applicationRef, {
+      nudgeCount: updatedNudgeCount,
+      lastNudgeAt: newLastNudgeAt,
+    });
+
+    return {
+      status: NUDGE_APPLICATION_STATUS.success,
+      nudgeCount: updatedNudgeCount,
+      lastNudgeAt: newLastNudgeAt,
+    };
+  });
+
+  return result;
+};
+
 module.exports = {
   getAllApplications,
   getUserApplications,
@@ -141,4 +195,5 @@ module.exports = {
   updateApplication,
   getApplicationsBasedOnStatus,
   getApplicationById,
+  nudgeApplication,
 };

@@ -13,6 +13,7 @@ module.exports = {
   enableConsoleLogs: false,
   discordUnverifiedRoleId: "<discordUnverifiedRoleId>",
   discordDeveloperRoleId: "<discordDeveloperRoleId>",
+  discordNewRoleId: "<discordNewRoleId>",
   discordMavenRoleId: "<discordMavenRoleId>",
   discordMissedUpdatesRoleId: "<discordMissedUpdatesRoleId>",
   githubApi: {
@@ -64,6 +65,7 @@ module.exports = {
 
     rdsUi: {
       baseUrl: "https://realdevsquad.com",
+      newSignupUrl: "https://www.realdevsquad.com/new-signup",
       routes: {
         authRedirection: "/goto",
       },

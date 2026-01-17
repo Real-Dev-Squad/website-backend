@@ -14,7 +14,7 @@ export const createOooStatusRequestValidator = async (
     .keys({
       from: joi
         .number()
-        .min(Date.now())
+        .min(new Date().setUTCHours(0, 0, 0, 0))
         .messages({
           "number.min": "from date must be greater than or equal to Today's date",
         })

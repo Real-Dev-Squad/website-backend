@@ -68,21 +68,20 @@ export const newOOOSchema = (request: oldOooStatusRequest) => ({
  * Transforms request responses based on request type and dev flag
  * @param {boolean} dev - Development flag to determine transformation logic
  */
-export const transformRequestResponse = (allRequests: (OooStatusRequest | oldOooStatusRequest)[], dev: boolean = false): (OooStatusRequest | oldOooStatusRequest)[] => {
+export const transformRequestResponse = (allRequests: (OooStatusRequest | oldOooStatusRequest)[]): (OooStatusRequest | oldOooStatusRequest)[] => {
   return allRequests.map(request => {
-    
+
     if (request.type !== REQUEST_TYPE.OOO) {
       return request;
     }
 
-    if (dev && 'status' in request) {
+    if ('status' in request) {
       return oldOOOSchema(request as OooStatusRequest);
     }
-    
-    if (!dev && 'state' in request) {
+    if ('state' in request) {
       return newOOOSchema(request as oldOooStatusRequest);
     }
-
     return request;
   });
+
 };

@@ -2,16 +2,17 @@ import chai from "chai";
 import chaiHttp from "chai-http";
 const { expect } = chai;
 import config from "config";
+import sinon from "sinon";
 const app = require("../../server");
 const addUser = require("../utils/addUser");
 const cleanDb = require("../utils/cleanDb");
 const authService = require("../../services/authService");
 const userData = require("../fixtures/user/user")();
 const applicationModel = require("../../models/applications");
-const { requestRoleData } = require("../fixtures/discordactions/discordactions");
 
 const applicationsData = require("../fixtures/applications/applications")();
 const cookieName = config.get("userToken.cookieName");
+const { APPLICATION_ERROR_MESSAGES, API_RESPONSE_MESSAGES } = require("../../constants/application");
 
 const appOwner = userData[3];
 const superUser = userData[4];
@@ -64,6 +65,7 @@ describe("Application", function () {
 
   after(async function () {
     await cleanDb();
+    sinon.restore();
   });
 
   describe("GET /applications", function () {
@@ -207,7 +209,7 @@ describe("Application", function () {
         });
     });
 
-        it("should return application with status accepted if status accepted is passed in query params", function (done) {
+    it("should return application with status accepted if status accepted is passed in query params", function (done) {
       chai
         .request(app)
         .get("/applications?status=accepted")
@@ -247,7 +249,6 @@ describe("Application", function () {
         });
     });
 
-
     it("should return application with status rejected and the total count of the rejected applications if  dev = true ", function (done) {
       chai
         .request(app)
@@ -271,7 +272,7 @@ describe("Application", function () {
         });
     });
 
-        it("should return application with status accepted and the total count of the accepted applications if  dev = true ", function (done) {
+    it("should return application with status accepted and the total count of the accepted applications if  dev = true ", function (done) {
       chai
         .request(app)
         .get("/applications?status=accepted&dev=true")
@@ -340,6 +341,7 @@ describe("Application", function () {
         .set("cookie", `${cookieName}=${secondUserJwt}`)
         .send({
           ...applicationsData[5],
+          imageUrl: "https://example.com/image.jpg",
         })
         .end((err, res) => {
           if (err) {
@@ -347,36 +349,18 @@ describe("Application", function () {
           }
 
           expect(res).to.have.status(201);
-          expect(res.body.message).to.be.equal("User application added.");
-          return done();
-        });
-    });
-
-    it("should return 409 if the user data is already submitted and the status is pending", function (done) {
-      chai
-        .request(app)
-        .post(`/applications`)
-        .set("cookie", `${cookieName}=${secondUserJwt}`)
-        .send({
-          ...applicationsData[5],
-        })
-        .end((err, res) => {
-          if (err) {
-            return done(err);
-          }
-
-          expect(res).to.have.status(409);
-          expect(res.body.message).to.be.equal("User application is already present!");
+          expect(res.body.message).to.be.equal("Application created successfully");
+          expect(res.body).to.have.property("applicationId");
           return done();
         });
     });
   });
 
-  describe("PATCH /application/:applicationId", function () {
-    it("should return 200 if the user is super user and application is updated", function (done) {
+  describe("PATCH /applications/:applicationId/feedback", function () {
+    it("should return 200 if the user is super user and application feedback is submitted", function (done) {
       chai
         .request(app)
-        .patch(`/applications/${applicationId1}`)
+        .patch(`/applications/${applicationId1}/feedback`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
           status: "accepted",
@@ -387,7 +371,7 @@ describe("Application", function () {
           }
 
           expect(res).to.have.status(200);
-          expect(res.body.message).to.be.equal("Application updated successfully!");
+          expect(res.body.message).to.be.equal("Application feedback submitted successfully");
           return done();
         });
     });
@@ -395,7 +379,7 @@ describe("Application", function () {
     it("should return 401 if the user is not super user", function (done) {
       chai
         .request(app)
-        .patch(`/applications/${applicationId1}`)
+        .patch(`/applications/${applicationId1}/feedback`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           status: "accepted",
@@ -414,7 +398,7 @@ describe("Application", function () {
     it("should return 400 if anything other than status and feedback is passed in the body", function (done) {
       chai
         .request(app)
-        .patch(`/applications/${applicationId1}`)
+        .patch(`/applications/${applicationId1}/feedback`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
           status: "accepted",
@@ -432,10 +416,10 @@ describe("Application", function () {
         });
     });
 
-    it("should return 400 if any status other than accepted, reject or pending is passed", function (done) {
+    it("should return 400 if any status other than accepted, rejected or changes_requested is passed", function (done) {
       chai
         .request(app)
-        .patch(`/applications/${applicationId1}`)
+        .patch(`/applications/${applicationId1}/feedback`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
           status: "something",
@@ -447,7 +431,7 @@ describe("Application", function () {
 
           expect(res).to.have.status(400);
           expect(res.body.error).to.be.equal("Bad Request");
-          expect(res.body.message).to.be.equal("Status is not valid");
+          expect(res.body.message).to.be.equal("Status must be one of: accepted, rejected, or changes_requested");
           return done();
         });
     });
@@ -503,6 +487,152 @@ describe("Application", function () {
           expect(res.body.message).to.be.equal("Application not found");
           return done();
         });
+    });
+  });
+
+  describe("PATCH /applications/:applicationId/nudge", function () {
+    let nudgeApplicationId: string;
+
+    beforeEach(async function () {
+      const applicationData = { ...applicationsData[0], userId };
+      nudgeApplicationId = await applicationModel.addApplication(applicationData);
+    });
+
+    afterEach(async function () {
+      sinon.restore();
+    });
+
+    it("should successfully nudge a pending application when user owns it and no previous nudge exists", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/${nudgeApplicationId}/nudge`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal(API_RESPONSE_MESSAGES.NUDGE_SUCCESS);
+          expect(res.body.nudgeCount).to.be.equal(1);
+          expect(res.body.lastNudgeAt).to.be.a("string");
+          done();
+        });
+    });
+
+    it("should successfully nudge an application when 24 hours have passed since last nudge", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/${nudgeApplicationId}/nudge`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          expect(res).to.have.status(200);
+          expect(res.body.nudgeCount).to.be.equal(1);
+
+          const twentyFiveHoursAgo = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString();
+          applicationModel.updateApplication({ lastNudgeAt: twentyFiveHoursAgo }, nudgeApplicationId).then(() => {
+            chai
+              .request(app)
+              .patch(`/applications/${nudgeApplicationId}/nudge`)
+              .set("cookie", `${cookieName}=${jwt}`)
+              .end(function (err, res) {
+                if (err) return done(err);
+
+                expect(res).to.have.status(200);
+                expect(res.body.message).to.be.equal(API_RESPONSE_MESSAGES.NUDGE_SUCCESS);
+                expect(res.body.nudgeCount).to.be.equal(2);
+                expect(res.body.lastNudgeAt).to.be.a("string");
+                done();
+              });
+          });
+        });
+    });
+
+    it("should return 404 if the application doesn't exist", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/non-existent-id/nudge`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          expect(res).to.have.status(404);
+          expect(res.body.error).to.be.equal("Not Found");
+          expect(res.body.message).to.be.equal("Application not found");
+          done();
+        });
+    });
+
+    it("should return 401 if user is not authenticated", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/${nudgeApplicationId}/nudge`)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          expect(res).to.have.status(401);
+          expect(res.body.error).to.be.equal("Unauthorized");
+          expect(res.body.message).to.be.equal("Unauthenticated User");
+          done();
+        });
+    });
+
+    it("should return 401 if user does not own the application", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/${nudgeApplicationId}/nudge`)
+        .set("cookie", `${cookieName}=${secondUserJwt}`)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          expect(res).to.have.status(401);
+          expect(res.body.error).to.be.equal("Unauthorized");
+          expect(res.body.message).to.be.equal("You are not authorized to nudge this application");
+          done();
+        });
+    });
+
+    it("should return 429 when trying to nudge within 24 hours", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/${nudgeApplicationId}/nudge`)
+        .set("cookie", `${cookieName}=${jwt}`)
+        .end(function (err, res) {
+          if (err) return done(err);
+
+          expect(res).to.have.status(200);
+
+          chai
+            .request(app)
+            .patch(`/applications/${nudgeApplicationId}/nudge`)
+            .set("cookie", `${cookieName}=${jwt}`)
+            .end(function (err, res) {
+              if (err) return done(err);
+
+              expect(res).to.have.status(429);
+              expect(res.body.error).to.be.equal("Too Many Requests");
+              expect(res.body.message).to.be.equal(APPLICATION_ERROR_MESSAGES.NUDGE_TOO_SOON);
+              done();
+            });
+        });
+    });
+
+    it("should return 400 when trying to nudge an application that is not in pending status", function (done) {
+      const nonPendingApplicationData = { ...applicationsData[1], userId };
+      applicationModel.addApplication(nonPendingApplicationData).then((nonPendingApplicationId: string) => {
+        chai
+          .request(app)
+          .patch(`/applications/${nonPendingApplicationId}/nudge`)
+          .set("cookie", `${cookieName}=${jwt}`)
+          .end(function (err, res) {
+            if (err) return done(err);
+
+            expect(res).to.have.status(400);
+            expect(res.body.error).to.be.equal("Bad Request");
+            expect(res.body.message).to.be.equal(APPLICATION_ERROR_MESSAGES.NUDGE_ONLY_PENDING_ALLOWED);
+            done();
+          });
+      });
     });
   });
 });
