@@ -92,7 +92,7 @@ describe("application validator test", function () {
     it("should call next function if only status and feedback is passed, and status has any of the allowed values", async function () {
       const req = {
         body: {
-          status: "pending",
+          status: "accepted",
           feedback: "some feedback",
         },
       };

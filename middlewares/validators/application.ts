@@ -71,21 +71,38 @@ const validateApplicationData = async (req: CustomRequest, res: CustomResponse, 
 
 const validateApplicationUpdateData = async (req: CustomRequest, res: CustomResponse, next: NextFunction) => {
   const schema = joi
-    .object()
-    .strict()
-    .keys({
-      status: joi
+  .object({
+    status: joi
+      .string()
+      .valid(
+        APPLICATION_STATUS_TYPES.ACCEPTED,
+        APPLICATION_STATUS_TYPES.REJECTED,
+        APPLICATION_STATUS_TYPES.CHANGES_REQUESTED
+      )
+      .required()
+      .messages({
+        "any.required": "Status is required",
+        "any.only":
+          "Status must be one of: accepted, rejected, or changes_requested",
+      }),
+
+    feedback: joi.when("status", {
+      is: APPLICATION_STATUS_TYPES.CHANGES_REQUESTED,
+      then: joi
         .string()
         .min(1)
-        .optional()
-        .custom((value, helper) => {
-          if (!Object.values(APPLICATION_STATUS_TYPES).includes(value)) {
-            return helper.message("Status is not valid");
-          }
-          return value;
+        .required()
+        .messages({
+          "any.required":
+            "Feedback is required when status is changes_requested",
+          "string.min":
+            "Feedback cannot be empty when status is changes_requested",
         }),
-      feedback: joi.string().min(1).optional(),
-    });
+      otherwise: joi.string().optional().allow(""),
+    }),
+  })
+  .strict();
+
 
   try {
     await schema.validateAsync(req.body);

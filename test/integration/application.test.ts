@@ -356,11 +356,11 @@ describe("Application", function () {
     });
   });
 
-  describe("PATCH /application/:applicationId", function () {
-    it("should return 200 if the user is super user and application is updated", function (done) {
+  describe("PATCH /applications/:applicationId/feedback", function () {
+    it("should return 200 if the user is super user and application feedback is submitted", function (done) {
       chai
         .request(app)
-        .patch(`/applications/${applicationId1}`)
+        .patch(`/applications/${applicationId1}/feedback`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
           status: "accepted",
@@ -371,7 +371,7 @@ describe("Application", function () {
           }
 
           expect(res).to.have.status(200);
-          expect(res.body.message).to.be.equal("Application updated successfully!");
+          expect(res.body.message).to.be.equal("Application feedback submitted successfully");
           return done();
         });
     });
@@ -379,7 +379,7 @@ describe("Application", function () {
     it("should return 401 if the user is not super user", function (done) {
       chai
         .request(app)
-        .patch(`/applications/${applicationId1}`)
+        .patch(`/applications/${applicationId1}/feedback`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
           status: "accepted",
@@ -398,7 +398,7 @@ describe("Application", function () {
     it("should return 400 if anything other than status and feedback is passed in the body", function (done) {
       chai
         .request(app)
-        .patch(`/applications/${applicationId1}`)
+        .patch(`/applications/${applicationId1}/feedback`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
           status: "accepted",
@@ -416,10 +416,10 @@ describe("Application", function () {
         });
     });
 
-    it("should return 400 if any status other than accepted, reject or pending is passed", function (done) {
+    it("should return 400 if any status other than accepted, rejected or changes_requested is passed", function (done) {
       chai
         .request(app)
-        .patch(`/applications/${applicationId1}`)
+        .patch(`/applications/${applicationId1}/feedback`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
           status: "something",
@@ -431,7 +431,7 @@ describe("Application", function () {
 
           expect(res).to.have.status(400);
           expect(res.body.error).to.be.equal("Bad Request");
-          expect(res.body.message).to.be.equal("Status is not valid");
+          expect(res.body.message).to.be.equal("Status must be one of: accepted, rejected, or changes_requested");
           return done();
         });
     });
