@@ -138,59 +138,54 @@ const updateApplication = async (dataToUpdate: object, applicationId: string) =>
 };
 
 const nudgeApplication = async ({ applicationId, userId }: { applicationId: string; userId: string }) => {
-  try {
-    const currentTime = Date.now();
-    const twentyFourHoursInMilliseconds = convertDaysToMilliseconds(1);
+  const currentTime = Date.now();
+  const twentyFourHoursInMilliseconds = convertDaysToMilliseconds(1);
 
-    const result = await firestore.runTransaction(async (transaction) => {
-      const applicationRef = ApplicationsModel.doc(applicationId);
-      const applicationDoc = await transaction.get(applicationRef);
+  const result = await firestore.runTransaction(async (transaction) => {
+    const applicationRef = ApplicationsModel.doc(applicationId);
+    const applicationDoc = await transaction.get(applicationRef);
 
-      if (!applicationDoc.exists) {
-        return { status: NUDGE_APPLICATION_STATUS.notFound };
+    if (!applicationDoc.exists) {
+      return { status: NUDGE_APPLICATION_STATUS.notFound };
+    }
+
+    const application = applicationDoc.data();
+
+    if (application.userId !== userId) {
+      return { status: NUDGE_APPLICATION_STATUS.unauthorized };
+    }
+
+    if (application.status !== APPLICATION_STATUS_TYPES.PENDING) {
+      return { status: NUDGE_APPLICATION_STATUS.notPending };
+    }
+
+    const lastNudgeAt = application.lastNudgeAt;
+    if (lastNudgeAt) {
+      const lastNudgeTimestamp = new Date(lastNudgeAt).getTime();
+      const timeDifference = currentTime - lastNudgeTimestamp;
+
+      if (timeDifference <= twentyFourHoursInMilliseconds) {
+        return { status: NUDGE_APPLICATION_STATUS.tooSoon };
       }
+    }
 
-      const application = applicationDoc.data();
+    const currentNudgeCount = application.nudgeCount || 0;
+    const updatedNudgeCount = currentNudgeCount + 1;
+    const newLastNudgeAt = new Date(currentTime).toISOString();
 
-      if (application.userId !== userId) {
-        return { status: NUDGE_APPLICATION_STATUS.unauthorized };
-      }
-
-      if (application.status !== APPLICATION_STATUS_TYPES.PENDING) {
-        return { status: NUDGE_APPLICATION_STATUS.notPending };
-      }
-
-      const lastNudgeAt = application.lastNudgeAt;
-      if (lastNudgeAt) {
-        const lastNudgeTimestamp = new Date(lastNudgeAt).getTime();
-        const timeDifference = currentTime - lastNudgeTimestamp;
-
-        if (timeDifference <= twentyFourHoursInMilliseconds) {
-          return { status: NUDGE_APPLICATION_STATUS.tooSoon };
-        }
-      }
-
-      const currentNudgeCount = application.nudgeCount || 0;
-      const updatedNudgeCount = currentNudgeCount + 1;
-      const newLastNudgeAt = new Date(currentTime).toISOString();
-
-      transaction.update(applicationRef, {
-        nudgeCount: updatedNudgeCount,
-        lastNudgeAt: newLastNudgeAt,
-      });
-
-      return {
-        status: NUDGE_APPLICATION_STATUS.success,
-        nudgeCount: updatedNudgeCount,
-        lastNudgeAt: newLastNudgeAt,
-      };
+    transaction.update(applicationRef, {
+      nudgeCount: updatedNudgeCount,
+      lastNudgeAt: newLastNudgeAt,
     });
 
-    return result;
-  } catch (err) {
-    logger.error("Error while nudging application", err);
-    throw err;
-  }
+    return {
+      status: NUDGE_APPLICATION_STATUS.success,
+      nudgeCount: updatedNudgeCount,
+      lastNudgeAt: newLastNudgeAt,
+    };
+  });
+
+  return result;
 };
 
 module.exports = {
