@@ -2,7 +2,7 @@ import { application } from "../types/application";
 const firestore = require("../utils/firestore");
 const logger = require("../utils/logger");
 const ApplicationsModel = firestore.collection("applicants");
-const { APPLICATION_STATUS_TYPES } = require("../constants/application");
+const { APPLICATION_STATUS_TYPES, NUDGE_APPLICATION_STATUS } = require("../constants/application");
 const { convertDaysToMilliseconds } = require("../utils/time");
 
 const getAllApplications = async (limit: number, lastDocId?: string) => {
@@ -147,17 +147,17 @@ const nudgeApplication = async ({ applicationId, userId }: { applicationId: stri
       const applicationDoc = await transaction.get(applicationRef);
 
       if (!applicationDoc.exists) {
-        return { status: "notFound" };
+        return { status: NUDGE_APPLICATION_STATUS.notFound };
       }
 
       const application = applicationDoc.data();
 
       if (application.userId !== userId) {
-        return { status: "unauthorized" };
+        return { status: NUDGE_APPLICATION_STATUS.unauthorized };
       }
 
       if (application.status !== APPLICATION_STATUS_TYPES.PENDING) {
-        return { status: "notPending" };
+        return { status: NUDGE_APPLICATION_STATUS.notPending };
       }
 
       const lastNudgeAt = application.lastNudgeAt;
@@ -166,7 +166,7 @@ const nudgeApplication = async ({ applicationId, userId }: { applicationId: stri
         const timeDifference = currentTime - lastNudgeTimestamp;
 
         if (timeDifference <= twentyFourHoursInMilliseconds) {
-          return { status: "tooSoon" };
+          return { status: NUDGE_APPLICATION_STATUS.tooSoon };
         }
       }
 
@@ -180,7 +180,7 @@ const nudgeApplication = async ({ applicationId, userId }: { applicationId: stri
       });
 
       return {
-        status: "success",
+        status: NUDGE_APPLICATION_STATUS.success,
         nudgeCount: updatedNudgeCount,
         lastNudgeAt: newLastNudgeAt,
       };

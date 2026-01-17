@@ -3,7 +3,7 @@ const { logType } = require("../constants/logs");
 import { CustomRequest, CustomResponse } from "../types/global";
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const ApplicationModel = require("../models/applications");
-const { API_RESPONSE_MESSAGES, APPLICATION_ERROR_MESSAGES } = require("../constants/application");
+const { API_RESPONSE_MESSAGES, APPLICATION_ERROR_MESSAGES, NUDGE_APPLICATION_STATUS } = require("../constants/application");
 const { createApplicationService } = require("../services/applicationService");
 const { Conflict } = require("http-errors");
 const logger = require("../utils/logger");
@@ -160,15 +160,15 @@ const nudgeApplication = async (req: CustomRequest, res: CustomResponse) => {
     });
 
     switch (result.status) {
-      case "notFound":
+      case NUDGE_APPLICATION_STATUS.notFound:
         return res.boom.notFound("Application not found");
-      case "unauthorized":
+      case NUDGE_APPLICATION_STATUS.unauthorized:
         return res.boom.unauthorized("You are not authorized to nudge this application");
-      case "notPending":
+      case NUDGE_APPLICATION_STATUS.notPending:
         return res.boom.badRequest(APPLICATION_ERROR_MESSAGES.NUDGE_ONLY_PENDING_ALLOWED);
-      case "tooSoon":
+      case NUDGE_APPLICATION_STATUS.tooSoon:
         return res.boom.tooManyRequests(APPLICATION_ERROR_MESSAGES.NUDGE_TOO_SOON);
-      case "success":
+      case NUDGE_APPLICATION_STATUS.success:
         return res.json({
           message: API_RESPONSE_MESSAGES.NUDGE_SUCCESS,
           nudgeCount: result.nudgeCount,
