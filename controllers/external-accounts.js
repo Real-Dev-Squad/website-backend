@@ -80,8 +80,17 @@ const linkExternalAccount = async (req, res) => {
     );
 
     if (!unverifiedRoleRemovalResponse.success) {
-      const message = `User details updated but ${unverifiedRoleRemovalResponse.message}. Please contact admin`;
-      return res.boom.internal(message, { message });
+      // Tolerable errors that should not block role assignment
+      const tolerableErrors = ["Role doesn't exist", "Role deletion from database failed"];
+      const isTolerableError = tolerableErrors.some((err) => unverifiedRoleRemovalResponse.message.includes(err));
+
+      if (!isTolerableError) {
+        const message = `User details updated but ${unverifiedRoleRemovalResponse.message}. Please contact admin`;
+        return res.boom.internal(message, { message });
+      }
+      logger.info(
+        `Tolerable error during unverified role removal for Discord ID: ${attributes.discordId}: ${unverifiedRoleRemovalResponse.message}`
+      );
     }
 
     const developerRoleId = config.get("discordDeveloperRoleId");

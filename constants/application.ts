@@ -26,6 +26,14 @@ const APPLICATION_ERROR_MESSAGES = {
   NUDGE_ONLY_PENDING_ALLOWED: "Nudge unavailable. Only pending applications can be nudged.",
 };
 
+const NUDGE_APPLICATION_STATUS = {
+  notFound: "notFound",
+  unauthorized: "unauthorized",
+  notPending: "notPending",
+  tooSoon: "tooSoon",
+  success: "success",
+} as const;
+
 /**
  * Business requirement: Applications created after this date are considered reviewed
  * and cannot be resubmitted. This date marks the start of the new application review cycle.
@@ -38,4 +46,5 @@ module.exports = {
   API_RESPONSE_MESSAGES,
   APPLICATION_ERROR_MESSAGES,
   APPLICATION_REVIEW_CYCLE_START_DATE,
+  NUDGE_APPLICATION_STATUS,
 };
