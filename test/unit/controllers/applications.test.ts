@@ -196,3 +196,148 @@ describe("nudgeApplication", () => {
     });
   });
 });
+
+describe("submitApplicationFeedback", () => {
+  let req: Partial<CustomRequest>;
+  let res: Partial<CustomResponse> & {
+    json: sinon.SinonSpy;
+    boom: {
+      notFound: sinon.SinonSpy;
+      badImplementation: sinon.SinonSpy;
+    };
+  };
+  let jsonSpy: sinon.SinonSpy;
+  let boomNotFound: sinon.SinonSpy;
+  let boomBadImplementation: sinon.SinonSpy;
+
+  const mockApplicationId = "test-application-id-123";
+  const mockUsername = "test-reviewer";
+
+  beforeEach(() => {
+    jsonSpy = sinon.spy();
+    boomNotFound = sinon.spy();
+    boomBadImplementation = sinon.spy();
+
+    req = {
+      params: {
+        applicationId: mockApplicationId,
+      },
+      body: {
+        status: "accepted",
+      },
+      userData: {
+        id: "test-user-id",
+        username: mockUsername,
+      },
+    };
+
+    res = {
+      json: jsonSpy,
+      boom: {
+        notFound: boomNotFound,
+        badImplementation: boomBadImplementation,
+      },
+    };
+  });
+
+  afterEach(() => {
+    sinon.restore();
+  });
+
+  describe("Success cases", () => {
+    it("should successfully submit feedback with status accepted", async () => {
+      const mockResult = {
+        status: "success",
+      };
+
+      const addApplicationFeedbackStub = sinon
+        .stub(ApplicationModel, "addApplicationFeedback")
+        .resolves(mockResult);
+
+      await applicationsController.submitApplicationFeedback(req as CustomRequest, res as CustomResponse);
+
+      expect(addApplicationFeedbackStub.calledOnce).to.be.true;
+      expect(addApplicationFeedbackStub.firstCall.args[0]).to.deep.equal({
+        applicationId: mockApplicationId,
+        status: "accepted",
+        feedback: undefined,
+        reviewerName: mockUsername,
+      });
+
+      expect(jsonSpy.calledOnce).to.be.true;
+      expect(jsonSpy.firstCall.args[0].message).to.equal(API_RESPONSE_MESSAGES.FEEDBACK_SUBMITTED_SUCCESS);
+    });
+
+    it("should successfully submit feedback with status rejected", async () => {
+      req.body = { status: "rejected" };
+      const mockResult = {
+        status: "success",
+      };
+
+      sinon.stub(ApplicationModel, "addApplicationFeedback").resolves(mockResult);
+
+      await applicationsController.submitApplicationFeedback(req as CustomRequest, res as CustomResponse);
+
+      expect(jsonSpy.calledOnce).to.be.true;
+      expect(jsonSpy.firstCall.args[0].message).to.equal(API_RESPONSE_MESSAGES.FEEDBACK_SUBMITTED_SUCCESS);
+    });
+
+    it("should successfully submit feedback with status changes_requested and feedback text", async () => {
+      req.body = {
+        status: "changes_requested",
+        feedback: "Please update your skills section",
+      };
+      const mockResult = {
+        status: "success",
+      };
+
+      const addApplicationFeedbackStub = sinon
+        .stub(ApplicationModel, "addApplicationFeedback")
+        .resolves(mockResult);
+
+      await applicationsController.submitApplicationFeedback(req as CustomRequest, res as CustomResponse);
+
+      expect(addApplicationFeedbackStub.calledOnce).to.be.true;
+      expect(addApplicationFeedbackStub.firstCall.args[0]).to.deep.equal({
+        applicationId: mockApplicationId,
+        status: "changes_requested",
+        feedback: "Please update your skills section",
+        reviewerName: mockUsername,
+      });
+
+      expect(jsonSpy.calledOnce).to.be.true;
+    });
+
+    it("should successfully submit feedback with optional feedback text for accepted status", async () => {
+      req.body = {
+        status: "accepted",
+        feedback: "Great application!",
+      };
+      const mockResult = {
+        status: "success",
+      };
+
+      sinon.stub(ApplicationModel, "addApplicationFeedback").resolves(mockResult);
+
+      await applicationsController.submitApplicationFeedback(req as CustomRequest, res as CustomResponse);
+
+      expect(jsonSpy.calledOnce).to.be.true;
+    });
+
+    it("should handle empty feedback string", async () => {
+      req.body = {
+        status: "accepted",
+        feedback: "",
+      };
+      const mockResult = {
+        status: "success",
+      };
+
+      sinon.stub(ApplicationModel, "addApplicationFeedback").resolves(mockResult);
+
+      await applicationsController.submitApplicationFeedback(req as CustomRequest, res as CustomResponse);
+
+      expect(jsonSpy.calledOnce).to.be.true;
+    });
+  });
+});

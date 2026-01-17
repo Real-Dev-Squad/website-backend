@@ -435,6 +435,164 @@ describe("Application", function () {
           return done();
         });
     });
+
+    it("should return 200 when submitting feedback with status rejected", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/${applicationId2}/feedback`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          status: "rejected",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal("Application feedback submitted successfully");
+          return done();
+        });
+    });
+
+    it("should return 200 when submitting feedback with status changes_requested and feedback text", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/${applicationId3}/feedback`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          status: "changes_requested",
+          feedback: "Please update your skills section with more details",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal("Application feedback submitted successfully");
+          return done();
+        });
+    });
+
+    it("should return 400 when status is changes_requested without feedback", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/${applicationId1}/feedback`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          status: "changes_requested",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(400);
+          expect(res.body.error).to.be.equal("Bad Request");
+          expect(res.body.message).to.include("Feedback is required when status is changes_requested");
+          return done();
+        });
+    });
+
+    it("should return 200 when submitting feedback with status accepted and optional feedback text", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/${applicationId4}/feedback`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          status: "accepted",
+          feedback: "Great application!",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal("Application feedback submitted successfully");
+          return done();
+        });
+    });
+
+    it("should return 200 when submitting feedback with status rejected and optional feedback text", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/${applicationId5}/feedback`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          status: "rejected",
+          feedback: "Not a good fit for this role",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal("Application feedback submitted successfully");
+          return done();
+        });
+    });
+
+    it("should return 200 when submitting feedback with status accepted and empty feedback string", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/${applicationId2}/feedback`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          status: "accepted",
+          feedback: "",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.equal("Application feedback submitted successfully");
+          return done();
+        });
+    });
+
+    it("should return 404 when application does not exist", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/non-existent-application-id/feedback`)
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          status: "accepted",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(404);
+          expect(res.body.error).to.be.equal("Not Found");
+          expect(res.body.message).to.be.equal("Application not found");
+          return done();
+        });
+    });
+
+    it("should return 401 when user is not authenticated", function (done) {
+      chai
+        .request(app)
+        .patch(`/applications/${applicationId1}/feedback`)
+        .send({
+          status: "accepted",
+        })
+        .end((err, res) => {
+          if (err) {
+            return done(err);
+          }
+
+          expect(res).to.have.status(401);
+          expect(res.body.error).to.be.equal("Unauthorized");
+          expect(res.body.message).to.be.equal("Unauthenticated User");
+          return done();
+        });
+    });
   });
 
   describe("GET /application/:applicationId", function () {
