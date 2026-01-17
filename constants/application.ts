@@ -17,11 +17,22 @@ const APPLICATION_ROLES = {
 const API_RESPONSE_MESSAGES = {
   APPLICATION_CREATED_SUCCESS: "Application created successfully",
   APPLICATION_RETURN_SUCCESS: "Applications returned successfully",
+  NUDGE_SUCCESS: "Nudge sent successfully",
 };
 
 const APPLICATION_ERROR_MESSAGES = {
   APPLICATION_ALREADY_REVIEWED: "Application has already been reviewed",
+  NUDGE_TOO_SOON: "Nudge unavailable. You'll be able to nudge again after 24 hours.",
+  NUDGE_ONLY_PENDING_ALLOWED: "Nudge unavailable. Only pending applications can be nudged.",
 };
+
+const NUDGE_APPLICATION_STATUS = {
+  notFound: "notFound",
+  unauthorized: "unauthorized",
+  notPending: "notPending",
+  tooSoon: "tooSoon",
+  success: "success",
+} as const;
 
 /**
  * Business requirement: Applications created after this date are considered reviewed
@@ -35,4 +46,5 @@ module.exports = {
   API_RESPONSE_MESSAGES,
   APPLICATION_ERROR_MESSAGES,
   APPLICATION_REVIEW_CYCLE_START_DATE,
+  NUDGE_APPLICATION_STATUS,
 };

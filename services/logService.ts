@@ -19,7 +19,11 @@ interface LogBody {
  * @param meta { LogMeta }: Meta data of the log
  * @param body { LogBody }: Body of the log
  */
-export const addLog = async (type: string, meta: LogMeta, body: LogBody): Promise<FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>> => {
+export const addLog = async (
+  type: string,
+  meta: LogMeta,
+  body: LogBody
+): Promise<FirebaseFirestore.DocumentReference<FirebaseFirestore.DocumentData>> => {
   try {
     const log = {
       type,
