@@ -148,6 +148,89 @@ const addUserDetailsToProgressDocs = async (progressDocs) => {
   }
 };
 
+/**
+ * Creates multiple progress documents in a batch operation.
+ * @param {Array<Object>} progressDataArray - Array of progress data objects to create.
+ * @returns {Promise<Object>} A Promise that resolves with the result of the batch operation,
+ *                           including counts of successful and failed operations and details of each.
+ */
+const createBulkProgressDocuments = async (progressDataArray) => {
+  const batch = fireStore.batch();
+  const createdAtTimestamp = new Date().getTime();
+  const progressDateTimestamp = getProgressDateTimestamp();
+  
+  const result = {
+    successCount: 0,
+    failureCount: 0,
+    successfulRecords: [],
+    failedRecords: []
+  };
+  
+  // First, check for existing progress documents for the current day
+  const existingProgressChecks = await Promise.all(
+    progressDataArray.map(async (progressData) => {
+      try {
+        const { type, taskId, userId } = progressData;
+        
+        // Validate task exists if taskId is provided
+        if (taskId) {
+          await assertTaskExists(taskId);
+        }
+        
+        // Check if progress already exists for today
+        const query = buildQueryForPostingProgress(progressData);
+        const existingDocumentSnapshot = await query.where("date", "==", progressDateTimestamp).get();
+        
+        return {
+          progressData,
+          exists: !existingDocumentSnapshot.empty,
+          error: existingDocumentSnapshot.empty ? null : `${type.charAt(0).toUpperCase() + type.slice(1)} ${PROGRESS_ALREADY_CREATED}`
+        };
+      } catch (error) {
+        return {
+          progressData,
+          exists: false,
+          error: error.message
+        };
+      }
+    })
+  );
+  
+  // Process records that don't have existing progress for today
+  existingProgressChecks.forEach((check) => {
+    if (check.error) {
+      result.failureCount++;
+      result.failedRecords.push({
+        record: check.progressData,
+        error: check.error
+      });
+    } else {
+      // Add to batch
+      const progressDocumentData = { 
+        ...check.progressData, 
+        createdAt: createdAtTimestamp, 
+        date: progressDateTimestamp 
+      };
+      
+      const docRef = progressesCollection.doc();
+      batch.set(docRef, progressDocumentData);
+      
+      result.successCount++;
+      result.successfulRecords.push({
+        id: docRef.id,
+        ...progressDocumentData
+      });
+    }
+  });
+  
+  // Commit the batch if there are any successful records
+  if (result.successCount > 0) {
+    await batch.commit();
+  }
+  
+  return result;
+};
+
 module.exports = {
   createProgressDocument,
   getProgressDocument,
@@ -155,4 +238,5 @@ module.exports = {
   getRangeProgressData,
   getProgressByDate,
   addUserDetailsToProgressDocs,
+  createBulkProgressDocuments,
 };

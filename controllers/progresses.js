@@ -220,6 +220,8 @@ const getProgressRangeData = async (req, res) => {
  * @property {string} date - The iso format date of the query.
  */
 
+
+
 /**
  * @typedef {Object} ProgressDocument
  * @property {string} id - The id of the progress document.
@@ -267,4 +269,51 @@ const getProgressBydDateController = async (req, res) => {
   }
 };
 
-module.exports = { createProgress, getProgress, getProgressRangeData, getProgressBydDateController };
+/**
+ * Creates multiple progress documents in bulk.
+ * @param {Object} req - The HTTP request object.
+ * @param {Object} req.body - The request body containing an array of progress records.
+ * @param {Array<ProgressRequestBody>} req.body.records - Array of progress records to create.
+ * @param {Object} res - The HTTP response object.
+ * @returns {Promise<void>} A Promise that resolves when the response is sent.
+ */
+const createBulkProgress = async (req, res) => {
+  if (req.userData.roles.archived) {
+    return res.boom.forbidden(UNAUTHORIZED_WRITE);
+  }
+
+  const { records } = req.body;
+  
+  try {
+    // Add userId to each record
+    const recordsWithUserId = records.map(record => ({
+      ...record,
+      userId: req.userData.id
+    }));
+    
+    const result = await progressesModel.createBulkProgressDocuments(recordsWithUserId);
+    
+    return res.status(201).json({
+      message: `Successfully created ${result.successCount} progress records`,
+      data: {
+        successCount: result.successCount,
+        failureCount: result.failureCount,
+        successfulRecords: result.successfulRecords,
+        failedRecords: result.failedRecords
+      }
+    });
+  } catch (error) {
+    logger.error(`Error in bulk progress creation: ${error.message}`);
+    return res.status(500).json({
+      message: INTERNAL_SERVER_ERROR_MESSAGE,
+    });
+  }
+};
+
+module.exports = { 
+  createProgress, 
+  getProgress, 
+  getProgressRangeData, 
+  getProgressBydDateController,
+  createBulkProgress
+};
