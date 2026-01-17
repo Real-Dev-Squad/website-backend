@@ -159,6 +159,7 @@ const fetchTasks = async (req, res) => {
         });
       }
       const filterTasks = await tasks.fetchTasks(searchParams.searchTerm);
+
       const tasksWithRdsAssigneeInfo = await fetchTasksWithRdsAssigneeInfo(filterTasks);
       if (tasksWithRdsAssigneeInfo.length === 0) {
         return res.status(404).json({
@@ -195,9 +196,20 @@ const fetchTasks = async (req, res) => {
     }
 
     const paginatedTasks = await fetchPaginatedTasks({ ...transformedQuery, prev, next, userFeatureFlag });
+
+    const updatedData = {
+      ...paginatedTasks,
+      tasks: paginatedTasks.tasks.map((task) => {
+        if (task.status === "COMPLETED") {
+          return { ...task, status: "DONE" };
+        }
+        return task;
+      }),
+    };
+
     return res.json({
       message: "Tasks returned successfully!",
-      ...paginatedTasks,
+      ...updatedData,
     });
   } catch (err) {
     logger.error(`Error while fetching tasks ${err}`);
@@ -233,6 +245,13 @@ const getUserTasks = async (req, res) => {
     if (allTasks.userNotFound) {
       return res.boom.notFound("User doesn't exist");
     }
+
+    allTasks = allTasks.map((task) => {
+      if (task.status === "COMPLETED") {
+        return { ...task, status: "DONE" };
+      }
+      return task;
+    });
 
     return res.json({
       message: "Tasks returned successfully!",
@@ -272,11 +291,17 @@ const getSelfTasks = async (req, res) => {
       ? await tasks.fetchUserCompletedTasks(username)
       : await tasks.fetchSelfTasks(username);
 
+    const statusChangedtasksData = tasksData.map((task) => {
+      if (task.status === "COMPLETED") {
+        return { ...task, status: "DONE" };
+      }
+      return task;
+    });
     res.set(
       "X-Deprecation-Warning",
       "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:username to get the task details."
     );
-    return res.json(tasksData);
+    return res.json(statusChangedtasksData);
   } catch (err) {
     logger.error(`Error while fetching tasks: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
@@ -289,6 +314,9 @@ const getTask = async (req, res) => {
     const { taskData, dependencyDocReference } = await tasks.fetchTask(taskId);
     if (!taskData) {
       return res.boom.notFound("Task not found");
+    }
+    if (taskData.status === "COMPLETED") {
+      taskData.status = "DONE";
     }
     return res.json({
       message: "task returned successfully",
