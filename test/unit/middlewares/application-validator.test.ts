@@ -139,6 +139,156 @@ describe("application validator test", function () {
       await applicationValidator.validateApplicationUpdateData(req, res, nextSpy);
       expect(nextSpy.callCount).to.equal(0);
     });
+
+    it("should call next function when status is accepted with optional feedback", async function () {
+      const req = {
+        body: {
+          status: "accepted",
+          feedback: "Great work!",
+        },
+      };
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+      const nextSpy = Sinon.spy();
+      await applicationValidator.validateApplicationUpdateData(req, res, nextSpy);
+      expect(nextSpy.callCount).to.equal(1);
+    });
+
+    it("should call next function when status is rejected with optional feedback", async function () {
+      const req = {
+        body: {
+          status: "rejected",
+          feedback: "Not a good fit",
+        },
+      };
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+      const nextSpy = Sinon.spy();
+      await applicationValidator.validateApplicationUpdateData(req, res, nextSpy);
+      expect(nextSpy.callCount).to.equal(1);
+    });
+
+    it("should call next function when status is changes_requested with feedback", async function () {
+      const req = {
+        body: {
+          status: "changes_requested",
+          feedback: "Please update your skills section",
+        },
+      };
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+      const nextSpy = Sinon.spy();
+      await applicationValidator.validateApplicationUpdateData(req, res, nextSpy);
+      expect(nextSpy.callCount).to.equal(1);
+    });
+
+    it("should not call next function when status is changes_requested without feedback", async function () {
+      const req = {
+        body: {
+          status: "changes_requested",
+        },
+      };
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+      const nextSpy = Sinon.spy();
+      await applicationValidator.validateApplicationUpdateData(req, res, nextSpy);
+      expect(nextSpy.callCount).to.equal(0);
+    });
+
+    it("should not call next function when status is changes_requested with empty feedback string", async function () {
+      const req = {
+        body: {
+          status: "changes_requested",
+          feedback: "",
+        },
+      };
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+      const nextSpy = Sinon.spy();
+      await applicationValidator.validateApplicationUpdateData(req, res, nextSpy);
+      expect(nextSpy.callCount).to.equal(0);
+    });
+
+    it("should call next function when status is accepted with empty feedback string", async function () {
+      const req = {
+        body: {
+          status: "accepted",
+          feedback: "",
+        },
+      };
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+      const nextSpy = Sinon.spy();
+      await applicationValidator.validateApplicationUpdateData(req, res, nextSpy);
+      expect(nextSpy.callCount).to.equal(1);
+    });
+
+    it("should call next function when status is rejected with empty feedback string", async function () {
+      const req = {
+        body: {
+          status: "rejected",
+          feedback: "",
+        },
+      };
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+      const nextSpy = Sinon.spy();
+      await applicationValidator.validateApplicationUpdateData(req, res, nextSpy);
+      expect(nextSpy.callCount).to.equal(1);
+    });
+
+    it("should not call next function when status is missing", async function () {
+      const req = {
+        body: {
+          feedback: "Some feedback",
+        },
+      };
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+      const nextSpy = Sinon.spy();
+      await applicationValidator.validateApplicationUpdateData(req, res, nextSpy);
+      expect(nextSpy.callCount).to.equal(0);
+    });
+
+    it("should not call next function when status is null", async function () {
+      const req = {
+        body: {
+          status: null,
+        },
+      };
+      const res = {
+        boom: {
+          badRequest: () => {},
+        },
+      };
+      const nextSpy = Sinon.spy();
+      await applicationValidator.validateApplicationUpdateData(req, res, nextSpy);
+      expect(nextSpy.callCount).to.equal(0);
+    });
   });
 
   describe("validateApplicationQueryParam", function () {

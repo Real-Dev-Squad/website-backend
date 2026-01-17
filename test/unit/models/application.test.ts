@@ -118,4 +118,193 @@ describe("applications", function () {
       expect(application.status).to.be.equal("accepted");
     });
   });
+
+  describe("addApplicationFeedback", function () {
+    let testApplicationId: string;
+    const reviewerName = "test-reviewer";
+
+    beforeEach(async function () {
+      const testApplication = { ...applicationsData[0], userId: "test-user-feedback" };
+      testApplicationId = await ApplicationModel.addApplication(testApplication);
+    });
+
+    it("should successfully add feedback with status accepted", async function () {
+      const result = await ApplicationModel.addApplicationFeedback({
+        applicationId: testApplicationId,
+        status: "accepted",
+        reviewerName,
+      });
+
+      expect(result.status).to.be.equal("success");
+
+      const application = await ApplicationModel.getApplicationById(testApplicationId);
+      expect(application.status).to.be.equal("accepted");
+      expect(application.feedback).to.be.a("array");
+      expect(application.feedback.length).to.be.equal(1);
+      expect(application.feedback[0].status).to.be.equal("accepted");
+      expect(application.feedback[0].reviewerName).to.be.equal(reviewerName);
+      expect(application.feedback[0].createdAt).to.exist;
+      expect(application.feedback[0]).to.not.have.property("feedback");
+    });
+
+    it("should successfully add feedback with status rejected", async function () {
+      const result = await ApplicationModel.addApplicationFeedback({
+        applicationId: testApplicationId,
+        status: "rejected",
+        reviewerName,
+      });
+
+      expect(result.status).to.be.equal("success");
+
+      const application = await ApplicationModel.getApplicationById(testApplicationId);
+      expect(application.status).to.be.equal("rejected");
+      expect(application.feedback.length).to.be.equal(1);
+      expect(application.feedback[0].status).to.be.equal("rejected");
+    });
+
+    it("should successfully add feedback with status changes_requested", async function () {
+      const feedbackText = "Please update your skills section";
+      const result = await ApplicationModel.addApplicationFeedback({
+        applicationId: testApplicationId,
+        status: "changes_requested",
+        feedback: feedbackText,
+        reviewerName,
+      });
+
+      expect(result.status).to.be.equal("success");
+
+      const application = await ApplicationModel.getApplicationById(testApplicationId);
+      expect(application.status).to.be.equal("changes_requested");
+      expect(application.feedback.length).to.be.equal(1);
+      expect(application.feedback[0].status).to.be.equal("changes_requested");
+      expect(application.feedback[0].feedback).to.be.equal(feedbackText);
+    });
+
+    it("should successfully add feedback with feedback text for accepted status", async function () {
+      const feedbackText = "Great application!";
+      const result = await ApplicationModel.addApplicationFeedback({
+        applicationId: testApplicationId,
+        status: "accepted",
+        feedback: feedbackText,
+        reviewerName,
+      });
+
+      expect(result.status).to.be.equal("success");
+
+      const application = await ApplicationModel.getApplicationById(testApplicationId);
+      expect(application.feedback[0].feedback).to.be.equal(feedbackText);
+    });
+
+    it("should trim whitespace from feedback text", async function () {
+      const feedbackText = "  Please update your skills  ";
+      const result = await ApplicationModel.addApplicationFeedback({
+        applicationId: testApplicationId,
+        status: "changes_requested",
+        feedback: feedbackText,
+        reviewerName,
+      });
+
+      expect(result.status).to.be.equal("success");
+
+      const application = await ApplicationModel.getApplicationById(testApplicationId);
+      expect(application.feedback[0].feedback).to.be.equal("Please update your skills");
+    });
+
+    it("should append feedback to existing feedback array", async function () {
+      // Add first feedback
+      await ApplicationModel.addApplicationFeedback({
+        applicationId: testApplicationId,
+        status: "changes_requested",
+        feedback: "First feedback",
+        reviewerName: "reviewer1",
+      });
+
+      const result = await ApplicationModel.addApplicationFeedback({
+        applicationId: testApplicationId,
+        status: "accepted",
+        feedback: "Second feedback",
+        reviewerName: "reviewer2",
+      });
+
+      expect(result.status).to.be.equal("success");
+
+      const application = await ApplicationModel.getApplicationById(testApplicationId);
+      expect(application.feedback.length).to.be.equal(2);
+      expect(application.feedback[0].status).to.be.equal("changes_requested");
+      expect(application.feedback[0].reviewerName).to.be.equal("reviewer1");
+      expect(application.feedback[1].status).to.be.equal("accepted");
+      expect(application.feedback[1].reviewerName).to.be.equal("reviewer2");
+      expect(application.status).to.be.equal("accepted");
+    });
+
+    it("should handle application with no existing feedback array", async function () {
+      const result = await ApplicationModel.addApplicationFeedback({
+        applicationId: testApplicationId,
+        status: "accepted",
+        reviewerName,
+      });
+
+      expect(result.status).to.be.equal("success");
+
+      const application = await ApplicationModel.getApplicationById(testApplicationId);
+      expect(application.feedback).to.be.a("array");
+      expect(application.feedback.length).to.be.equal(1);
+    });
+
+    it("should not include feedback field when feedback is empty string", async function () {
+      const result = await ApplicationModel.addApplicationFeedback({
+        applicationId: testApplicationId,
+        status: "accepted",
+        feedback: "",
+        reviewerName,
+      });
+
+      expect(result.status).to.be.equal("success");
+
+      const application = await ApplicationModel.getApplicationById(testApplicationId);
+      expect(application.feedback[0]).to.not.have.property("feedback");
+    });
+
+    it("should not include feedback field when feedback is only whitespace", async function () {
+      const result = await ApplicationModel.addApplicationFeedback({
+        applicationId: testApplicationId,
+        status: "accepted",
+        feedback: "   ",
+        reviewerName,
+      });
+
+      expect(result.status).to.be.equal("success");
+
+      const application = await ApplicationModel.getApplicationById(testApplicationId);
+      expect(application.feedback[0]).to.not.have.property("feedback");
+    });
+
+    it("should return notFound status when application does not exist", async function () {
+      const result = await ApplicationModel.addApplicationFeedback({
+        applicationId: "non-existent-id",
+        status: "accepted",
+        reviewerName,
+      });
+
+      expect(result.status).to.be.equal("notFound");
+    });
+
+    it("should include createdAt timestamp in feedback item", async function () {
+      const beforeTime = new Date().toISOString();
+      const result = await ApplicationModel.addApplicationFeedback({
+        applicationId: testApplicationId,
+        status: "accepted",
+        reviewerName,
+      });
+      const afterTime = new Date().toISOString();
+
+      expect(result.status).to.be.equal("success");
+
+      const application = await ApplicationModel.getApplicationById(testApplicationId);
+      expect(application.feedback[0].createdAt).to.exist;
+      expect(application.feedback[0].createdAt).to.be.a("string");
+      expect(application.feedback[0].createdAt >= beforeTime).to.be.true;
+      expect(application.feedback[0].createdAt <= afterTime).to.be.true;
+    });
+  });
 });
