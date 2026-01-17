@@ -80,7 +80,7 @@ function findSubscribedGroupIds(discordId, groupToUserMappings = []) {
 
   // Iterate through groupToUserMappings to find subscribed group IDs
   groupToUserMappings.forEach((group) => {
-    if (group.userid === discordId) {
+    if (String(group.userid) === String(discordId)) {
       subscribedGroupIds.add(group.roleid);
     }
   });
