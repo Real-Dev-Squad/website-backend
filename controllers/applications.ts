@@ -3,10 +3,11 @@ const { logType } = require("../constants/logs");
 import { CustomRequest, CustomResponse } from "../types/global";
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const ApplicationModel = require("../models/applications");
-const { API_RESPONSE_MESSAGES } = require("../constants/application");
+const { API_RESPONSE_MESSAGES, APPLICATION_ERROR_MESSAGES, NUDGE_APPLICATION_STATUS } = require("../constants/application");
 const { createApplicationService } = require("../services/applicationService");
 const { Conflict } = require("http-errors");
 const logger = require("../utils/logger");
+const { APPLICATION_STATUS_TYPES } = require("../constants/application");
 
 const getAllOrUserApplication = async (req: CustomRequest, res: CustomResponse): Promise<any> => {
   try {
@@ -149,9 +150,43 @@ const getApplicationById = async (req: CustomRequest, res: CustomResponse) => {
   }
 };
 
+const nudgeApplication = async (req: CustomRequest, res: CustomResponse) => {
+  try {
+    const { applicationId } = req.params;
+
+    const result = await ApplicationModel.nudgeApplication({
+      applicationId,
+      userId: req.userData.id,
+    });
+
+    switch (result.status) {
+      case NUDGE_APPLICATION_STATUS.notFound:
+        return res.boom.notFound("Application not found");
+      case NUDGE_APPLICATION_STATUS.unauthorized:
+        return res.boom.unauthorized("You are not authorized to nudge this application");
+      case NUDGE_APPLICATION_STATUS.notPending:
+        return res.boom.badRequest(APPLICATION_ERROR_MESSAGES.NUDGE_ONLY_PENDING_ALLOWED);
+      case NUDGE_APPLICATION_STATUS.tooSoon:
+        return res.boom.tooManyRequests(APPLICATION_ERROR_MESSAGES.NUDGE_TOO_SOON);
+      case NUDGE_APPLICATION_STATUS.success:
+        return res.json({
+          message: API_RESPONSE_MESSAGES.NUDGE_SUCCESS,
+          nudgeCount: result.nudgeCount,
+          lastNudgeAt: result.lastNudgeAt,
+        });
+      default:
+        return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    }
+  } catch (err) {
+    logger.error(`Error while nudging application: ${err}`);
+    return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+  }
+};
+
 module.exports = {
   getAllOrUserApplication,
   addApplication,
   updateApplication,
   getApplicationById,
+  nudgeApplication,
 };

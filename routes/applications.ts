@@ -24,5 +24,6 @@ router.patch(
   applicationValidator.validateApplicationUpdateData,
   applications.updateApplication
 );
+router.patch("/:applicationId/nudge", authenticate, applications.nudgeApplication);
 
 module.exports = router;
