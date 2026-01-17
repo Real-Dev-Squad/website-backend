@@ -18,12 +18,17 @@ const API_RESPONSE_MESSAGES = {
   APPLICATION_CREATED_SUCCESS: "Application created successfully",
   APPLICATION_RETURN_SUCCESS: "Applications returned successfully",
   NUDGE_SUCCESS: "Nudge sent successfully",
+  FEEDBACK_SUBMITTED_SUCCESS: "Application feedback submitted successfully",
 };
 
 const APPLICATION_ERROR_MESSAGES = {
   APPLICATION_ALREADY_REVIEWED: "Application has already been reviewed",
   NUDGE_TOO_SOON: "Nudge unavailable. You'll be able to nudge again after 24 hours.",
   NUDGE_ONLY_PENDING_ALLOWED: "Nudge unavailable. Only pending applications can be nudged.",
+};
+
+const APPLICATION_LOG_MESSAGES = {
+  ERROR_SUBMITTING_FEEDBACK: "Error while submitting the application feedback",
 };
 
 const NUDGE_APPLICATION_STATUS = {
@@ -45,6 +50,7 @@ module.exports = {
   APPLICATION_ROLES,
   API_RESPONSE_MESSAGES,
   APPLICATION_ERROR_MESSAGES,
+  APPLICATION_LOG_MESSAGES,
   APPLICATION_REVIEW_CYCLE_START_DATE,
-  NUDGE_APPLICATION_STATUS,
+  NUDGE_APPLICATION_STATUS
 };

@@ -2,7 +2,7 @@ import { application } from "../types/application";
 const firestore = require("../utils/firestore");
 const logger = require("../utils/logger");
 const ApplicationsModel = firestore.collection("applicants");
-const { APPLICATION_STATUS_TYPES, NUDGE_APPLICATION_STATUS } = require("../constants/application");
+const { APPLICATION_STATUS_TYPES, NUDGE_APPLICATION_STATUS, FEEDBACK_APPLICATION_STATUS } = require("../constants/application");
 const { convertDaysToMilliseconds } = require("../utils/time");
 
 const getAllApplications = async (limit: number, lastDocId?: string) => {
@@ -138,51 +138,101 @@ const updateApplication = async (dataToUpdate: object, applicationId: string) =>
 };
 
 const nudgeApplication = async ({ applicationId, userId }: { applicationId: string; userId: string }) => {
-  const currentTime = Date.now();
-  const twentyFourHoursInMilliseconds = convertDaysToMilliseconds(1);
+    const currentTime = Date.now();
+    const twentyFourHoursInMilliseconds = convertDaysToMilliseconds(1);
 
+    const result = await firestore.runTransaction(async (transaction) => {
+      const applicationRef = ApplicationsModel.doc(applicationId);
+      const applicationDoc = await transaction.get(applicationRef);
+
+      if (!applicationDoc.exists) {
+      return { status: NUDGE_APPLICATION_STATUS.notFound };
+      }
+
+      const application = applicationDoc.data();
+
+      if (application.userId !== userId) {
+      return { status: NUDGE_APPLICATION_STATUS.unauthorized };
+      }
+
+      if (application.status !== APPLICATION_STATUS_TYPES.PENDING) {
+      return { status: NUDGE_APPLICATION_STATUS.notPending };
+      }
+
+      const lastNudgeAt = application.lastNudgeAt;
+      if (lastNudgeAt) {
+        const lastNudgeTimestamp = new Date(lastNudgeAt).getTime();
+        const timeDifference = currentTime - lastNudgeTimestamp;
+
+        if (timeDifference <= twentyFourHoursInMilliseconds) {
+        return { status: NUDGE_APPLICATION_STATUS.tooSoon };
+        }
+      }
+
+      const currentNudgeCount = application.nudgeCount || 0;
+      const updatedNudgeCount = currentNudgeCount + 1;
+      const newLastNudgeAt = new Date(currentTime).toISOString();
+
+      transaction.update(applicationRef, {
+        nudgeCount: updatedNudgeCount,
+        lastNudgeAt: newLastNudgeAt,
+      });
+
+      return {
+      status: NUDGE_APPLICATION_STATUS.success,
+        nudgeCount: updatedNudgeCount,
+        lastNudgeAt: newLastNudgeAt,
+      };
+    });
+
+    return result;
+};
+
+const addApplicationFeedback = async ({
+  applicationId,
+  status,
+  feedback,
+  reviewerName,
+}: {
+  applicationId: string;
+  status: string;
+  feedback?: string;
+  reviewerName: string;
+}) => {
   const result = await firestore.runTransaction(async (transaction) => {
     const applicationRef = ApplicationsModel.doc(applicationId);
     const applicationDoc = await transaction.get(applicationRef);
 
     if (!applicationDoc.exists) {
-      return { status: NUDGE_APPLICATION_STATUS.notFound };
+      return { status: FEEDBACK_APPLICATION_STATUS.notFound };
     }
 
     const application = applicationDoc.data();
+    const existingFeedback = application.feedback || [];
 
-    if (application.userId !== userId) {
-      return { status: NUDGE_APPLICATION_STATUS.unauthorized };
+    const feedbackItem: {
+      status: string;
+      feedback?: string;
+      reviewerName: string;
+      createdAt: string;
+    } = {
+      status,
+      reviewerName,
+      createdAt: new Date().toISOString(),
+    };
+
+    if (feedback && feedback.trim()) {
+      feedbackItem.feedback = feedback.trim();
     }
 
-    if (application.status !== APPLICATION_STATUS_TYPES.PENDING) {
-      return { status: NUDGE_APPLICATION_STATUS.notPending };
-    }
-
-    const lastNudgeAt = application.lastNudgeAt;
-    if (lastNudgeAt) {
-      const lastNudgeTimestamp = new Date(lastNudgeAt).getTime();
-      const timeDifference = currentTime - lastNudgeTimestamp;
-
-      if (timeDifference <= twentyFourHoursInMilliseconds) {
-        return { status: NUDGE_APPLICATION_STATUS.tooSoon };
-      }
-    }
-
-    const currentNudgeCount = application.nudgeCount || 0;
-    const updatedNudgeCount = currentNudgeCount + 1;
-    const newLastNudgeAt = new Date(currentTime).toISOString();
+    const updatedFeedback = [...existingFeedback, feedbackItem];
 
     transaction.update(applicationRef, {
-      nudgeCount: updatedNudgeCount,
-      lastNudgeAt: newLastNudgeAt,
+      feedback: updatedFeedback,
+      status,
     });
 
-    return {
-      status: NUDGE_APPLICATION_STATUS.success,
-      nudgeCount: updatedNudgeCount,
-      lastNudgeAt: newLastNudgeAt,
-    };
+    return { status: FEEDBACK_APPLICATION_STATUS.success };
   });
 
   return result;
@@ -196,4 +246,5 @@ module.exports = {
   getApplicationsBasedOnStatus,
   getApplicationById,
   nudgeApplication,
+  addApplicationFeedback,
 };

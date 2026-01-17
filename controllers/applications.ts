@@ -3,7 +3,7 @@ const { logType } = require("../constants/logs");
 import { CustomRequest, CustomResponse } from "../types/global";
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const ApplicationModel = require("../models/applications");
-const { API_RESPONSE_MESSAGES, APPLICATION_ERROR_MESSAGES, NUDGE_APPLICATION_STATUS } = require("../constants/application");
+const { API_RESPONSE_MESSAGES, APPLICATION_ERROR_MESSAGES, APPLICATION_LOG_MESSAGES, NUDGE_APPLICATION_STATUS, FEEDBACK_APPLICATION_STATUS } = require("../constants/application");
 const { createApplicationService } = require("../services/applicationService");
 const { Conflict } = require("http-errors");
 const logger = require("../utils/logger");
@@ -136,43 +136,25 @@ const submitApplicationFeedback = async (req: CustomRequest, res: CustomResponse
     const { applicationId } = req.params;
     const { status, feedback } = req.body;
 
-    const application = await ApplicationModel.getApplicationById(applicationId);
-    if (application.notFound) {
-      return res.boom.notFound("Application not found");
-    }
-
-    const existingFeedback = application.feedback || [];
-
-    const newFeedbackEntry: {
-      status: string;
-      feedback?: string;
-      reviewerName: string;
-      createdAt: string;
-    } = {
+    const result = await ApplicationModel.addApplicationFeedback({
+      applicationId,
       status,
+      feedback,
       reviewerName: req.userData.username,
-      createdAt: new Date().toISOString(),
-    };
-
-    if (feedback && feedback.trim()) {
-      newFeedbackEntry.feedback = feedback.trim();
-    }
-
-    const updatedFeedback = [...existingFeedback, newFeedbackEntry];
-
-    const updatedData = {
-      feedback: updatedFeedback,
-      status,
-    };
-
-    await ApplicationModel.updateApplication(updatedData, applicationId);
-
-    return res.json({
-      message: "Application feedback submitted successfully",
-      feedback: newFeedbackEntry,
     });
+
+    switch (result.status) {
+      case FEEDBACK_APPLICATION_STATUS.notFound:
+        return res.boom.notFound("Application not found");
+      case FEEDBACK_APPLICATION_STATUS.success:
+        return res.json({
+          message: API_RESPONSE_MESSAGES.FEEDBACK_SUBMITTED_SUCCESS,
+        });
+      default:
+        return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
+    }
   } catch (err) {
-    logger.error(`Error while submitting the application feedback: ${err}`);
+    logger.error(`${APPLICATION_LOG_MESSAGES.ERROR_SUBMITTING_FEEDBACK}: ${err}`);
     return res.boom.badImplementation(INTERNAL_SERVER_ERROR);
   }
 };
