@@ -129,7 +129,6 @@ describe("Filter Users", function () {
     await cleanDb();
   });
 
-  // eslint-disable-next-line mocha/no-skipped-tests
   describe("GET /users/search", function () {
     it("Should search users based on state", function (done) {
       chai

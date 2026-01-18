@@ -23,7 +23,7 @@ describe("Notify Test", function () {
   });
 
   describe("POST call to notify", function () {
-    // eslint-disable-next-line mocha/no-skipped-tests
+    // eslint-disable-next-line mocha/no-pending-tests
     it.skip("should send message to specified users", async function () {
       // skipping the test because it connects with firebase cloud messaging service which we are unable to mock.
 

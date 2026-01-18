@@ -952,7 +952,7 @@ describe("Discord actions", function () {
     });
   });
 
-  // eslint-disable-next-line mocha/no-skipped-tests
+  // eslint-disable-next-line mocha/no-pending-tests
   describe.skip("GET /discord-actions/invite", function () {
     it("should return the invite for the user if no userId is provided in the params and the invite exists", async function () {
       await addInviteToInviteModel({ userId: superUserId, inviteLink: "discord.gg/apQYT7HB" });
@@ -995,7 +995,7 @@ describe("Discord actions", function () {
   });
 
   // <------ Will revisit this later https://github.com/Real-Dev-Squad/website-backend/issues/2078 --->
-  // eslint-disable-next-line mocha/no-skipped-tests
+  // eslint-disable-next-line mocha/no-pending-tests
   describe.skip("POST /discord-actions/invite", function () {
     afterEach(function () {
       sinon.restore();
@@ -1011,7 +1011,7 @@ describe("Discord actions", function () {
       expect(res.body.message).to.be.equal("User should be super user to generate link for other users");
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
+    // eslint-disable-next-line mocha/no-pending-tests
     it.skip("should return 403 if the user has discord id in their user object, which means user is already in discord", async function () {
       const res = await chai
         .request(app)
@@ -1022,7 +1022,7 @@ describe("Discord actions", function () {
       expect(res.body.message).to.be.equal("Only users who have never joined discord can generate invite link");
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
+    // eslint-disable-next-line mocha/no-pending-tests
     it.skip("should return 403 if user has role archieved", async function () {
       archievedUserId = await addUser(archievedUser);
       archievedUserToken = authService.generateAuthToken({ userId: archievedUserId });
@@ -1035,7 +1035,7 @@ describe("Discord actions", function () {
       expect(res.body.message).to.be.equal("Archived users cannot generate invite");
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
+    // eslint-disable-next-line mocha/no-pending-tests
     it.skip("should return 403 if the user doesn't have role designer, product_manager, or mavens", async function () {
       developerUserWithoutApprovedProfileStatusId = await addUser(developerUserWithoutApprovedProfileStatus);
       developerUserWithoutApprovedProfileStatusToken = authService.generateAuthToken({
@@ -1050,7 +1050,7 @@ describe("Discord actions", function () {
       expect(res.body.message).to.be.equal("Only selected roles can generate discord link directly");
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
+    // eslint-disable-next-line mocha/no-pending-tests
     it.skip("should generate discord link if user is a product mananger", async function () {
       fetchStub.returns(
         Promise.resolve({
@@ -1071,7 +1071,7 @@ describe("Discord actions", function () {
       expect(res.body.inviteLink).to.be.equal("discord.gg/xyz");
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
+    // eslint-disable-next-line mocha/no-pending-tests
     it.skip("should generate discord link if user is a designer", async function () {
       fetchStub.returns(
         Promise.resolve({
@@ -1092,7 +1092,7 @@ describe("Discord actions", function () {
       expect(res.body.inviteLink).to.be.equal("discord.gg/zlmfasd");
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
+    // eslint-disable-next-line mocha/no-pending-tests
     it.skip("should generate discord link if user is a maven", async function () {
       fetchStub.returns(
         Promise.resolve({
@@ -1153,7 +1153,7 @@ describe("Discord actions", function () {
       );
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
+    // eslint-disable-next-line mocha/no-pending-tests
     it.skip("should generate discord link if user has an approved application", async function () {
       sinon.stub(ApplicationModel, "getUserApplications").resolves([{ status: "accepted" }]);
       fetchStub.returns(
@@ -1367,7 +1367,6 @@ describe("Discord actions", function () {
         .request(app)
         .get("/discord-actions/groups?dev=true")
         .set("cookie", `${cookieName}=${userAuthToken}`)
-        // eslint-disable-next-line node/handle-callback-err
         .end((err, res) => {
           expect(res).to.have.status(500);
           expect(res.body).to.be.an("object");
