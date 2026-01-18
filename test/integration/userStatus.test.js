@@ -157,7 +157,7 @@ describe("UserStatus", function () {
         .send(generateUserStatusData("OOO", updatedAtDate, fromDate, untilDate, "Vacation Trip"));
       expect(response).to.have.status(400);
       expect(response.body.error).to.equal("Bad Request");
-      expect(response.body.message).to.equal("Invalid State. the acceptable states are ONBOARDING");
+      expect(response.body.message).to.equal("Updating 'state' is not allowed via this endpoint.");
     });
   });
 
