@@ -142,7 +142,9 @@ describe("UserStatus", function () {
       clock.restore();
     });
 
-    it("Should update the User Status based on the future dates", async function () {
+    // Skipping this as the users are not allowed to set OOO status directly via /self endpoint. Will remove the test while removing the feature flag.
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip("Should update the User Status based on the future dates", async function () {
       // creating Active Status from 12th Nov 2022 (1669401000000)
       const updatedAtDate = Date.now(); // 12th Nov 2022
       const fromDate = updatedAtDate + 12 * 24 * 60 * 60 * 1000; // 24th Nov 2022
@@ -223,7 +225,9 @@ describe("UserStatus", function () {
       expect(response6.body.data.currentStatus.state).to.equal("ACTIVE");
     });
 
-    it("Should clear the future active/idle Status if during ooo period user mark themselves idle/active", async function () {
+    // Skipping this as the users are not allowed to set OOO status directly via /self endpoint. Will remove the test while removing the feature flag.
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip("Should clear the future active/idle Status if during ooo period user mark themselves idle/active", async function () {
       // creating Active Status from 12th Nov 2022
       const updatedAtDate = Date.now(); // 12th Nov 2022
       const fromDate = updatedAtDate + 12 * 24 * 60 * 60 * 1000; // 24th Nov 2022
@@ -293,7 +297,9 @@ describe("UserStatus", function () {
       clock.restore();
     });
 
-    it("Should store the User Status in the collection", function (done) {
+    // Skipping this as direct OOO status setting is now blocked. OOO can only be set through proper OOO request flow.
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip("Should store the User Status in the collection", function (done) {
       chai
         .request(app)
         .patch(`/users/status/${testUserId}`)
@@ -311,7 +317,9 @@ describe("UserStatus", function () {
         });
     });
 
-    it("Should store the User Status in the collection when requested by Super User", function (done) {
+    // Skipping this as direct OOO status setting is now blocked. OOO can only be set through proper OOO request flow.
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip("Should store the User Status in the collection when requested by Super User", function (done) {
       chai
         .request(app)
         .patch(`/users/status/${testUserId}`)
@@ -329,7 +337,9 @@ describe("UserStatus", function () {
         });
     });
 
-    it("Should store the User Status in the collection when requested by User", function (done) {
+    // Skipping this as direct OOO status setting is now blocked. OOO can only be set through proper OOO request flow.
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip("Should store the User Status in the collection when requested by User", function (done) {
       chai
         .request(app)
         .patch(`/users/status/${testUserId}`)
@@ -365,7 +375,9 @@ describe("UserStatus", function () {
         });
     });
 
-    it("Should update the User Status without reason for short duration", function (done) {
+    // Skipping this as direct OOO status setting is now blocked. OOO can only be set through proper OOO request flow.
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip("Should update the User Status without reason for short duration", function (done) {
       chai
         .request(app)
         .patch(`/users/status/${userId}`)
@@ -417,11 +429,13 @@ describe("UserStatus", function () {
     });
 
     it("Should return 401 for unauthorized request for user and superuser", function (done) {
+      // Using ONBOARDING state since OOO is now blocked by the validator
+      // This test verifies authorization, not validation, so we need valid data
       chai
         .request(app)
         .patch(`/users/status/${testUserId}`)
         .set("cookie", `${cookieName}=${jwt}`)
-        .send(userStatusDataForOooState)
+        .send(generateUserStatusData("ONBOARDING", Date.now(), Date.now()))
         .end((err, res) => {
           if (err) {
             return done(err);
@@ -446,12 +460,14 @@ describe("UserStatus", function () {
           expect(res).to.have.status(400);
           expect(res.body).to.be.an("object");
           expect(res.body.error).to.equal(`Bad Request`);
-          expect(res.body.message).to.equal(`Invalid State. the acceptable states are OOO,ONBOARDING`);
+          expect(res.body.message).to.equal(`Invalid State. the acceptable states are ONBOARDING`);
           return done();
         });
     });
 
-    it("Should return error when trying to change OOO without reason for more than 3 days period", function (done) {
+    // Skipping this as direct OOO status setting is now blocked. OOO can only be set through proper OOO request flow.
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip("Should return error when trying to change OOO without reason for more than 3 days period", function (done) {
       // marking OOO from 18 Nov 2022 (1668709800000) to 23 Nov 2022 (1669141800000)
       const untilDate = Date.now() + 4 * 24 * 60 * 60 * 1000;
       chai
@@ -472,7 +488,9 @@ describe("UserStatus", function () {
         });
     });
 
-    it("Should return error when trying to update status for a past date", function (done) {
+    // Skipping this as direct OOO status setting is now blocked. OOO can only be set through proper OOO request flow.
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip("Should return error when trying to update status for a past date", function (done) {
       // marking ACTIVE from last 4 days
       const fromDate = Date.now() - 4 * 24 * 60 * 60 * 1000;
       chai
@@ -493,7 +511,9 @@ describe("UserStatus", function () {
         });
     });
 
-    it("Should return error when trying to mark 000 with until field having value less then from field", function (done) {
+    // Skipping this as direct OOO status setting is now blocked. OOO can only be set through proper OOO request flow.
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip("Should return error when trying to mark 000 with until field having value less then from field", function (done) {
       // marking ACTIVE from last 4 days
       const fromDate = Date.now() + 10 * 24 * 60 * 60 * 1000;
       const untilDate = Date.now() + 5 * 24 * 60 * 60 * 1000;
@@ -515,7 +535,9 @@ describe("UserStatus", function () {
         });
     });
 
-    it("should replace old future OOO Status with new future OOO Status", async function () {
+    // Skipping this as direct OOO status setting is now blocked. OOO can only be set through proper OOO request flow.
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip("should replace old future OOO Status with new future OOO Status", async function () {
       const updatedAtDate = Date.now();
       const statusData = generateUserStatusData("ACTIVE", updatedAtDate, updatedAtDate);
       statusData.userId = testUserId;
@@ -571,7 +593,9 @@ describe("UserStatus", function () {
       expect(response3.body.data.futureStatus.until).to.equal(untilDateInUTC); // 5th Dec 2022
     });
 
-    it("should clear future OOO Status if current Status is marked as OOO", async function () {
+    // Skipping this as direct OOO status setting is now blocked. OOO can only be set through proper OOO request flow.
+    // eslint-disable-next-line mocha/no-skipped-tests
+    it.skip("should clear future OOO Status if current Status is marked as OOO", async function () {
       // Initially Marking OOO Status from 24th Nov 2022 to 28th Nov 2022.
       let fromDate = new Date(2022, 10, 24).getTime(); // 24th Nov 2022
       let untilDate = new Date(2022, 10, 28).getTime(); // 28th Nov 2022
