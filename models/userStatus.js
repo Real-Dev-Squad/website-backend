@@ -219,6 +219,9 @@ const updateUserStatus = async (userId, updatedStatusData) => {
       const previousUntil = previousCurrentStatus.until;
       let requestedNextState;
       if (Object.keys(newStatusData).includes("currentStatus")) {
+        if (!newStatusData.currentStatus.state && previousCurrentStatus.state) {
+          newStatusData.currentStatus = { ...previousCurrentStatus, ...newStatusData.currentStatus };
+        }
         requestedNextState = newStatusData.currentStatus?.state;
         const newUserState = requestedNextState;
         const isNewStateOoo = newUserState === userState.OOO;

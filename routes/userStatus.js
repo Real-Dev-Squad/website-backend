@@ -16,6 +16,7 @@ const {
   validateUserStatus,
   validateMassUpdate,
   validateGetQueryParams,
+  validateUserStatusSelf,
 } = require("../middlewares/validators/userStatus");
 const { authorizeAndAuthenticate } = require("../middlewares/authorizeUsersAndService");
 const ROLES = require("../constants/roles");
@@ -24,7 +25,7 @@ const { Services } = require("../constants/bot");
 router.get("/", validateGetQueryParams, getUserStatusControllers);
 router.get("/self", authenticate, getUserStatus);
 router.get("/:userId", getUserStatus);
-router.patch("/self", authenticate, validateUserStatus, updateUserStatusController); // this route is being deprecated, please use /users/status/:userId PATCH endpoint instead.
+router.patch("/self", authenticate, validateUserStatusSelf, updateUserStatusController); // this route is being deprecated, please use /users/status/:userId PATCH endpoint instead.
 router.patch("/update", authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]), updateAllUserStatus);
 router.patch(
   "/batch",
