@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [22.10.0]
+        node-version: [22.18.0]
 
     steps:
       - uses: actions/checkout@v3
@@ -23,5 +23,9 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-      - run: yarn
-      - run: yarn test
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.14.0
+      - run: pnpm install
+      - run: pnpm test

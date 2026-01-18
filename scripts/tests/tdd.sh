@@ -30,4 +30,4 @@ firebase emulators:exec "nyc --check-coverage=true --all=false --skip-full=true 
 
 # Upon exiting, the script is expected to say "Script exited unsuccessfully (code 130)"
 
-# NOTE - Before commiting the code, run `yarn test` to run all the tests.
+# NOTE - Before committing the code, run `pnpm test` to run all the tests.
