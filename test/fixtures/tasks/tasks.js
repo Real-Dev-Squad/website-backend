@@ -236,5 +236,20 @@ module.exports = () => {
       endsOn: 1647172800,
       startedOn: 1644753600,
     },
+    {
+      title: "createdAt test",
+      type: "feature",
+      status: "AVAILABLE",
+      priority: "HIGH",
+      percentCompleted: 11,
+    },
+    {
+      title: "createdAt and updatedAt test",
+      createdAt: 1691918779936,
+      type: "feature",
+      status: "AVAILABLE",
+      priority: "HIGH",
+      percentCompleted: 11,
+    },
   ];
 };
