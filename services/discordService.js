@@ -147,6 +147,26 @@ const deleteGroupRoleFromDiscord = async (roleId) => {
   }
 };
 
+const updateGroupRoleInDiscord = async (roleId, roleName, userData) => {
+  try {
+    const headers = generateCloudFlareHeaders(userData);
+    const response = await fetch(`${DISCORD_BASE_URL}/roles/${roleId}`, {
+      method: "PATCH",
+      headers,
+      body: JSON.stringify({ rolename: roleName }),
+    });
+
+    if (response.status === 200) {
+      return { success: true };
+    }
+    const data = await response.json();
+    return { success: false, message: data.message };
+  } catch (err) {
+    logger.error("Error updating role on Discord", err);
+    return { success: false, message: "Internal server error" };
+  }
+};
+
 module.exports = {
   getDiscordMembers,
   getDiscordRoles,
@@ -155,4 +175,5 @@ module.exports = {
   removeRoleFromUser,
   setUserDiscordNickname,
   deleteGroupRoleFromDiscord,
+  updateGroupRoleInDiscord,
 };

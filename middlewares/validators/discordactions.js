@@ -15,6 +15,21 @@ const validateGroupRoleBody = async (req, res, next) => {
     res.boom.badRequest(error.details[0].message);
   }
 };
+
+const validateGroupRoleUpdateBody = async (req, res, next) => {
+  const schema = Joi.object({
+    rolename: Joi.string().trim(),
+    description: Joi.string().trim(),
+  }).or("rolename", "description");
+
+  try {
+    await schema.validateAsync(req.body);
+    next();
+  } catch (error) {
+    logger.error(`Error validating updateGroupRole payload : ${error}`);
+    res.boom.badRequest(error.details[0].message);
+  }
+};
 const validateMemberRoleBody = async (req, res, next) => {
   const schema = Joi.object({
     userid: Joi.string().trim().required(),
@@ -66,4 +81,5 @@ module.exports = {
   validateMemberRoleBody,
   validateLazyLoadingParams,
   validateUpdateUsersNicknameStatusBody,
+  validateGroupRoleUpdateBody,
 };
