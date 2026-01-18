@@ -216,7 +216,6 @@ describe("UserStatus", function () {
 
     it("Should return 401 for unauthorized request for user and superuser", function (done) {
       // Using ONBOARDING state since OOO is now blocked by the validator
-      // This test verifies authorization, not validation, so we need valid data
       chai
         .request(app)
         .patch(`/users/status/${testUserId}`)
