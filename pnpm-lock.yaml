@@ -318,8 +318,8 @@ importers:
         specifier: ^1.7.1
         version: 1.7.1
       firebase-tools:
-        specifier: 13.4.0
-        version: 13.4.0(@types/node@20.11.24)(encoding@0.1.13)(supports-color@5.5.0)
+        specifier: 13.6.0
+        version: 13.6.0(@types/node@20.11.24)(encoding@0.1.13)(supports-color@5.5.0)
       mocha:
         specifier: 10.3.0
         version: 10.3.0
@@ -2281,8 +2281,8 @@ packages:
     resolution: {integrity: sha512-Nuoxk//gaYrspS7TvwBINdGvFhh2QeiaWpRW6+PJ+tWyn2/CugBc7jKa1NaBg0AvhGSOXFOCIsXhzCzHA47Rew==}
     engines: {node: '>=14'}
 
-  firebase-tools@13.4.0:
-    resolution: {integrity: sha512-yoxET4Xifezr+SopwFgkpMIRGmp11aTTE67tFcfJoTOZDveBbY16dfo6so2xiuqBXQ7DNxsZIQ+d3JEm2Jn40A==}
+  firebase-tools@13.6.0:
+    resolution: {integrity: sha512-BXXkFkw8FupINBJHd+aPFRKpvIf8R5P1GyOnWjwsk06kgXXdfFuuYctxkL8e82N4sUomdNP5Q/ru/u2esnoSQA==}
     engines: {node: '>=18.0.0 || >=20.0.0'}
     hasBin: true
 
@@ -5896,7 +5896,7 @@ snapshots:
 
   '@types/glob@9.0.0':
     dependencies:
-      glob: 7.2.3
+      glob: 10.5.0
 
   '@types/http-errors@2.0.5': {}
 
@@ -7498,7 +7498,7 @@ snapshots:
       - encoding
       - supports-color
 
-  firebase-tools@13.4.0(@types/node@20.11.24)(encoding@0.1.13)(supports-color@5.5.0):
+  firebase-tools@13.6.0(@types/node@20.11.24)(encoding@0.1.13)(supports-color@5.5.0):
     dependencies:
       '@google-cloud/pubsub': 3.7.5(encoding@0.1.13)(supports-color@5.5.0)
       abort-controller: 3.0.0
@@ -9506,7 +9506,7 @@ snapshots:
 
   proto3-json-serializer@1.1.1:
     dependencies:
-      protobufjs: 7.2.4
+      protobufjs: 7.6.6
 
   proto3-json-serializer@2.0.2:
     dependencies:
