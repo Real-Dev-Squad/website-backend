@@ -185,8 +185,8 @@ importers:
         specifier: 2.0.3
         version: 2.0.3
       config:
-        specifier: 3.3.7
-        version: 3.3.7
+        specifier: 3.3.12
+        version: 3.3.12
       cookie-parser:
         specifier: 1.4.6
         version: 1.4.6
@@ -261,8 +261,8 @@ importers:
         specifier: 4.3.16
         version: 4.3.16
       '@types/config':
-        specifier: 3.3.4
-        version: 3.3.4
+        specifier: 3.3.5
+        version: 3.3.5
       '@types/express':
         specifier: 4.17.21
         version: 4.17.21
@@ -907,8 +907,8 @@ packages:
   '@types/concat-stream@1.6.1':
     resolution: {integrity: sha512-eHE4cQPoj6ngxBZMvVf6Hw7Mh4jMW4U9lpGmS5GBPB9RYxlFg+CHaVN7ErNY4W9XfLIEn20b4VDYaIrbq0q4uA==}
 
-  '@types/config@3.3.4':
-    resolution: {integrity: sha512-qFiTLnWy+TdPSMIXFHP+87lFXFRM4SXjRS+CSB66+56TrpLNw003y1sh7DGaaC1NGesxgKoT5FDy6dyA1Xju/g==}
+  '@types/config@3.3.5':
+    resolution: {integrity: sha512-itq2HtXQBrNUKwMNZnb9mBRE3T99VYCdl1gjST9rq+9kFaB1iMMGuDeZnP88qid73DnpAMKH9ZolqDpS1Lz7+w==}
 
   '@types/connect@3.4.38':
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
@@ -1607,8 +1607,8 @@ packages:
   config-chain@1.1.13:
     resolution: {integrity: sha512-qj+f8APARXHrM0hraqXYb2/bOVSV4PvJQlNZ/DVj0QrmNM2q2euizkeuVckQ57J+W0mRH6Hvi+k50M4Jul2VRQ==}
 
-  config@3.3.7:
-    resolution: {integrity: sha512-mX/n7GKDYZMqvvkY6e6oBY49W8wxdmQt+ho/5lhwFDXqQW9gI+Ahp8EKp8VAbISPnmf2+Bv5uZK7lKXZ6pf1aA==}
+  config@3.3.12:
+    resolution: {integrity: sha512-Vmx389R/QVM3foxqBzXO8t2tUikYZP64Q6vQxGrsMpREeJc/aWRnPRERXWsYzOHAumx/AOoILWe6nU3ZJL+6Sw==}
     engines: {node: '>= 10.0.0'}
 
   configstore@5.0.1:
@@ -5864,7 +5864,7 @@ snapshots:
     dependencies:
       '@types/node': 20.11.24
 
-  '@types/config@3.3.4': {}
+  '@types/config@3.3.5': {}
 
   '@types/connect@3.4.38':
     dependencies:
@@ -6675,7 +6675,7 @@ snapshots:
       ini: 1.3.8
       proto-list: 1.2.4
 
-  config@3.3.7:
+  config@3.3.12:
     dependencies:
       json5: 2.2.3
 
