@@ -324,8 +324,8 @@ importers:
         specifier: 10.3.0
         version: 10.3.0
       nock:
-        specifier: 13.2.9
-        version: 13.2.9(supports-color@5.5.0)
+        specifier: 13.5.6
+        version: 13.5.6(supports-color@5.5.0)
       node:
         specifier: runtime:22.10.0
         version: runtime:22.10.0
@@ -3511,8 +3511,8 @@ packages:
   nise@6.1.5:
     resolution: {integrity: sha512-SnRDPDBjxZZoU2n0+gzzLtSvo1OZo7j6jnbXsoh3AFxEGhaFU7ZF0TmefuKERq79wxR2U+MPn7ArW+Tl+clC3A==}
 
-  nock@13.2.9:
-    resolution: {integrity: sha512-1+XfJNYF1cjGB+TKMWi29eZ0b82QOvQs2YoLNzbpWGqFMtRQHTa57osqdGj4FrFPgkO4D4AZinzUJR9VvW3QUA==}
+  nock@13.5.6:
+    resolution: {integrity: sha512-o2zOYiCpzRqSzPj0Zt/dQ/DqZeYoaQ7TUonc/xUPjCGl9WeHpNbxgVvOquXYAaJzI0M9BXV3HTzG0p8IUAbBTQ==}
     engines: {node: '>= 10.13'}
 
   node-abi@3.96.0:
@@ -9022,11 +9022,10 @@ snapshots:
       just-extend: 6.2.0
       path-to-regexp: 8.4.2
 
-  nock@13.2.9(supports-color@5.5.0):
+  nock@13.5.6(supports-color@5.5.0):
     dependencies:
       debug: 4.3.5(supports-color@5.5.0)
       json-stringify-safe: 5.0.1
-      lodash: 4.17.21
       propagate: 2.0.1
     transitivePeerDependencies:
       - supports-color
