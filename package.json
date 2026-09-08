@@ -19,7 +19,7 @@
     "@aws-sdk/client-identitystore": "^3.665.0",
     "@google-cloud/firestore": "7.8.0",
     "@types/nodemailer": "^6.4.15",
-    "axios": "1.7.4",
+    "axios": "1.18.0",
     "cloudinary": "2.0.3",
     "config": "3.3.7",
     "cookie-parser": "1.4.6",
