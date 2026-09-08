@@ -36,12 +36,8 @@ the correct node for all scripts (`pnpm dev`, `pnpm test`, …). Verify with
 
 ### Local Development Setup
 
-Install all the packages using the following command:
-
-```shell
-pnpm install
-```
-Now if one runs pnpm install. The pnpm-lock.yaml will be unexpectedly updated with an unknown future version of a dependency, potentially breaking the build in the future. To ensure that the pnpm-lock.yaml file is not update, you will need to use the --frozen-lockfile flag.
+Install all the packages with a frozen lockfile, so versions stay exactly
+as locked:
 
 ```shell
 pnpm install --frozen-lockfile

@@ -5,12 +5,17 @@ blockExoticSubdeps: true
 # Block updates where the new version looks less trustworthy than older ones
 # (for example, published without proof of origin). This can signal a hacked package.
 trustPolicy: no-downgrade
-# Skip the trust check above for packages published over a year ago.
-# 5 old packages in our tree (semver 5/6, jose 4.15.x, eslint-config 9.x,
-# prettier-plugin 4.x) were released before their authors started signing,
-# so they would fail the check even though they are safe. New releases are
-# still fully checked. 525600 = 60 x 24 x 365 (one year in minutes).
-trustPolicyIgnoreAfter: 525600
+# Skip the trust check above for 5 old packages that were released before
+# their authors started signing (so they fail the check even though they
+# are safe). Listed by exact version; new releases are still fully checked.
+# trustPolicyExcludePrune drops entries the lockfile no longer resolves.
+trustPolicyExclude:
+  - 'eslint-config-prettier@9.1.2'
+  - 'eslint-plugin-prettier@4.2.5'
+  - 'jose@4.15.9'
+  - 'semver@5.7.2'
+  - 'semver@6.3.1'
+trustPolicyExcludePrune: true
 # Fail the install if a package wants to run a setup script we have not
 # reviewed yet. Approved and blocked scripts are listed under allowBuilds.
 # (This is already pnpm's default; written here so the rule is visible.)
