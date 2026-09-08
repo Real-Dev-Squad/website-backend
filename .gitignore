@@ -3,8 +3,7 @@
 # Logs
 *.log
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+pnpm-debug.log*
 lerna-debug.log*
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
@@ -67,8 +66,8 @@ web_modules/
 # Output of 'npm pack'
 *.tgz
 
-# Yarn Integrity file
-.yarn-integrity
+# pnpm
+.pnpm-store/
 
 # dotenv environment variables file
 .env
@@ -109,13 +108,6 @@ dist
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
 
-# yarn v2
-
-.yarn/cache
-.yarn/unplugged
-.yarn/build-state.yml
-.pnp.*
-
 # Jetbrains IDE files
 .idea
 
@@ -125,4 +117,6 @@ dist
 # Local config file
 config/local.js
 
+# Lockfiles from other package managers - this repo uses pnpm (pnpm-lock.yaml)
 package-lock.json
+yarn.lock

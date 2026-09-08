@@ -1,5 +1,5 @@
-# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+# This workflow will do a clean install of node dependencies, build the source code and run tests
+# pnpm setup follows https://pnpm.io/continuous-integration#github-actions
 
 name: Tests
 
@@ -13,15 +13,25 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
-    strategy:
-      matrix:
-        node-version: [22.10.0]
-
     steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      # Installs the pnpm from package.json. Node.js follows automatically from
+      # devEngines.runtime (downloaded on first use), so no version or runtime
+      # inputs here — package.json is the single source of truth.
+      - name: Install pnpm
+        uses: pnpm/setup@703c52620218391530e48b9e8870d5c0082e1b9b # v2.1.0
         with:
-          node-version: ${{ matrix.node-version }}
-      - run: yarn
-      - run: yarn test
+          cache: true
+          install: false
+      - name: Get pnpm metadata cache dir
+        id: pnpm-cache-dir
+        run: echo "dir=$(pnpm cache path)" >> "$GITHUB_OUTPUT"
+      - name: Restore pnpm metadata cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          # Holds pnpm's metadata plus the lockfile verification log, so an
+          # unchanged lockfile skips the supply-chain re-check.
+          path: ${{ steps.pnpm-cache-dir.outputs.dir }}
+          key: pnpm-meta-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test
