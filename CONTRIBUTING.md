@@ -1,7 +1,7 @@
 # Contributing to Real Dev Squad API
 
 - [Getting Started](#getting-started)
-- [Yarn Command Reference](#yarn-command-reference)
+- [Pnpm Command Reference](#pnpm-command-reference)
 - [Project Structure](#project-structure)
 - [Generating Authentication Token](#generating-authentication-token)
 - [Testing Guidelines](#testing-guidelines)
@@ -12,26 +12,26 @@
 
 Instructions for initial setup can be found in the [README](README.md).
 
-## Yarn Command Reference
+## Pnpm Command Reference
 
-##### `yarn`
+##### `pnpm install`
 
 Installs all `dependencies` listed in the root `package.json`.
 
-##### `yarn run test`
+##### `pnpm test`
 
-The script associated with `yarn run test` will run all tests that ensures that your commit does not break anything in the
+The script associated with `pnpm test` will run all tests that ensures that your commit does not break anything in the
 repository. This will run the lint, integration and unit tests.
 
-##### `yarn run lint`
+##### `pnpm lint`
 
 Runs the lint checks in the project.
 
-##### `yarn run generate-api-schema`
+##### `pnpm generate-api-schema`
 
 Generates the API schema in the file `public/apiSchema.json`.
 
-##### `yarn run validate-setup`
+##### `pnpm validate-setup`
 
 Runs the test for checking local development setup is working properly or not.
 
@@ -84,7 +84,8 @@ The following project structure should be followed:
     |-- README.md
     |-- CHANGELOG.md
     |-- app.js
-    |-- package-lock.json
+    |-- pnpm-workspace.yaml // pnpm allowBuilds approvals
+    |-- pnpm-lock.yaml
     |-- package.json
     |-- server.js // Contains server start logic
 
@@ -125,14 +126,14 @@ rds-session-staging
   - [nock](https://github.com/nock/nock/blob/main/README.md): HTTP requests mocking
 - The test suite uses [Firebase Local Emulator Suite](https://firebase.google.com/docs/emulator-suite) for running firestore for tests([documentation](https://firebase.google.com/docs/emulator-suite/install_and_configure)).
 - Pre-requisites:
-  - Node.js version 8.0 or higher.
+  - Node.js 22.10.0 (installed automatically by pnpm, see README).
   - Java version 1.8 or higher.
 
 ## Using Firebase Emulator Locally
 
 - [Firebase Local Emulator Suite](https://firebase.google.com/docs/emulator-suite) can be used locally as the DB for the project
 - Pre-requisites:
-  - Node.js version 8.0 or higher.
+  - Node.js 22.10.0 (installed automatically by pnpm, see README).
   - Java version 1.8 or higher.
 - Run: `npx firebase emulators:start`
 - The emulator will run and display the url you can access it on.
@@ -146,8 +147,8 @@ export FIRESTORE_EMULATOR_HOST="localhost:<Firebase emulator PORT>"
 ## Running test scripts on Windows
 
 - Git Bash is recommended for running test scripts on Windows.
-- Run `yarn run test-integration` for running integration tests.
-- Run `yarn run test-unit` for running unit tests.
+- Run `pnpm test-integration` for running integration tests.
+- Run `pnpm test-unit` for running unit tests.
 - Make sure the server is not running.
 - Make sure to close the emulator window after running the tests in order to avoid the blocking of the port for the next tests to run.
 - For e.g - After running the integration tests, close the emulator window and then run the command for unit tests.
@@ -163,7 +164,7 @@ export FIRESTORE_EMULATOR_HOST="localhost:<Firebase emulator PORT>"
 ## Certain issues you may face while running the tests:
 
 - Java version is not above 11
-- When we run yarn test, it runs both the unit and integration tests (in this order). So after the unit tests are done, the java process is not killed automatically and when our integration test run it gives error.
+- When we run pnpm test, it runs both the unit and integration tests (in this order). So after the unit tests are done, the java process is not killed automatically and when our integration test run it gives error.
 - Error: connect ECONNREFUSED ::1:8081
 
 ## Possible solutions for above issues (in particular order):

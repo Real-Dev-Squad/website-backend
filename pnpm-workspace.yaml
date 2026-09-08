@@ -1,0 +1,46 @@
+# Supply-chain hardening (see https://pnpm.io/supply-chain-security).
+# Only allow dependencies from the npm registry.
+# Block git links and direct download URLs, even deep in the dependency tree.
+blockExoticSubdeps: true
+# Block updates where the new version looks less trustworthy than older ones
+# (for example, published without proof of origin). This can signal a hacked package.
+trustPolicy: no-downgrade
+# Skip the trust check above for 5 old packages that were released before
+# their authors started signing (so they fail the check even though they
+# are safe). Listed by exact version; new releases are still fully checked.
+# trustPolicyExcludePrune drops entries the lockfile no longer resolves.
+trustPolicyExclude:
+  - 'eslint-config-prettier@9.1.2'
+  - 'eslint-plugin-prettier@4.2.5'
+  - 'jose@4.15.9'
+  - 'semver@5.7.2'
+  - 'semver@6.3.1'
+trustPolicyExcludePrune: true
+# Fail the install if a package wants to run a setup script we have not
+# reviewed yet. Approved and blocked scripts are listed under allowBuilds.
+# (This is already pnpm's default; written here so the rule is visible.)
+strictDepBuilds: true
+# Lock universal-analytics to 0.5.3. Version 0.5.4 needs uuid v14, which only
+# works as ESM and crashes firebase-tools. 0.5.3 uses uuid v8 and works.
+overrides:
+  universal-analytics: 0.5.3
+allowBuilds:
+  # Needed at runtime, no backup plan if skipped. Keep allowed.
+  # farmhash: used directly by firebase-admin.
+  farmhash: true
+  # pre-commit: sets up the git hook that runs lint before each commit.
+  # Blocking it would silently turn the hook off.
+  pre-commit: true
+  # Not needed, safe to block.
+  # re2: only used by the firebase dev server, which works fine without it.
+  re2: false
+  # Only add extra newrelic stats. The app works fine without them.
+  '@newrelic/native-metrics': false
+  '@contrast/fn-inspect': false
+  # Only prints a warning message. Nothing breaks without it.
+  protobufjs: false
+  # Only needed on very old node versions. We run node 22, so it does nothing.
+  spawn-sync: false
+  # Only matters on Firebase App Hosting. We don't deploy there,
+  # and the app already handles it being skipped.
+  '@firebase/util': false
