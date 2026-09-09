@@ -1,6 +1,5 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 const app = require("../../server");
 const cleanDb = require("../utils/cleanDb");
 const bot = require("../utils/generateBotToken");
@@ -19,7 +18,6 @@ const userModel = firestore.collection("users");
 const tasksModel = firestore.collection("tasks");
 const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../../constants/external-accounts");
 const config = require("config");
-chai.use(chaiHttp);
 const cookieName = config.get("userToken.cookieName");
 
 describe("External Accounts", function () {
@@ -35,8 +33,8 @@ describe("External Accounts", function () {
     });
 
     it("Should create a new external account data in firestore", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/external-accounts")
         .set("Authorization", `Bearer ${jwtToken}`)
         .send(externalAccountData[0])
@@ -53,8 +51,8 @@ describe("External Accounts", function () {
     });
 
     it("Should return 400 when adding incorrect data in firestore", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/external-accounts")
         .set("Authorization", `Bearer ${jwtToken}`)
         .send(externalAccountData[1])
@@ -74,8 +72,8 @@ describe("External Accounts", function () {
     });
 
     it("Should return 400 when authorization header is not present", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/external-accounts")
         .send(externalAccountData[0])
         .end((err, res) => {
@@ -94,8 +92,8 @@ describe("External Accounts", function () {
     });
 
     it("Should return 401 when authorization header is incorrect", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/external-accounts")
         .set("Authorization", `Bearer ${BAD_TOKEN}`)
         .send(externalAccountData[0])
@@ -116,8 +114,8 @@ describe("External Accounts", function () {
 
     it("Should return 409 when token already exists", function (done) {
       externalAccountsModel.addExternalAccountData(externalAccountData[0]);
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/external-accounts")
         .set("Authorization", `Bearer ${jwtToken}`)
         .send(externalAccountData[0])
@@ -153,8 +151,8 @@ describe("External Accounts", function () {
     });
 
     it("Should return 200 when data is returned successfully", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/external-accounts/<TOKEN>")
         .set("Authorization", `Bearer ${jwt}`)
         .end((err, res) => {
@@ -173,8 +171,8 @@ describe("External Accounts", function () {
     });
 
     it("Should return 404 when no data found", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/external-accounts/<TOKEN_2>")
         .set("Authorization", `Bearer ${jwt}`)
         .end((err, res) => {
@@ -190,8 +188,8 @@ describe("External Accounts", function () {
     });
 
     it("Should return 401 when token is expired", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/external-accounts/<TOKEN_1>")
         .set("Authorization", `Bearer ${jwt}`)
         .end((err, res) => {
@@ -211,8 +209,8 @@ describe("External Accounts", function () {
     });
 
     it("Should return 401 when user is not authenticated", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/external-accounts/<TOKEN>")
         .end((err, res) => {
           if (err) {
@@ -254,10 +252,10 @@ describe("External Accounts", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getDiscordMembers),
-        })
+        }),
       );
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/external-accounts/discord-sync")
         .set("Cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
@@ -278,8 +276,8 @@ describe("External Accounts", function () {
 
     it("returns 5xx errors", function (done) {
       fetchStub.throws(new Error("Some Internal Error"));
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/external-accounts/discord-sync")
         .set("Cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
@@ -331,11 +329,11 @@ describe("External Accounts", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getDiscordMembers),
-        })
+        }),
       );
 
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post("/external-accounts/users")
         .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
         .set("Cookie", `${cookieName}=${superUserJwt}`);
@@ -358,10 +356,10 @@ describe("External Accounts", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getDiscordMembers),
-        })
+        }),
       );
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post("/external-accounts/users")
         .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
         .set("Cookie", `${cookieName}=${superUserJwt}`);
@@ -384,10 +382,10 @@ describe("External Accounts", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getDiscordMembers),
-        })
+        }),
       );
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post("/external-accounts/users")
         .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
         .set("Cookie", `${cookieName}=${superUserJwt}`);
@@ -410,10 +408,10 @@ describe("External Accounts", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getDiscordMembers),
-        })
+        }),
       );
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post("/external-accounts/users")
         .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
         .set("Cookie", `${cookieName}=${superUserJwt}`);
@@ -431,8 +429,8 @@ describe("External Accounts", function () {
 
     it("Should Handle 5xx Errors", function (done) {
       fetchStub.throws(new Error("Some Internal Error"));
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/external-accounts/users")
         .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
         .set("Cookie", `${cookieName}=${superUserJwt}`)
@@ -464,14 +462,17 @@ describe("External Accounts", function () {
     });
 
     it("Should return 404 when token is not provided in path variable", async function () {
-      const res = await chai.request(app).patch("/external-accounts/link").set("Cookie", `${cookieName}=${newUserJWT}`);
+      const res = await request
+        .execute(app)
+        .patch("/external-accounts/link")
+        .set("Cookie", `${cookieName}=${newUserJWT}`);
       expect(res).to.have.status(404);
       expect(res.body.message).to.equal("Not Found");
     });
 
     it("Should return 404 when no data found", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/external-accounts/<TOKEN_2>")
         .set("Authorization", `Bearer ${newUserJWT}`)
         .end((err, res) => {
@@ -487,8 +488,8 @@ describe("External Accounts", function () {
     });
 
     it("Should return 401 when token is expired", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/external-accounts/<TOKEN_1>")
         .set("Authorization", `Bearer ${newUserJWT}`)
         .end((err, res) => {
@@ -508,8 +509,8 @@ describe("External Accounts", function () {
     });
 
     it("Should return 401 when user is not authenticated", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/external-accounts/<TOKEN>")
         .end((err, res) => {
           if (err) {
@@ -529,8 +530,8 @@ describe("External Accounts", function () {
 
     it("Should return 200 when valid token is provided and link discord account successfully", async function () {
       await externalAccountsModel.addExternalAccountData(externalAccountData[2]);
-      const getUserResponseBeforeUpdate = await chai
-        .request(app)
+      const getUserResponseBeforeUpdate = await request
+        .execute(app)
         .get("/users/self")
         .set("cookie", `${cookieName}=${newUserJWT}`);
 
@@ -544,8 +545,8 @@ describe("External Accounts", function () {
         message: "Role deleted successfully",
       });
 
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .patch(`/external-accounts/link/${externalAccountData[2].token}`)
         .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
         .set("Cookie", `${cookieName}=${newUserJWT}`);
@@ -554,8 +555,8 @@ describe("External Accounts", function () {
       expect(response.body).to.have.property("message");
       expect(response.body.message).to.equal("Your discord profile has been linked successfully");
 
-      const updatedUserDetails = await chai
-        .request(app)
+      const updatedUserDetails = await request
+        .execute(app)
         .get("/users/self")
         .set("cookie", `${cookieName}=${newUserJWT}`);
 
@@ -574,8 +575,8 @@ describe("External Accounts", function () {
         message: "Role deleted successfully",
       });
 
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .patch(`/external-accounts/link/${externalAccountData[2].token}`)
         .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
         .set("Cookie", `${cookieName}=${newUserJWT}`);
@@ -600,8 +601,8 @@ describe("External Accounts", function () {
         message: "Role doesn't exist",
       });
 
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .patch(`/external-accounts/link/${externalAccountData[2].token}`)
         .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
         .set("Cookie", `${cookieName}=${newUserJWT}`);
@@ -622,8 +623,8 @@ describe("External Accounts", function () {
         message: "Role deletion from discord failed",
       });
 
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .patch(`/external-accounts/link/${externalAccountData[2].token}`)
         .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
         .set("Cookie", `${cookieName}=${newUserJWT}`);
@@ -644,8 +645,8 @@ describe("External Accounts", function () {
         message: "Role deletion from database failed",
       });
 
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .patch(`/external-accounts/link/${externalAccountData[2].token}`)
         .query({ action: EXTERNAL_ACCOUNTS_POST_ACTIONS.DISCORD_USERS_SYNC })
         .set("Cookie", `${cookieName}=${newUserJWT}`);

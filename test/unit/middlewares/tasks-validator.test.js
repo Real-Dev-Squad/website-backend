@@ -1,3 +1,4 @@
+const { expect } = require("chai");
 const Sinon = require("sinon");
 const {
   getTasksValidator,
@@ -6,7 +7,6 @@ const {
   getUsersValidator,
   updateTask: updateTaskValidator,
 } = require("../../../middlewares/validators/tasks");
-const { expect } = require("chai");
 const { TASK_STATUS, tasksUsersStatus } = require("../../../constants/tasks");
 
 describe("getTasks validator", function () {

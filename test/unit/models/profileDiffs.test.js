@@ -1,5 +1,4 @@
-const chai = require("chai");
-const { expect } = chai;
+const { expect } = require("chai");
 const cleanDb = require("../../utils/cleanDb");
 const profileDiffsQuery = require("../../../models/profileDiffs");
 const getProfileDiffs = require("../../fixtures/profileDiffs/profileDiffs");
@@ -46,7 +45,7 @@ describe("profileDiffs", function () {
       Object.freeze(error);
       expect(error).to.be.an("Error");
       expect(error.message).to.be.equal(
-        'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.'
+        'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.',
       );
     });
 
@@ -62,7 +61,7 @@ describe("profileDiffs", function () {
       Object.freeze(error);
       expect(error).to.be.an("Error");
       expect(error.message).to.be.equal(
-        'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.'
+        'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.',
       );
     });
 
@@ -78,7 +77,7 @@ describe("profileDiffs", function () {
       Object.freeze(error);
       expect(error).to.be.an("Error");
       expect(error.message).to.be.equal(
-        'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.'
+        'Value for argument "documentPath" is not a valid resource path. Path must be a non-empty string.',
       );
     });
 

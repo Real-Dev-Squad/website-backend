@@ -1,5 +1,5 @@
-const Sinon = require("sinon");
 const { expect } = require("chai");
+const Sinon = require("sinon");
 
 const firestore = require("../../../utils/firestore");
 const tasksModel = firestore.collection("tasks");

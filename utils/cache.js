@@ -181,7 +181,7 @@ const cacheResponse = (options = {}) => {
           }
 
           const cacheValue = {
-            priority: priority,
+            priority,
             response: body,
             expiry: new Date().getTime() + minutesToMilliseconds(expiry),
             size: Buffer.byteLength(body),

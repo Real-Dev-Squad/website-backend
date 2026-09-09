@@ -1,3 +1,4 @@
+const { expect } = require("chai");
 const Sinon = require("sinon");
 const {
   validateGroupRoleBody,
@@ -5,7 +6,6 @@ const {
   validateUpdateUsersNicknameStatusBody,
   validateLazyLoadingParams,
 } = require("../../../middlewares/validators/discordactions");
-const { expect } = require("chai");
 
 describe("Middleware | Validators | discord actions", function () {
   describe("validateGroupRoleBody", function () {

@@ -88,7 +88,7 @@ const fetchPaginatedTaskRequests = async (queries = {}) => {
     for (const [filterKey, filterValue] of Object.entries(filterQueries)) {
       const valuesList = filterValue
         .map((query) =>
-          query.operator === Operators.INCLUDE ? Reflect.get(TASK_REQUEST_FILTER_VALUES, query.value) : null
+          query.operator === Operators.INCLUDE ? Reflect.get(TASK_REQUEST_FILTER_VALUES, query.value) : null,
         )
         .filter(Boolean);
 
@@ -531,7 +531,7 @@ const addNewFields = async () => {
         bulkWriter.update(taskRequestsCollection.doc(taskRequestsSnapshot.id), updatedTaskRequestData);
         documentsModified++;
       }
-    })
+    }),
   );
 
   await bulkWriter.close();

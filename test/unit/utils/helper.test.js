@@ -1,4 +1,4 @@
-const chai = require("chai");
+const { expect } = require("chai");
 const {
   getDateTimeRangeForPRs,
   getQualifiers,
@@ -6,7 +6,6 @@ const {
   findSubscribedGroupIds,
 } = require("../../../utils/helper");
 const { TASK_STATUS, TASK_SIZE } = require("../../../constants/tasks");
-const { expect } = chai;
 
 describe("helper", function () {
   describe("getDateTimeRangeForPRs", function () {

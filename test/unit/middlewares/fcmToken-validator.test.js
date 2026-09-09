@@ -1,6 +1,6 @@
+const { expect } = require("chai");
 const Sinon = require("sinon");
 
-const { expect } = require("chai");
 const { fcmTokenValidator } = require("../../../middlewares/validators/fcmToken");
 
 describe("Test the fcmToken validator", function () {

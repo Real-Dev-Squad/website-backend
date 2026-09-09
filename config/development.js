@@ -7,7 +7,7 @@ const port = 3000;
 const localUrl = `http://localhost:${port}`;
 
 module.exports = {
-  port: port,
+  port,
   enableFileLogs: false,
   enableConsoleLogs: true,
   discordNewComersChannelId: "709080951824842783",

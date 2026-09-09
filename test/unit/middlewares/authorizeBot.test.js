@@ -1,6 +1,6 @@
 const authorizeBot = require("../../../middlewares/authorizeBot");
 const sinon = require("sinon");
-const expect = require("chai").expect;
+const { expect } = require("chai");
 const bot = require("../../utils/generateBotToken");
 const jwt = require("jsonwebtoken");
 const {
@@ -76,7 +76,7 @@ describe("Middleware | Authorize Bot", function () {
       expect(nextSpy.calledOnce).to.be.equal(false);
     });
 
-    it("Should stop propagation for no auth token", function () {
+    it("Should stop propagation for no auth token", async function () {
       const request = {
         headers: {},
       };
@@ -85,13 +85,13 @@ describe("Middleware | Authorize Bot", function () {
 
       const nextSpy = sinon.spy();
 
-      authorizeBot.verifyCronJob(request, response, nextSpy).catch((err) => {
+      await authorizeBot.verifyCronJob(request, response, nextSpy).catch((err) => {
         expect(err).to.be.instanceOf(Error);
       });
       expect(nextSpy.calledOnce).to.be.equal(false);
     });
 
-    it("Should stop propagation for bad token data", function () {
+    it("Should stop propagation for bad token data", async function () {
       const jwtToken = bot.generateCronJobToken({ name: "Some Random Name" });
       const request = {
         headers: {
@@ -103,7 +103,7 @@ describe("Middleware | Authorize Bot", function () {
 
       const nextSpy = sinon.spy();
 
-      authorizeBot.verifyCronJob(request, response, nextSpy).catch((err) => {
+      await authorizeBot.verifyCronJob(request, response, nextSpy).catch((err) => {
         expect(err).to.be.instanceOf(Error);
       });
       expect(nextSpy.calledOnce).to.be.equal(false);

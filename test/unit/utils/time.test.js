@@ -1,6 +1,5 @@
-const chai = require("chai");
+const { expect } = require("chai");
 const sinon = require("sinon");
-const { expect } = chai;
 
 const cleanDb = require("../../utils/cleanDb");
 const timeUtils = require("../../../utils/time");

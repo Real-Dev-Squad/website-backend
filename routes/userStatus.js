@@ -32,7 +32,7 @@ router.patch(
   "/batch",
   authorizeAndAuthenticate([ROLES.SUPERUSER], [Services.CRON_JOB_HANDLER]),
   validateMassUpdate,
-  batchUpdateUsersStatus
+  batchUpdateUsersStatus,
 );
 router.patch("/:userId", authenticate, validateUserStatus, updateUserStatuses);
 router.delete("/:userId", authenticate, authorizeRoles([SUPERUSER]), deleteUserStatus);

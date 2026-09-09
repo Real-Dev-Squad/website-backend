@@ -1,6 +1,5 @@
-import chai from "chai";
+import { expect } from "chai";
 import sinon from "sinon";
-const { expect } = chai;
 
 import { createTaskRequestValidator } from "./../../../middlewares/validators/taskRequests";
 

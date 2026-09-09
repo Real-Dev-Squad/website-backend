@@ -1,6 +1,5 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 const sinon = require("sinon");
 const artsQuery = require("../../models/arts");
 
@@ -18,8 +17,6 @@ const cookieName = config.get("userToken.cookieName");
 const { addJoinData } = require("../../models/users");
 const joinData = require("../fixtures/user/join");
 
-chai.use(chaiHttp);
-
 describe("Arts", function () {
   let jwt;
   let userId = "";
@@ -36,8 +33,8 @@ describe("Arts", function () {
 
   describe("POST /arts/user/add", function () {
     it("Should add the art in system", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/arts/user/add")
         .set("cookie", `${cookieName}=${jwt}`)
         .send(artData[0])
@@ -54,8 +51,8 @@ describe("Arts", function () {
     });
 
     it("Should return 401, for Unauthenticated User", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/arts/user/add")
         .send(artData[0])
         .end((err, res) => {
@@ -78,8 +75,8 @@ describe("Arts", function () {
 
   describe("GET /arts", function () {
     it("Should get all the arts in system", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/arts")
         .end((err, res) => {
           if (err) {
@@ -99,8 +96,8 @@ describe("Arts", function () {
 
   describe("GET /arts/user/self", function () {
     it("Should get all the arts of the user", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/arts/user/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -115,7 +112,7 @@ describe("Arts", function () {
           expect(res.body.arts[0].title).to.equal(artData[0].title);
           expect(res).to.have.header(
             "X-Deprecation-Warning",
-            "WARNING: This endpoint is deprecated and will be removed in the future. Please use /arts/:userId to get the art details."
+            "WARNING: This endpoint is deprecated and will be removed in the future. Please use /arts/:userId to get the art details.",
           );
 
           return done();
@@ -123,8 +120,8 @@ describe("Arts", function () {
     });
 
     it("Should return 401, for Unauthenticated User", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/arts/user/self")
         .end((err, res) => {
           if (err) {
@@ -150,8 +147,8 @@ describe("Arts", function () {
     });
 
     it("Should get all the arts of the user", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/arts/${userId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -170,8 +167,8 @@ describe("Arts", function () {
     });
 
     it("Should return 401, for Unauthenticated User", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/arts/${userId}`)
         .end((err, res) => {
           if (err) {
@@ -193,8 +190,8 @@ describe("Arts", function () {
     it("Should return 204 No Content if no arts are found", function (done) {
       sinon.stub(artsQuery, "fetchUserArts").resolves([]);
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/arts/${userId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -213,8 +210,8 @@ describe("Arts", function () {
     it("Should return 500 Internal Server Error if there is an exception", function (done) {
       sinon.stub(artsQuery, "fetchUserArts").throws(new Error("Database error"));
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/arts/${userId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {

@@ -1,10 +1,6 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
+const { expect } = require("chai");
 
 const authService = require("../../../services/authService");
-
-chai.use(chaiHttp);
 
 describe("authService", function () {
   it("should validate the generated JWT", function (done) {

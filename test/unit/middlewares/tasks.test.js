@@ -1,5 +1,5 @@
-const { updateTask } = require("../../../middlewares/validators/tasks"); // Replace with the actual path to your updateTask module
 const { expect } = require("chai");
+const { updateTask } = require("../../../middlewares/validators/tasks"); // Replace with the actual path to your updateTask module
 const sinon = require("sinon");
 
 describe("updateTask function", function () {

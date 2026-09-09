@@ -1,3 +1,4 @@
+const { expect } = require("chai");
 const sinon = require("sinon");
 const {
   validateJoinData,
@@ -6,7 +7,6 @@ const {
 } = require("./../../../middlewares/validators/user");
 const joinData = require("./../../fixtures/user/join");
 const userData = require("./../../fixtures/user/user");
-const { expect } = require("chai");
 const { updateUser, getUsers } = require("./../../../middlewares/validators/user");
 
 describe("Middleware | Validators | User", function () {

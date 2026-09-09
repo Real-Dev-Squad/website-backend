@@ -1,7 +1,6 @@
-import chai from "chai";
+import { expect } from "chai";
 import sinon from "sinon";
 const Sinon = sinon;
-const { expect } = chai;
 const applicationValidator = require("../../../middlewares/validators/application");
 const applicationsData = require("../../fixtures/applications/applications")();
 

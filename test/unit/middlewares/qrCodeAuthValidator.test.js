@@ -1,10 +1,10 @@
+const { expect } = require("chai");
 const Sinon = require("sinon");
 const {
   validateAuthStatus,
   storeUserDeviceInfo,
   validateFetchingUserDocument,
 } = require("../../../middlewares/validators/qrCodeAuth");
-const { expect } = require("chai");
 const { userDeviceInfoDataArray } = require("../../fixtures/qrCodeAuth/qrCodeAuth");
 describe("qrCodeAuth", function () {
   describe("test post call validator", function () {

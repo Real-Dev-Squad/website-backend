@@ -22,6 +22,15 @@ const middleware = (app) => {
   app.use(express.urlencoded({ extended: false }));
   app.use(cookieParser());
 
+  // Express 5 leaves req.body undefined when no body parser runs for the
+  // request (e.g. no JSON content-type). The codebase was written against
+  // Express 4, which always defaulted req.body to {}, so normalize it here
+  // to keep validators and controllers from crashing on destructuring.
+  app.use(function defaultEmptyBody(req, _res, next) {
+    if (req.body === undefined) req.body = {};
+    next();
+  });
+
   // Middleware to add security headers. Few headers have been disabled as it does not serve any purpose for the API.
   app.use(
     helmet({
@@ -30,7 +39,7 @@ const middleware = (app) => {
       ieNoOpen: false,
       referrerPolicy: false,
       xssFilter: false,
-    })
+    }),
   );
 
   app.use(
@@ -38,7 +47,7 @@ const middleware = (app) => {
       origin: config.get("cors.allowedOrigins"),
       credentials: true,
       optionsSuccessStatus: 200,
-    })
+    }),
   );
   app.use(contentTypeCheck);
 

@@ -1,7 +1,6 @@
-const chai = require("chai");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 const sinon = require("sinon");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
 const nock = require("nock");
 
 const app = require("../../server");
@@ -14,8 +13,6 @@ const cleanDb = require("../utils/cleanDb");
 const goals = require("../../services/goalService");
 const { GET_OR_CREATE_GOAL_USER } = require("../fixtures/goals/Token");
 
-chai.use(chaiHttp);
-
 const user = userData[6];
 let jwt;
 let goalSiteConfig;
@@ -25,7 +22,7 @@ describe("Goals Site", function () {
     const userId = await addUser(user);
     user.id = userId;
     const goalsBackendUserId = "test_1";
-    jwt = authService.generateAuthToken({ userId: userId });
+    jwt = authService.generateAuthToken({ userId });
     goalSiteConfig = config.services.goalAPI;
 
     nock(goalSiteConfig.baseUrl)
@@ -70,8 +67,8 @@ describe("Goals Site", function () {
     it("Should set the cookie successfully on the request and return success", function (done) {
       sinon.stub(goals, "getOrCreateGoalUser").resolves(GET_OR_CREATE_GOAL_USER);
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/goals/token/")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {

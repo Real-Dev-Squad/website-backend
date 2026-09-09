@@ -1,6 +1,5 @@
-const chai = require("chai");
+const { expect } = require("chai");
 const sinon = require("sinon");
-const { expect } = chai;
 const authenticateProfile = require("../../../middlewares/authenticateProfile.js");
 
 describe("authenticateProfile Middleware", function () {

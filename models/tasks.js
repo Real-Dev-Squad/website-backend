@@ -95,7 +95,7 @@ const updateTask = async (taskData, taskId = null) => {
               const dependencyDoc = await tasksModel.doc(dependency).get();
               if (dependencyDoc.exists) {
                 const taskDependsOn = {
-                  taskId: taskId,
+                  taskId,
                   dependsOn: dependency,
                 };
                 const docRef = dependencyModel.doc();
@@ -129,7 +129,7 @@ const addDependency = async (data) => {
     }
     for (const dependency of dependsOn) {
       const taskDependOn = {
-        taskId: taskId,
+        taskId,
         dependsOn: dependency,
       };
       const docid = dependencyModel.doc();
@@ -579,7 +579,7 @@ const overdueTasks = async (overDueTasks) => {
           unassignedMember: assignee,
           unassignedTask,
         };
-      })
+      }),
     );
     return newAvailableTasks;
   } catch (err) {
@@ -654,7 +654,7 @@ const updateTaskStatus = async () => {
           updatedTaskDetails: res.updatedTaskDetails,
           failedTaskDetails: res.failedTaskDetails,
         };
-      })
+      }),
     );
 
     updatedTasksPromises.forEach((res) => {

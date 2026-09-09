@@ -1,12 +1,12 @@
 const firestore = require("../utils/firestore");
-const admin = require("firebase-admin");
+const { Timestamp } = require("firebase-admin/firestore");
 
 const chaincodeModel = firestore.collection("chaincodes");
 const storeChaincode = async (userId) => {
   try {
     const userChaincode = await chaincodeModel.add({
       userId,
-      timestamp: admin.firestore.Timestamp.fromDate(new Date()),
+      timestamp: Timestamp.fromDate(new Date()),
     });
     return userChaincode.id;
   } catch (error) {

@@ -1,6 +1,5 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 const sinon = require("sinon");
 
 const app = require("../../server");
@@ -18,8 +17,6 @@ const cacheData = require("../fixtures/cloudflareCache/data");
 
 const superUser = userData[4];
 
-chai.use(chaiHttp);
-
 describe("Purged Cache Metadata", function () {
   let jwt;
 
@@ -36,8 +33,8 @@ describe("Purged Cache Metadata", function () {
     });
 
     it("Should return no cache is cleared yet if no cache logs found in last 24 hours", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/cache")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((error, response) => {
@@ -55,8 +52,8 @@ describe("Purged Cache Metadata", function () {
 
     it("Should return latest purged cache metadata in last 24 hours", function (done) {
       sinon.stub(logsQuery, "fetchCacheLogs").returns(cacheData.cacheModelData);
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/cache")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((error, response) => {
@@ -75,8 +72,8 @@ describe("Purged Cache Metadata", function () {
     });
 
     it("Should return unauthorized error when not logged in", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/cache")
         .end((err, res) => {
           if (err) {
@@ -111,8 +108,8 @@ describe("Purged Cache Metadata", function () {
     });
 
     it("Should purge the cache of member's profile page", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/cache")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -134,8 +131,8 @@ describe("Purged Cache Metadata", function () {
     });
 
     it("Should purge the cache by superuser of member's profile page", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/cache")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ user: userData[0].username })
@@ -158,8 +155,8 @@ describe("Purged Cache Metadata", function () {
     });
 
     it("Should return username does not exist provided by superUser", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/cache")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ user: "username" })
@@ -177,8 +174,8 @@ describe("Purged Cache Metadata", function () {
     });
 
     it("Should return unauthorized error when not logged in", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/cache")
         .end((err, res) => {
           if (err) {

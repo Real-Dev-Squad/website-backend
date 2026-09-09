@@ -1,6 +1,6 @@
+import { expect } from "chai";
 import { convertDateStringToMilliseconds, getNewDeadline } from "../../../utils/requests"
 import { convertDaysToMilliseconds } from "../../../utils/time";
-import {expect} from "chai";
 
 describe("Test getNewDeadline", () => {
     const currentDate = Date.now();

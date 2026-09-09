@@ -52,7 +52,7 @@ const getSelfArts = async (req, res) => {
     const arts = await artsQuery.fetchUserArts(id);
     res.set(
       "X-Deprecation-Warning",
-      "WARNING: This endpoint is deprecated and will be removed in the future. Please use /arts/:userId to get the art details."
+      "WARNING: This endpoint is deprecated and will be removed in the future. Please use /arts/:userId to get the art details.",
     );
     return res.json({
       message: "User arts returned successfully!",

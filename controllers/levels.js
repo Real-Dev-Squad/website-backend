@@ -1,5 +1,5 @@
 const LevelModel = require("../models/levels");
-const admin = require("firebase-admin");
+const { Timestamp } = require("firebase-admin/firestore");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 /**
@@ -14,7 +14,7 @@ const addLevel = async (req, res) => {
     const { id, levelData } = await LevelModel.addLevel({
       ...req.body,
       createdBy: req.userData.id,
-      date: admin.firestore.Timestamp.fromDate(new Date()),
+      date: Timestamp.fromDate(new Date()),
     });
     return res.json({
       message: "Level created successfully!",

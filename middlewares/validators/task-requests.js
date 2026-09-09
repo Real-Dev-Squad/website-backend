@@ -70,7 +70,7 @@ const getTaskRequests = async (req, res, next) => {
         joi.object().keys({
           value: joi.string().valid(...Object.values(TASK_REQUEST_STATUS).map((value) => value.toLowerCase())),
           operator: joi.string().optional(),
-        })
+        }),
       )
       .optional(),
     "request-type": joi
@@ -79,7 +79,7 @@ const getTaskRequests = async (req, res, next) => {
         joi.object().keys({
           value: joi.string().valid(...Object.values(TASK_REQUEST_TYPE).map((value) => value.toLowerCase())),
           operator: joi.string().optional(),
-        })
+        }),
       )
       .optional(),
   });

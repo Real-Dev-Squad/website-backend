@@ -1,6 +1,5 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 
 const app = require("../../server");
 const authService = require("../../services/authService");
@@ -13,8 +12,6 @@ const superUser = userData[4];
 
 const config = require("config");
 const cookieName = config.get("userToken.cookieName");
-
-chai.use(chaiHttp);
 
 describe("GET /profileDiffs", function () {
   let newUserId;
@@ -32,8 +29,8 @@ describe("GET /profileDiffs", function () {
   });
 
   it("Should return pending profileDiffs, using authorized user (super_user)", function (done) {
-    chai
-      .request(app)
+    request
+      .execute(app)
       .get("/profileDiffs")
       .set("cookie", `${cookieName}=${superUserAuthToken}`)
       .end((error, response) => {
@@ -50,8 +47,8 @@ describe("GET /profileDiffs", function () {
   });
 
   it("Should return unauthorized error when not authorized", function (done) {
-    chai
-      .request(app)
+    request
+      .execute(app)
       .get("/profileDiffs")
       .set("cookie", `${cookieName}=${newUserAuthToken}`)
       .end((error, response) => {

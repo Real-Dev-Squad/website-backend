@@ -42,7 +42,7 @@ const getExternalAccountData = async (req, res) => {
       return res.boom.unauthorized("Token Expired. Please generate it again");
     }
 
-    return res.status(200).json({ message: "Data returned successfully", attributes: attributes });
+    return res.status(200).json({ message: "Data returned successfully", attributes });
   } catch (error) {
     logger.error(`Error getting external account data: ${error}`);
     return res.boom.serverUnavailable(SOMETHING_WENT_WRONG);
@@ -68,14 +68,14 @@ const linkExternalAccount = async (req, res) => {
         discordId: attributes.discordId,
         discordJoinedAt: attributes.discordJoinedAt,
       },
-      userId
+      userId,
     );
 
     const unverifiedRoleId = config.get("discordUnverifiedRoleId");
     const unverifiedRoleRemovalResponse = await removeDiscordRoleUtils.removeDiscordRoleFromUser(
       req.userData,
       attributes.discordId,
-      unverifiedRoleId
+      unverifiedRoleId,
     );
 
     if (!unverifiedRoleRemovalResponse.success) {
@@ -259,11 +259,11 @@ const newSyncExternalAccountData = async (req, res) => {
 
     return res.json({
       message: "Data Sync Complete",
-      usersArchivedCount: usersArchivedCount,
-      usersUnArchivedCount: usersUnArchivedCount,
-      totalUsersProcessed: totalUsersProcessed,
+      usersArchivedCount,
+      usersUnArchivedCount,
+      totalUsersProcessed,
       rdsDiscordServerUsers: discordUserData.length,
-      backlogTasksCount: backlogTasksCount,
+      backlogTasksCount,
     });
   } catch (err) {
     logger.error("Error in syncing users discord joined at");

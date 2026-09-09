@@ -203,7 +203,7 @@ const updateTaskRequests = async (req, res) => {
     const taskRequestLog = {
       type: "taskRequests",
       meta: {
-        taskRequestId: taskRequestId,
+        taskRequestId,
         action: "update",
         subAction: action,
         userId: req.userData.id,

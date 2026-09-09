@@ -1,6 +1,6 @@
+const { expect } = require("chai");
 const Sinon = require("sinon");
 const { createArt } = require("../../../middlewares/validators/arts");
-const { expect } = require("chai");
 
 describe("Test the arts validator", function () {
   it("Allows the request to pass", async function () {

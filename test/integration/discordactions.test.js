@@ -1,6 +1,5 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 
 const app = require("../../server");
 const authService = require("../../services/authService");
@@ -44,7 +43,6 @@ const { generateUserStatusData } = require("../fixtures/userStatus/userStatus");
 const { getDiscordMembers } = require("../fixtures/discordResponse/discord-response");
 const { getOnboarding31DPlusMembers } = require("../fixtures/discordResponse/discord-response");
 const discordRolesModel = require("../../models/discordactions");
-chai.use(chaiHttp);
 const { userStatusDataForOooState } = require("../fixtures/userStatus/userStatus");
 const { generateCronJobToken } = require("../utils/generateBotToken");
 const { CRON_JOB_HANDLER } = require("../../constants/bot");
@@ -76,7 +74,7 @@ describe("Discord actions", function () {
     userId = await addUser(userData[0]);
     superUserId = await addUser(superUser);
     superUserAuthToken = authService.generateAuthToken({ userId: superUserId });
-    userAuthToken = authService.generateAuthToken({ userId: userId });
+    userAuthToken = authService.generateAuthToken({ userId });
     jwt = authService.generateAuthToken({ userId });
     discordId = "12345";
 
@@ -97,10 +95,10 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({ user: { avatar: 12345 } }),
-        })
+        }),
       );
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/discord-actions/avatar/verify/${discordId}`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -119,10 +117,10 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({ user: { avatar: 12345 } }),
-        })
+        }),
       );
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/discord-actions/avatar/verify/${discordId + "random-error-string"}`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -172,8 +170,8 @@ describe("Discord actions", function () {
     });
 
     it("should successfully return api response correctly", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/discord-actions/roles`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -194,8 +192,8 @@ describe("Discord actions", function () {
     });
 
     it("should successfully return new groups detail when flag is set", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/discord-actions/groups`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -218,7 +216,7 @@ describe("Discord actions", function () {
 
   describe("DELETE /discord-actions/groups/:groupId", function () {
     let groupId;
-    // eslint-disable-next-line mocha/no-setup-in-describe
+
     const roleData = groupData[0];
 
     beforeEach(async function () {
@@ -242,8 +240,8 @@ describe("Discord actions", function () {
         existingRoles: { data: () => ({ ...roleData, roleid: roleData.roleid }) },
       });
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .delete(`/discord-actions/groups/${groupId}?dev=true`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -264,8 +262,8 @@ describe("Discord actions", function () {
         message: "Role deleted successfully",
       });
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .delete(`/discord-actions/groups/${groupId}?dev=true`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -286,8 +284,8 @@ describe("Discord actions", function () {
         message: "Failed to delete role from Discord",
       });
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .delete(`/discord-actions/groups/${groupId}?dev=true`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -308,8 +306,8 @@ describe("Discord actions", function () {
         message: "Internal server error",
       });
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .delete(`/discord-actions/groups/${groupId}?dev=true`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -330,8 +328,8 @@ describe("Discord actions", function () {
         message: "Role deleted successfully",
       });
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .delete(`/discord-actions/groups/${groupId}?dev=true`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -354,8 +352,8 @@ describe("Discord actions", function () {
       });
 
       sinon.stub(discordRolesModel, "deleteGroupRole").resolves({ isSuccess: false });
-      chai
-        .request(app)
+      request
+        .execute(app)
         .delete(`/discord-actions/groups/${groupId}?dev=true`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -368,8 +366,8 @@ describe("Discord actions", function () {
     it("should return 500 when an internal error occurs", function (done) {
       sinon.restore();
       sinon.stub(discordRolesModel, "isGroupRoleExists").throws(new Error("Database error"));
-      chai
-        .request(app)
+      request
+        .execute(app)
         .delete(`/discord-actions/groups/${groupId}?dev=true`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -418,11 +416,11 @@ describe("Discord actions", function () {
             ],
           },
         },
-        { user: userData[0] }
+        { user: userData[0] },
       );
 
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post("/discord-actions/roles")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ roleid, userid: userData[0].discordId });
@@ -438,11 +436,11 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({}),
-        })
+        }),
       );
       const roleId = groupData[4].roleid;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post("/discord-actions/roles")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ roleid: roleId, userid: userData[0].discordId });
@@ -457,13 +455,13 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({}),
-        })
+        }),
       );
 
       const roleId = groupData[4].roleid;
       const body = { roleid: roleId, userid: userData[0].discordId };
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post("/discord-actions/roles")
         .set("cookie", `${cookieName}=${jwt}`)
         .send(body);
@@ -472,13 +470,13 @@ describe("Discord actions", function () {
       expect(res.body).to.be.an("object");
       expect(res.body.message).to.equal("Role added successfully!");
       expect(fetchStub.getCall(0).args[1].headers["X-Audit-Log-Reason"]).to.equal(
-        `Action initiator's username=>ankur and id=${userId}`
+        `Action initiator's username=>ankur and id=${userId}`,
       );
     });
 
     it("should not allow unknown role to be added to user", async function () {
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post("/discord-actions/roles")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ roleid: "randomId", userid: "abc" });
@@ -489,8 +487,8 @@ describe("Discord actions", function () {
     });
 
     it("should not allow role to be added when userid does not belong to authenticated user", async function () {
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post("/discord-actions/roles")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ roleid, userid: "asdf" });
@@ -525,10 +523,10 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({ roleId: "1234", wasSuccess: true }),
-        })
+        }),
       );
-      chai
-        .request(app)
+      request
+        .execute(app)
         .delete("/discord-actions/roles")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ roleid, userid: userData[0].discordId })
@@ -550,10 +548,10 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({ roleId: "1234", wasSuccess: true }),
-        })
+        }),
       );
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .delete("/discord-actions/roles")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ roleid, userid: userData[0].discordId });
@@ -562,13 +560,13 @@ describe("Discord actions", function () {
       expect(res.body).to.be.an("object");
       expect(res.body.message).to.equal("Role deleted successfully");
       expect(fetchStub.getCall(0).args[1].headers["X-Audit-Log-Reason"]).to.equal(
-        `Action initiator's username=>ankur and id=${userId}`
+        `Action initiator's username=>ankur and id=${userId}`,
       );
     });
 
     it("should not allow unknown role to be deleted from user", async function () {
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .delete("/discord-actions/roles")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ roleid: "randomId", userid: "abc" });
@@ -579,8 +577,8 @@ describe("Discord actions", function () {
     });
 
     it("should not allow role to be deleted when userid does not belong to authenticated user", async function () {
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .delete("/discord-actions/roles")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ roleid, userid: "asdf" });
@@ -591,8 +589,8 @@ describe("Discord actions", function () {
     });
 
     it("should handle internal server error", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .delete("/discord-actions/roles")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ roleid, userid: userData[0].discordId })
@@ -633,10 +631,10 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(discordUsers),
-        })
+        }),
       );
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post(`/discord-actions/nicknames/sync`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -696,11 +694,11 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(response),
-        })
+        }),
       );
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/discord-actions/nickname/status")
         .set("Authorization", `Bearer ${jwtToken}`)
         .send({
@@ -728,8 +726,8 @@ describe("Discord actions", function () {
       sinon.stub(discordRolesModel, "updateUsersNicknameStatus").throws(new Error());
 
       sinon.stub();
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/discord-actions/nickname/status")
         .set("Authorization", `Bearer ${jwtToken}`)
         .send({
@@ -762,8 +760,8 @@ describe("Discord actions", function () {
     });
 
     it("should successfully update discord role into firestore", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post(`/discord-actions/discord-roles`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -827,7 +825,7 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getDiscordMembers),
-        })
+        }),
       );
     });
 
@@ -837,8 +835,8 @@ describe("Discord actions", function () {
     });
 
     it("should update Idle 7d+ Users successfully and return a 201 status code", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .put(`/discord-actions/group-idle-7d?dev=true`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -902,7 +900,7 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getOnboarding31DPlusMembers),
-        })
+        }),
       );
     });
 
@@ -915,11 +913,11 @@ describe("Discord actions", function () {
       createRequest({
         type: REQUEST_TYPE.ONBOARDING,
         state: REQUEST_STATE.APPROVED,
-        userId: userId,
+        userId,
         newEndsOn: Date.now() + convertDaysToMilliseconds(2),
       });
-      chai
-        .request(app)
+      request
+        .execute(app)
         .put(`/discord-actions/group-onboarding-31d-plus`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -934,8 +932,8 @@ describe("Discord actions", function () {
     });
 
     it("should update role for onboarding users with 31 days completed", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .put(`/discord-actions/group-onboarding-31d-plus`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -952,13 +950,13 @@ describe("Discord actions", function () {
     });
   });
 
-  // eslint-disable-next-line mocha/no-skipped-tests
+  // eslint-disable-next-line mocha/no-pending-tests
   describe.skip("GET /discord-actions/invite", function () {
     it("should return the invite for the user if no userId is provided in the params and the invite exists", async function () {
       await addInviteToInviteModel({ userId: superUserId, inviteLink: "discord.gg/apQYT7HB" });
 
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .get("/discord-actions/invite")
         .set("cookie", `${cookieName}=${superUserAuthToken}`);
       expect(res).to.have.status(200);
@@ -970,9 +968,9 @@ describe("Discord actions", function () {
     });
 
     it("Should return the invite for other user if the userId is provided in the query and the user is super user", async function () {
-      await addInviteToInviteModel({ userId: userId, inviteLink: "discord.gg/apQYT7HA" });
-      const res = await chai
-        .request(app)
+      await addInviteToInviteModel({ userId, inviteLink: "discord.gg/apQYT7HA" });
+      const res = await request
+        .execute(app)
         .get(`/discord-actions/invite?userId=${userId}`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`);
       expect(res).to.have.status(200);
@@ -984,8 +982,8 @@ describe("Discord actions", function () {
     });
 
     it("should return 403 if the userId in the query param is not equal to the userId of the user and user is not a super user", async function () {
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .get(`/discord-actions/invite?userId=${superUserId}`)
         .set("cookie", `${cookieName}=${userAuthToken}`);
       expect(res).to.have.status(403);
@@ -995,15 +993,15 @@ describe("Discord actions", function () {
   });
 
   // <------ Will revisit this later https://github.com/Real-Dev-Squad/website-backend/issues/2078 --->
-  // eslint-disable-next-line mocha/no-skipped-tests
+  // eslint-disable-next-line mocha/no-pending-tests
   describe.skip("POST /discord-actions/invite", function () {
     afterEach(function () {
       sinon.restore();
     });
 
     it("should return 403 if the userId in the query param is not equal to the userId of the user and user is not a super user", async function () {
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post(`/discord-actions/invite?userId=${superUserId}`)
         .set("cookie", `${cookieName}=${userAuthToken}`);
       expect(res).to.have.status(403);
@@ -1011,10 +1009,10 @@ describe("Discord actions", function () {
       expect(res.body.message).to.be.equal("User should be super user to generate link for other users");
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
+    // eslint-disable-next-line mocha/no-pending-tests
     it.skip("should return 403 if the user has discord id in their user object, which means user is already in discord", async function () {
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post(`/discord-actions/invite`)
         .set("cookie", `${cookieName}=${userAuthToken}`);
       expect(res).to.have.status(403);
@@ -1022,12 +1020,12 @@ describe("Discord actions", function () {
       expect(res.body.message).to.be.equal("Only users who have never joined discord can generate invite link");
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
+    // eslint-disable-next-line mocha/no-pending-tests
     it.skip("should return 403 if user has role archieved", async function () {
       archievedUserId = await addUser(archievedUser);
       archievedUserToken = authService.generateAuthToken({ userId: archievedUserId });
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post(`/discord-actions/invite`)
         .set("cookie", `${cookieName}=${archievedUserToken}`);
       expect(res).to.have.status(403);
@@ -1035,14 +1033,14 @@ describe("Discord actions", function () {
       expect(res.body.message).to.be.equal("Archived users cannot generate invite");
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
+    // eslint-disable-next-line mocha/no-pending-tests
     it.skip("should return 403 if the user doesn't have role designer, product_manager, or mavens", async function () {
       developerUserWithoutApprovedProfileStatusId = await addUser(developerUserWithoutApprovedProfileStatus);
       developerUserWithoutApprovedProfileStatusToken = authService.generateAuthToken({
         userId: developerUserWithoutApprovedProfileStatusId,
       });
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post(`/discord-actions/invite`)
         .set("cookie", `${cookieName}=${developerUserWithoutApprovedProfileStatusToken}`);
       expect(res).to.have.status(403);
@@ -1050,19 +1048,19 @@ describe("Discord actions", function () {
       expect(res.body.message).to.be.equal("Only selected roles can generate discord link directly");
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
+    // eslint-disable-next-line mocha/no-pending-tests
     it.skip("should generate discord link if user is a product mananger", async function () {
       fetchStub.returns(
         Promise.resolve({
           status: 201,
           json: () => Promise.resolve({ data: { code: "xyz" } }),
-        })
+        }),
       );
 
       productManagerUserId = await addUser(productManagerUser);
       productManagerAuthToken = authService.generateAuthToken({ userId: productManagerUserId });
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post(`/discord-actions/invite`)
         .set("cookie", `${cookieName}=${productManagerAuthToken}`);
 
@@ -1071,19 +1069,19 @@ describe("Discord actions", function () {
       expect(res.body.inviteLink).to.be.equal("discord.gg/xyz");
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
+    // eslint-disable-next-line mocha/no-pending-tests
     it.skip("should generate discord link if user is a designer", async function () {
       fetchStub.returns(
         Promise.resolve({
           status: 201,
           json: () => Promise.resolve({ data: { code: "zlmfasd" } }),
-        })
+        }),
       );
 
       designerUserId = await addUser(designerUser);
       designerAuthToken = authService.generateAuthToken({ userId: designerUserId });
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post(`/discord-actions/invite`)
         .set("cookie", `${cookieName}=${designerAuthToken}`);
 
@@ -1092,19 +1090,19 @@ describe("Discord actions", function () {
       expect(res.body.inviteLink).to.be.equal("discord.gg/zlmfasd");
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
+    // eslint-disable-next-line mocha/no-pending-tests
     it.skip("should generate discord link if user is a maven", async function () {
       fetchStub.returns(
         Promise.resolve({
           status: 201,
           json: () => Promise.resolve({ data: { code: "asdfdsfsd" } }),
-        })
+        }),
       );
 
       mavenUserId = await addUser(mavenUser);
       mavenAuthToken = authService.generateAuthToken({ userId: mavenUserId });
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post(`/discord-actions/invite`)
         .set("cookie", `${cookieName}=${mavenAuthToken}`);
 
@@ -1116,8 +1114,8 @@ describe("Discord actions", function () {
     it("should return 403 if user has no applications", async function () {
       sinon.stub(ApplicationModel, "getUserApplications").resolves([]);
 
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post(`/discord-actions/invite`)
         .set("cookie", `${cookieName}=${userAuthToken}`);
 
@@ -1128,43 +1126,43 @@ describe("Discord actions", function () {
     it("should return 403 if user has pending applications", async function () {
       sinon.stub(ApplicationModel, "getUserApplications").resolves([{ status: "pending" }]);
 
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post(`/discord-actions/invite`)
         .set("cookie", `${cookieName}=${userAuthToken}`);
 
       expect(res).to.have.status(403);
       expect(res.body.message).to.be.equal(
-        "Only users with an accepted application can generate a Discord invite link."
+        "Only users with an accepted application can generate a Discord invite link.",
       );
     });
 
     it("should return 403 if user has rejected applications", async function () {
       sinon.stub(ApplicationModel, "getUserApplications").resolves([{ status: "rejected" }]);
 
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post(`/discord-actions/invite`)
         .set("cookie", `${cookieName}=${userAuthToken}`);
 
       expect(res).to.have.status(403);
       expect(res.body.message).to.be.equal(
-        "Only users with an accepted application can generate a Discord invite link."
+        "Only users with an accepted application can generate a Discord invite link.",
       );
     });
 
-    // eslint-disable-next-line mocha/no-skipped-tests
+    // eslint-disable-next-line mocha/no-pending-tests
     it.skip("should generate discord link if user has an approved application", async function () {
       sinon.stub(ApplicationModel, "getUserApplications").resolves([{ status: "accepted" }]);
       fetchStub.returns(
         Promise.resolve({
           status: 201,
           json: () => Promise.resolve({ data: { code: "xyz" } }),
-        })
+        }),
       );
 
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post("/discord-actions/invite")
         .set("cookie", `${cookieName}=${userAuthToken}`);
       expect(res).to.have.status(201);
@@ -1184,11 +1182,11 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 201,
           json: () => Promise.resolve({ data: { code: "new-code" } }),
-        })
+        }),
       );
 
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post("/discord-actions/invite")
         .set("cookie", `${cookieName}=${userAuthToken}`);
 
@@ -1209,8 +1207,8 @@ describe("Discord actions", function () {
         inviteLink: "discord.gg/existing",
       });
 
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post("/discord-actions/invite")
         .set("cookie", `${cookieName}=${userAuthToken}`);
 
@@ -1219,8 +1217,8 @@ describe("Discord actions", function () {
     });
 
     it("should return 403 for super user when application data is not provided", async function () {
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post("/discord-actions/invite")
         .set("cookie", `${cookieName}=${superUserAuthToken}`);
 
@@ -1235,11 +1233,11 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 201,
           json: () => Promise.resolve({ data: { code: "super-code" } }),
-        })
+        }),
       );
 
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post("/discord-actions/invite?applicationId=app-super-1&role=developer")
         .set("cookie", `${cookieName}=${superUserAuthToken}`);
 
@@ -1297,7 +1295,7 @@ describe("Discord actions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getDiscordMembers),
-        })
+        }),
       );
     });
 
@@ -1307,8 +1305,8 @@ describe("Discord actions", function () {
     });
 
     it("should update Idle Users successfully and return a 201 status code!", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .put(`/discord-actions/group-idle?dev=true`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -1344,8 +1342,8 @@ describe("Discord actions", function () {
     });
 
     it("should return paginated results when dev=true is passed", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/discord-actions/groups?dev=true&page=1&size=10")
         .set("cookie", `${cookieName}=${userAuthToken}`)
         .end((err, res) => {
@@ -1380,8 +1378,8 @@ describe("Discord actions", function () {
       const size = 10;
       const page = 2;
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/discord-actions/groups?dev=true&page=${page}&size=${size}`)
         .set("cookie", `${cookieName}=${userAuthToken}`)
         .end((err, res) => {
@@ -1402,8 +1400,8 @@ describe("Discord actions", function () {
     });
 
     it("should return a bad request error for invalid size parameter", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/discord-actions/groups?dev=true&size=101&page=1")
         .set("cookie", `${cookieName}=${userAuthToken}`)
         .end((_err, res) => {
@@ -1418,8 +1416,8 @@ describe("Discord actions", function () {
       const size = 10;
       const page = 100;
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/discord-actions/groups?dev=true&page=${page}&size=${size}`)
         .set("cookie", `${cookieName}=${userAuthToken}`)
         .end((_err, res) => {
@@ -1439,11 +1437,11 @@ describe("Discord actions", function () {
     it("should handle internal server errors", function (done) {
       sinon.stub(discordRolesModel, "getPaginatedGroupRolesByPage").throws(new Error("Database error"));
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/discord-actions/groups?dev=true")
         .set("cookie", `${cookieName}=${userAuthToken}`)
-        // eslint-disable-next-line node/handle-callback-err
+        // eslint-disable-next-line n/handle-callback-err
         .end((err, res) => {
           expect(res).to.have.status(500);
           expect(res.body).to.be.an("object");
@@ -1466,7 +1464,7 @@ describe("Discord actions", function () {
         Promise.resolve({
           ok: true,
           json: () => Promise.resolve({ id: "discord-role-id-123" }),
-        })
+        }),
       );
 
       sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
@@ -1484,8 +1482,8 @@ describe("Discord actions", function () {
         description: "Test group role",
       };
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/discord-actions/groups")
         .set("cookie", `${cookieName}=${testUserAuthToken}`)
         .send(roleData)
@@ -1512,8 +1510,8 @@ describe("Discord actions", function () {
         description: "Test group role",
       };
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/discord-actions/groups?role=false")
         .set("cookie", `${cookieName}=${testUserAuthToken}`)
         .send(roleData)
@@ -1538,8 +1536,8 @@ describe("Discord actions", function () {
         description: "Test custom role",
       };
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/discord-actions/groups?role=true")
         .set("cookie", `${cookieName}=${testUserAuthToken}`)
         .send(roleData)
@@ -1564,8 +1562,8 @@ describe("Discord actions", function () {
         description: "Test role",
       };
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/discord-actions/groups?role=invalid")
         .set("cookie", `${cookieName}=${testUserAuthToken}`)
         .send(roleData)
@@ -1588,7 +1586,7 @@ describe("Discord actions", function () {
         Promise.resolve({
           ok: true,
           json: () => Promise.resolve({ id: "discord-role-id-123" }),
-        })
+        }),
       );
 
       sinon.stub(discordRolesModel, "isGroupRoleExists").resolves({
@@ -1600,8 +1598,8 @@ describe("Discord actions", function () {
         description: "Test role",
       };
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/discord-actions/groups?role=true")
         .set("cookie", `${cookieName}=${testUserAuthToken}`)
         .send(roleData)
@@ -1623,8 +1621,8 @@ describe("Discord actions", function () {
         description: "Test role",
       };
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/discord-actions/groups?role=true")
         .set("cookie", `${cookieName}=${testUserAuthToken}`)
         .send(roleData)

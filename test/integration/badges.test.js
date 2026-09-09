@@ -1,6 +1,6 @@
 const app = require("../../server");
-const chai = require("chai");
-const chaiHttp = require("chai-http");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 const sinon = require("sinon");
 const { Buffer } = require("node:buffer");
 
@@ -17,15 +17,12 @@ const cleanDb = require("../utils/cleanDb");
 const { SUCCESS_MESSAGES, ERROR_MESSAGES } = require("../../constants/badges");
 const { CONTROLLERS: CONTROLLERS_SUCCESS_MESSAGES } = SUCCESS_MESSAGES;
 const { VALIDATORS: ERROR_MESSAGES_VALIDATORS, MISC } = ERROR_MESSAGES;
-const { expect } = chai;
 
 let jwt;
 let userId;
 
 const superUser = userData[4];
 const cookieName = config.get("userToken.cookieName");
-
-chai.use(chaiHttp);
 
 describe("Badges", function () {
   before(async function () {
@@ -40,8 +37,8 @@ describe("Badges", function () {
   describe("GET /badges", function () {
     it("Should get all the list of badges", function (done) {
       sinon.stub(model, "fetchBadges").returns(fixture.BADGES);
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/badges")
         .end(function (error, response) {
           if (error) {
@@ -62,8 +59,8 @@ describe("Badges", function () {
 
   describe("POST /badges", function () {
     it("Should return user is unauthorized", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/badges")
         .end(function (error, response) {
           if (error) {
@@ -77,8 +74,8 @@ describe("Badges", function () {
     });
 
     it("Should return file is missing", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/badges")
         .set("cookie", `${cookieName}=${jwt}`)
         .end(function (error, response) {
@@ -94,8 +91,8 @@ describe("Badges", function () {
     });
 
     it("Should return API payload failed validation, createdBy is required", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/badges")
         .type("form")
         .set("cookie", `${cookieName}=${jwt}`)
@@ -109,7 +106,7 @@ describe("Badges", function () {
           }
           expect(response).to.have.status(400);
           expect(response.body.message).to.equal(
-            `${ERROR_MESSAGES_VALIDATORS.API_PAYLOAD_VALIDATION_FAILED}, "createdBy" is required`
+            `${ERROR_MESSAGES_VALIDATORS.API_PAYLOAD_VALIDATION_FAILED}, "createdBy" is required`,
           );
           expect(response.body.error).to.equal("Bad Request");
 
@@ -120,8 +117,8 @@ describe("Badges", function () {
     it("Should return success message, and badge-object", function (done) {
       sinon.stub(imageService, "uploadBadgeImage").returns(fixture.CLOUNDINARY_BADGE_IMAGE_UPLOAD_RESPONSE);
       sinon.stub(model, "createBadge").returns(fixture.EXPECTED_BADGE_OBJECT);
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/badges")
         .type("form")
         .set("cookie", `${cookieName}=${jwt}`)
@@ -145,26 +142,26 @@ describe("Badges", function () {
 
   describe("POST /badges/assign", function () {
     it(`Should return error message ${ERROR_MESSAGES_VALIDATORS.API_PAYLOAD_VALIDATION_FAILED}, userId is missing`, function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/badges/assign")
         .set("cookie", `${cookieName}=${jwt}`)
         .end(function (error, response) {
           if (error) {
-            done();
+            return done();
           }
           expect(response).to.have.status(400);
           expect(response.body.error).to.equal("Bad Request");
           expect(response.body.message).to.equal(
-            `${ERROR_MESSAGES_VALIDATORS.API_PAYLOAD_VALIDATION_FAILED}, "userId" is required`
+            `${ERROR_MESSAGES_VALIDATORS.API_PAYLOAD_VALIDATION_FAILED}, "userId" is required`,
           );
           return done();
         });
     });
 
     it(`Should validate badgeIds array and assign badges`, function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/badges/assign")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -173,7 +170,7 @@ describe("Badges", function () {
         })
         .end(function (error, response) {
           if (error) {
-            done();
+            return done();
           }
           expect(response).to.have.status(200);
           expect(response.body.message).to.equal(SUCCESS_MESSAGES.CONTROLLERS.POST_USER_BADGES);
@@ -184,8 +181,8 @@ describe("Badges", function () {
 
   describe("DELETE /badges/remove", function () {
     it("Should remove assigned badges from a user", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .delete("/badges/remove")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -194,7 +191,7 @@ describe("Badges", function () {
         })
         .end(function (error, response) {
           if (error) {
-            done();
+            return done();
           }
           expect(response).to.have.status(200);
           expect(response.body.message).to.equal(SUCCESS_MESSAGES.CONTROLLERS.DELETE_USER_BADGES);

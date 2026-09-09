@@ -126,15 +126,15 @@ rds-session-staging
   - [nock](https://github.com/nock/nock/blob/main/README.md): HTTP requests mocking
 - The test suite uses [Firebase Local Emulator Suite](https://firebase.google.com/docs/emulator-suite) for running firestore for tests([documentation](https://firebase.google.com/docs/emulator-suite/install_and_configure)).
 - Pre-requisites:
-  - Node.js 22.10.0 (installed automatically by pnpm, see README).
-  - Java version 1.8 or higher.
+  - Node.js 26.8.1 (installed automatically by pnpm, see README).
+  - Java version 21 or higher (required by firebase-tools 15+).
 
 ## Using Firebase Emulator Locally
 
 - [Firebase Local Emulator Suite](https://firebase.google.com/docs/emulator-suite) can be used locally as the DB for the project
 - Pre-requisites:
-  - Node.js 22.10.0 (installed automatically by pnpm, see README).
-  - Java version 1.8 or higher.
+  - Node.js 26.8.1 (installed automatically by pnpm, see README).
+  - Java version 21 or higher (required by firebase-tools 15+).
 - Run: `npx firebase emulators:start`
 - The emulator will run and display the url you can access it on.
 - You can view the emulator UI at: `http://localhost:4000`
@@ -163,13 +163,13 @@ export FIRESTORE_EMULATOR_HOST="localhost:<Firebase emulator PORT>"
 
 ## Certain issues you may face while running the tests:
 
-- Java version is not above 11
+- Java version is below 21 (`firebase-tools no longer supports Java version before 21`)
 - When we run pnpm test, it runs both the unit and integration tests (in this order). So after the unit tests are done, the java process is not killed automatically and when our integration test run it gives error.
 - Error: connect ECONNREFUSED ::1:8081
 
 ## Possible solutions for above issues (in particular order):
 
-- Java version above 11 is needed for firebase tool version >= 11
+- Java version 21 or above is needed for firebase-tools version >= 15
 - Either manually kill the java process after unit tests are done or run both the tests separately by running the test commands.
 - Add 'host : 0.0.0.0' to both firestore and ui object in firebase.json file if it is not added.
   for more info refer this : https://github.com/Real-Dev-Squad/website-backend/issues/918

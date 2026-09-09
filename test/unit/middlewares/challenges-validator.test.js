@@ -1,6 +1,6 @@
+const { expect } = require("chai");
 const Sinon = require("sinon");
 const { createChallenge } = require("../../../middlewares/validators/challenges");
-const { expect } = require("chai");
 
 describe("Middleware | Validators | Challenges", function () {
   describe("create challenge validator", function () {

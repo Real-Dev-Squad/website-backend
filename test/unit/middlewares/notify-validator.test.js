@@ -1,6 +1,6 @@
+const { expect } = require("chai");
 const Sinon = require("sinon");
 
-const { expect } = require("chai");
 const { notifyValidator } = require("../../../middlewares/validators/notify");
 
 describe("Test the notify validator", function () {

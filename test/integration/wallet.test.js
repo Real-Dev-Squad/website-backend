@@ -1,6 +1,5 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 
 const app = require("../../server");
 const authService = require("../../services/authService");
@@ -19,8 +18,6 @@ const superUser = userData[4];
 const config = require("config");
 const cookieName = config.get("userToken.cookieName");
 
-chai.use(chaiHttp);
-
 describe("Wallet", function () {
   let authToken;
   let userId;
@@ -38,8 +35,8 @@ describe("Wallet", function () {
 
   describe("GET /wallet", function () {
     it("Should return wallet information of the logged in user", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/wallet")
         .set("cookie", `${cookieName}=${authToken}`)
         .end((error, response) => {
@@ -60,8 +57,8 @@ describe("Wallet", function () {
     });
 
     it("Should return the user their own wallet with 1000 dineros loaded", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/wallet")
         .set("cookie", `${cookieName}=${authToken}`)
         .end((error, response) => {
@@ -79,8 +76,8 @@ describe("Wallet", function () {
     });
 
     it("Without cookie access should be unauthorized", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/wallet")
         .end((error, response) => {
           if (error) {
@@ -112,8 +109,8 @@ describe("Wallet", function () {
     });
 
     it("Should return wallet when trying to access someone else's wallet, using authorized user (super_user)", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/wallet/${userName}`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((error, response) => {
@@ -130,8 +127,8 @@ describe("Wallet", function () {
     });
 
     it("Should return unauthorized error when trying to access someone else's wallet when not authorized", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/wallet/${userName}`)
         .set("cookie", `${cookieName}=${newUserAuthToken}`)
         .end((error, response) => {

@@ -1,3 +1,4 @@
+import { expect } from "chai";
 import { 
     INVALID_REQUEST_DEADLINE, 
     INVALID_REQUEST_TYPE, 
@@ -11,7 +12,6 @@ import {
     updateOnboardingExtensionRequest, 
     validateOnboardingExtensionUpdateRequest 
 } from "../../../services/onboardingExtension"
-import { expect } from "chai"
 import firestore from "../../../utils/firestore";
 import { convertDaysToMilliseconds } from "../../../utils/time";
 import cleanDb from "../../utils/cleanDb";

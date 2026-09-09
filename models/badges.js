@@ -1,4 +1,4 @@
-const admin = require("firebase-admin");
+const { Timestamp } = require("firebase-admin/firestore");
 const firestore = require("../utils/firestore");
 const badgeModel = firestore.collection("badges");
 const userBadgeModel = firestore.collection("userBadges");
@@ -65,7 +65,7 @@ async function fetchUserBadges(userId) {
  */
 async function createBadge(badgeInfo) {
   try {
-    const createdAt = admin.firestore.Timestamp.now();
+    const createdAt = Timestamp.now();
     // INFO: description is optional
     const description = badgeInfo.description ?? "";
     const docRef = await badgeModel.add({
@@ -114,7 +114,7 @@ async function removeBadges({ userId, badgeIds }) {
     const documentRefferences = snapshot.docs.map((doc) => doc.ref);
     const documentsRefferencesChunks = chunks(documentRefferences, DOCUMENT_WRITE_SIZE);
     const bulkWriterBatches = documentsRefferencesChunks.map((value) =>
-      assignOrRemoveBadgesInBulk({ userId, array: value, isRemove: true })
+      assignOrRemoveBadgesInBulk({ userId, array: value, isRemove: true }),
     );
     return await Promise.all(bulkWriterBatches);
   } catch (err) {

@@ -1,4 +1,5 @@
 import { expect } from "chai";
+import { request } from "chai-http";
 import { authorizeAndAuthenticate  } from "../../middlewares/authorizeUsersAndService";
 import bot from "../utils/generateBotToken";
 const userData = require("../fixtures/user/user")();
@@ -11,7 +12,6 @@ const cookieName = config.get("userToken.cookieName");
 const express = require("express");
 const router = express.Router();
 const AppMiddlewares = require("../../middlewares");
-const chai = require("chai");
 const sinon = require("sinon");
 
 import authorizeBot from "../../middlewares/authorizeBot";
@@ -105,11 +105,10 @@ describe("Middleware | Authorization", function () {
       await cleanDb();
     });
     it("should authorize super user for route with super_user required role", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .get("/for-super-user")
         .set("cookie", `${cookieName}=${superUserJwt}`)
-        .end((err: Error, res: CustomResponse) => {
+        .end((err: Error, res: ChaiHttp.Response) => {
           if (err) {
             return done(err);
           }
@@ -119,11 +118,10 @@ describe("Middleware | Authorization", function () {
     });
     it("should not authenticate invalid tokens", function (done) {
       const jwtToken = bot.generateCronJobToken({ name: CRON_JOB_HANDLER });
-      chai
-        .request(app)
+      request.execute(app)
         .get("/for-super-user")
         .set("cookie", `${cookieName}=${jwtToken}`)
-        .end((err: Error, res: CustomResponse) => {
+        .end((err: Error, res: ChaiHttp.Response) => {
           if (err) {
             return done(err);
           }
@@ -132,11 +130,10 @@ describe("Middleware | Authorization", function () {
         });
     });
     it("should not allow default user for route with super_user required role", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .get("/for-super-user")
         .set("cookie", `${cookieName}=${defaultJwt}`)
-        .end((err: Error, res: CustomResponse) => {
+        .end((err: Error, res: ChaiHttp.Response) => {
           if (err) {
             return done(err);
           }
@@ -146,12 +143,11 @@ describe("Middleware | Authorization", function () {
     });
     it("should allow services if user does not have authorization", function (done) {
       const jwtToken = bot.generateCronJobToken({ name: CRON_JOB_HANDLER });
-      chai
-        .request(app)
+      request.execute(app)
         .get("/for-super-user")
         .set("cookie", `${cookieName}=${defaultJwt}`)
         .set("Authorization", `Bearer ${jwtToken}`)
-        .end((err: Error, res: CustomResponse) => {
+        .end((err: Error, res: ChaiHttp.Response) => {
           if (err) {
             return done(err);
           }
@@ -162,11 +158,10 @@ describe("Middleware | Authorization", function () {
     it("should respond with status 500 for unknown errors", function (done) {
       const jwtToken = bot.generateCronJobToken({ name: CRON_JOB_HANDLER });
       sinon.stub(authorizeBot, "verifyCronJob").throws(new Error("Error"));
-      chai
-        .request(app)
+      request.execute(app)
         .get("/for-super-user")
         .set("Authorization", `Bearer ${jwtToken}`)
-        .end((err: Error, res: CustomResponse) => {
+        .end((err: Error, res: ChaiHttp.Response) => {
           if (err) {
             return done(err);
           }

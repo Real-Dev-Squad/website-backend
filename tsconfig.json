@@ -106,5 +106,8 @@
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
     "skipLibCheck": true /* Skip type checking all .d.ts files. */
   },
-  "include": ["./"]
+  "include": ["./"],
+  // Keep the tsc build output free of files that would interfere with tooling:
+  // an emitted dist/eslint.config.* would hijack ESLint flat-config discovery.
+  "exclude": ["node_modules", "dist", "eslint.config.mjs"]
 }

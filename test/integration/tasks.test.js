@@ -1,7 +1,6 @@
-const chai = require("chai");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 const sinon = require("sinon");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
 
 const firestore = require("../../utils/firestore");
 const logsModel = firestore.collection("logs");
@@ -27,7 +26,6 @@ const { CRON_JOB_HANDLER } = require("../../constants/bot");
 const { logType } = require("../../constants/logs");
 const { INTERNAL_SERVER_ERROR } = require("../../constants/errorMessages");
 const tasksService = require("../../services/tasks");
-chai.use(chaiHttp);
 const tags = require("../../models/tags");
 const levels = require("../../models/levels");
 const items = require("../../models/items");
@@ -136,8 +134,8 @@ describe("Tasks", function () {
 
   describe("POST /tasks - creates a new task", function () {
     it("Should return success response after adding the task", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/tasks")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -174,8 +172,8 @@ describe("Tasks", function () {
     });
 
     it("Should have same time for createdAt and updatedAt for new tasks", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/tasks")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -208,8 +206,8 @@ describe("Tasks", function () {
     });
 
     it("should return fail response if task has a non-acceptable status value", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/tasks")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -247,13 +245,13 @@ describe("Tasks", function () {
     after(async function () {
       await tasks.updateTask(
         { ...taskData[1], createdAt: 1621717694, updatedAt: 1700775753, dependsOn: [], status: "IN_PROGRESS" },
-        taskId2
+        taskId2,
       );
     });
 
     it("Should get all the list of tasks", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/tasks")
         .end((err, res) => {
           if (err) {
@@ -277,8 +275,8 @@ describe("Tasks", function () {
     });
 
     it("Should return paginated tasks", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/tasks")
         .end((err, res) => {
           if (err) {
@@ -295,8 +293,8 @@ describe("Tasks", function () {
     });
 
     it("Should get all tasks filtered with status when passed to GET /tasks", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/tasks?status=${TASK_STATUS.IN_PROGRESS}`)
         .end((err, res) => {
           if (err) {
@@ -319,8 +317,8 @@ describe("Tasks", function () {
     });
 
     it("Should get all tasks filtered with status ,assignee, title when passed to GET /tasks", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/tasks?status=${TASK_STATUS.IN_PROGRESS}&userFeatureFlag=true&assignee=sagar&title=Test`)
         .end((err, res) => {
           if (err) {
@@ -345,8 +343,8 @@ describe("Tasks", function () {
     });
 
     it("Should get all tasks filtered with status, multiple assignees, title when passed to GET /tasks", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/tasks?status=${TASK_STATUS.IN_PROGRESS}&assignee=sagar,ankur&title=Test`)
         .end((err, res) => {
           if (err) {
@@ -371,8 +369,8 @@ describe("Tasks", function () {
     });
 
     it("Should get all overdue tasks GET /tasks", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/tasks?status=overdue`)
         .end((err, res) => {
           if (err) {
@@ -386,8 +384,8 @@ describe("Tasks", function () {
     });
 
     it("Should get all overdue tasks filtered with assignee when passed to GET /tasks", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/tasks?status=overdue&assignee=${appOwner.username}`)
         .end((err, res) => {
           if (err) {
@@ -411,8 +409,8 @@ describe("Tasks", function () {
     });
 
     it("Should get tasks when correct query parameters are passed", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/tasks?size=1&page=0")
         .end((err, res) => {
           if (err) {
@@ -432,7 +430,7 @@ describe("Tasks", function () {
 
     it("Should get next and previous page results based returned by the links in the response", async function () {
       const initialReq = `/tasks?size=1`;
-      const response = await chai.request(app).get(initialReq);
+      const response = await request.execute(app).get(initialReq);
       expect(response).to.have.status(200);
       expect(response.body).to.be.a("object");
       expect(response.body.message).to.equal("Tasks returned successfully!");
@@ -441,7 +439,7 @@ describe("Tasks", function () {
       expect(response.body.tasks).to.have.length(1);
 
       const nextPageLink = response.body.next;
-      const nextPageResponse = await chai.request(app).get(nextPageLink);
+      const nextPageResponse = await request.execute(app).get(nextPageLink);
 
       expect(nextPageResponse).to.have.status(200);
       expect(nextPageResponse.body).to.be.a("object");
@@ -451,7 +449,7 @@ describe("Tasks", function () {
       expect(nextPageResponse.body.tasks).to.have.length(1);
 
       const prevPageLink = nextPageResponse.body.prev;
-      const previousPageResponse = await chai.request(app).get(prevPageLink);
+      const previousPageResponse = await request.execute(app).get(prevPageLink);
 
       expect(previousPageResponse).to.have.status(200);
       expect(previousPageResponse.body).to.be.a("object");
@@ -463,8 +461,8 @@ describe("Tasks", function () {
 
     it("Should get tasks filtered by search term", function (done) {
       const searchTerm = "task";
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/tasks?q=searchTerm:task")
         .end((err, res) => {
           if (err) {
@@ -486,8 +484,8 @@ describe("Tasks", function () {
     });
 
     it("Should get tasks filtered by search term and handle no tasks found", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/tasks?q=searchTerm:random1`)
         .end((err, res) => {
           if (err) {
@@ -504,8 +502,8 @@ describe("Tasks", function () {
     });
 
     it("Should return no task found when there is no searchterm", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/tasks?q=searchTerm:`)
         .end((err, res) => {
           if (err) {
@@ -522,8 +520,8 @@ describe("Tasks", function () {
     });
 
     it("Should get paginated tasks ordered by updatedAt in desc order ", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/tasks?size=5&page=0")
         .end((err, res) => {
           if (err) {
@@ -547,9 +545,9 @@ describe("Tasks", function () {
         {
           status: "COMPLETED",
         },
-        taskId2
+        taskId2,
       );
-      const res = await chai.request(app).get(`/tasks?status=DONE&userFeatureFlag=true`);
+      const res = await request.execute(app).get(`/tasks?status=DONE&userFeatureFlag=true`);
 
       expect(res).to.have.status(200);
       expect(res.body).to.be.a("object");
@@ -570,8 +568,8 @@ describe("Tasks", function () {
 
   describe("GET /tasks/:id/details", function () {
     it("should return the task task with the Id that we provide in the route params", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/tasks/${taskId1}/details`)
         .end((err, res) => {
           if (err) {
@@ -589,8 +587,8 @@ describe("Tasks", function () {
     });
 
     it("Should return isCollapsed property in response", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/tasks/${taskId1}/details`)
         .end((err, res) => {
           if (err) {
@@ -606,18 +604,18 @@ describe("Tasks", function () {
   describe("GET /tasks/self", function () {
     it("Should return all the completed tasks of the user when query 'completed' is true", function (done) {
       const { COMPLETED } = TASK_STATUS;
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/tasks/self?completed=true")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
           if (err) {
-            return done;
+            return done(err);
           }
           expect(res).to.have.status(200);
           expect(res).to.have.header(
             "X-Deprecation-Warning",
-            "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:username to get the task details."
+            "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:username to get the task details.",
           );
           expect(res.body).to.be.a("array");
           expect(res.body[0].status).to.equal(COMPLETED);
@@ -661,22 +659,22 @@ describe("Tasks", function () {
       ];
       const { taskId: taskId1 } = await tasks.updateTask(assignedTask[0]);
       const { taskId: taskId2 } = await tasks.updateTask(assignedTask[1]);
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .get("/tasks/self")
         .set("cookie", `${cookieName}=${authService.generateAuthToken({ userId: assignedUser })}`);
       expect(res).to.have.status(200);
       expect(res).to.have.header(
         "X-Deprecation-Warning",
-        "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:username to get the task details."
+        "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:username to get the task details.",
       );
       expect(res.body).to.be.a("array");
       expect([taskId1, taskId2]).to.include(taskId1);
     });
 
     it("Should return 401 if not logged in", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/tasks/self")
         .end((err, res) => {
           if (err) {
@@ -698,8 +696,8 @@ describe("Tasks", function () {
 
   describe("PATCH /tasks", function () {
     it("Should update the task for the given taskId", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/tasks/" + taskId1)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -715,8 +713,8 @@ describe("Tasks", function () {
     });
 
     it("should update updatedAt field when patch request is made", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/tasks/" + taskId1)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -732,8 +730,8 @@ describe("Tasks", function () {
     });
 
     it("should update updatedAt field", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/tasks/${taskId1}/details`)
         .end((err, res) => {
           if (err) {
@@ -754,13 +752,13 @@ describe("Tasks", function () {
       const taskId2 = (await tasks.updateTask(tasksData[5])).taskId;
 
       const dependsOn = [taskId1, taskId2];
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/${taskId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ dependsOn });
       expect(res).to.have.status(204);
-      const res2 = await chai.request(app).get(`/tasks/${taskId}/details`);
+      const res2 = await request.execute(app).get(`/tasks/${taskId}/details`);
       expect(res2).to.have.status(200);
       expect(res2.body.taskData.dependsOn).to.be.a("array");
       res2.body.taskData.dependsOn.forEach((taskId) => {
@@ -774,8 +772,8 @@ describe("Tasks", function () {
       taskId = (await tasks.updateTask(tasksData[5])).taskId;
       const taskId1 = (await tasks.updateTask(tasksData[5])).taskId;
       const dependsOn = ["taskId5", "taskId6", taskId1];
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/${taskId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ dependsOn });
@@ -785,13 +783,13 @@ describe("Tasks", function () {
 
     it("Should update status when assignee pass as a payload", async function () {
       taskId = (await tasks.updateTask(tasksData[5])).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/${taskId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ assignee: "sagar" });
       expect(res).to.have.status(204);
-      const res2 = await chai.request(app).get(`/tasks/${taskId}/details`);
+      const res2 = await request.execute(app).get(`/tasks/${taskId}/details`);
       expect(res2).to.have.status(200);
       expect(res2.body.taskData.assignee).to.be.equal("sagar");
 
@@ -802,13 +800,13 @@ describe("Tasks", function () {
 
     it("Should add startedOn field when assignee passed as a payload", async function () {
       taskId = (await tasks.updateTask(tasksData[5])).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/${taskId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ assignee: "sagar", endsOn: 1695804641, status: TASK_STATUS.ASSIGNED });
       expect(res).to.have.status(204);
-      const res2 = await chai.request(app).get(`/tasks/${taskId}/details`);
+      const res2 = await request.execute(app).get(`/tasks/${taskId}/details`);
       const startedOn = Math.round(new Date().getTime() / 1000);
       expect(res2.body.taskData).to.have.property("startedOn");
       expect(res2.body.taskData.startedOn).to.be.equal(startedOn);
@@ -816,20 +814,20 @@ describe("Tasks", function () {
 
     it("Should use the existing startedOn field if it is passed in the payload", async function () {
       taskId = (await tasks.updateTask(tasksData[5])).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/${taskId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ assignee: "sagar", endsOn: 1695804641, status: TASK_STATUS.ASSIGNED, startedOn: 1695804041 });
       expect(res).to.have.status(204);
-      const res2 = await chai.request(app).get(`/tasks/${taskId}/details`);
+      const res2 = await request.execute(app).get(`/tasks/${taskId}/details`);
       expect(res2.body.taskData).to.have.property("startedOn");
       expect(res2.body.taskData.startedOn).to.be.equal(1695804041);
     });
 
     it("should check updated dependsOn", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/tasks/${taskId1}/details`)
         .end((err, res) => {
           if (err) {
@@ -847,8 +845,8 @@ describe("Tasks", function () {
     });
 
     it("Should update the task status collapsed for the given taskid", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/tasks/" + taskId1)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -865,8 +863,8 @@ describe("Tasks", function () {
     });
 
     it("Should return fail response if task data has a non-acceptable status value to update the task for the given taskid", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/tasks/" + taskId1)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -885,8 +883,8 @@ describe("Tasks", function () {
     });
 
     it("Should return fail response if percent completed is < 0 or > 100", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/tasks/" + taskId1)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -905,8 +903,8 @@ describe("Tasks", function () {
     });
 
     it("Should return 404 if task does not exist", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/tasks/taskid")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -925,8 +923,8 @@ describe("Tasks", function () {
     });
 
     it("Should return 204 if assignee exists", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/tasks/${taskId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ assignee: `${userData[4].username}` })
@@ -940,8 +938,8 @@ describe("Tasks", function () {
     });
 
     it("should return 404 if assignee is not in user db", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/tasks/${taskId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ assignee: "invaliduser" })
@@ -958,8 +956,8 @@ describe("Tasks", function () {
 
   describe("GET /tasks/:username", function () {
     it("Should return 200 when username is valid", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/tasks/${appOwner.username}?status=IN_PROGRESS`) // TODO: if status is passed in lowercase it fails, fix this
         .end((err, res) => {
           if (err) {
@@ -983,8 +981,8 @@ describe("Tasks", function () {
     });
 
     it("Should return 404 when username is invalid", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/tasks/dummyUser?status=in_progress")
         .end((err, res) => {
           if (err) {
@@ -1018,8 +1016,8 @@ describe("Tasks", function () {
     };
 
     it("Should throw 400 Bad Request if the user tries to update the status of a task to AVAILABLE", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/tasks/self/${taskId1}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send(taskStatusData)
@@ -1037,8 +1035,8 @@ describe("Tasks", function () {
 
     it("Should update the task status for given self taskid", function (done) {
       taskStatusData.status = "IN_PROGRESS";
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/tasks/self/${taskId1}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send(taskStatusData)
@@ -1060,8 +1058,8 @@ describe("Tasks", function () {
     });
 
     it("Should update the task status for given self taskid under feature flag", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/tasks/self/${taskId1}?userStatusFlag=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ status: "DONE", percentCompleted: 100 })
@@ -1083,8 +1081,8 @@ describe("Tasks", function () {
     });
 
     it("Should return fail response if task data has non-acceptable status value to update the task status for given self taskid", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/tasks/self/${taskId1}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ ...taskStatusData, status: "invalidStatus" })
@@ -1100,8 +1098,8 @@ describe("Tasks", function () {
     });
 
     it("Should return fail response if percentage is < 0 or  > 100", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/tasks/self/${taskId1}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ ...taskStatusData, percentCompleted: -10 })
@@ -1118,8 +1116,8 @@ describe("Tasks", function () {
 
     it("Should return 404 if task doesnt exist", function (done) {
       taskStatusData.status = "IN_PROGRESS";
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/tasks/self/wrongtaskId")
         .set("cookie", `${cookieName}=${jwt}`)
         .send(taskStatusData)
@@ -1137,15 +1135,15 @@ describe("Tasks", function () {
       const userId = await addUser(userData[0]);
       const jwt = authService.generateAuthToken({ userId });
 
-      const res = await chai.request(app).patch(`/tasks/self/${taskId1}`).set("cookie", `${cookieName}=${jwt}`);
+      const res = await request.execute(app).patch(`/tasks/self/${taskId1}`).set("cookie", `${cookieName}=${jwt}`);
 
       expect(res).to.have.status(403);
       expect(res.body.message).to.equal("This task is not assigned to you");
     });
 
     it("Should give error for no cookie", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/tasks/self/${taskId1}`)
         .send(taskStatusData)
         .end((err, res) => {
@@ -1161,8 +1159,8 @@ describe("Tasks", function () {
     it("Should give 403 if status is already 'VERIFIED' ", async function () {
       taskStatusData.status = "IN_PROGRESS";
       taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/self/${taskId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send(taskStatusData);
@@ -1173,8 +1171,8 @@ describe("Tasks", function () {
 
     it("Should give 403 if new status is 'MERGED' ", async function () {
       taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/self/${taskId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ ...taskStatusData, status: "MERGED" });
@@ -1184,8 +1182,8 @@ describe("Tasks", function () {
 
     it("Should give 403 if new status is 'BACKLOG' ", async function () {
       taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/self/${taskId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ ...taskStatusData, status: "BACKLOG" });
@@ -1195,8 +1193,8 @@ describe("Tasks", function () {
 
     it("Should give 400 if percentCompleted is not 100 and new status is COMPLETED ", async function () {
       taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/self/${taskId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ ...taskStatusData, status: "COMPLETED" });
@@ -1207,8 +1205,8 @@ describe("Tasks", function () {
 
     it("Should give 403 if current task status is DONE", async function () {
       taskId = (await tasks.updateTask({ ...taskData, status: "DONE", assignee: appOwner.username })).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ ...taskStatusData, status: "IN_REVIEW" });
@@ -1219,8 +1217,8 @@ describe("Tasks", function () {
 
     it("Should give 400 if percentCompleted is not 100 and new status is VERIFIED ", async function () {
       taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/self/${taskId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ ...taskStatusData, status: "VERIFIED" });
@@ -1244,8 +1242,8 @@ describe("Tasks", function () {
         isNoteworthy: true,
       };
       taskId = (await tasks.updateTask(taskData)).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/self/${taskId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ percentCompleted: 80 });
@@ -1257,53 +1255,53 @@ describe("Tasks", function () {
     it("Should give 400 if current status of task is In Progress  and new status is not Blocked and both current and new percentCompleted are not 100 ", async function () {
       const newDate = { ...updateTaskStatus[0], status: "IN_PROGRESS", percentCompleted: 80 };
       taskId = (await tasks.updateTask(newDate)).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ status: "NEEDS_REVIEW" });
 
       expect(res).to.have.status(400);
       expect(res.body.message).to.be.equal(
-        "The status of task can not be changed from In progress until progress of task is not 100%."
+        "The status of task can not be changed from In progress until progress of task is not 100%.",
       );
     });
 
     it("Should give 400 if new status of task is In Progress and current status of task is not Blocked and both current and new percentCompleted are not 0 ", async function () {
       const newDate = { ...updateTaskStatus[0], status: "NEEDS_REVIEW", percentCompleted: 100 };
       taskId = (await tasks.updateTask(newDate)).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ status: "IN_PROGRESS" });
 
       expect(res).to.have.status(400);
       expect(res.body.message).to.be.equal(
-        "The status of task can not be changed to In progress until progress of task is not 0%."
+        "The status of task can not be changed to In progress until progress of task is not 0%.",
       );
     });
 
     it("Should give 400 if current status of task is Blocked and new status is not In Progress and both current and new percentCompleted are not 100 ", async function () {
       const newDate = { ...updateTaskStatus[0], status: "BLOCKED", percentCompleted: 52 };
       taskId = (await tasks.updateTask(newDate)).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ status: "NEEDS_REVIEW" });
 
       expect(res).to.have.status(400);
       expect(res.body.message).to.be.equal(
-        "The status of task can not be changed from Blocked until progress of task is not 100%."
+        "The status of task can not be changed from Blocked until progress of task is not 100%.",
       );
     });
 
     it("Should give 200 if new status of task is In Progress and current status of task is Blocked", async function () {
       const newDate = { ...updateTaskStatus[0], status: "BLOCKED", percentCompleted: 56 };
       taskId = (await tasks.updateTask(newDate)).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ status: "IN_PROGRESS" });
@@ -1315,8 +1313,8 @@ describe("Tasks", function () {
     it("Should give 200 if new status of task is Blocked and current status of task is In Progress", async function () {
       const newDate = { ...updateTaskStatus[0], status: "IN_PROGRESS", percentCompleted: 59 };
       taskId = (await tasks.updateTask(newDate)).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/self/${taskId}?userStatusFlag=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ status: "BLOCKED" });
@@ -1346,8 +1344,8 @@ describe("Tasks", function () {
     };
 
     it("Should throw 400 Bad Request if the user tries to update the status of a task to AVAILABLE", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/tasks/${taskId1}/status?dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send(taskStatusData)
@@ -1365,8 +1363,8 @@ describe("Tasks", function () {
 
     it("Should update the task status for given self taskid", function (done) {
       taskStatusData.status = "IN_PROGRESS";
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/tasks/${taskId1}/status?dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send(taskStatusData)
@@ -1388,8 +1386,8 @@ describe("Tasks", function () {
     });
 
     it("Should update the task status for given self taskid under feature flag", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/tasks/${taskId1}/status?dev=true&userStatusFlag=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ status: "DONE", percentCompleted: 100 })
@@ -1411,8 +1409,8 @@ describe("Tasks", function () {
     });
 
     it("Should return fail response if task data has non-acceptable status value to update the task status for given self taskid", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/tasks/${taskId1}/status?dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ ...taskStatusData, status: "invalidStatus" })
@@ -1428,8 +1426,8 @@ describe("Tasks", function () {
     });
 
     it("Should return fail response if percentage is < 0 or  > 100", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/tasks/${taskId1}/status?dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ ...taskStatusData, percentCompleted: -10 })
@@ -1446,8 +1444,8 @@ describe("Tasks", function () {
 
     it("Should return 404 if task doesnt exist", function (done) {
       taskStatusData.status = "IN_PROGRESS";
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/tasks/wrongtaskId/status?dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send(taskStatusData)
@@ -1465,8 +1463,8 @@ describe("Tasks", function () {
       const userId = await addUser(userData[0]);
       const jwt = authService.generateAuthToken({ userId });
 
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/${taskId1}/status?dev=true`)
         .set("cookie", `${cookieName}=${jwt}`);
 
@@ -1475,8 +1473,8 @@ describe("Tasks", function () {
     });
 
     it("Should give error for no cookie", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/tasks/${taskId1}/status?dev=true`)
         .send(taskStatusData)
         .end((err, res) => {
@@ -1492,8 +1490,8 @@ describe("Tasks", function () {
     it("Should give 403 if status is already 'VERIFIED' ", async function () {
       taskStatusData.status = "IN_PROGRESS";
       taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/${taskId}/status?dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send(taskStatusData);
@@ -1504,8 +1502,8 @@ describe("Tasks", function () {
 
     it("Should give 403 if new status is 'MERGED' ", async function () {
       taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/${taskId}/status?dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ ...taskStatusData, status: "MERGED" });
@@ -1515,8 +1513,8 @@ describe("Tasks", function () {
 
     it("Should give 403 if new status is 'BACKLOG' ", async function () {
       taskId = (await tasks.updateTask({ ...taskData, assignee: appOwner.username })).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/${taskId}/status?dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ ...taskStatusData, status: "BACKLOG" });
@@ -1526,8 +1524,8 @@ describe("Tasks", function () {
 
     it("Should give 400 if percentCompleted is not 100 and new status is COMPLETED ", async function () {
       taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/${taskId}/status?dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ ...taskStatusData, status: "COMPLETED" });
@@ -1538,8 +1536,8 @@ describe("Tasks", function () {
 
     it("Should give 403 if current task status is DONE", async function () {
       taskId = (await tasks.updateTask({ ...taskData, status: "DONE", assignee: appOwner.username })).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/${taskId}/status?dev=true&userStatusFlag=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ ...taskStatusData, status: "IN_REVIEW" });
@@ -1550,8 +1548,8 @@ describe("Tasks", function () {
 
     it("Should give 400 if percentCompleted is not 100 and new status is VERIFIED ", async function () {
       taskId = (await tasks.updateTask({ ...taskData, status: "REVIEW", assignee: appOwner.username })).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/${taskId}/status?dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ ...taskStatusData, status: "VERIFIED" });
@@ -1575,8 +1573,8 @@ describe("Tasks", function () {
         isNoteworthy: true,
       };
       taskId = (await tasks.updateTask(taskData)).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/${taskId}/status?dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ percentCompleted: 80 });
@@ -1588,53 +1586,53 @@ describe("Tasks", function () {
     it("Should give 400 if current status of task is In Progress  and new status is not Blocked and both current and new percentCompleted are not 100 ", async function () {
       const newDate = { ...updateTaskStatus[0], status: "IN_PROGRESS", percentCompleted: 80 };
       taskId = (await tasks.updateTask(newDate)).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/${taskId}/status?dev=true&userStatusFlag=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ status: "NEEDS_REVIEW" });
 
       expect(res).to.have.status(400);
       expect(res.body.message).to.be.equal(
-        "The status of task can not be changed from In progress until progress of task is not 100%."
+        "The status of task can not be changed from In progress until progress of task is not 100%.",
       );
     });
 
     it("Should give 400 if new status of task is In Progress and current status of task is not Blocked and both current and new percentCompleted are not 0 ", async function () {
       const newDate = { ...updateTaskStatus[0], status: "NEEDS_REVIEW", percentCompleted: 100 };
       taskId = (await tasks.updateTask(newDate)).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/${taskId}/status?dev=true&userStatusFlag=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ status: "IN_PROGRESS" });
 
       expect(res).to.have.status(400);
       expect(res.body.message).to.be.equal(
-        "The status of task can not be changed to In progress until progress of task is not 0%."
+        "The status of task can not be changed to In progress until progress of task is not 0%.",
       );
     });
 
     it("Should give 400 if current status of task is Blocked and new status is not In Progress and both current and new percentCompleted are not 100 ", async function () {
       const newDate = { ...updateTaskStatus[0], status: "BLOCKED", percentCompleted: 52 };
       taskId = (await tasks.updateTask(newDate)).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/${taskId}/status?dev=true&userStatusFlag=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ status: "NEEDS_REVIEW" });
 
       expect(res).to.have.status(400);
       expect(res.body.message).to.be.equal(
-        "The status of task can not be changed from Blocked until progress of task is not 100%."
+        "The status of task can not be changed from Blocked until progress of task is not 100%.",
       );
     });
 
     it("Should give 200 if new status of task is In Progress and current status of task is Blocked", async function () {
       const newDate = { ...updateTaskStatus[0], status: "BLOCKED", percentCompleted: 56 };
       taskId = (await tasks.updateTask(newDate)).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/${taskId}/status?dev=true&userStatusFlag=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ status: "IN_PROGRESS" });
@@ -1646,8 +1644,8 @@ describe("Tasks", function () {
     it("Should give 200 if new status of task is Blocked and current status of task is In Progress", async function () {
       const newDate = { ...updateTaskStatus[0], status: "IN_PROGRESS", percentCompleted: 59 };
       taskId = (await tasks.updateTask(newDate)).taskId;
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/${taskId}/status?dev=true&userStatusFlag=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ status: "BLOCKED" });
@@ -1661,7 +1659,7 @@ describe("Tasks", function () {
     it("Should return all the overdue Tasks", async function () {
       await tasks.updateTask(tasksData[0]);
       await tasks.updateTask(tasksData[1]);
-      const res = await chai.request(app).get("/tasks/overdue").set("cookie", `${cookieName}=${superUserJwt}`);
+      const res = await request.execute(app).get("/tasks/overdue").set("cookie", `${cookieName}=${superUserJwt}`);
 
       expect(res).to.have.status(200);
       expect(res.body.newAvailableTasks).to.be.a("array");
@@ -1676,7 +1674,7 @@ describe("Tasks", function () {
 
     it("Should return [] if no overdue task", async function () {
       await tasks.updateTask(tasksData[2]);
-      const res = await chai.request(app).get("/tasks/overdue").set("cookie", `${cookieName}=${superUserJwt}`);
+      const res = await request.execute(app).get("/tasks/overdue").set("cookie", `${cookieName}=${superUserJwt}`);
 
       expect(res).to.have.status(200);
       expect(res.body.newAvailableTasks).to.have.lengthOf(0);
@@ -1688,7 +1686,7 @@ describe("Tasks", function () {
     it("Should update status COMPLETED to DONE successful", async function () {
       const taskData1 = { status: "COMPLETED" };
       await firestore.collection("tasks").doc("updateTaskStatus1").set(taskData1);
-      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`);
+      const res = await request.execute(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`);
       expect(res).to.have.status(200);
       expect(res.body.totalTasks).to.be.equal(1);
       expect(res.body.totalUpdatedStatus).to.be.equal(1);
@@ -1698,7 +1696,7 @@ describe("Tasks", function () {
     });
 
     it("Should not update if not found any COMPLETED task status ", async function () {
-      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`);
+      const res = await request.execute(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`);
       expect(res).to.have.status(200);
       expect(res.body.totalTasks).to.be.equal(0);
       expect(res.body.totalUpdatedStatus).to.be.equal(0);
@@ -1717,7 +1715,7 @@ describe("Tasks", function () {
       });
       const taskData1 = { status: "COMPLETED" };
       await firestore.collection("tasks").doc("updateTaskStatus1").set(taskData1);
-      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`);
+      const res = await request.execute(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`);
       expect(res.status).to.equal(500);
       const response = res.body;
       expect(response.message).to.be.equal("An internal server error occurred");
@@ -1726,7 +1724,7 @@ describe("Tasks", function () {
     it("Should return 401 if not super_user", async function () {
       const nonSuperUserId = await addUser(appOwner);
       const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
-      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${nonSuperUserJwt}`);
+      const res = await request.execute(app).post("/tasks/migration").set("cookie", `${cookieName}=${nonSuperUserJwt}`);
       expect(res).to.have.status(401);
     });
   });
@@ -1751,7 +1749,7 @@ describe("Tasks", function () {
     });
 
     it("Should return 401 if not super_user", async function () {
-      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${jwt}`);
+      const res = await request.execute(app).post("/tasks/migration").set("cookie", `${cookieName}=${jwt}`);
       expect(res).to.have.status(401);
     });
 
@@ -1762,10 +1760,14 @@ describe("Tasks", function () {
       await tasks.updateTask({ ...tasksData[8], createdAt: null, updatedAt: null });
       await tasks.updateTask({ ...tasksData[9], updatedAt: null });
       await tasks.updateTask({ ...tasksData[10], createdAt: null });
-      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`).send({
-        action: "ADD",
-        field: "CREATED_AT+UPDATED_AT",
-      });
+      const res = await request
+        .execute(app)
+        .post("/tasks/migration")
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          action: "ADD",
+          field: "CREATED_AT+UPDATED_AT",
+        });
       expect(res).to.have.status(200);
       expect(res.body.totalTasks).to.be.equal(10);
       expect(res.body.totalTaskToBeUpdate).to.be.equal(4);
@@ -1775,10 +1777,14 @@ describe("Tasks", function () {
     });
 
     it("Should update status createdAt and updatedAt, if filed doesn't exists", async function () {
-      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`).send({
-        action: "ADD",
-        field: "CREATED_AT+UPDATED_AT",
-      });
+      const res = await request
+        .execute(app)
+        .post("/tasks/migration")
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          action: "ADD",
+          field: "CREATED_AT+UPDATED_AT",
+        });
       expect(res).to.have.status(200);
       expect(res.body.totalTasks).to.be.equal(6);
       expect(res.body.totalTaskToBeUpdate).to.be.equal(0);
@@ -1799,10 +1805,14 @@ describe("Tasks", function () {
           throw new Error("Firestore batch commit failed!");
         },
       });
-      const res = await chai.request(app).post("/tasks/migration").set("cookie", `${cookieName}=${superUserJwt}`).send({
-        action: "ADD",
-        field: "CREATED_AT+UPDATED_AT",
-      });
+      const res = await request
+        .execute(app)
+        .post("/tasks/migration")
+        .set("cookie", `${cookieName}=${superUserJwt}`)
+        .send({
+          action: "ADD",
+          field: "CREATED_AT+UPDATED_AT",
+        });
       expect(res).to.have.status(200);
       expect(res.body.totalTasks).to.be.equal(10);
       expect(res.body.totalTaskToBeUpdate).to.be.equal(4);
@@ -1893,14 +1903,14 @@ describe("Tasks", function () {
     });
 
     it("should return successful response with user id list", async function () {
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .get("/tasks/users/discord")
         .query({ q: `status:${tasksUsersStatus.MISSED_UPDATES}` })
         .set("Authorization", `Bearer ${jwtToken}`);
 
       expect(response.body.message).to.equal(
-        "Discord details of users with status missed updates fetched successfully"
+        "Discord details of users with status missed updates fetched successfully",
       );
       expect(response.body.data.tasks).to.equal(5);
       expect(response.body.data.missedUpdatesTasks).to.equal(4);
@@ -1911,8 +1921,8 @@ describe("Tasks", function () {
     });
 
     it("should return successful response with user id when all params are passed", async function () {
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .get("/tasks/users/discord")
         .query({
           size: 6,
@@ -1932,8 +1942,8 @@ describe("Tasks", function () {
     });
 
     it("should return bad request error when status is not passed", async function () {
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .get("/tasks/users/discord")
         .query({})
         .set("Authorization", `Bearer ${jwtToken}`);
@@ -1947,8 +1957,8 @@ describe("Tasks", function () {
 
     it("should save logs when there is an error", async function () {
       getDiscordMembersStub.throws(new Error("Error occurred"));
-      await chai
-        .request(app)
+      await request
+        .execute(app)
         .get("/tasks/users/discord")
         .query({ q: `status:${tasksUsersStatus.MISSED_UPDATES}` })
         .set("Authorization", `Bearer ${jwtToken}`);
@@ -1997,7 +2007,7 @@ describe("Tasks", function () {
     });
 
     it("Should update status of orphan tasks to BACKLOG", async function () {
-      const res = await chai.request(app).post("/tasks/orphanTasks").set("cookie", `${cookieName}=${superUserJwt}`);
+      const res = await request.execute(app).post("/tasks/orphanTasks").set("cookie", `${cookieName}=${superUserJwt}`);
       expect(res).to.have.status(200);
       expect(res.body).to.deep.equal({
         message: "Orphan tasks filtered successfully",
@@ -2010,7 +2020,10 @@ describe("Tasks", function () {
     it("Should return 400 if not super user", async function () {
       const nonSuperUserId = await addUser(appOwner);
       const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
-      const res = await chai.request(app).post("/tasks/orphanTasks").set("Authorization", `Bearer ${nonSuperUserJwt}`);
+      const res = await request
+        .execute(app)
+        .post("/tasks/orphanTasks")
+        .set("Authorization", `Bearer ${nonSuperUserJwt}`);
 
       expect(res).to.have.status(401);
       expect(res.body).to.deep.equal({
@@ -2045,13 +2058,13 @@ describe("Tasks", function () {
       const task = abandonedTasksData[3];
       await tasksModel.add(task);
 
-      const res = await chai.request(app).get("/tasks?dev=true&orphaned=true").set("Accept", "application/json");
+      const res = await request.execute(app).get("/tasks?dev=true&orphaned=true").set("Accept", "application/json");
 
       expect(res).to.have.status(204);
     });
 
     it("should fetch tasks assigned to archived and non-discord users", async function () {
-      const res = await chai.request(app).get("/tasks?dev=true&orphaned=true");
+      const res = await request.execute(app).get("/tasks?dev=true&orphaned=true");
 
       expect(res).to.have.status(200);
       expect(res.body).to.have.property("message").that.equals("Orphan tasks fetched successfully");
@@ -2059,7 +2072,7 @@ describe("Tasks", function () {
     });
 
     it("should fail if dev flag is not passed", async function () {
-      const res = await chai.request(app).get("/tasks?orphaned=true");
+      const res = await request.execute(app).get("/tasks?orphaned=true");
       expect(res).to.have.status(404);
       expect(res.body.message).to.be.equal("Route not found");
     });
@@ -2067,7 +2080,7 @@ describe("Tasks", function () {
     it("should handle errors gracefully if the database query fails", async function () {
       sinon.stub(tasksService, "fetchOrphanedTasks").rejects(new Error(INTERNAL_SERVER_ERROR));
 
-      const res = await chai.request(app).get("/tasks?orphaned=true&dev=true");
+      const res = await request.execute(app).get("/tasks?orphaned=true&dev=true");
 
       expect(res).to.have.status(500);
       expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
@@ -2091,8 +2104,8 @@ describe("Tasks", function () {
     it("Should not assign a task to the user if they do not have status idle", async function () {
       await tasks.updateTask(taskData);
 
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/assign/${testUserId}?dev=true`)
         .set("cookie", `${cookieName}=${testUserjwt}`)
         .send();
@@ -2104,8 +2117,8 @@ describe("Tasks", function () {
     it("Should not assign a task to the user if task doesn't exist", async function () {
       await tasks.updateTask(taskData);
 
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/assign/${genZUserId}?dev=true`)
         .set("cookie", `${cookieName}=${genZUserJwt}`)
         .send();
@@ -2127,8 +2140,8 @@ describe("Tasks", function () {
 
       await items.addTagsToItem(itemData);
 
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/assign/${genZUserId}?dev=true`)
         .set("cookie", `${cookieName}=${genZUserJwt}`)
         .send();
@@ -2140,8 +2153,8 @@ describe("Tasks", function () {
     it("Should throw an error if Firestore batch operations fail", async function () {
       sinon.stub(taskController, "assignTask").rejects(new Error(INTERNAL_SERVER_ERROR));
 
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/tasks/assign/${genZUserId}?dev=true`)
         .set("cookie", `${cookieName}=${genZUserJwt}`)
         .send();

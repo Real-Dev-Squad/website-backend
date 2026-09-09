@@ -1,8 +1,8 @@
+import { expect } from "chai";
 import { REQUEST_TYPE } from "../../../constants/requests";
 import { createOnboardingExtensionRequestValidator } from "../../../middlewares/validators/onboardingExtensionRequest";
 import sinon from "sinon";
 import { CreateOnboardingExtensionBody } from "../../../types/onboardingExtension";
-import { expect } from "chai";
 
 describe("Onboarding Extension Request Validators", () => {
     let req: any;

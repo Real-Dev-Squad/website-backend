@@ -1,7 +1,7 @@
 import firestore from "../utils/firestore";
 const userFutureStatusModel = firestore.collection("userFutureStatus");
 import { UserFutureStatusType } from "../types/userFutureStatus";
-import * as admin from "firebase-admin";
+import { Query } from "firebase-admin/firestore";
 
 /**
  * Function to create user future status
@@ -33,7 +33,7 @@ export const createUserFutureStatus = async (body: UserFutureStatusType) => {
 export const getUserFutureStatus = async (userId: string, status: string, state: string) => {
   try {
     let resultArray = [];
-    let query: admin.firestore.Query = userFutureStatusModel;
+    let query: Query = userFutureStatusModel;
 
     if (userId) {
       query = query.where("userId", "==", userId);

@@ -1,6 +1,5 @@
-import chai from "chai";
+import { expect } from "chai";
 import sinon from "sinon";
-const { expect } = chai;
 const conditionalMiddleware = require("../../../middlewares/conditionalMiddleware");
 const authService = require("../../../services/authService");
 const addUser = require("../../utils/addUser");

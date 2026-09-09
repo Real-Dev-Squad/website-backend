@@ -4,7 +4,7 @@ const profileDiffsQuery = require("../models/profileDiffs");
 const firestore = require("../utils/firestore");
 const memberRoleModel = firestore.collection("member-group-roles");
 const logsModel = firestore.collection("logs");
-const admin = require("firebase-admin");
+const { Timestamp } = require("firebase-admin/firestore");
 const logsQuery = require("../models/logs");
 const imageService = require("../services/imageService");
 const { profileDiffStatus } = require("../constants/profileDiff");
@@ -105,7 +105,7 @@ const getUsers = async (req, res) => {
       const id = req.query.id;
       let result, user;
       try {
-        result = await dataAccess.retrieveUsers({ id: id });
+        result = await dataAccess.retrieveUsers({ id });
         user = result.user;
       } catch (error) {
         logger.error(`Error while fetching user: ${error}`);
@@ -143,7 +143,7 @@ const getUsers = async (req, res) => {
         return res.json({
           message: `Users with profile status ${normalizedProfileStatus} returned successfully!`,
           count: users.length,
-          users: users,
+          users,
         });
       } catch (error) {
         logger.error(`Error while fetching users with profile status ${normalizedProfileStatus}: ${error}`);
@@ -172,7 +172,7 @@ const getUsers = async (req, res) => {
         return res.json({
           message: "Inactive users returned successfully!",
           count: users.length,
-          users: users,
+          users,
         });
       } catch (error) {
         logger.error(`Error while fetching all users: ${error}`);
@@ -286,7 +286,7 @@ const getUsers = async (req, res) => {
     if (qualifiers?.filterBy) {
       const allPRs = await getFilteredPRsOrIssues(qualifiers);
       const usernames = getUsernamesFromPRs(allPRs);
-      const users = await dataAccess.retrieveUsers({ usernames: usernames });
+      const users = await dataAccess.retrieveUsers({ usernames });
       return res.json({
         message: "Users returned successfully!",
         users,
@@ -451,7 +451,7 @@ const getSelfDetails = async (req, res) => {
 
       res.set(
         "X-Deprecation-Warning",
-        "WARNING: This endpoint is deprecated and will be removed in the future. Please use /users?profile=true to get the updated profile details."
+        "WARNING: This endpoint is deprecated and will be removed in the future. Please use /users?profile=true to get the updated profile details.",
       );
       return res.send(user);
     }
@@ -488,7 +488,7 @@ const updateSelf = async (req, res, next) => {
         firstName,
         lastName,
         role,
-        existingRole
+        existingRole,
       );
       if (username) {
         req.body.username = username;
@@ -540,7 +540,7 @@ const updateSelf = async (req, res, next) => {
             }
           }
           return res.boom.forbidden(
-            "Developers can only update disabled_roles. Use profile service for updating other attributes."
+            "Developers can only update disabled_roles. Use profile service for updating other attributes.",
           );
         }
       }
@@ -701,7 +701,7 @@ const markUnverified = async (req, res) => {
 
     const batchSize = 500;
     const batches = Array.from({ length: Math.ceil(usersToApplyUnverifiedRole.length / batchSize) }, (_, index) =>
-      usersToApplyUnverifiedRole.slice(index * batchSize, index * batchSize + batchSize)
+      usersToApplyUnverifiedRole.slice(index * batchSize, index * batchSize + batchSize),
     );
 
     batches.forEach((batch) => {
@@ -714,14 +714,14 @@ const markUnverified = async (req, res) => {
         firestoreBatch.set(memberRoleRef, {
           roleid: unverifiedRoleId,
           userid: id,
-          date: admin.firestore.Timestamp.fromDate(new Date()),
+          date: Timestamp.fromDate(new Date()),
         });
 
         firestoreBatch.set(logRef, {
           type: logType.ADD_UNVERIFIED_ROLE,
           meta: { roleid: unverifiedRoleId, userid: id },
           body: { message: "Unverified role added successfully" },
-          timestamp: admin.firestore.Timestamp.fromDate(new Date()),
+          timestamp: Timestamp.fromDate(new Date()),
         });
       });
 
@@ -797,7 +797,7 @@ const updateUser = async (req, res) => {
 
     const meta = {
       approvedBy: req.userData.id,
-      userId: userId,
+      userId,
     };
 
     await logsQuery.addLog(logType.PROFILE_DIFF_APPROVED, meta, { profileDiffId, message });
@@ -847,7 +847,7 @@ const rejectProfileDiff = async (req, res) => {
     const { profileDiffId, message } = req.body;
     const profileResponse = await profileDiffsQuery.updateProfileDiff(
       { approval: profileDiffStatus.REJECTED },
-      profileDiffId
+      profileDiffId,
     );
 
     if (profileResponse.notFound) return res.boom.notFound("Profile Diff doesn't exist");
@@ -920,7 +920,7 @@ const getUserIntro = async (req, res) => {
     if (data.length) {
       return res.json({
         message: "User data returned",
-        data: data,
+        data,
       });
     } else {
       return res.status(404).json({
@@ -980,7 +980,7 @@ const filterUsers = async (req, res) => {
       const users = await dataAccess.retreiveFilteredUsers(req.query);
       return res.json({
         message: users.length ? "Users found successfully!" : "No users found",
-        users: users,
+        users,
         count: users.length,
       });
     }
@@ -997,7 +997,7 @@ const filterUsers = async (req, res) => {
 
     return res.json({
       message: users.length ? "Users found successfully!" : "No users found",
-      users: users,
+      users,
       links: paginationLinks,
       count: users.length,
     });
@@ -1043,7 +1043,7 @@ const updateRoles = async (req, res) => {
             },
             archived_by: {
               user_id: superUserId,
-              roles: roles,
+              roles,
             },
           };
           addLog("archived-details", {}, body);
@@ -1122,7 +1122,7 @@ const getIdentityStats = async (req, res) => {
   const membersInDiscord = await getDiscordMembers();
   if (membersInDiscord) {
     const developersInDiscord = membersInDiscord.filter(
-      (discordMember) => discordMember && discordMember.roles && discordMember.roles.includes(discordDeveloperRoleId)
+      (discordMember) => discordMember && discordMember.roles && discordMember.roles.includes(discordDeveloperRoleId),
     );
     developers = developersInDiscord;
   }
@@ -1130,14 +1130,14 @@ const getIdentityStats = async (req, res) => {
   const findUserByDiscordId = (usersArray, discordId) => usersArray.find((user) => user.discordId === discordId);
 
   const verifiedDeveloperCount = developers.filter((developer) =>
-    findUserByDiscordId(verifiedUsers, developer.user.id)
+    findUserByDiscordId(verifiedUsers, developer.user.id),
   ).length;
   const blockedDeveloperCount = developers.filter((developer) =>
-    findUserByDiscordId(blockedUsers, developer.user.id)
+    findUserByDiscordId(blockedUsers, developer.user.id),
   ).length;
   const developersLeftToVerifyCount = developers.filter(
     (developer) =>
-      !findUserByDiscordId(verifiedUsers, developer.user.id) && !findUserByDiscordId(blockedUsers, developer.user.id)
+      !findUserByDiscordId(verifiedUsers, developer.user.id) && !findUserByDiscordId(blockedUsers, developer.user.id),
   ).length;
 
   return res.status(200).json({

@@ -1,5 +1,4 @@
-import chai from "chai";
-const { expect } = chai;
+import { expect } from "chai";
 import { verifyAuthToken } from "../../../utils/verifyAuthToken";
 
 describe("verifyAuthToken", () => {

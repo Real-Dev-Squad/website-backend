@@ -24,7 +24,7 @@ const { userAuthorization } = require("../middlewares/userAuthorization");
 const oldAuthorizationMiddleware = authorizeRoles([APPOWNER, SUPERUSER]);
 const newAuthorizationMiddleware = authorizeAndAuthenticate(
   [APPOWNER, SUPERUSER],
-  [CLOUDFLARE_WORKER, CRON_JOB_HANDLER]
+  [CLOUDFLARE_WORKER, CRON_JOB_HANDLER],
 );
 
 // Middleware to check if 'dev' query parameter is set to true
@@ -40,7 +40,7 @@ router.get(
   "/",
   getTasksValidator,
   cacheResponse({ invalidationKey: ALL_TASKS, expiry: CACHE_TTL_24H_MIN }),
-  tasks.fetchTasks
+  tasks.fetchTasks,
 );
 router.get("/self", authenticate, tasks.getSelfTasks);
 
@@ -51,7 +51,7 @@ router.post(
   authorizeRoles([APPOWNER, SUPERUSER]),
   invalidateCache({ invalidationKeys: [ALL_TASKS] }),
   createTask,
-  tasks.addNewTask
+  tasks.addNewTask,
 );
 router.patch(
   "/:id",
@@ -59,7 +59,7 @@ router.patch(
   enableDevModeMiddleware,
   invalidateCache({ invalidationKeys: [ALL_TASKS] }),
   updateTask,
-  tasks.updateTask
+  tasks.updateTask,
 );
 router.get("/:id/details", cacheResponse({ invalidationKey: ALL_TASKS, expiry: CACHE_TTL_24H_MIN }), tasks.getTask);
 router.get("/:username", cacheResponse({ invalidationKey: ALL_TASKS, expiry: CACHE_TTL_24H_MIN }), tasks.getUserTasks);
@@ -70,7 +70,7 @@ router.patch(
   invalidateCache({ invalidationKeys: [ALL_TASKS] }),
   updateSelfTask,
   tasks.updateTaskStatus,
-  assignTask
+  assignTask,
 ); // this route is being deprecated in favor of /tasks/:id/status.
 router.patch(
   "/:id/status",
@@ -79,7 +79,7 @@ router.patch(
   invalidateCache({ invalidationKeys: [ALL_TASKS] }),
   updateSelfTask,
   tasks.updateTaskStatus,
-  assignTask
+  assignTask,
 );
 router.patch("/assign/self", authenticate, invalidateCache({ invalidationKeys: [ALL_TASKS] }), tasks.assignTask); // this route is being deprecated in favor of /assign/:userId.
 
@@ -89,7 +89,7 @@ router.patch(
   devFlagMiddleware,
   userAuthorization,
   invalidateCache({ invalidationKeys: [ALL_TASKS] }),
-  tasks.assignTask
+  tasks.assignTask,
 );
 
 router.get("/users/discord", verifyCronJob, getUsersValidator, tasks.getUsersHandler);
@@ -100,7 +100,7 @@ router.post(
   authenticate,
   authorizeRoles([SUPERUSER]),
   invalidateCache({ invalidationKeys: [ALL_TASKS] }),
-  tasks.orphanTasks
+  tasks.orphanTasks,
 );
 
 module.exports = router;

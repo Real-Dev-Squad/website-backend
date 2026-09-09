@@ -1,5 +1,4 @@
-const chai = require("chai");
-const { expect } = chai;
+const { expect } = require("chai");
 
 const cleanDb = require("../../utils/cleanDb");
 const firestore = require("../../../utils/firestore");

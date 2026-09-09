@@ -1,3 +1,4 @@
+const { expect } = require("chai");
 const Sinon = require("sinon");
 const {
   externalAccountData,
@@ -5,7 +6,6 @@ const {
   linkDiscord,
 } = require("../../../middlewares/validators/external-accounts");
 const { EXTERNAL_ACCOUNTS_POST_ACTIONS } = require("../../../constants/external-accounts");
-const { expect } = require("chai");
 
 describe("Middleware | Validators | external accounts", function () {
   describe("externalAccountsData", function () {

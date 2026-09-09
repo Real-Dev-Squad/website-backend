@@ -1,4 +1,4 @@
-const admin = require("firebase-admin");
+const { Timestamp } = require("firebase-admin/firestore");
 
 const minutesToMilliseconds = [
   {
@@ -52,16 +52,16 @@ const timeInSecondsAfter = [
 const timeBeforeHour = [
   {
     param: {
-      timestamp: admin.firestore.Timestamp.fromDate(new Date(1671820200 * 1000)),
+      timestamp: Timestamp.fromDate(new Date(1671820200 * 1000)),
       hours: 24,
     },
-    result: admin.firestore.Timestamp.fromDate(new Date(1671733800 * 1000))._seconds,
+    result: Timestamp.fromDate(new Date(1671733800 * 1000))._seconds,
   },
   {
     param: {
-      timestamp: admin.firestore.Timestamp.fromDate(new Date()),
+      timestamp: Timestamp.fromDate(new Date()),
     },
-    result: admin.firestore.Timestamp.fromDate(new Date())._seconds,
+    result: Timestamp.fromDate(new Date())._seconds,
   },
 ];
 

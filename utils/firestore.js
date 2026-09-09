@@ -1,4 +1,5 @@
 const admin = require("firebase-admin");
+const { getFirestore } = require("firebase-admin/firestore");
 const config = require("config");
 
 // Firestore config needs to contain the credentials as a string instead of JS object,
@@ -6,9 +7,9 @@ const config = require("config");
 const credentialsObject = JSON.parse(config.firestore);
 
 admin.initializeApp({
-  credential: admin.credential.cert(credentialsObject),
+  credential: admin.cert(credentialsObject),
 });
 
-const db = admin.firestore();
+const db = getFirestore();
 
 module.exports = db;

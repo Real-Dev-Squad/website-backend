@@ -1,4 +1,5 @@
-const chai = require("chai");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 const sinon = require("sinon");
 
 const firestore = require("../../utils/firestore");
@@ -19,7 +20,6 @@ const withDiscordMembership = require("../utils/withDiscordMembership");
 const taskData = require("../fixtures/tasks/tasks")();
 const { INTERNAL_SERVER_ERROR_MESSAGE, UNAUTHORIZED_WRITE } = require("../../constants/progresses");
 const cookieName = config.get("userToken.cookieName");
-const { expect } = chai;
 
 describe("Test Progress Updates API for Tasks", function () {
   afterEach(async function () {
@@ -45,7 +45,7 @@ describe("Test Progress Updates API for Tasks", function () {
       userId = await addUser(withDiscordMembership(userData[1]));
       archivedUserId = await addUser(userData[5]);
       archivedUserToken = authService.generateAuthToken({ userId: archivedUserId });
-      userToken = authService.generateAuthToken({ userId: userId });
+      userToken = authService.generateAuthToken({ userId });
       const taskObject1 = await tasks.updateTask(taskData[0]);
       taskId1 = taskObject1.taskId;
       const taskObject2 = await tasks.updateTask(taskData[1]);
@@ -65,10 +65,10 @@ describe("Test Progress Updates API for Tasks", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({}),
-        })
+        }),
       );
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post(`/progresses`)
         .set("Cookie", `${cookieName}=${userToken}`)
         .send(taskProgressDay1(taskId2))
@@ -96,8 +96,8 @@ describe("Test Progress Updates API for Tasks", function () {
 
     it("stores the user progress document for the previous day if the update is sent before 6am IST", function (done) {
       clock.setSystemTime(new Date(Date.UTC(2023, 4, 2, 0, 29)).getTime()); // 2nd May 2023 05:59 am IST
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post(`/progresses`)
         .set("cookie", `${cookieName}=${userToken}`)
         .send(taskProgressDay1(taskId2))
@@ -111,8 +111,8 @@ describe("Test Progress Updates API for Tasks", function () {
 
     it("stores the user progress document for the current day if the update is sent after 6am IST", function (done) {
       clock.setSystemTime(new Date(Date.UTC(2023, 4, 2, 0, 31)).getTime()); // 2nd May 2023 06:01 am IST
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post(`/progresses`)
         .set("cookie", `${cookieName}=${userToken}`)
         .send(taskProgressDay1(taskId2))
@@ -125,8 +125,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("throws Conflict Error 409 if the task progress is updated multiple times in a day", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post(`/progresses`)
         .set("cookie", `${cookieName}=${userToken}`)
         .send(taskProgressDay1(taskId1))
@@ -142,8 +142,8 @@ describe("Test Progress Updates API for Tasks", function () {
     it("Gives 400 for invalid request body", function (done) {
       const incompleteProgressArray = incompleteTaskProgress(taskId1);
       const requests = incompleteProgressArray.map((progress) => {
-        return chai
-          .request(app)
+        return request
+          .execute(app)
           .post(`/progresses`)
           .set("Cookie", `${cookieName}=${userToken}`)
           .send(progress.payload)
@@ -159,8 +159,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("Gives 401 for unauthenticated user", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post(`/progresses`)
         .send(taskProgressDay1(taskId1))
         .end((err, res) => {
@@ -172,8 +172,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("should return forbidden response when user is not in discord", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/progresses")
         .set("Cookie", `${cookieName}=${archivedUserToken}`)
         .send(taskProgressDay1("1111"))
@@ -217,8 +217,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("Returns the progress array for the task", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses?taskId=${taskId1}`)
         .end((err, res) => {
           if (err) return done(err);
@@ -245,8 +245,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("Returns a 404 error when the task does not exist", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses?taskId=nonExistingTaskId&dev=true`)
         .end((err, res) => {
           if (err) return done(err);
@@ -260,8 +260,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("Gives 400 status when anything other than -date or date is supplied", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses?taskId=${taskId1}&orderBy=-randomfield`)
         .end((err, res) => {
           if (err) return done(err);
@@ -272,8 +272,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("Returns the progress array with latest date first", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses?taskId=${taskId1}`)
         .end((err, res) => {
           if (err) return done(err);
@@ -288,8 +288,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("Returns the progress array with latest date first if query -date is supplied", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses?taskId=${taskId1}&orderBy=-date`)
         .end((err, res) => {
           if (err) return done(err);
@@ -305,8 +305,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("Returns the progress array with oldest date first if query date is supplied", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses?taskId=${taskId1}&orderBy=date`)
         .end((err, res) => {
           if (err) return done(err);
@@ -321,8 +321,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("Returns the progress array for all the tasks", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses?type=task`)
         .end((err, res) => {
           if (err) return done(err);
@@ -350,8 +350,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("Returns 400 for bad request", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses`)
         .end((err, res) => {
           if (err) return done(err);
@@ -362,8 +362,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("Returns 404 for invalid task id", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses?taskId=invalidUserId`)
         .end((err, res) => {
           if (err) return done(err);
@@ -374,8 +374,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("Returns 404 if the progress document doesn't exist for the task", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses?taskId=${taskId3}`)
         .end((err, res) => {
           if (err) return done(err);
@@ -406,8 +406,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("Verifies the progress records for a task within the specified date range.", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses/range?taskId=${taskId1}&startDate=2023-05-09&endDate=2023-05-12`)
         .end((err, res) => {
           if (err) return done(err);
@@ -428,8 +428,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("Returns 400 for bad request", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses/range?taskId=${taskId1}`)
         .end((err, res) => {
           if (err) return done(err);
@@ -440,8 +440,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("Returns 404 for invalid task id", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses/range?taskId=invalidTaskId&startDate=2023-05-09&endDate=2023-05-12`)
         .end((err, res) => {
           if (err) return done(err);
@@ -452,8 +452,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("Returns 404 if the progress document doesn't exist", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses/range?taskId=${taskId2}&startDate=2023-05-09&endDate=2023-05-12`)
         .end((err, res) => {
           if (err) return done(err);
@@ -480,8 +480,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("Returns the progress data for a specific task", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses/task/${taskId}/date/2023-05-02`)
         .end((err, res) => {
           if (err) return done(err);
@@ -505,8 +505,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("Should return 404 No progress records found if the document doesn't exist", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses/task/${taskId}/date/2023-05-03`)
         .end((err, res) => {
           if (err) return done(err);
@@ -519,8 +519,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("Returns 400 for bad request", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses/task/${taskId}/date/2023-05-33`)
         .end((err, res) => {
           if (err) return done(err);
@@ -531,8 +531,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("Returns 404 for invalid task id", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses/task/invalidTaskId/date/2023-05-02`)
         .end((err, res) => {
           if (err) return done(err);
@@ -543,8 +543,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("Returns 404 if the progress document doesn't exist for the task", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses/task/${anotherTaskId}/date/2023-05-02`)
         .end((err, res) => {
           if (err) return done(err);
@@ -571,8 +571,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("should return paginated results when dev=true is passed", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses?type=task&dev=true&page=0&size=1`)
         .end((err, res) => {
           if (err) return done(err);
@@ -602,8 +602,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("should not return paginated results when dev=false is passed", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses?type=task&dev=false&page=0&size=1`)
         .end((err, res) => {
           if (err) return done(err);
@@ -635,8 +635,8 @@ describe("Test Progress Updates API for Tasks", function () {
       const size = 1;
       const page = 1;
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses?type=task&dev=true&page=${page}&size=${size}`)
         .end((err, res) => {
           if (err) return done(err);
@@ -652,8 +652,8 @@ describe("Test Progress Updates API for Tasks", function () {
     });
 
     it("should return a bad request error for invalid size parameter", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses?type=task&dev=true&page=0&size=104`)
         .end((_err, res) => {
           expect(res).to.have.status(400);
@@ -667,8 +667,8 @@ describe("Test Progress Updates API for Tasks", function () {
       const size = 10;
       const page = 100;
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses?type=task&dev=true&page=${page}&size=${size}`)
         .end((err, res) => {
           if (err) return done(err);
@@ -688,8 +688,8 @@ describe("Test Progress Updates API for Tasks", function () {
     it("Should return 500 Internal Server Error if there is an exception", function (done) {
       sinon.stub(progressesModel, "getPaginatedProgressDocument").throws(new Error("Database error"));
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses?type=task&dev=true&page=0&size=1`)
         .end((err, res) => {
           if (err) return done(err);

@@ -1,4 +1,5 @@
-const chai = require("chai");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 
 const firestore = require("../../utils/firestore");
 const app = require("../../server");
@@ -21,7 +22,6 @@ const userData = require("../fixtures/user/user")();
 const [userData0, userData1, , , superUserData] = userData;
 
 const cookieName = config.get("userToken.cookieName");
-const { expect } = chai;
 
 describe("Test the tracked Progress API", function () {
   let userId0, userId1, superUserId;
@@ -53,8 +53,8 @@ describe("Test the tracked Progress API", function () {
 
   describe("Verify the POST call for monitor route", function () {
     it("stores the tracked progress document for user", async function () {
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .post("/monitor")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send({
@@ -87,8 +87,8 @@ describe("Test the tracked Progress API", function () {
     });
 
     it("throws 409 if tracked progress document already exists for the same user", async function () {
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .post("/monitor")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send({
@@ -102,8 +102,8 @@ describe("Test the tracked Progress API", function () {
     });
 
     it("stores the tracked progress document for task", async function () {
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .post("/monitor")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send({
@@ -136,8 +136,8 @@ describe("Test the tracked Progress API", function () {
     });
 
     it("throws 409 if tracked progress document already exists for the same task", async function () {
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .post("/monitor")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send({
@@ -151,8 +151,8 @@ describe("Test the tracked Progress API", function () {
     });
 
     it("throws 400 Bad Request if the payload is incorrect", async function () {
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .post("/monitor")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send({
@@ -168,8 +168,8 @@ describe("Test the tracked Progress API", function () {
     });
 
     it("Handles unauthenticated user request with 401 Unauthorized", async function () {
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .post("/monitor")
         .send({
           ...trackedProgressUserDataForPost,
@@ -183,8 +183,8 @@ describe("Test the tracked Progress API", function () {
     });
 
     it("handles unauthorized user request who don't have super user permission", async function () {
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .post("/monitor")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
@@ -200,8 +200,8 @@ describe("Test the tracked Progress API", function () {
     });
 
     it("handles no resource found with 404 if the task / user does not exist", async function () {
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .post("/monitor")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send({
@@ -217,8 +217,8 @@ describe("Test the tracked Progress API", function () {
 
   describe("Verify the PATCH call for monitor route", function () {
     it("Updates the tracked progress document for user", async function () {
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .patch(`/monitor/user/${userId0}`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(trackedProgressDataForPatch);
@@ -248,8 +248,8 @@ describe("Test the tracked Progress API", function () {
     });
 
     it("throws 404 if tried to update a user document that doesn't exist", async function () {
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .patch(`/monitor/user/${userId1}`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(trackedProgressDataForPatch);
@@ -260,8 +260,8 @@ describe("Test the tracked Progress API", function () {
     });
 
     it("Updates the tracked progress document for task", async function () {
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .patch(`/monitor/task/${taskId0}`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(trackedProgressDataForPatch);
@@ -292,8 +292,8 @@ describe("Test the tracked Progress API", function () {
     });
 
     it("throws 404 if tried to update a task document that doesn't exist", async function () {
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .patch(`/monitor/task/${taskId1}`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(trackedProgressDataForPatch);
@@ -304,8 +304,8 @@ describe("Test the tracked Progress API", function () {
     });
 
     it("throws 400 Bad Request if the payload is incorrect", async function () {
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .patch(`/monitor/user/${taskId0}`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send({ monitored: "false" });
@@ -318,7 +318,7 @@ describe("Test the tracked Progress API", function () {
     });
 
     it("Handles unauthenticated user request with 401 Unauthorized", async function () {
-      const response = await chai.request(app).patch(`/monitor/task/${taskId0}`).send(trackedProgressDataForPatch);
+      const response = await request.execute(app).patch(`/monitor/task/${taskId0}`).send(trackedProgressDataForPatch);
       expect(response).to.have.status(401);
       expect(response.body).to.be.an("object");
       expect(response.body).to.have.keys(["message", "error", "statusCode"]);
@@ -328,8 +328,8 @@ describe("Test the tracked Progress API", function () {
     });
 
     it("handles unauthorized user request who don't have super user permission", async function () {
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .patch(`/monitor/task/${taskId0}`)
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send(trackedProgressDataForPatch);
@@ -342,8 +342,8 @@ describe("Test the tracked Progress API", function () {
     });
 
     it("handles no resource found with 404 if the task / user does not exist", async function () {
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .patch(`/monitor/user/invalid-task`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .send(trackedProgressDataForPatch);
@@ -356,7 +356,7 @@ describe("Test the tracked Progress API", function () {
 
   describe("Verify the GET call for monitor route", function () {
     it("Returns the tracked progress document for a specific user", async function () {
-      const response = await chai.request(app).get(`/monitor?userId=${userId0}`);
+      const response = await request.execute(app).get(`/monitor?userId=${userId0}`);
       expect(response).to.have.status(200);
       expect(response.body).to.have.all.keys(["message", "data"]);
       expect(response.body.data).to.be.an("object");
@@ -373,7 +373,7 @@ describe("Test the tracked Progress API", function () {
     });
 
     it("Returns the tracked progress document for a specific task", async function () {
-      const response = await chai.request(app).get(`/monitor?taskId=${taskId0}`);
+      const response = await request.execute(app).get(`/monitor?taskId=${taskId0}`);
       expect(response).to.have.status(200);
       expect(response.body).to.have.keys(["message", "data"]);
       expect(response.body.data).to.be.an("object");
@@ -390,7 +390,7 @@ describe("Test the tracked Progress API", function () {
     });
 
     it("Should return 404 No tracked progress exist in user collection", async function () {
-      const response = await chai.request(app).get(`/monitor?userId=${userId1}`);
+      const response = await request.execute(app).get(`/monitor?userId=${userId1}`);
       expect(response).to.have.status(404);
       expect(response.body).to.be.an("object");
       expect(response.body).to.have.key("message");
@@ -398,7 +398,7 @@ describe("Test the tracked Progress API", function () {
     });
 
     it("Should return 404 No tracked progress exist in task collection", async function () {
-      const response = await chai.request(app).get(`/monitor?taskId=${taskId1}`);
+      const response = await request.execute(app).get(`/monitor?taskId=${taskId1}`);
       expect(response).to.have.status(404);
       expect(response.body).to.be.an("object");
       expect(response.body).to.have.key("message");
@@ -406,19 +406,19 @@ describe("Test the tracked Progress API", function () {
     });
 
     it("Returns 404 for invalid user id", async function () {
-      const response = await chai.request(app).get("/monitor?userId=invalidUserId");
+      const response = await request.execute(app).get("/monitor?userId=invalidUserId");
       expect(response).to.have.status(404);
       expect(response.body.message).to.be.equal("User with id invalidUserId does not exist.");
     });
 
     it("Returns 404 for invalid task id", async function () {
-      const response = await chai.request(app).get("/monitor?taskId=invalidTaskId");
+      const response = await request.execute(app).get("/monitor?taskId=invalidTaskId");
       expect(response).to.have.status(404);
       expect(response.body.message).to.be.equal("Task with id invalidTaskId does not exist.");
     });
 
     it("Returns the tracked progress document for a user type", async function () {
-      const response = await chai.request(app).get(`/monitor?type=user`);
+      const response = await request.execute(app).get(`/monitor?type=user`);
       expect(response).to.have.status(200);
       expect(response.body).to.be.an("object");
       expect(response.body).to.have.all.keys(["message", "data"]);
@@ -447,7 +447,7 @@ describe("Test the tracked Progress API", function () {
     });
 
     it("Returns the tracked progress document for a user type and monitored", async function () {
-      const response = await chai.request(app).get(`/monitor?type=user&monitored=true`);
+      const response = await request.execute(app).get(`/monitor?type=user&monitored=true`);
       expect(response).to.have.status(200);
       expect(response.body).to.be.an("object");
       expect(response.body).to.have.all.keys(["message", "data"]);
@@ -477,7 +477,7 @@ describe("Test the tracked Progress API", function () {
     });
 
     it("Returns an empty array if none of the query matches for user", async function () {
-      const response = await chai.request(app).get(`/monitor?type=user&monitored=false`);
+      const response = await request.execute(app).get(`/monitor?type=user&monitored=false`);
       expect(response).to.have.status(404);
       expect(response.body).to.be.an("object");
       expect(response.body).to.have.all.keys(["message", "data"]);
@@ -486,7 +486,7 @@ describe("Test the tracked Progress API", function () {
     });
 
     it("Returns the tracked progress document for a task type", async function () {
-      const response = await chai.request(app).get(`/monitor?type=task`);
+      const response = await request.execute(app).get(`/monitor?type=task`);
       expect(response).to.have.status(200);
       expect(response.body).to.be.an("object");
       expect(response.body).to.have.all.keys(["message", "data"]);
@@ -514,7 +514,7 @@ describe("Test the tracked Progress API", function () {
     });
 
     it("Returns the tracked progress document for a task type and monitored", async function () {
-      const response = await chai.request(app).get(`/monitor?type=task&monitored=true`);
+      const response = await request.execute(app).get(`/monitor?type=task&monitored=true`);
       expect(response).to.have.status(200);
       expect(response.body).to.be.an("object");
       expect(response.body).to.have.all.keys(["message", "data"]);
@@ -543,7 +543,7 @@ describe("Test the tracked Progress API", function () {
     });
 
     it("Returns an empty array if none of the query matches for task", async function () {
-      const response = await chai.request(app).get(`/monitor?type=task&monitored=false`);
+      const response = await request.execute(app).get(`/monitor?type=task&monitored=false`);
       expect(response).to.have.status(404);
       expect(response.body).to.be.an("object");
       expect(response.body).to.have.all.keys(["message", "data"]);

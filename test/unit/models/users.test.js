@@ -4,9 +4,8 @@
  */
 /* eslint-disable security/detect-object-injection */
 
-const chai = require("chai");
+const { expect } = require("chai");
 const sinon = require("sinon");
-const { expect } = chai;
 const cleanDb = require("../../utils/cleanDb");
 const users = require("../../../models/users");
 const firestore = require("../../../utils/firestore");

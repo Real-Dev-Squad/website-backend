@@ -81,7 +81,7 @@ module.exports = {
 
   cors: {
     // eslint-disable-next-line security/detect-unsafe-regex
-    allowedOrigins: /(https:\/\/([a-zA-Z0-9-_]+\.)?realdevsquad\.com$)/, // Allow realdevsquad.com, *.realdevsquad.com
+    allowedOrigins: [/https:\/\/([a-zA-Z0-9-]+\.)?realdevsquad\.com$/], // Allow realdevsquad.com, *.realdevsquad.com
   },
 
   userToken: {

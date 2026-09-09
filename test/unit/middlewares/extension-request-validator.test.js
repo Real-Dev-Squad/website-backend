@@ -1,6 +1,6 @@
+const { expect } = require("chai");
 const Sinon = require("sinon");
 const { getExtensionRequestsValidator } = require("../../../middlewares/validators/extensionRequests");
-const { expect } = require("chai");
 describe("getExtensionRequestsValidator", function () {
   it("should pass the request when no values for query params is passed", async function () {
     const req = { query: {} };

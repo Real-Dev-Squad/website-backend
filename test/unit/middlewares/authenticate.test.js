@@ -1,5 +1,5 @@
-const Sinon = require("sinon");
 const { expect } = require("chai");
+const Sinon = require("sinon");
 const authMiddleware = require("../../../middlewares/authenticate");
 const authService = require("../../../services/authService");
 const dataAccess = require("../../../services/dataAccessLayer");

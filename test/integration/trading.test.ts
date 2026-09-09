@@ -1,5 +1,5 @@
-import chai from "chai";
-import chaiHttp from "chai-http";
+import { expect } from "chai";
+import { request } from "chai-http";
 import app from "../../server";
 import authService from "../../services/authService";
 import addUser from "../utils/addUser";
@@ -12,8 +12,6 @@ import currencies from "../fixtures/currencies/currencies";
 import tradeService from "../../services/tradingService";
 
 const cookieName: string = config.get("userToken.cookieName");
-chai.use(chaiHttp);
-const { expect } = chai;
 
 describe("POST /trade/stock/new/:userId", function () {
   let jwt: string;
@@ -44,8 +42,7 @@ describe("POST /trade/stock/new/:userId", function () {
   });
 
   it("Should return success when trade is completed", function (done) {
-    chai
-      .request(app)
+    request.execute(app)
       .post(`/trade/stock/new/${userId}?dev=true`)
       .set("cookie", `${cookieName}=${jwt}`)
       .send(userStock)
@@ -65,8 +62,7 @@ describe("POST /trade/stock/new/:userId", function () {
     userStock.quantity = 2000;
     userStock.totalPrice = 2000 * stockData.price;
 
-    chai
-      .request(app)
+    request.execute(app)
       .post(`/trade/stock/new/${userId}?dev=true`)
       .set("cookie", `${cookieName}=${jwt}`)
       .send(userStock)
@@ -85,8 +81,7 @@ describe("POST /trade/stock/new/:userId", function () {
     userStock.quantity = 20001;
     userStock.totalPrice = 20001 * stockData.price;
 
-    chai
-      .request(app)
+    request.execute(app)
       .post(`/trade/stock/new/${userId}?dev=true`)
       .set("cookie", `${cookieName}=${jwt}`)
       .send(userStock)
@@ -103,8 +98,7 @@ describe("POST /trade/stock/new/:userId", function () {
   it("Should return 500 when an internal server error occurs", function (done) {
     sinon.stub(tradeService, "trade").throws(new Error("Database error"));
 
-    chai
-      .request(app)
+    request.execute(app)
       .post(`/trade/stock/new/${userId}?dev=true`)
       .set("cookie", `${cookieName}=${jwt}`)
       .send(userStock)

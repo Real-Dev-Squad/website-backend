@@ -1,4 +1,4 @@
-const admin = require("firebase-admin");
+const { Timestamp } = require("firebase-admin/firestore");
 const firestore = require("../utils/firestore");
 const answerModel = firestore.collection("answers");
 import { Answer, AnswerBody, AnswerFieldsToUpdate } from "../typeDefinitions/answers";
@@ -8,7 +8,7 @@ const createAnswer = async (answerData: AnswerBody) => {
   try {
     const { eventId: event_id, answeredBy: answered_by, answer, questionId: question_id } = answerData;
     const answerRef = answerModel.doc(answerData.id);
-    const createdAndUpdatedAt = admin.firestore.Timestamp.now();
+    const createdAndUpdatedAt = Timestamp.now();
 
     await answerRef.set({
       answer,
@@ -34,7 +34,7 @@ const createAnswer = async (answerData: AnswerBody) => {
 const updateAnswer = async (id: string, fieldsToUpdate: AnswerFieldsToUpdate) => {
   try {
     const answerRef = answerModel.doc(id);
-    const updatedAt = admin.firestore.Timestamp.now();
+    const updatedAt = Timestamp.now();
     await answerRef.update({ ...fieldsToUpdate, updated_at: updatedAt });
 
     const answerSnapshot = await answerRef.get();

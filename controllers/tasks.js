@@ -274,7 +274,7 @@ const getSelfTasks = async (req, res) => {
 
     res.set(
       "X-Deprecation-Warning",
-      "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:username to get the task details."
+      "WARNING: This endpoint is deprecated and will be removed in the future. Please use /tasks/:username to get the task details.",
     );
     return res.json(tasksData);
   } catch (err) {
@@ -387,12 +387,12 @@ const updateTaskStatus = async (req, res, next) => {
           return res.boom.badRequest(
             `The status of task can not be changed from ${
               isCurrentTaskStatusInProgress ? "In progress" : "Blocked"
-            } until progress of task is not 100%.`
+            } until progress of task is not 100%.`,
           );
         }
         if (isNewTaskStatusInProgress && !isCurrentTaskStatusBlock && !isCurrProgress0 && !isNewProgress0) {
           return res.boom.badRequest(
-            "The status of task can not be changed to In progress until progress of task is not 0%."
+            "The status of task can not be changed to In progress until progress of task is not 0%.",
           );
         }
       }
@@ -471,7 +471,7 @@ const overdueTasks = async (req, res) => {
     const allTasks = await tasks.fetchTasks();
     const now = Math.floor(Date.now() / 1000);
     const overDueTasks = allTasks.filter(
-      (task) => (task.status === ASSIGNED || task.status === IN_PROGRESS) && task.endsOn < now
+      (task) => (task.status === ASSIGNED || task.status === IN_PROGRESS) && task.endsOn < now,
     );
     const newAvailableTasks = await tasks.overdueTasks(overDueTasks);
     return res.json({
@@ -546,11 +546,11 @@ const getUsersHandler = async (req, res) => {
     } = transformTasksUsersQuery({ ...filterQueries, size });
     if (status === tasksUsersStatus.MISSED_UPDATES) {
       const response = await getMissedProgressUpdatesUsers({
-        cursor: cursor,
+        cursor,
         size: transformedSize,
         excludedDates: dateList,
         excludedDays: weekdayList,
-        dateGap: dateGap,
+        dateGap,
       });
 
       if (response.error) {

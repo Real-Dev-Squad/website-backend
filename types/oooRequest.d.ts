@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { Timestamp } from "firebase-admin/firestore";
 import { REQUEST_STATE, REQUEST_TYPE } from "../constants/requests";
 import { Boom } from "express-boom";
 import { RequestParams, RequestQuery } from "./requests";
@@ -44,7 +45,7 @@ export type OooRequestUpdateBody = {
   id?: string;
   reason?: string;
   state: REQUEST_STATE.APPROVED | REQUEST_STATE.REJECTED;
-  updatedAt?: admin.firestore.Timestamp;
+  updatedAt?: Timestamp;
 };
 
 export type OooRequestResponse = Response & { boom: Boom };

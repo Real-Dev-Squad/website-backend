@@ -1,12 +1,5 @@
-/**
- * This eslint rule is disabled because of https://github.com/nodesecurity/eslint-plugin-security/issues/21
- * It gives linting errors in testing the DB data with keys from fixtures
- */
-/* eslint-disable security/detect-object-injection */
-
-const chai = require("chai");
+const { expect } = require("chai");
 const sinon = require("sinon");
-const { expect } = chai;
 const cleanDb = require("../../utils/cleanDb");
 const tasksData = require("../../fixtures/tasks/tasks")();
 const tasks = require("../../../models/tasks");

@@ -1,4 +1,4 @@
-import * as admin from "firebase-admin";
+import { Timestamp } from "firebase-admin/firestore";
 import { CustomResponse } from "./global";
 
 export type QuestionBody = {
@@ -15,7 +15,7 @@ export type Question = {
   created_by: string;
   event_id: string;
   max_characters: string | null;
-  created_at: admin.firestore.Timestamp;
+  created_at: Timestamp;
 };
 
 export type Client = {

@@ -38,7 +38,7 @@ const transformQuery = (size, status, dev = false) => {
   } else if (status) {
     transformedStatus = status.toUpperCase();
   }
-  return { transformedSize: transformedSize, transformedStatus: transformedStatus, transformedDev: transformedDev };
+  return { transformedSize, transformedStatus, transformedDev };
 };
 
 const generateNextLink = (nextPageParams) => {

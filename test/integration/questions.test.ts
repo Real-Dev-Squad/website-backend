@@ -1,7 +1,7 @@
-import chai, { expect } from "chai";
+import { expect } from "chai";
+import { request } from "chai-http";
 const sinon = require("sinon");
 const config = require("config");
-const chaiHttp = require("chai-http");
 
 const app = require("../../server");
 const authService = require("../../services/authService");
@@ -19,7 +19,6 @@ const questionDataWithMaxWords = questionDataArray[5];
 
 const cookieName = config.get("userToken.cookieName");
 
-chai.use(chaiHttp);
 
 describe("questions", function () {
   let authToken: string;
@@ -44,8 +43,7 @@ describe("questions", function () {
     });
 
     it("should return unauthorized error if user is not authenticated", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .post("/questions")
         .send(questionDataWithMaxWords)
         .end((error, response) => {
@@ -62,8 +60,7 @@ describe("questions", function () {
     });
 
     it("should return unauthorized is user is not super user", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .post("/questions")
         .set("cookie", `${cookieName}=${authToken}`)
         .send(questionDataWithMaxWords)
@@ -83,8 +80,7 @@ describe("questions", function () {
     it("should return 500 if server fails to process the request", function (done) {
       sinon.stub(questionQuery, "createQuestion").throws(new Error());
 
-      chai
-        .request(app)
+      request.execute(app)
         .post("/questions")
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send(questionDataWithMaxWords)
@@ -103,8 +99,7 @@ describe("questions", function () {
     it("should create and return the question if the user is super user", function (done) {
       sinon.stub(questionQuery, "createQuestion").resolves(questionDataArray[6]);
 
-      chai
-        .request(app)
+      request.execute(app)
         .post("/questions")
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send(questionDataWithMaxWords)

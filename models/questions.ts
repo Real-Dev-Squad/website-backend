@@ -1,4 +1,4 @@
-const admin = require("firebase-admin");
+const { Timestamp } = require("firebase-admin/firestore");
 
 import { Question, QuestionBody } from "../types/questions";
 
@@ -10,7 +10,7 @@ const createQuestion = async (questionData: QuestionBody): Promise<Question> => 
   try {
     const { eventId: event_id, createdBy: created_by, question, maxCharacters: max_characters } = questionData;
     const questionRef = questionModel.doc(questionData.id);
-    const createdAndUpdatedAt = admin.firestore.Timestamp.now();
+    const createdAndUpdatedAt = Timestamp.now();
 
     await questionRef.set({
       question,

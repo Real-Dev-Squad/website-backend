@@ -1,10 +1,6 @@
-const chai = require("chai");
-const chaiHttp = require("chai-http");
+const { expect } = require("chai");
 const sinon = require("sinon");
 const { getDiscordMemberDetails } = require("../../../services/discordMembersService");
-
-chai.use(chaiHttp);
-const expect = chai.expect;
 
 describe("getDiscordMemberDetails", function () {
   let fetchStub;
@@ -20,7 +16,7 @@ describe("getDiscordMemberDetails", function () {
   it("should return the discord data of a user", async function () {
     const discordId = "1234567890";
     const expectedMemberDetails = {
-      discordId: discordId,
+      discordId,
       username: "Test User",
       discriminator: "0001",
     };
@@ -29,7 +25,7 @@ describe("getDiscordMemberDetails", function () {
       Promise.resolve({
         status: 200,
         json: () => Promise.resolve(expectedMemberDetails),
-      })
+      }),
     );
 
     const response = await getDiscordMemberDetails(discordId);
@@ -44,7 +40,7 @@ describe("getDiscordMemberDetails", function () {
       Promise.resolve({
         status: 404,
         json: () => Promise.resolve({ message: "User does not exist" }),
-      })
+      }),
     );
 
     try {

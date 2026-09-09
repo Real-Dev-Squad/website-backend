@@ -1,5 +1,5 @@
 const TagModel = require("../models/tags");
-const admin = require("firebase-admin");
+const { Timestamp } = require("firebase-admin/firestore");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 /**
@@ -14,7 +14,7 @@ const addTag = async (req, res) => {
     const { id, tagData, message } = await TagModel.addTag({
       ...req.body,
       createdBy: req.userData.id,
-      date: admin.firestore.Timestamp.fromDate(new Date()),
+      date: Timestamp.fromDate(new Date()),
     });
     if (id) {
       return res.json({

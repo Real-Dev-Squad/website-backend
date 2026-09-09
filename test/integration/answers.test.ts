@@ -1,5 +1,5 @@
-import chai, { expect } from "chai";
-import chaiHttp from "chai-http";
+import { expect } from "chai";
+import { request } from "chai-http";
 const sinon = require("sinon");
 const config = require("config");
 
@@ -18,7 +18,6 @@ const memberUser = userData[6];
 
 import { AnswerStatus } from "../../typeDefinitions/answers";
 
-chai.use(chaiHttp);
 
 describe("answers", function () {
   let defaultUserAuthToken: string;
@@ -49,8 +48,7 @@ describe("answers", function () {
     it("should return 500 if server fails to process the request", function (done) {
       sinon.stub(answerQuery, "createAnswer").throws(new Error());
 
-      chai
-        .request(app)
+      request.execute(app)
         .post("/answers")
         .send(answerDataArray[1])
         .end((error, response) => {
@@ -68,8 +66,7 @@ describe("answers", function () {
     it("should create and return answer", function (done) {
       sinon.stub(answerQuery, "createAnswer").returns(answerDataArray[2]);
 
-      chai
-        .request(app)
+      request.execute(app)
         .post("/answers")
         .send(answerDataArray[1])
         .end((error, response) => {
@@ -104,8 +101,7 @@ describe("answers", function () {
         status: "REJECTED",
       };
 
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/answers/${answerDataArray[2].id}`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send(payload)
@@ -128,8 +124,7 @@ describe("answers", function () {
         status: "REJECTED",
       };
 
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/answers/${answerDataArray[2].id}`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send(payload)
@@ -150,8 +145,7 @@ describe("answers", function () {
         status: "APPROVED",
       };
 
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/answers/${answerDataArray[2].id}`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send(payload)
@@ -172,8 +166,7 @@ describe("answers", function () {
         status: "REJECTED",
       };
 
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/answers/${answerDataArray[2].id}`)
         .set("cookie", `${cookieName}=${memberAuthToken}`)
         .send(payload)
@@ -194,8 +187,7 @@ describe("answers", function () {
         status: "APPROVED",
       };
 
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/answers/${answerDataArray[2].id}`)
         .set("cookie", `${cookieName}=${memberAuthToken}`)
         .send(payload)
@@ -216,8 +208,7 @@ describe("answers", function () {
         status: "REJECTED",
       };
 
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/answers/${answerDataArray[2].id}`)
         .set("cookie", `${cookieName}=${defaultUserAuthToken}`)
         .send(payload)

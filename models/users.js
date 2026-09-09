@@ -23,7 +23,7 @@ const joinModel = firestore.collection("applicants");
 const itemModel = firestore.collection("itemTags");
 const photoVerificationModel = firestore.collection("photo-verification");
 const { ITEM_TAG, USER_STATE } = ALLOWED_FILTER_PARAMS;
-const admin = require("firebase-admin");
+const { Timestamp, FieldValue } = require("firebase-admin/firestore");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { AUTHORITIES } = require("../constants/authorities");
 const { formatUsername } = require("../utils/username");
@@ -529,8 +529,8 @@ const addForVerification = async (userId, discordId, profileImageUrl, discordIma
   const unverifiedUserData = {
     userId,
     discordId,
-    discord: { url: discordImageUrl, approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) },
-    profile: { url: profileImageUrl, approved: false, date: admin.firestore.Timestamp.fromDate(new Date()) },
+    discord: { url: discordImageUrl, approved: false, date: Timestamp.fromDate(new Date()) },
+    profile: { url: profileImageUrl, approved: false, date: Timestamp.fromDate(new Date()) },
   };
   try {
     if (!isNotVerifiedSnapshot.empty) {
@@ -912,7 +912,7 @@ const removeGitHubToken = async (users) => {
 
       // Only allow valid Firestore DocumentReferences to update
       if (userRef && typeof userRef.update === "function") {
-        currentBatch.update(userRef, { tokens: admin.firestore.FieldValue.delete() });
+        currentBatch.update(userRef, { tokens: FieldValue.delete() });
       }
 
       count++;
@@ -1148,7 +1148,7 @@ const updateUsersWithNewUsernames = async () => {
       userChunks.map(async (users) => {
         const res = await updateUsernamesInBatch(users);
         return res;
-      })
+      }),
     );
 
     updatedUsersPromises.forEach((res) => {

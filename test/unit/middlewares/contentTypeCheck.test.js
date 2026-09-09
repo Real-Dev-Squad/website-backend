@@ -1,6 +1,5 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 const { getDiscordMembers } = require("../../fixtures/discordResponse/discord-response");
 const sinon = require("sinon");
 
@@ -10,8 +9,6 @@ const addUser = require("../../utils/addUser");
 const cleanDb = require("../../utils/cleanDb");
 const config = require("config");
 const cookieName = config.get("userToken.cookieName");
-
-chai.use(chaiHttp);
 
 describe("contentTypeCheck", function () {
   let jwt;
@@ -26,7 +23,7 @@ describe("contentTypeCheck", function () {
       Promise.resolve({
         status: 200,
         json: () => Promise.resolve(getDiscordMembers),
-      })
+      }),
     );
   });
 
@@ -36,8 +33,8 @@ describe("contentTypeCheck", function () {
   });
 
   it("should return 415 error when content-type application/json is not passed", function (done) {
-    chai
-      .request(app)
+    request
+      .execute(app)
       .post("/users")
       .set("content-type", "application/xml")
       .send()
@@ -59,8 +56,8 @@ describe("contentTypeCheck", function () {
   });
 
   it("should process the request when no content-type is passed", function (done) {
-    chai
-      .request(app)
+    request
+      .execute(app)
       .get("/healthcheck")
       .end((err, res) => {
         if (err) {
@@ -74,8 +71,8 @@ describe("contentTypeCheck", function () {
   });
 
   it("should process the request when content-type application/json is passed", function (done) {
-    chai
-      .request(app)
+    request
+      .execute(app)
       .patch("/users/self")
       .set("cookie", `${cookieName}=${jwt}`)
       .send({

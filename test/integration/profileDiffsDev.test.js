@@ -1,6 +1,5 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 const sinon = require("sinon");
 const firestore = require("../../utils/firestore");
 const profileDiffsModel = firestore.collection("profileDiffs");
@@ -20,8 +19,6 @@ const config = require("config");
 const addProfileDiffs = require("../utils/addProfileDiffs");
 const cookieName = config.get("userToken.cookieName");
 
-chai.use(chaiHttp);
-
 describe("Profile Diffs API Behind Feature Flag", function () {
   let newUserId;
   let newUserAuthToken;
@@ -40,8 +37,8 @@ describe("Profile Diffs API Behind Feature Flag", function () {
 
   describe("GET /profileDiffs", function () {
     it("Should return pending profileDiffs with obfuscated email and phone, using authorized user (super_user)", async function () {
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .get("/profileDiffs?dev=true")
         .set("cookie", `${cookieName}=${superUserAuthToken}`);
 
@@ -69,8 +66,8 @@ describe("Profile Diffs API Behind Feature Flag", function () {
     });
 
     it("Should return unauthorized error when not authorized", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/profileDiffs?dev=true")
         .set("cookie", `${cookieName}=${newUserAuthToken}`)
         .end((error, response) => {
@@ -84,10 +81,10 @@ describe("Profile Diffs API Behind Feature Flag", function () {
     it("Should handle query parameters correctly and obfuscate email and phone", async function () {
       const profileDiffsSnapshot = await profileDiffsModel.where("approval", "==", "APPROVED").limit(1).get();
 
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .get(
-          `/profileDiffs?dev=true&status=APPROVED&order=asc&size=1&username=${newUser.username}&cursor=${profileDiffsSnapshot.docs[0].id}`
+          `/profileDiffs?dev=true&status=APPROVED&order=asc&size=1&username=${newUser.username}&cursor=${profileDiffsSnapshot.docs[0].id}`,
         )
         .set("cookie", `${cookieName}=${superUserAuthToken}`);
       expect(res).to.have.status(200);
@@ -116,8 +113,8 @@ describe("Profile Diffs API Behind Feature Flag", function () {
     it("Should handle server errors", function (done) {
       const stub = sinon.stub(profileDiffsQuery, "fetchProfileDiffsWithPagination").throws(new Error("Database error"));
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/profileDiffs?dev=true")
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((error, response) => {
@@ -133,8 +130,8 @@ describe("Profile Diffs API Behind Feature Flag", function () {
     it("Should return a specific profile diff with obfuscated email and phone for authorized user", async function () {
       const profileDiffsSnapshot = await profileDiffsModel.where("approval", "==", "PENDING").limit(1).get();
 
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .get(`/profileDiffs/${profileDiffsSnapshot.docs[0].id}`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`);
       expect(response).to.have.status(200);
@@ -156,8 +153,8 @@ describe("Profile Diffs API Behind Feature Flag", function () {
     it("Should return not found for non-existent profile diff", function (done) {
       const nonExistentId = "nonExistentId";
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/profileDiffs/${nonExistentId}`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((error, response) => {
@@ -171,8 +168,8 @@ describe("Profile Diffs API Behind Feature Flag", function () {
       const fakeId = "fakeProfileDiffId";
       const stub = sinon.stub(profileDiffsQuery, "fetchProfileDiff").throws(new Error("Database error"));
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/profileDiffs/${fakeId}`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((error, response) => {

@@ -1,22 +1,21 @@
-import chai from "chai";
-import chaiHttp from "chai-http";
-import config from "config";
-import app from "../../server";
-import cleanDb from "../utils/cleanDb";
-import authService from "../../services/authService";
-import userDataFixture from "../fixtures/user/user";
-import addUser from "../utils/addUser";
-import { createOooRequests } from "../fixtures/oooRequest/oooRequest";
-import { createRequest } from "../../models/requests";
-import logsQuery, { addLog } from "../../models/logs";
-import { LOG_ACTION, REQUEST_LOG_TYPE } from "../../constants/requests";
-import { requestsLogs } from "../fixtures/logs/requests";
-import { extensionRequestLogs } from "../fixtures/logs/extensionRequests";
-const { expect } = chai;
+const { expect } = require("chai");
+const { request } = require("chai-http");
+const config = require("config");
+const app = require("../../server");
+const cleanDb = require("../utils/cleanDb");
+const authService = require("../../services/authService");
+const userDataFixture = require("../fixtures/user/user");
+const addUser = require("../utils/addUser");
+const { createOooRequests } = require("../fixtures/oooRequest/oooRequest");
+const { createRequest } = require("../../models/requests");
+const logsQuery = require("../../models/logs");
+const { addLog } = logsQuery;
+const { LOG_ACTION, REQUEST_LOG_TYPE } = require("../../constants/requests");
+const { requestsLogs } = require("../fixtures/logs/requests");
+const { extensionRequestLogs } = require("../fixtures/logs/extensionRequests");
 const cookieName = config.get("userToken.cookieName");
 
 const userData = userDataFixture();
-chai.use(chaiHttp);
 
 let authToken;
 let superUserToken;
@@ -50,8 +49,8 @@ describe("/logs", function () {
 
   describe("GET /logs", function () {
     it("should return logs of specific type", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/logs/REQUEST_CREATED")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .end(function (err, res) {
@@ -70,8 +69,8 @@ describe("/logs", function () {
     });
 
     it("should return 401 if user is not logged in", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/logs")
         .end(function (err, res) {
           if (err) {
@@ -83,8 +82,8 @@ describe("/logs", function () {
     });
 
     it("should return 401 if the user is not authorized to access the logs", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/logs")
         .set("cookie", `${cookieName}=${authToken}`)
         .end(function (err, res) {
@@ -98,8 +97,8 @@ describe("/logs", function () {
     });
 
     it("should return all Logs", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/logs")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .end(function (err, res) {
@@ -114,8 +113,8 @@ describe("/logs", function () {
     });
 
     it("should return all formatted Logs", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/logs?format=feed")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .end(function (err, res) {
@@ -141,8 +140,8 @@ describe("/logs", function () {
     });
 
     it("should return logs of type = extensionRequests", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/logs?type=extensionRequests")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .end((err, res) => {
@@ -156,8 +155,8 @@ describe("/logs", function () {
     });
 
     it("if no logs are present, should return valid response", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/logs?type=REQUEST_CREATED1")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .end((err, res) => {
@@ -171,8 +170,8 @@ describe("/logs", function () {
     });
 
     it("should return data if page param is passed in the quey", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/logs?page=1&size=3")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .end(function (err, res) {
@@ -187,8 +186,8 @@ describe("/logs", function () {
     });
 
     it("should return valid paginated link", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/logs?size=3")
         .set("cookie", `${cookieName}=${superUserToken}`)
         .end(function (err, res) {
@@ -206,8 +205,8 @@ describe("/logs", function () {
       const username = "joygupta";
       const startDate = 1729841400;
       const endDate = 1729841500;
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/logs?username=${username}&startDate=${startDate}&endDate=${endDate}&dev=true`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .end(function (err, res) {
@@ -236,8 +235,8 @@ describe("/logs", function () {
       const startDate = 1729841500000;
       const endDate = 1729841400000;
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/logs?username=${username}&startDate=${startDate}&endDate=${endDate}&dev=true`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .end(function (_err, res) {
@@ -252,8 +251,8 @@ describe("/logs", function () {
       const startDate = 1729841400;
       const endDate = 1729841500;
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/logs?username=${username}&startDate=${startDate}&endDate=${endDate}&dev=true`)
         .set("cookie", `${cookieName}=${superUserToken}`)
         .end(function (_err, res) {
@@ -266,7 +265,11 @@ describe("/logs", function () {
 
   describe("Update logs", function () {
     it("should run the migration and update logs successfully", async function () {
-      const res = await chai.request(app).post("/logs/migrate").set("cookie", `${cookieName}=${superUserToken}`).send();
+      const res = await request
+        .execute(app)
+        .post("/logs/migrate")
+        .set("cookie", `${cookieName}=${superUserToken}`)
+        .send();
 
       expect(res).to.have.status(200);
       expect(res.body).to.be.an("object");
@@ -282,12 +285,12 @@ describe("/logs", function () {
         "totalLogsProcessed",
         "totalLogsUpdated",
         "totalOperationsFailed",
-        "failedLogDetails"
+        "failedLogDetails",
       );
     });
 
     it("should return error if unauthorized user tries to run migration", async function () {
-      const res = await chai.request(app).post("/logs/migrate").set("cookie", `${cookieName}=invalidToken`).send();
+      const res = await request.execute(app).post("/logs/migrate").set("cookie", `${cookieName}=invalidToken`).send();
 
       expect(res).to.have.status(401);
       expect(res.body).to.have.property("error").that.is.a("string");
@@ -304,14 +307,14 @@ describe("/logs", function () {
     });
 
     it("Should update the users and capture the logs", async function () {
-      const res = await chai.request(app).patch("/users/self").set("cookie", `${cookieName}=${jwt}`).send({
+      const res = await request.execute(app).patch("/users/self").set("cookie", `${cookieName}=${jwt}`).send({
         first_name: "Test first_name",
       });
 
       expect(res).to.have.status(204);
 
-      const logRes = await chai
-        .request(app)
+      const logRes = await request
+        .execute(app)
         .get("/logs/USER_DETAILS_UPDATED")
         .set("cookie", `${cookieName}=${superUserToken}`);
 

@@ -29,10 +29,10 @@ This Project serves the backend APIs required for [Real Dev Squad](https://reald
 ## Starting Local Development
 
 Please install `pnpm` version 12 (see [pnpm installation](https://pnpm.io/installation)).
-No separate node version manager is needed: this repo pins node 22.10.0 via the
+No separate node version manager is needed: this repo pins node 26.8.1 via the
 `devEngines.runtime` field in `package.json`, so pnpm automatically downloads and uses
 the correct node for all scripts (`pnpm dev`, `pnpm test`, …). Verify with
-`pnpm exec node --version`, which should print `v22.10.0`.
+`pnpm exec node --version`, which should print `v26.8.1`.
 
 ### Local Development Setup
 

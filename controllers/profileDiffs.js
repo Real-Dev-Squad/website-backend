@@ -24,7 +24,7 @@ const getProfileDiffs = async (req, res) => {
         order,
         parseInt(size),
         username,
-        cursor
+        cursor,
       );
 
       return res.json({

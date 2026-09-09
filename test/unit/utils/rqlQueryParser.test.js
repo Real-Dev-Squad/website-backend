@@ -1,5 +1,5 @@
-import { Operators, QueryTypes } from "../../../typeDefinitions/rqlParser";
 const { expect } = require("chai");
+const { Operators, QueryTypes } = require("../../../typeDefinitions/rqlParser");
 const { RQLQueryParser } = require("../../../utils/RQLParser");
 describe("RQLQueryParser", function () {
   it("should parse filter queries", function () {
