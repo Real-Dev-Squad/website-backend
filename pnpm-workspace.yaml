@@ -1,6 +1,3 @@
-# Supply-chain hardening (see https://pnpm.io/supply-chain-security).
-# Only allow dependencies from the npm registry.
-# Block git links and direct download URLs, even deep in the dependency tree.
 blockExoticSubdeps: true
 # Block updates where the new version looks less trustworthy than older ones
 # (for example, published without proof of origin). This can signal a hacked package.
@@ -23,7 +20,7 @@ strictDepBuilds: true
 # Lock universal-analytics to 0.5.3. Version 0.5.4 needs uuid v14, which only
 # works as ESM and crashes firebase-tools. 0.5.3 uses uuid v8 and works.
 overrides:
-  universal-analytics: 0.5.3
+  universal-analytics: 0.5.4
 allowBuilds:
   # Needed at runtime, no backup plan if skipped. Keep allowed.
   # farmhash: used directly by firebase-admin.
