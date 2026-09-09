@@ -1,4 +1,4 @@
-import chai from "chai";
+import { expect } from "chai";
 import Sinon from "sinon";
 import { logType } from "../../../constants/logs";
 import { addLog } from "../../../models/logs";
@@ -6,7 +6,6 @@ import firestore from "../../../utils/firestore";
 import { addDiscordRoleToUser } from "../../../utils/addDiscordRoleToUser";
 import discordServices from "../../../services/discordService";
 import cleanDb from "../../utils/cleanDb";
-const { expect } = chai;
 const logsModel = firestore.collection("logs");
 
 describe("addDiscordRoleToUser", function () {

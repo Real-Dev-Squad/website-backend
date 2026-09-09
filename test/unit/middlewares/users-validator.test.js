@@ -1,6 +1,6 @@
+const { expect } = require("chai");
 const Sinon = require("sinon");
 const { validateUpdateRoles, validateUserQueryParams } = require("../../../middlewares/validators/user");
-const { expect } = require("chai");
 
 describe("Test the roles update validator", function () {
   it("Allows the request to pass with member property", async function () {

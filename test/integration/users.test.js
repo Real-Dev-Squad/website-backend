@@ -1,6 +1,5 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 
 const firestore = require("../../utils/firestore");
 const app = require("../../server");
@@ -50,7 +49,6 @@ const {
   tasksData: abandonedTasksData,
 } = require("../fixtures/abandoned-tasks/departed-users");
 const userService = require("../../services/users");
-chai.use(chaiHttp);
 
 describe("Users", function () {
   let jwt;
@@ -81,7 +79,7 @@ describe("Users", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getDiscordMembers),
-        })
+        }),
       );
     });
 
@@ -90,8 +88,8 @@ describe("Users", function () {
     });
 
     it("Should return when only one user", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/identity-stats")
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -117,8 +115,8 @@ describe("Users", function () {
       await addOrUpdate(userData[2]);
       await addOrUpdate(userData[3]);
 
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .get("/users/identity-stats")
         .set("cookie", `${cookieName}=${superUserAuthToken}`);
 
@@ -139,7 +137,7 @@ describe("Users", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getDiscordMembers),
-        })
+        }),
       );
     });
 
@@ -148,8 +146,8 @@ describe("Users", function () {
     });
 
     it("Should update the user", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -167,8 +165,8 @@ describe("Users", function () {
     });
 
     it("Should update the user status", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -188,8 +186,8 @@ describe("Users", function () {
     it("should update the username when valid username is provided and dev is false", function (done) {
       addUser(newUser).then((newUserId) => {
         const newUserJwt = authService.generateAuthToken({ userId: newUserId });
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch("/users/self")
           .set("cookie", `${cookieName}=${newUserJwt}`)
           .send({
@@ -210,8 +208,8 @@ describe("Users", function () {
     it("Should update the username when dev is true and role,firstName and lastName are given", function (done) {
       addUser(newUser).then((newUserId) => {
         const newUserJwt = authService.generateAuthToken({ userId: newUserId });
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch("/users/self?dev=true")
           .set("cookie", `${cookieName}=${newUserJwt}`)
           .send({
@@ -233,8 +231,8 @@ describe("Users", function () {
     it("Should not update the username when role is not present and dev is true", function (done) {
       addUser(newUser).then((newUserId) => {
         const newUserJwt = authService.generateAuthToken({ userId: newUserId });
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch(`/users/self?dev=true`)
           .set("cookie", `${cookieName}=${newUserJwt}`)
           .send({
@@ -255,8 +253,8 @@ describe("Users", function () {
     it("Should not update the username first_name is not present", function (done) {
       addUser(newUser).then((newUserId) => {
         const newUserJwt = authService.generateAuthToken({ userId: newUserId });
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch(`/users/self?dev=true`)
           .set("cookie", `${cookieName}=${newUserJwt}`)
           .send({
@@ -277,8 +275,8 @@ describe("Users", function () {
     it("Should not update the username when last_name is not present and dev is true", function (done) {
       addUser(newUser).then((newUserId) => {
         const newUserJwt = authService.generateAuthToken({ userId: newUserId });
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch(`/users/self?dev=true`)
           .set("cookie", `${cookieName}=${newUserJwt}`)
           .send({
@@ -298,8 +296,8 @@ describe("Users", function () {
     it("Should not update the username incompleteUserDetails is false and dev is true", function (done) {
       addUser(newUser2).then((newUserId) => {
         const newUserJwt = authService.generateAuthToken({ userId: newUserId });
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch(`/users/self?dev=true`)
           .set("cookie", `${cookieName}=${newUserJwt}`)
           .send({
@@ -321,8 +319,8 @@ describe("Users", function () {
     it("Should not update the user roles when user already has a role", function (done) {
       addUser(userWithRole).then((newUserId) => {
         const newUserJwt = authService.generateAuthToken({ userId: newUserId });
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch("/users/self?dev=true")
           .set("cookie", `${cookieName}=${newUserJwt}`)
           .send({
@@ -340,8 +338,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 for invalid status value", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -359,8 +357,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 if invalid role", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -378,8 +376,8 @@ describe("Users", function () {
     });
 
     it("Should update the social id with valid social id", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -396,8 +394,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 for invalid Twitter ID", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -421,8 +419,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 for invalid Linkedin ID", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -446,8 +444,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 for invalid instagram ID", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -471,8 +469,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 is space is included in the social ID", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -516,8 +514,8 @@ describe("Users", function () {
     });
 
     it("Should get all the users in system", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users")
         .end((err, res) => {
           if (err) {
@@ -537,8 +535,8 @@ describe("Users", function () {
     });
 
     it("Should get all the users with archived false", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users")
         .end((err, res) => {
           if (err) {
@@ -561,8 +559,8 @@ describe("Users", function () {
     });
 
     it("Should get all the users in system when query params are valid", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users")
         .query({
           size: 1,
@@ -586,8 +584,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 bad request when query params are invalid", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users")
         .query({
           size: -1,
@@ -608,8 +606,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 bad request when query param size is invalid", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users")
         .query({
           size: 101,
@@ -629,8 +627,8 @@ describe("Users", function () {
     });
 
     it("Should return next and prev links", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users?size=2")
         .end((err, res) => {
           if (err) {
@@ -649,8 +647,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 when both prev and next passed as query param", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/users?next=${userId}&prev=${userId}&size=2`)
         .end((err, res) => {
           if (err) {
@@ -665,8 +663,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 when both page and next passed as query param", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/users?next=${userId}&page=1&size=2`)
         .end((err, res) => {
           if (err) {
@@ -681,8 +679,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 when both page and prev passed as query param", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/users?page=1&prev=${userId}&size=2`)
         .end((err, res) => {
           if (err) {
@@ -697,8 +695,8 @@ describe("Users", function () {
     });
 
     it("Should include search and size query params in the response links that are passed by the request", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/users?search=an&size=2`)
         .end((err, res) => {
           if (err) {
@@ -721,8 +719,8 @@ describe("Users", function () {
     });
 
     it("Should not have page param in the response links if passed by the request", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/users?page=1&size=2`)
         .end((err, res) => {
           if (err) {
@@ -743,7 +741,7 @@ describe("Users", function () {
     });
 
     it("Should get next and previous page results based upon the links in the response", async function () {
-      const response = await chai.request(app).get(`/users?size=2`);
+      const response = await request.execute(app).get(`/users?size=2`);
       expect(response).to.have.status(200);
       expect(response.body).to.be.a("object");
       expect(response.body.message).to.equal("Users returned successfully!");
@@ -752,7 +750,7 @@ describe("Users", function () {
       expect(response.body.links).to.have.property("prev");
 
       const nextPageLink = response.body.links.next;
-      const nextPageResponse = await chai.request(app).get(nextPageLink);
+      const nextPageResponse = await request.execute(app).get(nextPageLink);
 
       expect(nextPageResponse).to.have.status(200);
       expect(nextPageResponse.body).to.be.a("object");
@@ -763,7 +761,7 @@ describe("Users", function () {
       expect(nextPageResponse.body.users).to.have.length(2);
 
       const prevPageLink = nextPageResponse.body.links.prev;
-      const previousPageResponse = await chai.request(app).get(prevPageLink);
+      const previousPageResponse = await request.execute(app).get(prevPageLink);
 
       expect(previousPageResponse).to.have.status(200);
       expect(previousPageResponse.body).to.be.a("object");
@@ -775,8 +773,8 @@ describe("Users", function () {
     });
 
     it("Should return 503 if something went wrong if data not fetch from github", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users")
         .query({
           query: "filterBy:unmerged_prs+days:30",
@@ -793,8 +791,8 @@ describe("Users", function () {
     });
 
     it("Should return 503 if something went wrong if data not fetch from github for new query format under feature flag", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users")
         .query({
           q: "filterBy:unmerged_prs+days:30",
@@ -812,8 +810,8 @@ describe("Users", function () {
     });
 
     it("Should throw an error when there is no feature flag when using the new query parameter format(q)", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users")
         .query({
           q: "filterBy:unmerged_prs+days:30",
@@ -830,8 +828,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 if days is not passed for filterBy unmerged_prs", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users?query=filterBy:unmerged_prs")
         .end((err, res) => {
           if (err) {
@@ -845,8 +843,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 if days is not passed for filterBy unmerged_prs with new query format and feature flag", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users?q=filterBy:unmerged_prs&dev=true")
         .end((err, res) => {
           if (err) {
@@ -862,7 +860,7 @@ describe("Users", function () {
     it("Should return one user with given discord id and feature flag", async function () {
       const discordId = userData[0].discordId;
 
-      const res = await chai.request(app).get(`/users?dev=true&discordId=${discordId}`);
+      const res = await request.execute(app).get(`/users?dev=true&discordId=${discordId}`);
       expect(res).to.have.status(200);
       expect(res.body).to.be.a("object");
       expect(res.body.user).to.have.property("state");
@@ -870,7 +868,7 @@ describe("Users", function () {
 
     it("Should throw an error when there is no feature flag", async function () {
       const discordId = userData[0].discordId;
-      const res = await chai.request(app).get(`/users?discordId=${discordId}`).set("cookie", `${cookieName}=${jwt}`);
+      const res = await request.execute(app).get(`/users?discordId=${discordId}`).set("cookie", `${cookieName}=${jwt}`);
       expect(res).to.have.status(404);
       expect(res.body).to.be.a("object");
       expect(res.body.message).to.equal("Route not found");
@@ -878,15 +876,15 @@ describe("Users", function () {
 
     it("Should return an empty object when passing an invalid Discord ID", async function () {
       const invalidDiscordId = "50485556209423";
-      const res = await chai.request(app).get(`/users?dev=true&discordId=${invalidDiscordId}`);
+      const res = await request.execute(app).get(`/users?dev=true&discordId=${invalidDiscordId}`);
       expect(res).to.have.status(200);
       expect(res.body).to.be.a("object");
       expect(res.body.message).to.equal("User not found");
     });
 
     it("should return users who have overdue tasks with APPROVED status", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users?query=filterBy:overdue_tasks")
         .end((err, res) => {
           if (err) {
@@ -903,8 +901,8 @@ describe("Users", function () {
     });
 
     it("Should return user ID(s) with overdue tasks within the last 1 day", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users?query=filterBy:overdue_tasks+days:1")
         .end((err, res) => {
           if (err) {
@@ -919,8 +917,8 @@ describe("Users", function () {
     });
 
     it("Should return user id which have overdue tasks with new query params under feature flag", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users?q=filterBy:overdue_tasks+days:1&dev=true")
         .end((err, res) => {
           if (err) {
@@ -935,8 +933,8 @@ describe("Users", function () {
     });
 
     it("Should return the logged-in user's details when profile is true", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users?profile=true")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -954,8 +952,8 @@ describe("Users", function () {
     });
 
     it("Should return 401 if not logged in", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users?profile=true")
         .set("cookie", `${cookieName}=invalid_token`)
         .end((err, res) => {
@@ -976,8 +974,8 @@ describe("Users", function () {
     });
 
     it("Should return users filtered by profile status", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users?profileStatus=BLOCKED")
         .end((err, res) => {
           if (err) {
@@ -998,8 +996,8 @@ describe("Users", function () {
     });
 
     it("Should return empty array when no users with specified profile status", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users?profileStatus=NON_EXISTENT_STATUS")
         .end((err, res) => {
           if (err) {
@@ -1017,8 +1015,8 @@ describe("Users", function () {
     });
 
     it("Should accept lowercase profileStatus", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users?profileStatus=blocked")
         .end((err, res) => {
           if (err) {
@@ -1037,8 +1035,8 @@ describe("Users", function () {
 
   describe("GET /users/self", function () {
     it("Should return the logged user's details", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/self")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -1053,7 +1051,7 @@ describe("Users", function () {
           expect(res.body).to.not.have.property("chaincode");
           expect(res).to.have.header(
             "X-Deprecation-Warning",
-            "WARNING: This endpoint is deprecated and will be removed in the future. Please use /users?profile=true to get the updated profile details."
+            "WARNING: This endpoint is deprecated and will be removed in the future. Please use /users?profile=true to get the updated profile details.",
           );
 
           return done();
@@ -1061,8 +1059,8 @@ describe("Users", function () {
     });
 
     it("Should return 401 if not logged in", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/self")
         .end((err, res) => {
           if (err) {
@@ -1084,8 +1082,8 @@ describe("Users", function () {
 
   describe("GET /users/id", function () {
     it("Should return one user with given id", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/users/${userData[0].username}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -1105,8 +1103,8 @@ describe("Users", function () {
     });
 
     it("Should return 404 if there is no user in the system", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/invalidUser")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -1125,8 +1123,8 @@ describe("Users", function () {
 
   describe("GET /users/userId/id", function () {
     it("Should return one user with given id", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/users/userId/${userId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -1146,8 +1144,8 @@ describe("Users", function () {
     });
 
     it("Should return 404 if there is no user in the system", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/userId/invalidUserId")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -1166,8 +1164,8 @@ describe("Users", function () {
 
   describe("GET /users/isUsernameAvailable/username", function () {
     it("Should return isUsernameAvailable as true as we are passing new user", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/isUsernameAvailable/availableUser")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -1183,8 +1181,8 @@ describe("Users", function () {
     });
 
     it("Should return isUsernameAvailable as false as we are passing existing user", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/users/isUsernameAvailable/${userData[0].username}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -1207,8 +1205,8 @@ describe("Users", function () {
     it("Should return unique username when passing firstname and lastname", function (done) {
       addUser(userData[15]).then((availableUsernameUserId) => {
         const userJwt = authService.generateAuthToken({ userId: availableUsernameUserId });
-        chai
-          .request(app)
+        request
+          .execute(app)
           .get(`/users/username?firstname=${firstname}&lastname=${lastname}&dev=true`)
           .set("cookie", `${cookieName}=${userJwt}`)
           .end((err, res) => {
@@ -1225,8 +1223,8 @@ describe("Users", function () {
     });
 
     it("Should return 404 if feature flag is not pass", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/users/username?firstname=${firstname}&lastname=${lastname}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -1242,8 +1240,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 for empty firstname and lastname", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/users/username?firstname=&lastname=&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -1262,8 +1260,8 @@ describe("Users", function () {
       const longFirstname = "ChristopherJonathan";
       const longLastname = "MontgomeryWellington";
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/users/username?firstname=${longFirstname}&lastname=${longLastname}&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -1278,8 +1276,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 if firstname or lastname is missing", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/users/username?firstname=${firstname}&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -1300,8 +1298,8 @@ describe("Users", function () {
     });
 
     it("Should return data of the given username", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/users/${userId}/intro`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -1316,8 +1314,8 @@ describe("Users", function () {
     });
 
     it("Should return 404 if user not Found", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/users/ritiksuserId/intro`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -1331,8 +1329,8 @@ describe("Users", function () {
     });
 
     it("Should return 401 is not Logged In", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/users/${userId}/intro`)
         .end((err, res) => {
           if (err) {
@@ -1353,7 +1351,7 @@ describe("Users", function () {
 
     it("Should return given user by id", async function () {
       const { userId } = await addOrUpdate(userData[0]);
-      const res = await chai.request(app).get(`/users/?id=${userId}`);
+      const res = await request.execute(app).get(`/users/?id=${userId}`);
       expect(res).to.have.status(200);
       expect(res.body).to.be.a("object");
       expect(res.body.message).to.equal("User returned successfully!");
@@ -1373,8 +1371,8 @@ describe("Users", function () {
     });
 
     it("Should return 404 if user not Found", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/users/?id=anyRandomuserId`)
         .end((err, res) => {
           if (err) {
@@ -1399,8 +1397,8 @@ describe("Users", function () {
     });
 
     it("Should return users successfully", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users")
         .query({ search: searchParamValues.an })
         .set("cookie", `${cookieName}=${jwt}`)
@@ -1418,8 +1416,8 @@ describe("Users", function () {
     });
 
     it("Should return users successfully converting search param value to small case", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users")
         .query({ search: searchParamValues.AN })
         .set("cookie", `${cookieName}=${jwt}`)
@@ -1439,8 +1437,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 for empty value of search param", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users")
         .query({ search: searchParamValues.null })
         .set("cookie", `${cookieName}=${jwt}`)
@@ -1455,8 +1453,8 @@ describe("Users", function () {
     });
 
     it("Should return users of username starting with '23' with response status code 200", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users")
         .query({ search: searchParamValues.number23 })
         .set("cookie", `${cookieName}=${jwt}`)
@@ -1476,8 +1474,8 @@ describe("Users", function () {
     });
 
     it("Should return users with first name 'Ankur' successfully", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users")
         .query({ search: "Ankur", dev: true }) // Search for users with first name 'Ankur' in dev mode
         .set("cookie", `${cookieName}=${jwt}`)
@@ -1494,8 +1492,8 @@ describe("Users", function () {
     });
 
     it("Should return users with last name 'Narkhede' successfully", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users")
         .query({ search: "Narkhede", dev: true })
         .set("cookie", `${cookieName}=${jwt}`)
@@ -1512,8 +1510,8 @@ describe("Users", function () {
     });
 
     it("Should return an empty array with response status code 200", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users")
         .query({ search: searchParamValues.mu })
         .set("cookie", `${cookieName}=${jwt}`)
@@ -1546,7 +1544,7 @@ describe("Users", function () {
     });
 
     it("should return a list of users with abandoned tasks", async function () {
-      const res = await chai.request(app).get("/users?dev=true&departed=true");
+      const res = await request.execute(app).get("/users?dev=true&departed=true");
       expect(res).to.have.status(200);
       expect(res.body).to.have.property("message").that.equals("Users with abandoned tasks fetched successfully");
       expect(res.body).to.have.property("users").to.be.an("array").with.lengthOf(2);
@@ -1559,13 +1557,13 @@ describe("Users", function () {
 
       const task = abandonedTasksData[3];
       await taskModel.add(task);
-      const res = await chai.request(app).get("/users?dev=true&departed=true");
+      const res = await request.execute(app).get("/users?dev=true&departed=true");
 
       expect(res).to.have.status(204);
     });
 
     it("should fail if dev flag is not passed", async function () {
-      const res = await chai.request(app).get("/users?departed=true");
+      const res = await request.execute(app).get("/users?departed=true");
       expect(res).to.have.status(404);
       expect(res.body.message).to.be.equal("Route not found");
     });
@@ -1573,7 +1571,7 @@ describe("Users", function () {
     it("should handle errors gracefully if getUsersWithIncompleteTasks fails", async function () {
       Sinon.stub(userService, "getUsersWithIncompleteTasks").rejects(new Error(INTERNAL_SERVER_ERROR));
 
-      const res = await chai.request(app).get("/users?departed=true&dev=true");
+      const res = await request.execute(app).get("/users?departed=true&dev=true");
 
       expect(res).to.have.status(500);
       expect(res.body.message).to.be.equal(INTERNAL_SERVER_ERROR);
@@ -1591,8 +1589,8 @@ describe("Users", function () {
 
     it("should return 409 if the data already present", function (done) {
       addJoinData(joinData(userId)[3]);
-      chai
-        .request(app)
+      request
+        .execute(app)
         .put(`/users/self/intro`)
         .set("Cookie", `${cookieName}=${jwt}`)
         .send(joinData(userId)[3])
@@ -1608,8 +1606,8 @@ describe("Users", function () {
     });
 
     it("Should store the info in db", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .put(`/users/self/intro`)
         .set("Cookie", `${cookieName}=${jwt}`)
         .send(joinData()[2])
@@ -1629,8 +1627,8 @@ describe("Users", function () {
     });
 
     it("Should return 401 for unauthorized request", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .put(`/users/self/intro`)
         .set("Cookie", `${cookieName}=""`)
         .send(joinData()[2])
@@ -1645,8 +1643,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 for invalid Data", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .put(`/users/self/intro`)
         .set("Cookie", `${cookieName}=${jwt}`)
         .send(joinData()[1])
@@ -1673,8 +1671,8 @@ describe("Users", function () {
 
     it("should return 409 if the data already present", function (done) {
       addJoinData(joinData(userId)[3]);
-      chai
-        .request(app)
+      request
+        .execute(app)
         .put(`/users/${userId}/intro?dev=true`)
         .set("Cookie", `${cookieName}=${jwt}`)
         .send(joinData(userId)[3])
@@ -1690,8 +1688,8 @@ describe("Users", function () {
     });
 
     it("Should store the info in db", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .put(`/users/${userId}/intro?dev=true`)
         .set("Cookie", `${cookieName}=${jwt}`)
         .send(joinData()[2])
@@ -1711,8 +1709,8 @@ describe("Users", function () {
     });
 
     it("Should return 401 for Unauthenticated User Request", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .put(`/users/${userId}/intro?dev=true`)
         .set("Cookie", `${cookieName}=""`)
         .send(joinData()[2])
@@ -1728,8 +1726,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 for invalid Data", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .put(`/users/${userId}/intro?dev=true`)
         .set("Cookie", `${cookieName}=${jwt}`)
         .send(joinData()[1])
@@ -1748,8 +1746,8 @@ describe("Users", function () {
       const userId = "anotherUser123";
       addJoinData(joinData(userId)[3]);
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .put(`/users/${userId}/intro?dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send(joinData(userId)[3])
@@ -1772,8 +1770,8 @@ describe("Users", function () {
     });
 
     it("Should update reject the profileDiff specified, using authorized user (super_user)", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/users/rejectDiff`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send({
@@ -1792,8 +1790,8 @@ describe("Users", function () {
     });
 
     it("Should return unauthorized error when not authorized", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/users/rejectDiff`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -1809,8 +1807,8 @@ describe("Users", function () {
     });
 
     it("Should return unauthorized error when not logged in", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/users/rejectDiff`)
         .end((err, res) => {
           if (err) {
@@ -1836,8 +1834,8 @@ describe("Users", function () {
     });
 
     it("Should update the user profile with latest pending profileDiffs, using authorized user (super_user)", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/users/${userId}`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send({
@@ -1856,8 +1854,8 @@ describe("Users", function () {
     });
 
     it("Should return unauthorized error when not authorized", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/users/${userId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -1873,8 +1871,8 @@ describe("Users", function () {
     });
 
     it("Should return unauthorized error when not logged in", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/users/${userId}`)
         .end((err, res) => {
           if (err) {
@@ -1899,7 +1897,7 @@ describe("Users", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getDiscordMembers),
-        })
+        }),
       );
     });
 
@@ -1909,8 +1907,8 @@ describe("Users", function () {
     });
 
     it("Should update the user", async function () {
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/users/${userId}?profile=true&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -1923,8 +1921,8 @@ describe("Users", function () {
     });
 
     it("Should update the user status", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/users/${userId}?profile=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -1943,8 +1941,8 @@ describe("Users", function () {
     it("Should not update the user when dev is true and role is not present", function (done) {
       addUser(newUser).then((newUserId) => {
         const newUserJwt = authService.generateAuthToken({ userId: newUserId });
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch(`/users/${newUserId}?profile=true&dev=true`)
           .set("cookie", `${cookieName}=${newUserJwt}`)
           .send({
@@ -1964,8 +1962,8 @@ describe("Users", function () {
     it("Should not update the user when first_name is not present and dev is true", function (done) {
       addUser(newUser).then((newUserId) => {
         const newUserJwt = authService.generateAuthToken({ userId: newUserId });
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch(`/users/${newUserId}?profile=true&dev=true`)
           .set("cookie", `${cookieName}=${newUserJwt}`)
           .send({
@@ -1985,8 +1983,8 @@ describe("Users", function () {
     it("Should not update the user when last_name is not present and dev is true", function (done) {
       addUser(newUser).then((newUserId) => {
         const newUserJwt = authService.generateAuthToken({ userId: newUserId });
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch(`/users/${newUserId}?profile=true&dev=true`)
           .set("cookie", `${cookieName}=${newUserJwt}`)
           .send({
@@ -2007,8 +2005,8 @@ describe("Users", function () {
     it("Should not update the user roles when user already has a role", function (done) {
       addUser(userWithRole).then((newUserId) => {
         const newUserJwt = authService.generateAuthToken({ userId: newUserId });
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch(`/users/${newUserId}?profile=true&dev=true`)
           .set("cookie", `${cookieName}=${newUserJwt}`)
           .send({
@@ -2026,8 +2024,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 for invalid status value", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/users/${userId}?profile=true&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -2051,8 +2049,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 if required roles is missing", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/users/${userId}?profile=true&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -2073,8 +2071,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 if invalid roles", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/users/${userId}?profile=true&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -2096,8 +2094,8 @@ describe("Users", function () {
     });
 
     it("Should update the social id with valid social id", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/users/${userId}?profile=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -2114,8 +2112,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 for invalid Twitter ID", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/users/${userId}?profile=true&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -2139,8 +2137,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 for invalid Linkedin ID", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/users/${userId}?profile=true&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -2164,8 +2162,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 for invalid instagram ID", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/users/${userId}?profile=true&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -2189,8 +2187,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 is space is included in the social ID", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/users/${userId}?profile=true&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -2216,8 +2214,8 @@ describe("Users", function () {
 
   describe("GET /users/chaincode", function () {
     it("Should save the userId and timestamp in firestore collection and return the document ID as chaincode in response", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/chaincode")
         .set("cookie", `${cookieName}=${jwt}`)
         .end(async (err, res) => {
@@ -2233,8 +2231,8 @@ describe("Users", function () {
     });
 
     it("Should return 401 if user not logged in", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/chaincode")
         .end((err, res) => {
           if (err) {
@@ -2250,8 +2248,8 @@ describe("Users", function () {
 
   describe("PATCH /users/profileURL", function () {
     it("Should update the profileURL", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/users/profileURL")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -2269,8 +2267,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 for invalid profileURL value", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/users/profileURL")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -2294,8 +2292,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 for no profileURL value", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/users/profileURL")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({})
@@ -2318,8 +2316,8 @@ describe("Users", function () {
 
   describe("POST /users/verify", function () {
     it("Should queue the Request", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/users/verify")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -2334,8 +2332,8 @@ describe("Users", function () {
     });
 
     it("Should return 401 if the user is not logged in", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/users/verify")
         .end((err, res) => {
           if (err) {
@@ -2351,8 +2349,8 @@ describe("Users", function () {
 
   describe("PATCH /users/picture/verify/id", function () {
     it("Should verify the discord image of the user", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/users/picture/verify/${userId}?type=discord`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -2367,8 +2365,8 @@ describe("Users", function () {
     });
 
     it("Should throw for wrong query while verifying the discord image of the user", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/users/picture/verify/${userId}?type=RANDOM`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -2384,8 +2382,8 @@ describe("Users", function () {
 
   describe("GET /users/picture/id", function () {
     it("Should get the user's verification record", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/users/picture/${userId}`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -2401,8 +2399,8 @@ describe("Users", function () {
     });
 
     it("Should throw error if no user's verification record was found", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/picture/some-unknown-user-id")
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -2418,8 +2416,8 @@ describe("Users", function () {
 
   describe("POST /update-in-discord", function () {
     it("it returns proper response", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/users/update-in-discord")
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -2450,10 +2448,10 @@ describe("Users", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getDiscordMembers),
-        })
+        }),
       );
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/users")
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -2469,8 +2467,8 @@ describe("Users", function () {
 
     it("Gives internal server error", function (done) {
       fetchStub.throws(new Error("OOps"));
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/users")
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -2487,8 +2485,8 @@ describe("Users", function () {
   describe("PATCH /users/:id/temporary/data", function () {
     it("Should make the user a member", function (done) {
       addUser(userRoleUpdate).then((userRoleUpdateId) => {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch(`/users/${userRoleUpdateId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
@@ -2508,8 +2506,8 @@ describe("Users", function () {
 
     it("Should make the member a user", function (done) {
       addUser(userRoleUpdate).then((userRoleUpdateId) => {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch(`/users/${userRoleUpdateId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
@@ -2529,8 +2527,8 @@ describe("Users", function () {
 
     it("Should archive the user", function (done) {
       addUser(userRoleUpdate).then((userRoleUpdateId) => {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch(`/users/${userRoleUpdateId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
@@ -2550,8 +2548,8 @@ describe("Users", function () {
 
     it("Should un-archive the user", function (done) {
       addUser(userRoleUnArchived).then((userRoleUnArchivedId) => {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch(`/users/${userRoleUnArchivedId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
@@ -2571,8 +2569,8 @@ describe("Users", function () {
 
     it("Should return 400 if invalid role", function (done) {
       addUser(userRoleUpdate).then((userRoleUpdateId) => {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch(`/users/${userRoleUpdateId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
@@ -2594,8 +2592,8 @@ describe("Users", function () {
 
     it("Should return 400 if we pass in_discord role", function (done) {
       addUser(userRoleUpdate).then((userRoleUpdateId) => {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch(`/users/${userRoleUpdateId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
@@ -2615,8 +2613,8 @@ describe("Users", function () {
 
     it("Should return 409 if user is already a member", function (done) {
       addUser(userAlreadyMember).then((userAlreadyMemberId) => {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch(`/users/${userAlreadyMemberId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
@@ -2636,8 +2634,8 @@ describe("Users", function () {
 
     it("Should return 409 if user is already not a member", function (done) {
       addUser(userAlreadyNotMember).then((userAlreadyNotMemberId) => {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch(`/users/${userAlreadyNotMemberId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
@@ -2657,8 +2655,8 @@ describe("Users", function () {
 
     it("Should return 409 if user is already archived", function (done) {
       addUser(userAlreadyArchived).then((userAlreadyArchivedId) => {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch(`/users/${userAlreadyArchivedId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
@@ -2678,8 +2676,8 @@ describe("Users", function () {
 
     it("Should return 409 if user is already un-archived", function (done) {
       addUser(userAlreadyUnArchived).then((userAlreadyUnArchivedId) => {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch(`/users/${userAlreadyUnArchivedId}/temporary/data`)
           .set("cookie", `${cookieName}=${superUserAuthToken}`)
           .send({
@@ -2697,8 +2695,8 @@ describe("Users", function () {
     });
 
     it("Should return 404 if user not found", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/users/111111111111/temporary/data`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send({
@@ -2717,8 +2715,8 @@ describe("Users", function () {
     it("Should return 401 if user is not a super user", function (done) {
       addUser(nonSuperUser).then((nonSuperUserId) => {
         const nonSuperUserJwt = authService.generateAuthToken({ userId: nonSuperUserId });
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch(`/users/${nonSuperUserId}/temporary/data`)
           .set("cookie", `${cookieName}=${nonSuperUserJwt}`)
           .send({
@@ -2759,8 +2757,8 @@ describe("Users", function () {
     });
 
     it("should return 400 if payload is not passed correctly", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/users")
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send()
@@ -2776,8 +2774,8 @@ describe("Users", function () {
     });
 
     it("should returns successful response for api archiveUsersIfNotInDiscord", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/users")
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send({ action: "archiveUsers" })
@@ -2793,7 +2791,7 @@ describe("Users", function () {
           expect(res.body.summary.totalUsers).to.be.equal(3);
           expect(res.body.summary.totalOperationsFailed).to.be.equal(0);
           expect(res.body.message).to.equal(
-            "Successfully updated users archived role to true if in_discord role is false"
+            "Successfully updated users archived role to true if in_discord role is false",
           );
           return done();
         });
@@ -2808,8 +2806,8 @@ describe("Users", function () {
       await addOrUpdate({ ...userData[1], roles }, userId2);
       await addOrUpdate({ ...userData[2], roles }, userId3);
 
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch("/users")
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send({ action: "archiveUsers" });
@@ -2832,8 +2830,8 @@ describe("Users", function () {
         },
       });
 
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/users`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send({ action: "archiveUsers" });
@@ -2844,8 +2842,8 @@ describe("Users", function () {
     });
 
     it("should return correct response if debug query is passed for api archiveUsersIfNotInDiscord", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/users?debug=true")
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send({ action: "archiveUsers" })
@@ -2868,7 +2866,7 @@ describe("Users", function () {
           expect(res.body.summary.updatedUserDetails.length).to.equal(3);
           expect(res.body.summary.failedUserDetails.length).to.equal(0);
           expect(res.body.message).to.equal(
-            "Successfully updated users archived role to true if in_discord role is false"
+            "Successfully updated users archived role to true if in_discord role is false",
           );
           return done();
         });
@@ -2891,10 +2889,10 @@ describe("Users", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(),
-        })
+        }),
       );
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/users/${userId}/update-nickname`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -2929,8 +2927,8 @@ describe("Users", function () {
           throw new Error("User not verified");
         },
       });
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/users/${userId}/update-nickname`)
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -2952,7 +2950,7 @@ describe("Users", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getDiscordMembers),
-        })
+        }),
       );
     });
 
@@ -2961,8 +2959,8 @@ describe("Users", function () {
     });
 
     it("Should return false if user is a developer and not in discord", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/isDeveloper")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -2992,7 +2990,7 @@ describe("Users", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(discordMembers),
-        })
+        }),
       );
     });
 
@@ -3002,8 +3000,8 @@ describe("Users", function () {
     });
 
     it("Should not update the user if user is a developer", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/users/self")
         .set("cookie", `${cookieName}=${jwtoken}`)
         .send({
@@ -3016,7 +3014,7 @@ describe("Users", function () {
 
           expect(res).to.have.status(403);
           expect(res.body.message).to.equal(
-            "Developers can only update disabled_roles. Use profile service for updating other attributes."
+            "Developers can only update disabled_roles. Use profile service for updating other attributes.",
           );
 
           return done();
@@ -3024,8 +3022,8 @@ describe("Users", function () {
     });
 
     it("Should return 200 when disabled_roles is being set to [super_user] in userObject ", async function () {
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch("/users/self?dev=true")
         .set("cookie", `${cookieName}=${jwtoken}`)
         .send({
@@ -3039,7 +3037,7 @@ describe("Users", function () {
         disabled_roles: ["super_user"],
       });
 
-      const res2 = await chai.request(app).get("/users/self").set("cookie", `${cookieName}=${jwtoken}`);
+      const res2 = await request.execute(app).get("/users/self").set("cookie", `${cookieName}=${jwtoken}`);
 
       expect(res2).to.have.status(200);
       expect(res2.body).to.be.an("object");
@@ -3047,8 +3045,8 @@ describe("Users", function () {
     });
 
     it("Should return 200 when disabled_roles is being set to [super_user, member] in userObject", async function () {
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch("/users/self?dev=true")
         .set("cookie", `${cookieName}=${jwtoken}`)
         .send({
@@ -3062,7 +3060,7 @@ describe("Users", function () {
         disabled_roles: ["super_user", "member"],
       });
 
-      const res2 = await chai.request(app).get("/users/self").set("cookie", `${cookieName}=${jwtoken}`);
+      const res2 = await request.execute(app).get("/users/self").set("cookie", `${cookieName}=${jwtoken}`);
 
       expect(res2).to.have.status(200);
       expect(res2.body).to.be.an("object");
@@ -3071,9 +3069,13 @@ describe("Users", function () {
     });
 
     it("Should return 200 when disabled_roles is being set to [], member in userObject", async function () {
-      const res = await chai.request(app).patch("/users/self?dev=true").set("cookie", `${cookieName}=${jwtoken}`).send({
-        disabledRoles: [],
-      });
+      const res = await request
+        .execute(app)
+        .patch("/users/self?dev=true")
+        .set("cookie", `${cookieName}=${jwtoken}`)
+        .send({
+          disabledRoles: [],
+        });
       expect(res).to.have.status(200);
       expect(res.body).to.be.an("object");
       expect(res.body).to.eql({
@@ -3081,7 +3083,7 @@ describe("Users", function () {
         disabled_roles: [],
       });
 
-      const res2 = await chai.request(app).get("/users/self").set("cookie", `${cookieName}=${jwtoken}`);
+      const res2 = await request.execute(app).get("/users/self").set("cookie", `${cookieName}=${jwtoken}`);
 
       expect(res2).to.have.status(200);
       expect(res2.body).to.be.an("object");
@@ -3089,12 +3091,12 @@ describe("Users", function () {
     });
 
     it("Should return 403 when disabled_roles is being set to [], member in userObject without the dev flag", async function () {
-      const res = await chai.request(app).patch("/users/self").set("cookie", `${cookieName}=${jwtoken}`).send({
+      const res = await request.execute(app).patch("/users/self").set("cookie", `${cookieName}=${jwtoken}`).send({
         disabledRoles: [],
       });
       expect(res).to.have.status(403);
       expect(res.body.message).to.equal(
-        "Developers can only update disabled_roles. Use profile service for updating other attributes."
+        "Developers can only update disabled_roles. Use profile service for updating other attributes.",
       );
     });
 
@@ -3103,9 +3105,9 @@ describe("Users", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({ error: "🚫 Bad Request Signature" }),
-        })
+        }),
       );
-      const res = await chai.request(app).patch("/users/self").set("cookie", `${cookieName}=${jwtoken}`).send({
+      const res = await request.execute(app).patch("/users/self").set("cookie", `${cookieName}=${jwtoken}`).send({
         disabledRoles: [],
       });
       expect(res).to.have.status(404);
@@ -3113,8 +3115,8 @@ describe("Users", function () {
     });
 
     it("Should return 400 when disabled_roles is being set to ['admin'], member in userObject", async function () {
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch("/users/self?dev=true")
         .set("cookie", `${cookieName}=${jwtoken}`)
         .send({
@@ -3140,7 +3142,7 @@ describe("Users", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(discordMembers),
-        })
+        }),
       );
     });
 
@@ -3149,8 +3151,8 @@ describe("Users", function () {
     });
 
     it("Should return true if user is a developer", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/isDeveloper")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -3168,8 +3170,8 @@ describe("Users", function () {
 
   describe("POST USERS MIGRATION", function () {
     it("should run the migration and update usernames successfully", async function () {
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post("/users/batch-username-update")
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send();
@@ -3178,8 +3180,8 @@ describe("Users", function () {
     });
 
     it("should not update usernames for super_user or member", async function () {
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post("/users/batch-username-update")
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .send();
@@ -3190,8 +3192,8 @@ describe("Users", function () {
     });
 
     it("should return 401 for unauthorized user attempting migration", async function () {
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post("/users/batch-username-update")
         .set("cookie", `${cookieName}=${jwt}`)
         .send();

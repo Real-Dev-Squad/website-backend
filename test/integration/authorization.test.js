@@ -1,5 +1,5 @@
-const chai = require("chai");
-const { expect } = chai;
+const { expect } = require("chai");
+const { request } = require("chai-http");
 
 const { authorizeUser } = require("../../middlewares/authorization");
 const authenticate = require("../../middlewares/authenticate");
@@ -48,8 +48,8 @@ describe("authorizeUser", function () {
   });
 
   it("should authorize default user for route with no required role", function (done) {
-    chai
-      .request(app)
+    request
+      .execute(app)
       .get("/for-everyone")
       .set("cookie", `${cookieName}=${defaultJwt}`)
       .end((err, res) => {
@@ -62,8 +62,8 @@ describe("authorizeUser", function () {
   });
 
   it("should authorize user with role for route with no required role", function (done) {
-    chai
-      .request(app)
+    request
+      .execute(app)
       .get("/for-everyone")
       .set("cookie", `${cookieName}=${appOwnerJwt}`)
       .end((err, res) => {
@@ -76,8 +76,8 @@ describe("authorizeUser", function () {
   });
 
   it("should authorize appOwner for route with appOwner required role", function (done) {
-    chai
-      .request(app)
+    request
+      .execute(app)
       .get("/for-app-owner")
       .set("cookie", `${cookieName}=${appOwnerJwt}`)
       .end((err, res) => {
@@ -90,8 +90,8 @@ describe("authorizeUser", function () {
   });
 
   it("should not allow user not having role for route with appOwner required role", function (done) {
-    chai
-      .request(app)
+    request
+      .execute(app)
       .get("/for-app-owner")
       .set("cookie", `${cookieName}=${defaultJwt}`)
       .end((err, res) => {
@@ -104,8 +104,8 @@ describe("authorizeUser", function () {
   });
 
   it("should authorize superUser for route with appOwner required role", function (done) {
-    chai
-      .request(app)
+    request
+      .execute(app)
       .get("/for-app-owner")
       .set("cookie", `${cookieName}=${superUserJwt}`)
       .end((err, res) => {
@@ -118,8 +118,8 @@ describe("authorizeUser", function () {
   });
 
   it("should authorize superUser for route with superUser required role", function (done) {
-    chai
-      .request(app)
+    request
+      .execute(app)
       .get("/for-super-user")
       .set("cookie", `${cookieName}=${superUserJwt}`)
       .end((err, res) => {
@@ -132,8 +132,8 @@ describe("authorizeUser", function () {
   });
 
   it("should not allow appOwner for route with superUser required role", function (done) {
-    chai
-      .request(app)
+    request
+      .execute(app)
       .get("/for-super-user")
       .set("cookie", `${cookieName}=${appOwnerJwt}`)
       .end((err, res) => {

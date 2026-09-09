@@ -1,5 +1,5 @@
-import { createUserFutureStatus, getUserFutureStatus } from "../../../models/userFutureStatus";
 import { expect } from "chai";
+import { createUserFutureStatus, getUserFutureStatus } from "../../../models/userFutureStatus";
 import cleanDb from "../../utils/cleanDb";
 import { UserFutureStatusType } from "../../../types/userFutureStatus";
 import { userFutureStatusData } from "../../fixtures/userFutureStatus/userFutureStatusData";

@@ -103,7 +103,7 @@ const trade = async (tradeData) => {
 
     const { id } = await tradeLogsModel.add({
       type: `STOCK_${tradeType}`,
-      userId: userId,
+      userId,
       stockName: stockData.name,
       orderValue,
       quantity: qtyUserCanPurchase,
@@ -112,7 +112,7 @@ const trade = async (tradeData) => {
     });
 
     await transactionsModel.add({
-      userId: userId,
+      userId,
       type: `STOCK_${tradeType}`,
       refId: id,
       timestamp: +Date.now(),

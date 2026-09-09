@@ -1,4 +1,4 @@
-import chai from "chai";
+import { expect } from "chai";
 import Sinon from "sinon";
 import { logType } from "../../../constants/logs";
 import discordActions from "../../../models/discordactions";
@@ -8,7 +8,6 @@ import { removeDiscordRoleFromUser } from "../../../utils/removeDiscordRoleFromU
 import { groupData, memberGroupData } from "../../fixtures/discordactions/discordactions";
 import addUser from "../../utils/addUser";
 import cleanDb from "../../utils/cleanDb";
-const { expect } = chai;
 const discordRolesModel = firestore.collection("discord-roles");
 const memberRoleModel = firestore.collection("member-group-roles");
 const logsModel = firestore.collection("logs");

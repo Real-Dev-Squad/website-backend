@@ -19,7 +19,7 @@ router.post(
   authenticate,
   authorizeRoles([SUPERUSER]),
   validateCreateTrackedProgressRecord,
-  createTrackedProgressController
+  createTrackedProgressController,
 );
 
 router.patch(
@@ -27,7 +27,7 @@ router.patch(
   authenticate,
   authorizeRoles([SUPERUSER]),
   validateUpdateTrackedProgress,
-  updateTrackedProgressController
+  updateTrackedProgressController,
 );
 
 router.get("/", validateGetTrackedProgressQueryParams, getTrackedProgressController);

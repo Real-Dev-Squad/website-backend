@@ -1,5 +1,5 @@
-const Sinon = require("sinon");
 const { expect } = require("chai");
+const Sinon = require("sinon");
 
 const firestore = require("../../../utils/firestore");
 const userModel = firestore.collection("users");
@@ -278,7 +278,7 @@ describe("Users services", function () {
           firstName,
           lastName,
           newRole,
-          existingRole
+          existingRole,
         );
 
         expect(result).to.equal(null);
@@ -295,7 +295,7 @@ describe("Users services", function () {
           firstName,
           lastName,
           newRole,
-          existingRole
+          existingRole,
         );
 
         expect(result).to.equal(null);

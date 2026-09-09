@@ -29,7 +29,7 @@ const fetchExternalAccountData = async (query, param) => {
     }
 
     return {
-      id: id,
+      id,
       ...data,
     };
   } catch (err) {

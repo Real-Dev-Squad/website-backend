@@ -1,5 +1,5 @@
-const chai = require("chai");
-const { expect } = chai;
+const { expect } = require("chai");
+const { request } = require("chai-http");
 const app = require("../../server");
 const cleanDb = require("../utils/cleanDb");
 const addUser = require("../utils/addUser");
@@ -23,7 +23,7 @@ describe("Notify Test", function () {
   });
 
   describe("POST call to notify", function () {
-    // eslint-disable-next-line mocha/no-skipped-tests
+    // eslint-disable-next-line mocha/no-pending-tests
     it.skip("should send message to specified users", async function () {
       // skipping the test because it connects with firebase cloud messaging service which we are unable to mock.
 
@@ -31,16 +31,16 @@ describe("Notify Test", function () {
 
       const fcmTokenData = { fcmToken: "iedsijdsdj" };
 
-      await chai
-        .request(app)
+      await request
+        .execute(app)
         .post("/v1/fcm-tokens")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
           ...fcmTokenData,
         });
 
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .post("/v1/notifications")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
@@ -55,16 +55,16 @@ describe("Notify Test", function () {
 
       const fcmTokenData = { fcmToken: "iedsijdsdj" };
 
-      await chai
-        .request(app)
+      await request
+        .execute(app)
         .post("/v1/fcm-tokens")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
           ...fcmTokenData,
         });
 
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .post("/v1/notifications")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
@@ -80,16 +80,16 @@ describe("Notify Test", function () {
 
       const fcmTokenData = { fcmToken: "iedsijdsdj" };
 
-      await chai
-        .request(app)
+      await request
+        .execute(app)
         .post("/v1/fcm-tokens")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
           ...fcmTokenData,
         });
 
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .post("/v1/notifications")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
@@ -105,15 +105,15 @@ describe("Notify Test", function () {
 
       const fcmTokenData = { fcmToken: "iedsijdsdj" };
 
-      await chai
-        .request(app)
+      await request
+        .execute(app)
         .post("/v1/fcm-tokens")
         .send({
           ...fcmTokenData,
         });
 
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .post("/v1/notifications")
         .send({
           ...notifyData,

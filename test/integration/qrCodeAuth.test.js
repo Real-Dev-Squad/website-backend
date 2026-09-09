@@ -1,6 +1,6 @@
-const chai = require("chai");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 const sinon = require("sinon");
-const { expect } = chai;
 const app = require("../../server");
 const cleanDb = require("../utils/cleanDb");
 const userData = require("../fixtures/user/user")();
@@ -35,8 +35,8 @@ describe("QrCodeAuth", function () {
     });
 
     it("Should return success response after storing user device info for mobile auth", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/auth/qr-code-auth")
         .send(userDeviceInfoData)
         .end((err, response) => {
@@ -55,8 +55,8 @@ describe("QrCodeAuth", function () {
     });
 
     it("should fail with 404, when the user is not found", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/auth/qr-code-auth")
         .send(wrongUserDeviceInfoData)
         .end((err, res) => {
@@ -74,8 +74,8 @@ describe("QrCodeAuth", function () {
     });
 
     it("should throw 400, if the validation of the values passed in the body does not pass", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/auth/qr-code-auth")
         .send(wrongUserIdDeviceInfo)
         .end((err, res) => {
@@ -111,8 +111,8 @@ describe("QrCodeAuth", function () {
     });
 
     it("Should fail with 401 when cookie is invalid", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/auth/qr-code-auth/authorization_status/AUTHORIZED")
         .set("cookie", `${cookieName}=xyzdddaa`)
         .end((err, res) => {
@@ -130,8 +130,8 @@ describe("QrCodeAuth", function () {
     });
 
     it("should fail with 404, when the user is not found", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/auth/qr-code-auth/authorization_status/AUTHORIZED")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -149,8 +149,8 @@ describe("QrCodeAuth", function () {
     });
 
     it("should throw 400, if authorization value is anything other than the valid values [REJECTED, AUTHORIZED, NOT_INIT]", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/auth/qr-code-auth/authorization_status/1234")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -169,8 +169,8 @@ describe("QrCodeAuth", function () {
 
     it("should successfully update the auth status of the user", function (done) {
       qrCodeAuthModel.storeUserDeviceInfo(userDeviceInfoWithAuthStatus);
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch("/auth/qr-code-auth/authorization_status/AUTHORIZED")
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -207,8 +207,8 @@ describe("QrCodeAuth", function () {
 
     it("should successfully fetch the user device info", function (done) {
       qrCodeAuthModel.storeUserDeviceInfo(userDeviceInfoData).then((response) => {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .get(`/auth/qr-code-auth?device_id=${response.userDeviceInfoData.device_id}`)
           .end((err, res) => {
             if (err) {
@@ -229,8 +229,8 @@ describe("QrCodeAuth", function () {
     });
 
     it("should fail with 404, when the document is not found", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/auth/qr-code-auth?device_id=${userDeviceInfoData.device_id}`)
         .end((err, res) => {
           if (err) {

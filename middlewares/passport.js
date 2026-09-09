@@ -12,8 +12,8 @@ try {
       },
       (accessToken, refreshToken, profile, done) => {
         return done(null, accessToken, profile);
-      }
-    )
+      },
+    ),
   );
   passport.use(
     new GoogleStrategy(
@@ -24,8 +24,8 @@ try {
       },
       (accessToken, refreshToken, profile, done) => {
         return done(null, accessToken, profile);
-      }
-    )
+      },
+    ),
   );
 } catch (err) {
   logger.error("Error initialising passport:", err);

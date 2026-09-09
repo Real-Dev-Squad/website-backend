@@ -1,5 +1,4 @@
-const chai = require("chai");
-const { expect } = chai;
+const { expect } = require("chai");
 
 const usersUtils = require("../../../utils/users");
 const cleanDb = require("../../utils/cleanDb");
@@ -187,7 +186,7 @@ describe("users", function () {
           .split("-")
           .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
           .join("-")
-          .substring(0, usernameLen)} ${oooMessage}`
+          .substring(0, usernameLen)} ${oooMessage}`,
       );
     });
 
@@ -208,7 +207,7 @@ describe("users", function () {
         username
           .split("-")
           .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-          .join("-")
+          .join("-"),
       );
     });
   });
@@ -233,7 +232,7 @@ describe("users", function () {
           status: 200,
           ok: true,
           json: () => Promise.resolve(response),
-        })
+        }),
       );
 
       const status = {

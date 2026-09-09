@@ -1,5 +1,5 @@
-import chai from "chai";
-import chaiHttp from "chai-http";
+import { expect } from "chai";
+import { request } from "chai-http";
 import app from "../../server";
 import authService from "../../services/authService";
 import addUser from "../utils/addUser";
@@ -9,8 +9,6 @@ import sinon from "sinon";
 import config from "config";
 
 const cookieName: string = config.get("userToken.cookieName");
-chai.use(chaiHttp);
-const { expect } = chai;
 
 describe("GET /stocks/:userId", function () {
   let jwt: string;
@@ -33,7 +31,7 @@ describe("GET /stocks/:userId", function () {
   it("Should return user stocks when stocks are available", async function () {
     await stocks.updateUserStocks(userId, userStock);
 
-    const res = await chai.request(app).get(`/stocks/${userId}?dev=true`).set("cookie", `${cookieName}=${jwt}`);
+    const res = await request.execute(app).get(`/stocks/${userId}?dev=true`).set("cookie", `${cookieName}=${jwt}`);
 
     expect(res).to.have.status(200);
     expect(res.body).to.be.an("object");
@@ -43,8 +41,7 @@ describe("GET /stocks/:userId", function () {
   });
 
   it("Should return empty object when no stocks are found", function (done) {
-    chai
-      .request(app)
+    request.execute(app)
       .get(`/stocks/${userId}?dev=true`)
       .set("cookie", `${cookieName}=${jwt}`)
       .end((err, res) => {
@@ -62,8 +59,7 @@ describe("GET /stocks/:userId", function () {
   it("Should return 403 for unauthorized access", function (done) {
     const userId = "anotherUser123";
 
-    chai
-      .request(app)
+    request.execute(app)
       .get(`/stocks/${userId}?dev=true`)
       .set("cookie", `${cookieName}=${jwt}`)
       .end((err, res) => {
@@ -80,8 +76,7 @@ describe("GET /stocks/:userId", function () {
   it("Should return 500 when an internal server error occurs", function (done) {
     sinon.stub(stocks, "fetchUserStocks").throws(new Error("Database error"));
 
-    chai
-      .request(app)
+    request.execute(app)
       .get(`/stocks/${userId}?dev=true`)
       .set("cookie", `${cookieName}=${jwt}`)
       .end((err, res) => {

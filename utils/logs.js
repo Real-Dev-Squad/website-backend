@@ -1,4 +1,4 @@
-const admin = require("firebase-admin");
+const { FieldPath } = require("firebase-admin/firestore");
 const { logType } = require("../constants/logs");
 const usersService = require("../services/dataAccessLayer");
 const firestore = require("./firestore");
@@ -11,7 +11,7 @@ async function getUsersListFromLogs(allLogs) {
       userIds.add(log.meta.userId || log.meta.createdBy);
     }
   }
-  return await usersService.fetchUsersForKeyValues(admin.firestore.FieldPath.documentId(), Array.from(userIds));
+  return await usersService.fetchUsersForKeyValues(FieldPath.documentId(), Array.from(userIds));
 }
 
 async function getTasksFromLogs(allLogs) {
@@ -25,9 +25,9 @@ async function getTasksFromLogs(allLogs) {
   if (Array.from(taskIds).filter((e) => e).length !== 0) {
     const data = await tasksModel
       .where(
-        admin.firestore.FieldPath.documentId(),
+        FieldPath.documentId(),
         "in",
-        Array.from(taskIds).filter((e) => e)
+        Array.from(taskIds).filter((e) => e),
       )
       .get();
     data.forEach((doc) => {

@@ -1,7 +1,6 @@
-const chai = require("chai");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 const sinon = require("sinon");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
 const passport = require("passport");
 const app = require("../../server");
 const cleanDb = require("../utils/cleanDb");
@@ -10,8 +9,6 @@ const { generateGithubAuthRedirectUrl } = require("..//utils/github");
 const { generateGoogleAuthRedirectUrl, stubPassportAuthenticate } = require("..//utils/googleauth");
 const { addUserToDBForTest } = require("../../utils/users");
 const userData = require("../fixtures/user/user")();
-
-chai.use(chaiHttp);
 
 // Import fixtures
 const githubUserInfo = require("../fixtures/auth/githubUserInfo")();
@@ -26,7 +23,7 @@ describe("auth", function () {
 
   it("should return github call back URL", async function () {
     const githubOauthURL = generateGithubAuthRedirectUrl({});
-    const res = await chai.request(app).get("/auth/github/login").redirects(0);
+    const res = await request.execute(app).get("/auth/github/login").redirects(0);
     expect(res).to.have.status(302);
     expect(res.headers.location).to.equal(githubOauthURL);
   });
@@ -34,8 +31,8 @@ describe("auth", function () {
   it("should return github call back URL with redirectUrl", async function () {
     const RDS_MEMBERS_SITE_URL = "https://members.realdevsquad.com";
     const githubOauthURL = generateGithubAuthRedirectUrl({ state: RDS_MEMBERS_SITE_URL });
-    const res = await chai
-      .request(app)
+    const res = await request
+      .execute(app)
       .get("/auth/github/login")
       .query({ redirectURL: RDS_MEMBERS_SITE_URL })
       .redirects(0);
@@ -46,8 +43,8 @@ describe("auth", function () {
   it("should return github call back URL with redirectUrl for mobile-app", async function () {
     const RDS_MEMBERS_SITE_URL = "https://members.realdevsquad.com";
     const githubOauthURL = generateGithubAuthRedirectUrl({ state: RDS_MEMBERS_SITE_URL + "/?isMobileApp=true" });
-    const res = await chai
-      .request(app)
+    const res = await request
+      .execute(app)
       .get("/auth/github/login")
       .query({ redirectURL: RDS_MEMBERS_SITE_URL, sourceUtm: "rds-mobile-app" })
       .redirects(0);
@@ -63,8 +60,8 @@ describe("auth", function () {
       return (req, res, next) => {};
     });
 
-    const res = await chai
-      .request(app)
+    const res = await request
+      .execute(app)
       .get("/auth/github/callback")
       .query({ code: "codeReturnedByGithub" })
       .redirects(0);
@@ -80,8 +77,8 @@ describe("auth", function () {
       return (req, res, next) => {};
     });
 
-    const res = await chai
-      .request(app)
+    const res = await request
+      .execute(app)
       .get("/auth/github/callback")
       .query({ code: "codeReturnedByGithub", state: rdsUiUrl })
       .redirects(0);
@@ -98,8 +95,8 @@ describe("auth", function () {
       return (req, res, next) => {};
     });
 
-    const res = await chai
-      .request(app)
+    const res = await request
+      .execute(app)
       .get("/auth/github/callback")
       .query({ code: "codeReturnedByGithub", state: rdsUiUrl })
       .redirects(0);
@@ -115,8 +112,8 @@ describe("auth", function () {
       return (req, res, next) => {};
     });
 
-    const res = await chai
-      .request(app)
+    const res = await request
+      .execute(app)
       .get(`/auth/github/callback`)
       .query({ code: "codeReturnedByGithub", state: rdsUrl })
       .redirects(0);
@@ -133,8 +130,8 @@ describe("auth", function () {
       return (req, res, next) => {};
     });
 
-    const res = await chai
-      .request(app)
+    const res = await request
+      .execute(app)
       .get(`/auth/github/callback`)
       .query({ code: "codeReturnedByGithub", state: invalidRedirectUrl })
       .redirects(0);
@@ -151,8 +148,8 @@ describe("auth", function () {
       return (req, res, next) => {};
     });
 
-    const res = await chai
-      .request(app)
+    const res = await request
+      .execute(app)
       .get(`/auth/github/callback`)
       .query({ code: "codeReturnedByGithub", state: invalidRedirectUrl })
       .redirects(0);
@@ -168,8 +165,8 @@ describe("auth", function () {
       return (req, res, next) => {};
     });
 
-    chai
-      .request(app)
+    request
+      .execute(app)
       .get("/auth/github/callback")
       .query({ code: "codeReturnedByGithub" })
       .redirects(0)
@@ -194,8 +191,8 @@ describe("auth", function () {
   });
 
   it("should return 401 if github call fails", function (done) {
-    chai
-      .request(app)
+    request
+      .execute(app)
       .get("/auth/github/callback")
       .query({ code: "codeReturnedByGithub" })
       .end((err, res) => {
@@ -216,8 +213,8 @@ describe("auth", function () {
   });
 
   it("Should clear the rds session cookies", function (done) {
-    chai
-      .request(app)
+    request
+      .execute(app)
       .get("/auth/signout")
       .end((err, res) => {
         if (err) {
@@ -240,8 +237,8 @@ describe("auth", function () {
       return (req, res, next) => {};
     });
 
-    const res = await chai
-      .request(app)
+    const res = await request
+      .execute(app)
       .get("/auth/github/callback")
       .query({ code: "codeReturnedByGithub", state: rdsUiUrl.href + "?v2=true" })
       .redirects(0);
@@ -276,8 +273,8 @@ describe("auth", function () {
       return (req, res, next) => {};
     });
 
-    const res = await chai
-      .request(app)
+    const res = await request
+      .execute(app)
       .get(`/auth/github/callback`)
       .query({ code: "codeReturnedByGithub", state: rdsUrl })
       .redirects(0);
@@ -290,7 +287,7 @@ describe("auth", function () {
 
   it("should return google call back URL", async function () {
     const googleOauthURL = generateGoogleAuthRedirectUrl({});
-    const res = await chai.request(app).get("/auth/google/login?dev=true").redirects(0);
+    const res = await request.execute(app).get("/auth/google/login?dev=true").redirects(0);
     expect(res).to.have.status(302);
     expect(res.headers.location).to.equal(googleOauthURL);
   });
@@ -298,8 +295,8 @@ describe("auth", function () {
   it("should return google call back URL with redirectUrl", async function () {
     const RDS_MEMBERS_SITE_URL = "https://members.realdevsquad.com";
     const googleOauthURL = generateGoogleAuthRedirectUrl({ state: RDS_MEMBERS_SITE_URL });
-    const res = await chai
-      .request(app)
+    const res = await request
+      .execute(app)
       .get("/auth/google/login?dev=true")
       .query({ redirectURL: RDS_MEMBERS_SITE_URL })
       .redirects(0);
@@ -311,8 +308,8 @@ describe("auth", function () {
     const redirectURL = config.get("services.rdsUi.newSignupUrl");
     stubPassportAuthenticate(googleUserInfo[0]);
 
-    const res = await chai
-      .request(app)
+    const res = await request
+      .execute(app)
       .get("/auth/google/callback")
       .query({ code: "codeReturnedByGoogle" })
       .redirects(0);
@@ -325,8 +322,8 @@ describe("auth", function () {
     const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
     stubPassportAuthenticate(googleUserInfo[0]);
 
-    const res = await chai
-      .request(app)
+    const res = await request
+      .execute(app)
       .get("/auth/google/callback")
       .query({ code: "codeReturnedByGoogle", state: rdsUiUrl })
       .redirects(0);
@@ -338,8 +335,8 @@ describe("auth", function () {
     await addUserToDBForTest(googleUserInfo[1]);
     const rdsUrl = new URL("https://dashboard.realdevsquad.com").href;
     stubPassportAuthenticate(googleUserInfo[0]);
-    const res = await chai
-      .request(app)
+    const res = await request
+      .execute(app)
       .get(`/auth/google/callback`)
       .query({ code: "codeReturnedByGoogle", state: rdsUrl })
       .redirects(0);
@@ -353,8 +350,8 @@ describe("auth", function () {
     const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
     stubPassportAuthenticate(googleUserInfo[0]);
 
-    const res = await chai
-      .request(app)
+    const res = await request
+      .execute(app)
       .get(`/auth/google/callback`)
       .query({ code: "codeReturnedByGoogle", state: invalidRedirectUrl })
       .redirects(0);
@@ -367,8 +364,8 @@ describe("auth", function () {
     const invalidRedirectUrl = "invalidURL";
     const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
     stubPassportAuthenticate(googleUserInfo[0]);
-    const res = await chai
-      .request(app)
+    const res = await request
+      .execute(app)
       .get(`/auth/google/callback`)
       .query({ code: "codeReturnedByGoogle", state: invalidRedirectUrl })
       .redirects(0);
@@ -381,8 +378,8 @@ describe("auth", function () {
 
     stubPassportAuthenticate(googleUserInfo[0]);
 
-    chai
-      .request(app)
+    request
+      .execute(app)
       .get("/auth/google/callback")
       .query({ code: "codeReturnedByGoogle" })
       .redirects(0)
@@ -410,8 +407,8 @@ describe("auth", function () {
     const rdsUiUrl = new URL(config.get("services.rdsUi.baseUrl")).href;
     stubPassportAuthenticate(googleUserInfo[2]);
 
-    const res = await chai
-      .request(app)
+    const res = await request
+      .execute(app)
       .get("/auth/google/callback")
       .query({ code: "codeReturnedByGoogle", state: rdsUiUrl })
       .redirects(0);
@@ -432,8 +429,8 @@ describe("auth", function () {
     };
     stubPassportAuthenticate(userInfoFromGitHub);
 
-    const res = await chai
-      .request(app)
+    const res = await request
+      .execute(app)
       .get("/auth/github/callback")
       .query({ code: "codeReturnedByGithub", state: rdsUiUrl })
       .redirects(0);
@@ -451,8 +448,8 @@ describe("auth", function () {
     };
     stubPassportAuthenticate(userInfoFromGoogle);
 
-    const res = await chai
-      .request(app)
+    const res = await request
+      .execute(app)
       .get("/auth/google/callback")
       .query({ code: "codeReturnedByGoogle", state: newSignupUrl })
       .redirects(0);
@@ -472,8 +469,8 @@ describe("auth", function () {
     };
     stubPassportAuthenticate(googleUser);
 
-    const res = await chai
-      .request(app)
+    const res = await request
+      .execute(app)
       .get("/auth/google/callback")
       .query({ code: "codeReturnedByGoogle", state: rdsUiUrl })
       .redirects(0);
@@ -482,7 +479,7 @@ describe("auth", function () {
   });
 
   it("should return 404 if dev feature flag is not enabled", async function () {
-    const res = await chai.request(app).get("/auth/google/login");
+    const res = await request.execute(app).get("/auth/google/login");
 
     expect(res).to.have.status(404);
     expect(res.body.message).to.equal("Route not found");
@@ -497,8 +494,8 @@ describe("auth", function () {
 
     stubPassportAuthenticate(userInfoWithoutEmail);
 
-    const res = await chai
-      .request(app)
+    const res = await request
+      .execute(app)
       .get("/auth/google/callback")
       .query({ code: "codeReturnedByGoogle", state: rdsUiUrl })
       .redirects(0);
@@ -514,8 +511,8 @@ describe("auth", function () {
       emails: [{ value: "test@example.com", verified: false }],
     };
     stubPassportAuthenticate(userInfoWithUnverifiedEmail);
-    const res = await chai
-      .request(app)
+    const res = await request
+      .execute(app)
       .get("/auth/google/callback")
       .query({ code: "codeReturnedByGoogle", state: rdsUiUrl })
       .redirects(0);
@@ -525,8 +522,8 @@ describe("auth", function () {
   });
 
   it("should return 401 if google auth call fails", function (done) {
-    chai
-      .request(app)
+    request
+      .execute(app)
       .get("/auth/google/callback")
       .query({ code: "codeReturnedByGoogle" })
       .end((err, res) => {

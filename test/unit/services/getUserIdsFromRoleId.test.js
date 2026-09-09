@@ -1,5 +1,4 @@
-const chai = require("chai");
-const expect = chai.expect;
+const { expect } = require("chai");
 const cleanDb = require("../../utils/cleanDb");
 const { addGroupRoleToMember } = require("../../../models/discordactions");
 const { getUserIdsFromRoleId } = require("../../../services/getUserIdsFromRoleId");

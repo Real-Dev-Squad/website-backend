@@ -1,6 +1,5 @@
-const chai = require("chai");
+const { expect } = require("chai");
 const sinon = require("sinon");
-const { expect } = chai;
 const cleanDb = require("../../utils/cleanDb");
 const { addUserDetailsToProgressDocs, getPaginatedProgressDocument } = require("../../../models/progresses");
 const fireStore = require("../../../utils/firestore");
@@ -118,7 +117,7 @@ describe("progressModel", function () {
       removeSensitiveInfo(updatedUserData);
       removeSensitiveInfo(updatedUserData2);
       const mockProgressDocs = [
-        { userId: userId, taskId: 101 },
+        { userId, taskId: 101 },
         { userId: userId2, taskId: 102 },
       ];
 

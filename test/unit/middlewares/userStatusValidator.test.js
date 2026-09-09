@@ -1,5 +1,5 @@
-const Sinon = require("sinon");
 const { expect } = require("chai");
+const Sinon = require("sinon");
 const { validateUserStatus } = require("../../../middlewares/validators/userStatus");
 
 describe("Validation Tests for Cancel OOO", function () {

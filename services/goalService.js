@@ -6,7 +6,7 @@ const getOrCreateGoalUser = async ({ userId, roles }) => {
       type: "User",
       attributes: {
         rds_id: userId,
-        roles: roles,
+        roles,
       },
     },
   });

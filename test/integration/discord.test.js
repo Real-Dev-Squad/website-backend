@@ -1,5 +1,5 @@
-const chai = require("chai");
-const { expect } = chai;
+const { expect } = require("chai");
+const { request } = require("chai-http");
 
 const app = require("../../server");
 const addUser = require("../utils/addUser");
@@ -33,8 +33,8 @@ describe("test discord actions", function () {
     });
 
     it("returns 403 for archived users post method", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/discord-actions/groups")
         .set("Cookie", `${cookieName}=${jwt}`)
         .send(requestRoleData)
@@ -48,8 +48,8 @@ describe("test discord actions", function () {
     });
 
     it("returns 403 for archived users get method", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/discord-actions/groups")
         .set("Cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -94,8 +94,8 @@ describe("test discord actions", function () {
     });
 
     it("returns 200 for active users get method", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/discord-actions/groups")
         .set("Cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {

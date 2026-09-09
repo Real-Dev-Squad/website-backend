@@ -54,7 +54,7 @@ class EventTokenService {
       access_key: EventTokenService.#app_access_key,
       room_id: roomId,
       user_id: userId,
-      role: role,
+      role,
       type: "app",
       version: 2,
       iat: Math.floor(Date.now() / 1000),

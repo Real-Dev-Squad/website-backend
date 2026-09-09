@@ -1,6 +1,5 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 
 const app = require("../../server");
 const authService = require("../../services/authService");
@@ -19,8 +18,6 @@ const { assertUserIds } = require("../utils/user");
 const { userState } = require("../../constants/userStatus");
 
 const cookieName = config.get("userToken.cookieName");
-
-chai.use(chaiHttp);
 
 describe("Filter Users", function () {
   let jwt;
@@ -45,12 +42,12 @@ describe("Filter Users", function () {
     oooUser = await addUser(userData[0]);
     await updateUserStatus(
       oooUser,
-      generateUserStatusData(userState.OOO, updatedAtDate, updatedAtDate, untilDate, "Bad Health")
+      generateUserStatusData(userState.OOO, updatedAtDate, updatedAtDate, untilDate, "Bad Health"),
     );
     idleUser = await addUser(userData[1]);
     await updateUserStatus(
       idleUser,
-      generateUserStatusData(userState.IDLE, updatedAtDate, updatedAtDate, untilDate, "CSS")
+      generateUserStatusData(userState.IDLE, updatedAtDate, updatedAtDate, untilDate, "CSS"),
     );
     activeUser = await addUser(userData[8]);
     await updateUserStatus(activeUser, generateUserStatusData(userState.ACTIVE, updatedAtDate, updatedAtDate));
@@ -136,11 +133,10 @@ describe("Filter Users", function () {
     await cleanDb();
   });
 
-  // eslint-disable-next-line mocha/no-skipped-tests
   describe("GET /users/search", function () {
     it("Should not be accessed by unauthorized user", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/search")
         .query({ state: "OOO" })
         .end((err, res) => {
@@ -153,8 +149,8 @@ describe("Filter Users", function () {
     });
 
     it("Should search users based on state", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/search")
         .query({ state: "OOO" })
         .set("cookie", `${cookieName}=${jwt}`)
@@ -176,8 +172,8 @@ describe("Filter Users", function () {
     });
 
     it("Should return the correct pagination information", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/search")
         .query({ page: 0, size: 100, dev: true })
         .set("cookie", `${cookieName}=${jwt}`)
@@ -198,8 +194,8 @@ describe("Filter Users", function () {
     });
 
     it("Should return paginated results when dev=true", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/search")
         .set("cookie", `${cookieName}=${jwt}`)
         .query({ dev: true, page: 1, size: 10 })
@@ -230,8 +226,8 @@ describe("Filter Users", function () {
     });
 
     it("Should return non-paginated results when dev is not set or set to false", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/search")
         .set("cookie", `${cookieName}=${jwt}`)
         .query({ state: ["OOO", "IDLE", "ONBOARDING"] })
@@ -263,8 +259,8 @@ describe("Filter Users", function () {
     });
 
     it("Should search users based on Onboarding state", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/search")
         .query({ state: "ONBOARDING" })
         .set("cookie", `${cookieName}=${jwt}`)
@@ -286,8 +282,8 @@ describe("Filter Users", function () {
     });
 
     it("Should skip correct number of users", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/search")
         .query({ page: 1, size: 100, dev: true })
         .set("cookie", `${cookieName}=${jwt}`)
@@ -309,8 +305,8 @@ describe("Filter Users", function () {
     });
 
     it("Should search users based on Onboarding state and discord join more then 31 days", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/search")
         .query({ state: "ONBOARDING", time: "31d" })
         .set("cookie", `${cookieName}=${jwt}`)
@@ -327,8 +323,8 @@ describe("Filter Users", function () {
     });
 
     it("Should search users based on Tag", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/search")
         .query({ tagId: tagIdFE })
         .set("cookie", `${cookieName}=${jwt}`)
@@ -348,8 +344,8 @@ describe("Filter Users", function () {
     });
 
     it("Should search users based on multiple Tags", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/search")
         .query({ tagId: [tagIdFE, tagIdBE] })
         .set("cookie", `${cookieName}=${jwt}`)
@@ -369,8 +365,8 @@ describe("Filter Users", function () {
     });
 
     it("Should search users based on multiple states", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/search")
         .query({ state: ["OOO", "IDLE", "ONBOARDING"] })
         .set("cookie", `${cookieName}=${jwt}`)
@@ -390,8 +386,8 @@ describe("Filter Users", function () {
     });
 
     it("Should search users based on single tag and single state", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/search")
         .query({ state: "OOO", tagId: tagIdFE })
         .set("cookie", `${cookieName}=${jwt}`)
@@ -411,8 +407,8 @@ describe("Filter Users", function () {
     });
 
     it("Should search users based on single tag and multiple state", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/search")
         .query({ state: ["OOO", "ACTIVE"], tagId: tagIdFE })
         .set("cookie", `${cookieName}=${jwt}`)
@@ -432,8 +428,8 @@ describe("Filter Users", function () {
     });
 
     it("Should search users based on multiple tag and single state", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/search")
         .query({ state: "OOO", tagId: [tagIdFE, tagIdBE] })
         .set("cookie", `${cookieName}=${jwt}`)
@@ -454,8 +450,8 @@ describe("Filter Users", function () {
     });
 
     it("Should search users based on multiple tag and multiple states", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/search")
         .query({ state: ["OOO", "ACTIVE"], tagId: [tagIdFE, tagIdBE] })
         .set("cookie", `${cookieName}=${jwt}`)
@@ -475,8 +471,8 @@ describe("Filter Users", function () {
     });
 
     it("Should search users based on archived role", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/search")
         .query({ role: "archived" })
         .set("cookie", `${cookieName}=${jwt}`)
@@ -497,8 +493,8 @@ describe("Filter Users", function () {
     });
 
     it("Check personal details not present", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/search")
         .query({ state: ["OOO", "ACTIVE", "IDLE"] })
         .set("cookie", `${cookieName}=${jwt}`)

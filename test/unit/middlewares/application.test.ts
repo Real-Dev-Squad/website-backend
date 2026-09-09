@@ -1,6 +1,5 @@
-import chai from "chai";
+import { expect } from "chai";
 const Sinon = require("sinon");
-const { expect } = chai;
 const { authorizeOwnOrSuperUser } = require("../../../middlewares/authorizeOwnOrSuperUser");
 
 describe("authorizeOwnOrSuperUser", function () {

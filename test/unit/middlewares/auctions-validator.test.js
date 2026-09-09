@@ -1,6 +1,6 @@
+const { expect } = require("chai");
 const Sinon = require("sinon");
 const { createAuction, placeBid } = require("../../../middlewares/validators/auctions");
-const { expect } = require("chai");
 
 describe("auctions validator", function () {
   describe("create auctions validator", function () {

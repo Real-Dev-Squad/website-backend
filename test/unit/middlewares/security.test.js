@@ -1,17 +1,14 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 
 const app = require("../../../server");
-
-chai.use(chaiHttp);
 
 describe("CORS", function () {
   it("should allow preflight requests from allowed domains", function (done) {
     const origin = "https://www.realdevsquad.com";
 
-    chai
-      .request(app)
+    request
+      .execute(app)
       .options("/users")
       .set("origin", origin)
       .send()
@@ -33,8 +30,8 @@ describe("CORS", function () {
   it("should allow preflight requests from localhost in test env", function (done) {
     const origin = "http://localhost:3000";
 
-    chai
-      .request(app)
+    request
+      .execute(app)
       .options("/users")
       .set("origin", origin)
       .send()
@@ -56,8 +53,8 @@ describe("CORS", function () {
   it("should not allow preflight requests from non specified origin", function (done) {
     const origin = "http://notspecifieddomain.com";
 
-    chai
-      .request(app)
+    request
+      .execute(app)
       .options("/users")
       .set("origin", origin)
       .send()

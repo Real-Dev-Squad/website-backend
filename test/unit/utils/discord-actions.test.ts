@@ -1,6 +1,5 @@
-import chai from "chai";
+import { expect } from "chai";
 import sinon from "sinon";
-const { expect } = chai;
 import { generateDiscordInviteLink } from "../../../utils/discord-actions";
 
 describe("generateDiscordInviteLink", () => {

@@ -14,7 +14,16 @@ const validateGroupRoleBody = async (req, res, next) => {
 
   try {
     await bodySchema.validateAsync(req.body);
-    req.query = await querySchema.validateAsync(req.query);
+    const validatedQuery = await querySchema.validateAsync(req.query);
+    // Express 5 exposes req.query as a getter-only property that re-parses on
+    // every access, so a plain assignment would be silently dropped. Define an
+    // own property instead to propagate the validated/coerced values.
+    Object.defineProperty(req, "query", {
+      value: validatedQuery,
+      writable: true,
+      configurable: true,
+      enumerable: true,
+    });
     next();
   } catch (error) {
     logger.error(`Error validating createGroupRole payload : ${error}`);
@@ -60,7 +69,16 @@ const validateLazyLoadingParams = async (req, res, next) => {
   });
 
   try {
-    req.query = await schema.validateAsync(req.query);
+    const validatedQuery = await schema.validateAsync(req.query);
+    // Express 5 exposes req.query as a getter-only property that re-parses on
+    // every access, so a plain assignment would be silently dropped. Define an
+    // own property instead to propagate the validated/coerced values.
+    Object.defineProperty(req, "query", {
+      value: validatedQuery,
+      writable: true,
+      configurable: true,
+      enumerable: true,
+    });
     next();
   } catch (error) {
     res.boom.badRequest(error.message);

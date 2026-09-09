@@ -1,6 +1,6 @@
-import chai, {expect} from "chai";
+import { expect } from "chai";
+import { request } from "chai-http";
 import sinon from 'sinon';
-import chaiHttp from 'chai-http';
 import * as awsFunctions from '../../utils/awsFunctions';
 import bot from "../utils/generateBotToken";
 import { PROFILE_SVC_GITHUB_URL } from '../../constants/urls';
@@ -12,7 +12,6 @@ const addUser = require("../utils/addUser");
 const cleanDb = require("../utils/cleanDb");
 const { CLOUDFLARE_WORKER } = require("../../constants/bot")
 
-chai.use(chaiHttp);
 
 describe('addUserToAWSGroup', function(){
   let req: any;
@@ -34,8 +33,7 @@ describe('addUserToAWSGroup', function(){
   });
 
   it('should return 400 and user not found with wrong discord Id passed', function(done){
-    const res = chai
-    .request(app)
+    const res = request.execute(app)
     .post(AWS_ACCESS_API_URL)
     .set('Authorization', req.headers.authorization)
     .send({
@@ -54,8 +52,7 @@ describe('addUserToAWSGroup', function(){
   });
 
   it('should return 400 when user email is missing', function(done) {    
-    const res = chai
-      .request(app)
+    const res = request.execute(app)
       .post(AWS_ACCESS_API_URL)
       .set('Authorization', req.headers.authorization)
       .send({
@@ -79,8 +76,7 @@ describe('addUserToAWSGroup', function(){
     sinon.stub(awsFunctions, "addUserToGroup").resolves({ conflict: false });
     sinon.stub(awsFunctions, "fetchAwsUserIdByUsername").resolves(null);
 
-    const res = chai
-    .request(app)
+    const res = request.execute(app)
     .post(AWS_ACCESS_API_URL)
     .set('Authorization', req.headers.authorization)
     .send({
@@ -103,8 +99,7 @@ describe('addUserToAWSGroup', function(){
     sinon.stub(awsFunctions, "addUserToGroup").resolves({ conflict: false });
     sinon.stub(awsFunctions, "fetchAwsUserIdByUsername").resolves("existing-user-id-123");
     
-    const res =  chai
-    .request(app)
+    const res =  request.execute(app)
     .post(AWS_ACCESS_API_URL)
     .set('Authorization', req.headers.authorization)
     .send({
@@ -127,8 +122,7 @@ describe('addUserToAWSGroup', function(){
     sinon.stub(awsFunctions, "addUserToGroup").resolves({ conflict: true });
     sinon.stub(awsFunctions, "fetchAwsUserIdByUsername").resolves("existing-user-id-123");
     
-    const res = chai
-    .request(app)
+    const res = request.execute(app)
     .post(AWS_ACCESS_API_URL)
     .set('Authorization', req.headers.authorization)
     .send({

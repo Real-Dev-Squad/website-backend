@@ -1,5 +1,4 @@
-import chai from "chai";
-const { expect } = chai;
+import { expect } from "chai";
 const { getUserApplicationObject } = require("../../../utils/application");
 
 describe("getUserApplicationObject", async function () {

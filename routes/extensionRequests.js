@@ -22,7 +22,7 @@ router.get(
   devFlagMiddleware,
   authenticate,
   userAuthorization,
-  extensionRequests.getSelfExtensionRequests
+  extensionRequests.getSelfExtensionRequests,
 );
 router.get("/:id", authenticate, authorizeRoles([SUPERUSER, APPOWNER]), extensionRequests.getExtensionRequest);
 //  remove the skipAuthorizeRolesUnderFF & authorizeRoles middleware when removing the feature flag
@@ -31,14 +31,14 @@ router.patch(
   authenticate,
   skipAuthorizeRolesUnderFF(authorizeRoles([SUPERUSER, APPOWNER])),
   updateExtensionRequest,
-  extensionRequests.updateExtensionRequest
+  extensionRequests.updateExtensionRequest,
 );
 router.patch(
   "/:id/status",
   authenticate,
   authorizeRoles([SUPERUSER, APPOWNER]),
   updateExtensionRequestStatus,
-  extensionRequests.updateExtensionRequestStatus
+  extensionRequests.updateExtensionRequestStatus,
 );
 
 module.exports = router;

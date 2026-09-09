@@ -1,6 +1,5 @@
-const chai = require("chai");
+const { assert } = require("chai");
 const sinon = require("sinon");
-const { assert } = chai;
 const skipAuthorizeRolesUnderFF = require("../../../middlewares/skipAuthorizeRolesWrapper");
 
 describe("skipAuthorizeRolesUnderFF Middleware", function () {

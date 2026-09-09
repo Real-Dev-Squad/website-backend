@@ -65,7 +65,7 @@ module.exports = {
         authRedirection: "/goto",
       },
       goalAPI: {
-        baseUrl: "<goalBaseUrl>",
+        baseUrl: "http://goals-api.test", // Dummy URL: real calls are stubbed/mocked in tests; must stay a valid URL for nock()
         secretKey: "<goalSecretKey>",
         cookieName: `goals-session-test`,
       },
@@ -74,15 +74,18 @@ module.exports = {
       baseUrl: "DISCORD_BASE_URL",
     },
     goalAPI: {
-      baseUrl: "<goalBaseUrl>",
+      baseUrl: "http://goals-api.test", // Dummy URL: real calls are stubbed/mocked in tests; must stay a valid URL for nock()
       secretKey: "<goalSecretKey>",
       cookieName: `goals-session-test`,
     },
   },
 
   cors: {
-    // eslint-disable-next-line security/detect-unsafe-regex
-    allowedOrigins: /(https:\/\/([a-zA-Z0-9-_]+\.)?realdevsquad\.com$)|(localhost)/, // Allow realdevsquad.com, *.realdevsquad.com and localhost for non-production envs
+    // Stored as a string (not a RegExp): node-config wraps objects in an
+    // immutable Proxy, which breaks RegExp internal slots (V8 throws
+    // "Method RegExp.prototype.exec called on incompatible receiver").
+    // middlewares/index.js builds the RegExp from this pattern.
+    allowedOrigins: "(https://([a-zA-Z0-9-_]+\\.)?realdevsquad\\.com$)|(localhost)", // Allow realdevsquad.com, *.realdevsquad.com and localhost for non-production envs
   },
 
   userToken: {

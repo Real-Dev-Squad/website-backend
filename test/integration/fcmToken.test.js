@@ -1,5 +1,5 @@
-const chai = require("chai");
-const { expect } = chai;
+const { expect } = require("chai");
+const { request } = require("chai-http");
 const app = require("../../server");
 const cleanDb = require("../utils/cleanDb");
 const addUser = require("../utils/addUser");
@@ -26,8 +26,8 @@ describe("Fcm Token Test", function () {
     it("should save the fcm token", async function () {
       const fcmTokenData = { fcmToken: "iedsijdsdj" };
 
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .post("/v1/fcm-tokens")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
@@ -40,16 +40,16 @@ describe("Fcm Token Test", function () {
 
     it("should not duplicate fcm token", async function () {
       const fcmTokenData = { fcmToken: "iedsijdsdj" };
-      await chai
-        .request(app)
+      await request
+        .execute(app)
         .post("/v1/fcm-tokens")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
           ...fcmTokenData,
         });
 
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .post("/v1/fcm-tokens")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
@@ -62,8 +62,8 @@ describe("Fcm Token Test", function () {
 
     it("should have fcm token", async function () {
       const fcmTokenData = {};
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .post("/v1/fcm-tokens")
         .set("cookie", `${cookieName}=${userIdToken0}`)
         .send({
@@ -76,8 +76,8 @@ describe("Fcm Token Test", function () {
     it("should have user token", async function () {
       const fcmTokenData = { fcmToken: "iedsijdsdj" };
 
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .post("/v1/fcm-tokens")
         .send({
           ...fcmTokenData,
@@ -90,8 +90,8 @@ describe("Fcm Token Test", function () {
     it("should have user token and fcm token", async function () {
       const fcmTokenData = {};
 
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .post("/v1/fcm-tokens")
         .send({
           ...fcmTokenData,

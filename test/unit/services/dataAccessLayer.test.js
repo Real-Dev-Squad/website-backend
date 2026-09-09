@@ -1,5 +1,4 @@
-const chai = require("chai");
-const chaiHttp = require("chai-http");
+const { expect } = require("chai");
 
 const userQuery = require("../../../models/users");
 const members = require("../../../models/members");
@@ -19,8 +18,6 @@ const { KEYS_NOT_ALLOWED, ACCESS_LEVEL } = require("../../../constants/userDataL
 
 const userData = require("../../fixtures/user/user")();
 
-chai.use(chaiHttp);
-const expect = chai.expect;
 let fetchUserStub;
 
 describe("Data Access Layer", function () {

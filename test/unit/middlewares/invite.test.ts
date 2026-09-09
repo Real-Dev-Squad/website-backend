@@ -1,6 +1,5 @@
-import chai from "chai";
+import { expect } from "chai";
 import sinon from "sinon";
-const { expect } = chai;
 
 const { createInviteValidator } = require("./../../../middlewares/validators/invites");
 import { InviteBodyData, inviteData } from "./../../fixtures/invites/invitesData";

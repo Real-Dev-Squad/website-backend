@@ -56,7 +56,9 @@ const createAnswer = async (req: Request, res: CustomResponse) => {
 };
 
 const updateAnswer = async (req: CustomRequest, res: CustomResponse) => {
-  const id: string = req.params.answerId;
+  // Express 5 types route params as string | string[]; this route defines a
+  // single :answerId segment, so it is always a plain string at runtime.
+  const id: string = req.params.answerId as string;
   const status: AnswerStatus = req.body.status;
 
   try {

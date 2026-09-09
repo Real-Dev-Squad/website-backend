@@ -6,11 +6,11 @@ async function purgeCache(files) {
     CLOUDFLARE_PURGE_CACHE_API,
     "POST",
     null,
-    { files: files },
+    { files },
     {
       "X-Auth-Key": config.get("cloudflare.CLOUDFLARE_X_AUTH_KEY"),
       "X-Auth-Email": config.get("cloudflare.CLOUDFLARE_X_AUTH_EMAIL"),
-    }
+    },
   );
 
   return response;

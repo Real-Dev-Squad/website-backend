@@ -1,16 +1,14 @@
-const chai = require("chai");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 const sinon = require("sinon");
 const app = require("../../server");
 const cookieName = config.get("userToken.cookieName");
 const { subscribedMessage, unSubscribedMessage, subscriptionData } = require("../fixtures/subscription/subscription");
 const addUser = require("../utils/addUser");
 const authService = require("../../services/authService");
-const chaiHttp = require("chai-http");
-chai.use(chaiHttp);
 const nodemailer = require("nodemailer");
 const nodemailerMock = require("nodemailer-mock");
 const userData = require("../fixtures/user/user")();
-const { expect } = chai;
 let userId = "";
 const superUser = userData[4];
 let superUserAuthToken = "";
@@ -23,8 +21,8 @@ describe("/subscription email notifications", function () {
   });
 
   it("Should return 401 if the user is not logged in", function (done) {
-    chai
-      .request(app)
+    request
+      .execute(app)
       .post("/subscription?dev=true")
       .end((err, res) => {
         if (err) {
@@ -38,8 +36,8 @@ describe("/subscription email notifications", function () {
   });
 
   it("should add user's data and make them subscribe to us.", function (done) {
-    chai
-      .request(app)
+    request
+      .execute(app)
       .post(`/subscription?dev=true`)
       .set("cookie", `${cookieName}=${jwt}`)
       .send(subscriptionData)
@@ -54,8 +52,8 @@ describe("/subscription email notifications", function () {
   });
 
   it("should unsubscribe the user", function (done) {
-    chai
-      .request(app)
+    request
+      .execute(app)
       .patch(`/subscription?dev=true`)
       .set("cookie", `${cookieName}=${jwt}`)
       .end((err, res) => {
@@ -81,8 +79,8 @@ describe("/subscription email notifications", function () {
     });
 
     it("Should return 401 if the super user is not logged in", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/subscription/notify?dev=true")
         .end((err, res) => {
           if (err) {
@@ -100,8 +98,8 @@ describe("/subscription email notifications", function () {
         throw new Error("Transport error");
       });
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/subscription/notify?dev=true")
         .set("Cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {

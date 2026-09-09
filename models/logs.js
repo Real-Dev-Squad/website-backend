@@ -1,7 +1,7 @@
 const firestore = require("../utils/firestore");
 const { getBeforeHourTime } = require("../utils/time");
 const logsModel = firestore.collection("logs");
-const admin = require("firebase-admin");
+const { Timestamp } = require("firebase-admin/firestore");
 const { logType, ERROR_WHILE_FETCHING_LOGS } = require("../constants/logs");
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 const { getFullName, getUserId } = require("../utils/users");
@@ -25,7 +25,7 @@ const addLog = async (type, meta, body) => {
   try {
     const log = {
       type,
-      timestamp: admin.firestore.Timestamp.fromDate(new Date()),
+      timestamp: Timestamp.fromDate(new Date()),
       meta,
       body,
     };
@@ -46,7 +46,6 @@ const fetchLogs = async (query, param) => {
   try {
     let call = logsModel.where("type", "==", param);
     Object.keys(query).forEach((key) => {
-      // eslint-disable-next-line security/detect-object-injection
       if (key !== "limit" && key !== "lastDocId") {
         // eslint-disable-next-line security/detect-object-injection
         call = call.where(key, "==", query[key]);
@@ -117,7 +116,7 @@ const fetchCacheLogs = async (id) => {
   try {
     const logsSnapshot = await logsModel
       .where("type", "==", logType.CLOUDFLARE_CACHE_PURGED)
-      .where("timestamp", ">=", getBeforeHourTime(admin.firestore.Timestamp.fromDate(new Date()), 24))
+      .where("timestamp", ">=", getBeforeHourTime(Timestamp.fromDate(new Date()), 24))
       .where("meta.userId", "==", id)
       .get();
 
@@ -194,11 +193,11 @@ const fetchAllLogs = async (query) => {
       }
 
       if (startDate) {
-        requestQuery = requestQuery.where("timestamp", ">=", admin.firestore.Timestamp.fromMillis(startDate));
+        requestQuery = requestQuery.where("timestamp", ">=", Timestamp.fromMillis(startDate));
       }
 
       if (endDate) {
-        requestQuery = requestQuery.where("timestamp", "<=", admin.firestore.Timestamp.fromMillis(endDate));
+        requestQuery = requestQuery.where("timestamp", "<=", Timestamp.fromMillis(endDate));
       }
     }
 

@@ -1,5 +1,4 @@
-import chai from "chai";
-const { expect } = chai;
+import { expect } from "chai";
 const cleanDb = require("../../utils/cleanDb");
 const applicationsData = require("../../fixtures/applications/applications")();
 const ApplicationModel = require("../../../models/applications");

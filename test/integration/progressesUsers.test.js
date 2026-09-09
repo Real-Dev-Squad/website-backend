@@ -1,4 +1,5 @@
-const chai = require("chai");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 const sinon = require("sinon");
 
 const firestore = require("../../utils/firestore");
@@ -17,7 +18,6 @@ const userData = require("../fixtures/user/user")();
 const withDiscordMembership = require("../utils/withDiscordMembership");
 const { INTERNAL_SERVER_ERROR_MESSAGE, UNAUTHORIZED_WRITE } = require("../../constants/progresses");
 const cookieName = config.get("userToken.cookieName");
-const { expect } = chai;
 
 describe("Test Progress Updates API for Users", function () {
   afterEach(async function () {
@@ -39,7 +39,7 @@ describe("Test Progress Updates API for Users", function () {
         toFake: ["Date"],
       });
       userId = await addUser(withDiscordMembership(userData[1]));
-      userToken = authService.generateAuthToken({ userId: userId });
+      userToken = authService.generateAuthToken({ userId });
       anotherUserId = await addUser(withDiscordMembership(userData[8]));
       anotherUserToken = authService.generateAuthToken({ userId: anotherUserId });
       const progressData = stubbedModelProgressData(anotherUserId, 1682935200000, 1682899200000);
@@ -56,10 +56,10 @@ describe("Test Progress Updates API for Users", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({}),
-        })
+        }),
       );
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post(`/progresses`)
         .set("cookie", `${cookieName}=${userToken}`)
         .send(standupProgressDay1)
@@ -85,8 +85,8 @@ describe("Test Progress Updates API for Users", function () {
 
     it("stores the user progress document for the previous day if the update is sent before 6am IST", function (done) {
       clock.setSystemTime(new Date(Date.UTC(2023, 4, 2, 0, 29)).getTime()); // 2nd May 2023 05:59 am IST
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post(`/progresses`)
         .set("cookie", `${cookieName}=${userToken}`)
         .send(standupProgressDay1)
@@ -100,8 +100,8 @@ describe("Test Progress Updates API for Users", function () {
 
     it("stores the user progress document for the current day if the update is sent after 6am IST", function (done) {
       clock.setSystemTime(new Date(Date.UTC(2023, 4, 2, 0, 31)).getTime()); // 2nd May 2023 06:01 am IST
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post(`/progresses`)
         .set("cookie", `${cookieName}=${userToken}`)
         .send(standupProgressDay1)
@@ -114,8 +114,8 @@ describe("Test Progress Updates API for Users", function () {
     });
 
     it("throws Conflict Error 409 if the user tries to update progress multiple times in a single day", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post(`/progresses`)
         .set("cookie", `${cookieName}=${anotherUserToken}`)
         .send(standupProgressDay1)
@@ -130,8 +130,8 @@ describe("Test Progress Updates API for Users", function () {
 
     it("Gives Bad Request 400 for invalid request body", function (done) {
       const requests = incompleteProgress.map((progress) => {
-        return chai
-          .request(app)
+        return request
+          .execute(app)
           .post(`/progresses`)
           .set("Cookie", `${cookieName}=${anotherUserToken}`)
           .send(progress.payload)
@@ -147,8 +147,8 @@ describe("Test Progress Updates API for Users", function () {
     });
 
     it("Gives Unauthenticated Error 401 for unauthenticated user", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post(`/progresses`)
         .send(standupProgressDay1)
         .end((err, res) => {
@@ -169,8 +169,8 @@ describe("Test Progress Updates API for Users", function () {
       const nonDiscordUserId = await addUser(nonDiscordFixture);
       const nonDiscordToken = authService.generateAuthToken({ userId: nonDiscordUserId });
 
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post("/progresses")
         .set("Cookie", `${cookieName}=${nonDiscordToken}`)
         .send(standupProgressDay1);
@@ -196,8 +196,8 @@ describe("Test Progress Updates API for Users", function () {
     });
 
     it("Returns the progress array for a specific user", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses?userId=${userId1}`)
         .end((err, res) => {
           if (err) return done(err);
@@ -223,8 +223,8 @@ describe("Test Progress Updates API for Users", function () {
     });
 
     it("Returns the progress array for all the user", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses?type=user`)
         .end((err, res) => {
           if (err) return done(err);
@@ -250,8 +250,8 @@ describe("Test Progress Updates API for Users", function () {
     });
 
     it("Returns 400 for bad request", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses`)
         .end((err, res) => {
           if (err) return done(err);
@@ -262,8 +262,8 @@ describe("Test Progress Updates API for Users", function () {
     });
 
     it("Returns 404 for invalid user id", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses?userId=invalidUserId`)
         .end((err, res) => {
           if (err) return done(err);
@@ -274,8 +274,8 @@ describe("Test Progress Updates API for Users", function () {
     });
 
     it("Returns 404 if the progress document doesn't exist for the users", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses?userId=${userId3}`)
         .end((err, res) => {
           if (err) return done(err);
@@ -300,8 +300,8 @@ describe("Test Progress Updates API for Users", function () {
     });
 
     it("Verifies the progress records for a user within the specified date range.", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses/range?userId=${userId}&startDate=2023-05-09&endDate=2023-05-12`)
         .end((err, res) => {
           if (err) return done(err);
@@ -322,8 +322,8 @@ describe("Test Progress Updates API for Users", function () {
     });
 
     it("Returns 400 for bad request", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses/range?userId=${userId}`)
         .end((err, res) => {
           if (err) return done(err);
@@ -334,8 +334,8 @@ describe("Test Progress Updates API for Users", function () {
     });
 
     it("Returns 404 for invalid user id", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses/range?userId=invalidUserId&startDate=2023-05-09&endDate=2023-05-12`)
         .end((err, res) => {
           if (err) return done(err);
@@ -346,8 +346,8 @@ describe("Test Progress Updates API for Users", function () {
     });
 
     it("Returns 404 if the progress document doesn't exist", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses/range?userId=${userId2}&startDate=2023-05-09&endDate=2023-05-12`)
         .end((err, res) => {
           if (err) return done(err);
@@ -370,8 +370,8 @@ describe("Test Progress Updates API for Users", function () {
     });
 
     it("Returns the progress data for a specific user", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses/user/${userId}/date/2023-05-02`)
         .end((err, res) => {
           if (err) return done(err);
@@ -394,8 +394,8 @@ describe("Test Progress Updates API for Users", function () {
     });
 
     it("Should return 404 No progress records found if the document doesn't exist", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses/user/${userId}/date/2023-05-03`)
         .end((err, res) => {
           if (err) return done(err);
@@ -408,8 +408,8 @@ describe("Test Progress Updates API for Users", function () {
     });
 
     it("Returns 400 for bad request", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses/user/${userId}/date/2023-05-33`)
         .end((err, res) => {
           if (err) return done(err);
@@ -420,8 +420,8 @@ describe("Test Progress Updates API for Users", function () {
     });
 
     it("Returns 404 for invalid user id", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses/user/invalidUserId/date/2023-05-02`)
         .end((err, res) => {
           if (err) return done(err);
@@ -432,8 +432,8 @@ describe("Test Progress Updates API for Users", function () {
     });
 
     it("Returns 404 if the progress document doesn't exist for the user", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses/user/${anotherUserId}/date/2023-05-02`)
         .end((err, res) => {
           if (err) return done(err);
@@ -459,8 +459,8 @@ describe("Test Progress Updates API for Users", function () {
     });
 
     it("should return paginated results when dev=true is passed", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses?type=user&dev=true&page=0&size=1`)
         .end((err, res) => {
           if (err) return done(err);
@@ -492,8 +492,8 @@ describe("Test Progress Updates API for Users", function () {
       const size = 1;
       const page = 1;
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses?type=user&dev=true&page=${page}&size=${size}`)
         .end((err, res) => {
           if (err) return done(err);
@@ -509,8 +509,8 @@ describe("Test Progress Updates API for Users", function () {
     });
 
     it("should return a bad request error for invalid size parameter", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses?type=user&dev=true&page=0&size=104`)
         .end((_err, res) => {
           expect(res).to.have.status(400);
@@ -524,8 +524,8 @@ describe("Test Progress Updates API for Users", function () {
       const size = 10;
       const page = 100;
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses?type=user&dev=true&page=${page}&size=${size}`)
         .end((err, res) => {
           if (err) return done(err);
@@ -545,8 +545,8 @@ describe("Test Progress Updates API for Users", function () {
     it("Should return 500 Internal Server Error if there is an exception", function (done) {
       sinon.stub(progressesModel, "getPaginatedProgressDocument").throws(new Error("Database error"));
 
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/progresses?type=user&dev=true&page=0&size=1`)
         .end((err, res) => {
           if (err) return done(err);

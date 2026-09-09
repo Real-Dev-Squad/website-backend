@@ -1,6 +1,6 @@
 import firestore from "../utils/firestore";
 const logsModel = firestore.collection("logs");
-import admin from "firebase-admin";
+import { Timestamp } from "firebase-admin/firestore";
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 interface LogMeta {
@@ -27,7 +27,7 @@ export const addLog = async (
   try {
     const log = {
       type,
-      timestamp: admin.firestore.Timestamp.fromDate(new Date()),
+      timestamp: Timestamp.fromDate(new Date()),
       meta,
       body,
     };

@@ -1,5 +1,5 @@
-const sinon = require("sinon");
 const { expect } = require("chai");
+const sinon = require("sinon");
 const { cacheResponse, invalidateCache } = require("../../../utils/cache");
 
 const { dummyResponse } = require("../../fixtures/cache/cache");

@@ -1,8 +1,7 @@
-import { userFutureStatusData } from "../../fixtures/userFutureStatus/userFutureStatusData";
-const chai = require("chai");
+const { userFutureStatusData } = require("../../fixtures/userFutureStatus/userFutureStatusData");
+const { expect } = require("chai");
 const sinon = require("sinon");
 const { NotFound, Forbidden } = require("http-errors");
-const { expect } = chai;
 const firestore = require("../../../utils/firestore");
 const userStatusModel = firestore.collection("usersStatus");
 const tasksModel = firestore.collection("tasks");

@@ -2,7 +2,7 @@ import { TaskRequestType } from "../typeDefinitions/task-requests";
 import { User } from "../typeDefinitions/users";
 
 import usersService from "../services/dataAccessLayer";
-import admin from "firebase-admin";
+import { FieldPath } from "firebase-admin/firestore";
 
 const generateLink = (queries: { [key: string]: string }): string => {
   const urlSearchParams = new URLSearchParams();
@@ -35,7 +35,7 @@ const transformTaskRequests = async (taskRequestsList: TaskRequestType[]) => {
   });
 
   const userList = await usersService.fetchUsersForKeyValues(
-    admin.firestore.FieldPath.documentId(),
+    FieldPath.documentId(),
     Array.from(userIdSet)
   );
 

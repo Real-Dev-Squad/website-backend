@@ -1,7 +1,7 @@
+import { assert } from "chai";
 import sinon from "sinon";
 import { skipAuthenticateForOnboardingExtensionRequest } from "../../../middlewares/skipAuthenticateForOnboardingExtension";
 import { REQUEST_TYPE } from "../../../constants/requests";
-import { assert } from "chai";
 
 describe("skipAuthenticateForOnboardingExtensionRequest Middleware", () => {
     let req, res, next, authenticate: sinon.SinonSpy, verifyDiscordBot: sinon.SinonSpy;

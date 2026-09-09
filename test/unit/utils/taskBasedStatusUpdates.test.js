@@ -1,7 +1,6 @@
-const chai = require("chai");
+const { expect } = require("chai");
 const sinon = require("sinon");
 const { NotFound } = require("http-errors");
-const { expect } = chai;
 const { userState } = require("../../../constants/userStatus");
 const {
   generateAlreadyExistingStatusResponse,

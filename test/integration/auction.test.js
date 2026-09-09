@@ -1,6 +1,5 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 
 const app = require("../../server");
 const authService = require("../../services/authService");
@@ -20,8 +19,6 @@ const currenciesData = currencyDataArray.default;
 const config = require("config");
 const cookieName = config.get("userToken.cookieName");
 
-chai.use(chaiHttp);
-
 describe("Auctions", function () {
   let jwt;
   let auctionId;
@@ -39,8 +36,8 @@ describe("Auctions", function () {
 
   describe("GET /auctions", function () {
     it("Should return the ongoing auctions", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/auctions")
         .end((err, res) => {
           if (err) {
@@ -60,8 +57,8 @@ describe("Auctions", function () {
 
   describe("GET /auctions/:id", function () {
     it("Should return the ongoing auctions for given Id", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/auctions/${auctionId}`)
         .end((err, res) => {
           if (err) {
@@ -88,8 +85,8 @@ describe("Auctions", function () {
     });
 
     it("Should return 404, for Auction not found", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/auctions/invalidId")
         .end((err, res) => {
           if (err) {
@@ -107,8 +104,8 @@ describe("Auctions", function () {
 
   describe("POST /auctions", function () {
     it("Should create a new auction", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/auctions")
         .set("cookie", `${cookieName}=${jwt}`)
         .send(auctionData)
@@ -126,8 +123,8 @@ describe("Auctions", function () {
     });
 
     it("User should have enough items in wallet to sell", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/auctions")
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ ...auctionData, quantity: 5 })
@@ -145,8 +142,8 @@ describe("Auctions", function () {
     });
 
     it("Should return 401, for Unauthenticated User", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/auctions")
         .end((err, res) => {
           if (err) {
@@ -168,8 +165,8 @@ describe("Auctions", function () {
 
   describe("POST /auctions/bid/:id", function () {
     it("Should make a new bid with given auctionId", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post(`/auctions/bid/${auctionId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ bid: 500 })
@@ -187,8 +184,8 @@ describe("Auctions", function () {
     });
 
     it("User should have sufficient balance for bidding", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post(`/auctions/bid/${auctionId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ bid: 1001 })
@@ -207,8 +204,8 @@ describe("Auctions", function () {
     });
 
     it("Bid Should be higher than the previous bid", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post(`/auctions/bid/${auctionId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ bid: 50 })
@@ -226,8 +223,8 @@ describe("Auctions", function () {
     });
 
     it("Should return 401, for Unauthenticated User", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/auctions/bid/invalidId")
         .end((err, res) => {
           if (err) {

@@ -1,6 +1,5 @@
-import chai from "chai";
+import { expect } from "chai";
 import { formatUsername } from "../../../utils/username";
-const { expect } = chai;
 const { MAX_USERNAME_LENGTH } = require("../../../constants/users");
 
 describe("formatUsername", function () {

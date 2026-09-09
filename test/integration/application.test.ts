@@ -1,6 +1,5 @@
-import chai from "chai";
-import chaiHttp from "chai-http";
-const { expect } = chai;
+import { expect } from "chai";
+import { request } from "chai-http";
 import config from "config";
 import sinon from "sinon";
 const app = require("../../server");
@@ -20,7 +19,6 @@ const appOwner = userData[3];
 const superUser = userData[4];
 const secondUser = userData[0];
 
-chai.use(chaiHttp);
 
 let userId: string;
 let superUserId: string;
@@ -72,8 +70,7 @@ describe("Application", function () {
 
   describe("GET /applications", function () {
     it("should return all the application if the user is super user and there is no user id, and next url if the size provided is equal to the applications returned in query", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .get("/applications?size=5")
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
@@ -94,8 +91,7 @@ describe("Application", function () {
     });
 
     it("should return all the application if the user is super user and there is no user id, and next url should be null if the size provided is not equal to the applications returned in query", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .get("/applications?size=25")
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
@@ -114,8 +110,7 @@ describe("Application", function () {
     });
 
     it("should return application of the user if the user is super user and user id is there in query params", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .get(`/applications?userId=${userId}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
@@ -134,8 +129,7 @@ describe("Application", function () {
     });
 
     it("should return 403 in case the user is not super user and there is no userId in query", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .get(`/applications`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -151,8 +145,7 @@ describe("Application", function () {
     });
 
     it("should return the applications of user if the userId of user is same as userId in the application object", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .get(`/applications?userId=${userId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -171,8 +164,7 @@ describe("Application", function () {
     });
 
     it("should return 403 if the userId of user is not same as userId in the application object and user is not super user", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .get(`/applications?userId=${superUserId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -189,8 +181,7 @@ describe("Application", function () {
     });
 
     it("should return application with status rejected if status rejected is passed in query params and next url if the size provided is equal to the applications returned in query ", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .get("/applications?status=rejected&size=2")
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
@@ -212,8 +203,7 @@ describe("Application", function () {
     });
 
     it("should return application with status accepted if status accepted is passed in query params", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .get("/applications?status=accepted")
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
@@ -232,8 +222,7 @@ describe("Application", function () {
     });
 
     it("should return application with status pending if status pending is passed in query params ", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .get("/applications?status=pending")
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
@@ -252,8 +241,7 @@ describe("Application", function () {
     });
 
     it("should return application with status rejected and the total count of the rejected applications if  dev = true ", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .get("/applications?status=rejected&size=2&dev=true")
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
@@ -275,8 +263,7 @@ describe("Application", function () {
     });
 
     it("should return application with status accepted and the total count of the accepted applications if  dev = true ", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .get("/applications?status=accepted&dev=true")
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
@@ -295,8 +282,7 @@ describe("Application", function () {
     });
 
     it("should return application with status pending and the total count of the pending applications if  dev = true ", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .get("/applications?status=pending&dev=true")
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
@@ -315,8 +301,7 @@ describe("Application", function () {
     });
 
     it("should return application with status rejected if status rejected is passed in query params and next url should be null if the size provided is not equal to the applications returned in query ", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .get("/applications?status=rejected&size=5")
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
@@ -337,8 +322,7 @@ describe("Application", function () {
 
   describe("POST /applications", function () {
     it("should create a application and return 201 if the user has not yet submitted the application", async function () {
-      const res = await chai
-        .request(app)
+      const res = await request.execute(app)
         .post(`/applications`)
         .set("cookie", `${cookieName}=${secondUserJwt}`)
         .send({
@@ -350,8 +334,7 @@ describe("Application", function () {
       expect(res.body.message).to.be.equal("Application created successfully");
       expect(res.body).to.have.property("applicationId");
 
-      const getRes = await chai
-        .request(app)
+      const getRes = await request.execute(app)
         .get(`/applications/${res.body.applicationId}`)
         .set("cookie", `${cookieName}=${superUserJwt}`);
 
@@ -362,8 +345,7 @@ describe("Application", function () {
 
   describe("PATCH /applications/:applicationId", function () {
     it("should return 200 and update application when owner sends valid payload", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/${applicationId1}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ introduction: "Updated introduction text" })
@@ -379,8 +361,7 @@ describe("Application", function () {
     });
 
     it("should return 400 when request body is empty", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/${applicationId1}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({})
@@ -397,8 +378,7 @@ describe("Application", function () {
     });
 
     it("should return 400 when request body contains disallowed field", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/${applicationId1}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ batman: true })
@@ -414,8 +394,7 @@ describe("Application", function () {
     });
 
     it("should return 400 when imageUrl is not a valid URI", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/${applicationId1}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ imageUrl: "not-a-valid-uri" })
@@ -431,8 +410,7 @@ describe("Application", function () {
     });
 
     it("should return 404 when application does not exist", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/non-existent-application-id`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ introduction: "Updated" })
@@ -449,8 +427,7 @@ describe("Application", function () {
     });
 
     it("should return 401 when user is not authenticated", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/${applicationId1}`)
         .send({ introduction: "Updated" })
         .end((err, res) => {
@@ -466,8 +443,7 @@ describe("Application", function () {
     });
 
     it("should return 401 when user does not own the application", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/${applicationId1}`)
         .set("cookie", `${cookieName}=${secondUserJwt}`)
         .send({ introduction: "Updated" })
@@ -487,16 +463,14 @@ describe("Application", function () {
       const applicationForEditTest = { ...applicationsData[0], userId };
       const editTestApplicationId = await applicationModel.addApplication(applicationForEditTest);
 
-      const firstRes = await chai
-        .request(app)
+      const firstRes = await request.execute(app)
         .patch(`/applications/${editTestApplicationId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ introduction: "First edit" });
 
       expect(firstRes).to.have.status(200);
 
-      const secondRes = await chai
-        .request(app)
+      const secondRes = await request.execute(app)
         .patch(`/applications/${editTestApplicationId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ foundFrom: "Second edit" });
@@ -510,8 +484,7 @@ describe("Application", function () {
       const applicationData = { ...applicationsData[0], userId };
       const testApplicationId = await applicationModel.addApplication(applicationData);
 
-      const res = await chai
-        .request(app)
+      const res = await request.execute(app)
         .patch(`/applications/${testApplicationId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ city: "New Delhi", state: "Delhi", country: "India" });
@@ -524,8 +497,7 @@ describe("Application", function () {
       const applicationData = { ...applicationsData[0], userId };
       const testApplicationId = await applicationModel.addApplication(applicationData);
 
-      const res = await chai
-        .request(app)
+      const res = await request.execute(app)
         .patch(`/applications/${testApplicationId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ role: "designer" });
@@ -538,8 +510,7 @@ describe("Application", function () {
       const applicationData = { ...applicationsData[0], userId };
       const testApplicationId = await applicationModel.addApplication(applicationData);
 
-      const res = await chai
-        .request(app)
+      const res = await request.execute(app)
         .patch(`/applications/${testApplicationId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ role: "invalid_role" });
@@ -551,8 +522,7 @@ describe("Application", function () {
 
   describe("PATCH /applications/:applicationId/feedback", function () {
     it("should return 200 if the user is super user and application feedback is submitted", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/${applicationId1}/feedback`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
@@ -570,8 +540,7 @@ describe("Application", function () {
     });
 
     it("should return 400 if anything other than status and feedback is passed in the body", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/${applicationId1}/feedback`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
@@ -591,8 +560,7 @@ describe("Application", function () {
     });
 
     it("should return 400 if any status other than accepted, rejected or changes_requested is passed", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/${applicationId1}/feedback`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
@@ -611,8 +579,7 @@ describe("Application", function () {
     });
 
     it("should return 200 when submitting feedback with status rejected", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/${applicationId2}/feedback`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
@@ -630,8 +597,7 @@ describe("Application", function () {
     });
 
     it("should return 200 when submitting feedback with status changes_requested and feedback text", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/${applicationId3}/feedback`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
@@ -650,8 +616,7 @@ describe("Application", function () {
     });
 
     it("should return 400 when status is changes_requested without feedback", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/${applicationId1}/feedback`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
@@ -670,8 +635,7 @@ describe("Application", function () {
     });
 
     it("should return 200 when submitting feedback with status accepted and optional feedback text", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/${applicationId4}/feedback`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
@@ -690,8 +654,7 @@ describe("Application", function () {
     });
 
     it("should return 200 when submitting feedback with status rejected and optional feedback text", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/${applicationId5}/feedback`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
@@ -710,8 +673,7 @@ describe("Application", function () {
     });
 
     it("should return 200 when submitting feedback with status accepted and empty feedback string", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/${applicationId2}/feedback`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
@@ -730,8 +692,7 @@ describe("Application", function () {
     });
 
     it("should return 404 when application does not exist", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/non-existent-application-id/feedback`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
@@ -750,8 +711,7 @@ describe("Application", function () {
     });
 
     it("should return 401 when user is not authenticated", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/${applicationId1}/feedback`)
         .send({
           status: "accepted",
@@ -769,8 +729,7 @@ describe("Application", function () {
     });
 
     it("should return 401 if user is not a super user", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/${applicationId1}/feedback`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -791,8 +750,7 @@ describe("Application", function () {
 
   describe("GET /application/:applicationId", function () {
     it("should return Unauthorized if user is not a super user", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .get(`/applications/${applicationId1}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -808,8 +766,7 @@ describe("Application", function () {
     });
 
     it("should return a particular application if it is present in the db and the user is super user ", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .get(`/applications/${applicationId1}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
@@ -825,8 +782,7 @@ describe("Application", function () {
     });
 
     it("should return 404 if the application doesn't exist", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .get(`/applications/faskdfsdjfjk`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
@@ -855,8 +811,7 @@ describe("Application", function () {
     });
 
     it("should successfully nudge a pending application when user owns it and no previous nudge exists", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/${nudgeApplicationId}/nudge`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end(function (err, res) {
@@ -872,8 +827,7 @@ describe("Application", function () {
     });
 
     it("should successfully nudge an application when 24 hours have passed since last nudge", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/${nudgeApplicationId}/nudge`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end(function (err, res) {
@@ -893,8 +847,7 @@ describe("Application", function () {
               {}
             )
             .then(() => {
-              chai
-                .request(app)
+              request.execute(app)
                 .patch(`/applications/${nudgeApplicationId}/nudge`)
                 .set("cookie", `${cookieName}=${jwt}`)
                 .end(function (err, res) {
@@ -912,8 +865,7 @@ describe("Application", function () {
     });
 
     it("should return 404 if the application doesn't exist", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/non-existent-id/nudge`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end(function (err, res) {
@@ -927,8 +879,7 @@ describe("Application", function () {
     });
 
     it("should return 401 if user is not authenticated", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/${nudgeApplicationId}/nudge`)
         .end(function (err, res) {
           if (err) return done(err);
@@ -941,8 +892,7 @@ describe("Application", function () {
     });
 
     it("should return 401 if user does not own the application", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/${nudgeApplicationId}/nudge`)
         .set("cookie", `${cookieName}=${secondUserJwt}`)
         .end(function (err, res) {
@@ -956,8 +906,7 @@ describe("Application", function () {
     });
 
     it("should return 429 when trying to nudge within 24 hours", function (done) {
-      chai
-        .request(app)
+      request.execute(app)
         .patch(`/applications/${nudgeApplicationId}/nudge`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end(function (err, res) {
@@ -965,8 +914,7 @@ describe("Application", function () {
 
           expect(res).to.have.status(200);
 
-          chai
-            .request(app)
+          request.execute(app)
             .patch(`/applications/${nudgeApplicationId}/nudge`)
             .set("cookie", `${cookieName}=${jwt}`)
             .end(function (err, res) {
@@ -983,8 +931,7 @@ describe("Application", function () {
     it("should return 400 when trying to nudge an application that is not in pending status", function (done) {
       const nonPendingApplicationData = { ...applicationsData[1], userId };
       applicationModel.addApplication(nonPendingApplicationData).then((nonPendingApplicationId: string) => {
-        chai
-          .request(app)
+        request.execute(app)
           .patch(`/applications/${nonPendingApplicationId}/nudge`)
           .set("cookie", `${cookieName}=${jwt}`)
           .end(function (err, res) {
@@ -1003,8 +950,7 @@ describe("Application", function () {
     it("should return 201 when uploading with type=application and valid file", function (done) {
       const mockImageResponse = { publicId: "profile/test-id/image", url: "https://res.cloudinary.com/example/image.png" };
       const uploadStub = sinon.stub(imageService, "uploadProfilePicture").resolves(mockImageResponse);
-      chai
-        .request(app)
+      request.execute(app)
         .post("/users/picture")
         .type("form")
         .set("cookie", `${cookieName}=${jwt}`)
@@ -1022,8 +968,7 @@ describe("Application", function () {
 
     it("should return 500 when upload fails", function (done) {
       const uploadStub = sinon.stub(imageService, "uploadProfilePicture").rejects(new Error("Upload failed"));
-      chai
-        .request(app)
+      request.execute(app)
         .post("/users/picture")
         .type("form")
         .set("cookie", `${cookieName}=${jwt}`)

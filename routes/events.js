@@ -13,7 +13,7 @@ router.post(
   authenticate,
   authorizeRoles([SUPERUSER, MEMBER]),
   eventsValidator.joinEvent,
-  events.joinEvent
+  events.joinEvent,
 );
 router.post("/join", eventsValidator.joinEvent, events.joinEvent);
 router.get("/:id", eventsValidator.getEventById, events.getEventById);
@@ -23,7 +23,7 @@ router.patch(
   authenticate,
   authorizeRoles([SUPERUSER, MEMBER]),
   eventsValidator.endActiveEvent,
-  events.endActiveEvent
+  events.endActiveEvent,
 );
 router.post("/:id/peers", eventsValidator.addPeerToEvent, events.addPeerToEvent);
 router.patch(
@@ -31,20 +31,20 @@ router.patch(
   authenticate,
   authorizeRoles([SUPERUSER, MEMBER]),
   eventsValidator.kickoutPeer,
-  events.kickoutPeer
+  events.kickoutPeer,
 );
 router.post(
   "/:id/codes",
   authenticate,
   authorizeRoles([SUPERUSER]),
   eventsValidator.generateEventCode,
-  events.generateEventCode
+  events.generateEventCode,
 );
 router.get(
   "/:id/codes",
   authenticate,
   authorizeRoles([SUPERUSER]),
   eventsValidator.getEventCodes,
-  events.getEventCodes
+  events.getEventCodes,
 );
 module.exports = router;

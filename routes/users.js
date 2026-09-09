@@ -25,20 +25,20 @@ router.post(
   authenticate,
   authorizeRoles([SUPERUSER]),
   invalidateCache({ invalidationKeys: [ALL_USERS] }),
-  users.setInDiscordScript
+  users.setInDiscordScript,
 );
 router.post("/verify", authenticate, invalidateCache({ invalidationKeys: [ALL_USERS] }), users.verifyUser);
 router.get(
   "/userId/:userId",
   cacheResponse({ invalidationKey: ALL_USERS, expiry: CACHE_TTL_24H_MIN }),
-  users.getUserById
+  users.getUserById,
 );
 router.patch(
   "/self",
   authenticate,
   invalidateCache({ invalidationKeys: [ALL_USERS] }),
   userValidator.updateUser,
-  users.updateSelf
+  users.updateSelf,
 ); // this route is being deprecated soon, please use alternate available `/users/:userId?profile=true` PATCH endpoint.
 router.get("/", authenticateProfile(authenticate), userValidator.getUsers, users.getUsers);
 router.get("/self", authenticate, users.getSelfDetails);
@@ -53,7 +53,7 @@ router.get(
   authenticate,
   authorizeRoles([SUPERUSER]),
   userValidator.validateUserQueryParams,
-  users.filterUsers
+  users.filterUsers,
 );
 router.get("/identity-stats", authenticate, authorizeRoles([SUPERUSER]), users.getIdentityStats);
 router.patch(
@@ -61,7 +61,7 @@ router.patch(
   authenticate,
   authorizeRoles([SUPERUSER]),
   checkIsVerifiedDiscord,
-  users.updateDiscordUserNickname
+  users.updateDiscordUserNickname,
 );
 router.get("/:username", cacheResponse({ invalidationKey: ALL_USERS, expiry: CACHE_TTL_24H_MIN }), users.getUser);
 router.get("/:userId/intro", authenticate, authorizeRoles([SUPERUSER]), users.getUserIntro);
@@ -70,7 +70,7 @@ router.put(
   authenticate,
   invalidateCache({ invalidationKeys: [ALL_USERS] }),
   userValidator.validateJoinData,
-  users.addUserIntro
+  users.addUserIntro,
 ); // This route is being deprecated soon, please use alternate available route `/users/:userId/intro`.
 router.put(
   "/:userId/intro",
@@ -79,7 +79,7 @@ router.put(
   invalidateCache({ invalidationKeys: [ALL_USERS] }),
   userValidator.validateJoinData,
   userAuthorization,
-  users.addUserIntro
+  users.addUserIntro,
 );
 router.get("/:id/skills", users.getUserSkills);
 router.get("/:id/badges", getUserBadges);
@@ -89,7 +89,7 @@ router.patch(
   authorizeRoles([SUPERUSER]),
   invalidateCache({ invalidationKeys: [ALL_USERS] }),
   userValidator.validateUsersPatchHandler,
-  users.usersPatchHandler
+  users.usersPatchHandler,
 );
 router.patch(
   "/:id/temporary/data",
@@ -97,7 +97,7 @@ router.patch(
   authorizeRoles([SUPERUSER]),
   invalidateCache({ invalidationKeys: [ALL_USERS] }),
   userValidator.validateUpdateRoles,
-  users.updateRoles
+  users.updateRoles,
 );
 
 // upload.single('profile') -> multer inmemory storage of file for type multipart/form-data
@@ -107,14 +107,14 @@ router.post(
   invalidateCache({ invalidationKeys: [ALL_USERS] }),
   upload.single("profile"),
   skipWhenApplicationType(checkIsVerifiedDiscord),
-  users.handleUserPictureUpload
+  users.handleUserPictureUpload,
 );
 router.patch(
   "/picture/verify/:id",
   authenticate,
   authorizeRoles([SUPERUSER]),
   userValidator.validateImageVerificationQuery,
-  users.verifyUserImage
+  users.verifyUserImage,
 );
 router.get("/picture/:id", authenticate, authorizeRoles([SUPERUSER]), users.getUserImageForVerification);
 router.patch(
@@ -122,7 +122,7 @@ router.patch(
   authenticate,
   invalidateCache({ invalidationKeys: [ALL_USERS] }),
   userValidator.updateProfileURL,
-  users.profileURL
+  users.profileURL,
 );
 router.patch("/rejectDiff", authenticate, authorizeRoles([SUPERUSER]), users.rejectProfileDiff);
 router.patch(
@@ -130,7 +130,7 @@ router.patch(
   authenticate,
   invalidateCache({ invalidationKeys: [ALL_USERS] }),
   conditionalMiddleware(userValidator.updateUser),
-  users.updateProfile
+  users.updateProfile,
 );
 router.get("/suggestedUsers/:skillId", authenticate, authorizeRoles([SUPERUSER]), users.getSuggestedUsers);
 router.post(
@@ -138,7 +138,7 @@ router.post(
   authenticate,
   authorizeRoles([SUPERUSER]),
   invalidateCache({ invalidationKeys: [ALL_USERS] }),
-  users.updateUsernames
+  users.updateUsernames,
 );
 
 module.exports = router;

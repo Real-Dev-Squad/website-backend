@@ -34,7 +34,7 @@ class EventAPIService {
         };
         return config;
       },
-      (error) => Promise.reject(error)
+      (error) => Promise.reject(error),
     );
     this.#axiosInstance.interceptors.response.use(
       (response) => {
@@ -48,7 +48,7 @@ class EventAPIService {
           originalRequest._retry = true;
         }
         return Promise.reject(error);
-      }
+      },
     );
   }
 

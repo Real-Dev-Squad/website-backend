@@ -1,4 +1,4 @@
-import chai from "chai";
+import { expect } from "chai";
 import sinon from "sinon";
 import {
   createImpersonationRequestValidator,
@@ -19,7 +19,6 @@ import {
 } from "../../../types/impersonationRequest";
 import { Request, Response } from "express";
 
-const { expect } = chai;
 
 describe("Impersonation Request Validators", function () {
   let req: Partial<Request>;

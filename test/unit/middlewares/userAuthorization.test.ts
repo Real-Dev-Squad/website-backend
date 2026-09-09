@@ -1,6 +1,5 @@
 import * as sinon from "sinon";
-import chai from "chai";
-const { expect } = chai;
+import { expect } from "chai";
 const { userAuthorization } = require("../../../middlewares/userAuthorization");
 
 describe("userAuthorization Middleware", function () {

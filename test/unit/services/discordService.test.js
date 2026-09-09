@@ -49,7 +49,7 @@ describe("Discord services", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({ message: "done" }),
-        })
+        }),
       );
 
       const response = await addRoleToUser("123456789", "987654321");
@@ -72,7 +72,7 @@ describe("Discord services", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(discordMembersArray.getDiscordMembers),
-        })
+        }),
       );
 
       const response = await getDiscordMembers();
@@ -107,7 +107,7 @@ describe("Discord services", function () {
               message: "Role Removed Successfully",
               userAffected: { userid: "987654321123456789", roleid: "112233445566778899" },
             }),
-        })
+        }),
       );
       const response = await removeRoleFromUser("112233445566778899", "987654321123456789");
       expect(response).to.deep.equal({
@@ -144,7 +144,7 @@ describe("Discord services", function () {
               userEffected: "Kotesh",
               message: "User nickname changed successfully",
             }),
-        })
+        }),
       );
 
       const response = await setUserDiscordNickname("Kotesh", "aMYlI7sxQ4JMPwiqLQlp");
@@ -175,7 +175,7 @@ describe("Discord services", function () {
         Promise.resolve({
           ok: true,
           status: 204,
-        })
+        }),
       );
 
       const response = await deleteGroupRoleFromDiscord("123456789");
@@ -191,7 +191,7 @@ describe("Discord services", function () {
         Promise.resolve({
           ok: false,
           status: 400,
-        })
+        }),
       );
 
       const response = await deleteGroupRoleFromDiscord("123456789");

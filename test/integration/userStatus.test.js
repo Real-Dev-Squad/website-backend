@@ -1,6 +1,5 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 const sinon = require("sinon");
 
 const firestore = require("../../utils/firestore");
@@ -23,8 +22,6 @@ const { userState } = require("../../constants/userStatus");
 const cookieName = config.get("userToken.cookieName");
 const userStatusModel = require("../../models/userStatus");
 
-chai.use(chaiHttp);
-
 describe("UserStatus", function () {
   let jwt;
   let superUserId;
@@ -45,8 +42,8 @@ describe("UserStatus", function () {
 
   describe("GET /users/status", function () {
     it("Should not be accessed by unauthorized user", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/status")
         .end((err, res) => {
           if (err) {
@@ -58,8 +55,8 @@ describe("UserStatus", function () {
     });
 
     it("Should get all the userStatus in system", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/users/status")
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {
@@ -86,8 +83,8 @@ describe("UserStatus", function () {
       await updateUserStatus(nonArchivedIdleUserId, generateUserStatusData("IDLE", new Date(), new Date()));
       const nonArchivedActiveUserId = await addUser(userData[8]);
       await updateUserStatus(nonArchivedActiveUserId, generateUserStatusData("ACTIVE", new Date(), new Date()));
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .get("/users/status?state=IDLE")
         .set("cookie", `${cookieName}=${superUserAuthToken}`);
       expect(response).to.have.status(200);
@@ -99,8 +96,8 @@ describe("UserStatus", function () {
     });
 
     it("Should return pagination links with empty next/prev on a single page", async function () {
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .get("/users/status")
         .set("cookie", `${cookieName}=${superUserAuthToken}`);
       expect(response).to.have.status(200);
@@ -116,8 +113,8 @@ describe("UserStatus", function () {
 
       const userIdsFromResponse = (response) => response.body.allUserStatus.map((status) => status.userId);
 
-      const firstPage = await chai
-        .request(app)
+      const firstPage = await request
+        .execute(app)
         .get("/users/status?size=2")
         .set("cookie", `${cookieName}=${superUserAuthToken}`);
       expect(firstPage).to.have.status(200);
@@ -125,8 +122,8 @@ describe("UserStatus", function () {
       expect(firstPage.body.links.next).to.not.equal("");
       expect(firstPage.body.links.prev).to.equal("");
 
-      const secondPage = await chai
-        .request(app)
+      const secondPage = await request
+        .execute(app)
         .get(firstPage.body.links.next)
         .set("cookie", `${cookieName}=${superUserAuthToken}`);
       expect(secondPage).to.have.status(200);
@@ -134,8 +131,8 @@ describe("UserStatus", function () {
       expect(secondPage.body.links.prev).to.not.equal("");
       expect(userIdsFromResponse(secondPage).some((id) => userIdsFromResponse(firstPage).includes(id))).to.equal(false);
 
-      const firstPageAgain = await chai
-        .request(app)
+      const firstPageAgain = await request
+        .execute(app)
         .get(secondPage.body.links.prev)
         .set("cookie", `${cookieName}=${superUserAuthToken}`);
       expect(firstPageAgain).to.have.status(200);
@@ -145,8 +142,8 @@ describe("UserStatus", function () {
 
   describe("GET /users/status/:userid", function () {
     it("Should return the User Status Document with the given id", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/users/status/${userId}`)
         .end((err, res) => {
           if (err) {
@@ -163,8 +160,8 @@ describe("UserStatus", function () {
     });
 
     it("Should return the User Status Document of the user requesting it", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/users/status/self`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -184,12 +181,12 @@ describe("UserStatus", function () {
 
   describe("PATCH /users/status/update", function () {
     it("Should return 401 for unauthorized request", async function () {
-      const response = await chai.request(app).patch("/users/status/update");
+      const response = await request.execute(app).patch("/users/status/update");
       expect(response).to.have.status(401);
     });
 
     it("Should return 401 for non-super user request", async function () {
-      const response = await chai.request(app).patch("/users/status/update").set("cookie", `${cookieName}=${jwt}`);
+      const response = await request.execute(app).patch("/users/status/update").set("cookie", `${cookieName}=${jwt}`);
       expect(response).to.have.status(401);
     });
   });
@@ -213,8 +210,8 @@ describe("UserStatus", function () {
     });
 
     it("Should store the User Status in the collection", async function () {
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/users/status/${testUserId}`)
         .set("cookie", `${cookieName}=${testUserJwt}`)
         .send(generateUserStatusData("ONBOARDING", Date.now(), Date.now()));
@@ -230,8 +227,8 @@ describe("UserStatus", function () {
     });
 
     it("Should return 400 when attempting to set OOO status directly via :userid endpoint", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/users/status/${testUserId}`)
         .set("Cookie", `${cookieName}=${testUserJwt}`)
         .send(userStatusDataForOooState)
@@ -248,8 +245,8 @@ describe("UserStatus", function () {
     });
 
     it("Should return 401 for unauthorized request", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/users/status/${testUserId}`)
         .set("Cookie", `${cookieName}=""`)
         .send(userStatusDataForOooState)
@@ -266,8 +263,8 @@ describe("UserStatus", function () {
 
     it("Should return 401 for unauthorized request for user and superuser", function (done) {
       // Using ONBOARDING state since OOO is now blocked by the validator
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/users/status/${testUserId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send(generateUserStatusData("ONBOARDING", Date.now(), Date.now()))
@@ -283,8 +280,8 @@ describe("UserStatus", function () {
     });
 
     it("Should return 400 for incorrect state value", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/users/status/${testUserId}`)
         .set("cookie", `${cookieName}=${testUserJwt}`)
         .send(generateUserStatusData("IN_OFFICE", Date.now(), Date.now()))
@@ -315,8 +312,8 @@ describe("UserStatus", function () {
       const fromDate = updatedAtDate + 12 * 24 * 60 * 60 * 1000;
       const untilDate = updatedAtDate + 16 * 24 * 60 * 60 * 1000;
 
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .patch(`/users/status/self`)
         .set("Cookie", `${cookieName}=${userJwt}`)
         .send(generateUserStatusData("OOO", updatedAtDate, fromDate, untilDate, "Vacation Trip"));
@@ -347,7 +344,7 @@ describe("UserStatus", function () {
         .collection("usersStatus")
         .doc("user1AssignedStatus")
         .set({
-          userId: userId,
+          userId,
           currentStatus: {
             message: "",
             from: nowTimeStamp,
@@ -356,8 +353,8 @@ describe("UserStatus", function () {
             state: userState.OOO,
           },
         });
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${userJwt}`)
         .send({ cancelOoo: true });
@@ -376,7 +373,7 @@ describe("UserStatus", function () {
         .collection("usersStatus")
         .doc("user1AssignedStatus")
         .set({
-          userId: userId,
+          userId,
           currentStatus: {
             message: "",
             from: nowTimeStamp,
@@ -385,8 +382,8 @@ describe("UserStatus", function () {
             state: userState.OOO,
           },
         });
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${userJwt}`)
         .send({ cancelOoo: true });
@@ -397,8 +394,8 @@ describe("UserStatus", function () {
     });
 
     it("Should throw Not Found when User Status does not exist.", async function () {
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${userJwt}`)
         .send({ cancelOoo: true });
@@ -413,7 +410,7 @@ describe("UserStatus", function () {
         .collection("usersStatus")
         .doc("user1AssignedStatus")
         .set({
-          userId: userId,
+          userId,
           currentStatus: {
             message: "",
             from: nowTimeStamp,
@@ -422,8 +419,8 @@ describe("UserStatus", function () {
             state: "ACTIVE",
           },
         });
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${userJwt}`)
         .send({ cancelOoo: true });
@@ -434,8 +431,8 @@ describe("UserStatus", function () {
 
     it("Should throw an error if firestore error", async function () {
       sinon.stub(userStatusModel, "cancelOooStatus").throws(new Error("Firestore error"));
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .patch(`/users/status/self`)
         .set("cookie", `${cookieName}=${userJwt}`)
         .send({ cancelOoo: true });
@@ -447,8 +444,8 @@ describe("UserStatus", function () {
 
   describe("DELETE user-status/:userid", function () {
     it("Shouldn't delete User Status when the user is Unauthorized", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .delete(`/users/status/${userId}`)
         .set("cookie", `${cookieName}=""`)
         .end((err, res) => {
@@ -466,8 +463,8 @@ describe("UserStatus", function () {
     });
 
     it("Shouldn't delete User Status if the user doesnt have a superuser role", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .delete(`/users/status/${userId}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -485,8 +482,8 @@ describe("UserStatus", function () {
     });
 
     it("Should delete the User Staus if the user has a Super User Role", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .delete(`/users/status/${userId}`)
         .set("cookie", `${cookieName}=${superUserAuthToken}`)
         .end((err, res) => {

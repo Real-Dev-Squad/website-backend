@@ -121,7 +121,7 @@ const fetchAvailableAuctions = async () => {
 const createNewAuction = async ({ seller, initialPrice, endTime, itemType, quantity }) => {
   try {
     const auctionRef = await auctionsModel.add({
-      seller: seller,
+      seller,
       item: itemType,
       quantity: parseInt(quantity),
       highest_bidder: null,
@@ -172,7 +172,7 @@ const makeNewBid = async ({ bidder, auctionId, bid }) => {
 
     const bidRef = await bidsModel.add({
       auction_id: auctionId,
-      bidder: bidder,
+      bidder,
       bid: parseInt(bid),
       time: new Date().getTime(),
     });

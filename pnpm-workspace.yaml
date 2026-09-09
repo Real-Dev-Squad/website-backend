@@ -10,11 +10,8 @@ trustPolicy: no-downgrade
 # are safe). Listed by exact version; new releases are still fully checked.
 # trustPolicyExcludePrune drops entries the lockfile no longer resolves.
 trustPolicyExclude:
-  - 'eslint-config-prettier@9.1.2'
-  - 'eslint-plugin-prettier@4.2.5'
-  - 'jose@4.15.9'
-  - 'semver@5.7.2'
-  - 'semver@6.3.1'
+  - semver@5.7.2
+  - semver@6.3.1
 trustPolicyExcludePrune: true
 # Fail the install if a package wants to run a setup script we have not
 # reviewed yet. Approved and blocked scripts are listed under allowBuilds.
@@ -22,8 +19,14 @@ trustPolicyExcludePrune: true
 strictDepBuilds: true
 # Lock universal-analytics to 0.5.3. Version 0.5.4 needs uuid v14, which only
 # works as ESM and crashes firebase-tools. 0.5.3 uses uuid v8 and works.
+# Pin @google-cloud/firestore to a single copy: models import Firestore
+# classes (Timestamp, FieldValue) from the top-level package while the db
+# handle comes from firebase-admin's nested copy. Two different copies fail
+# instanceof checks ("doesn't match the expected instance"). 8.7.1 satisfies
+# firebase-admin 14's ^8.7.1 range.
 overrides:
   universal-analytics: 0.5.3
+  '@google-cloud/firestore': 8.7.1
 allowBuilds:
   # Needed at runtime, no backup plan if skipped. Keep allowed.
   # farmhash: used directly by firebase-admin.
@@ -36,6 +39,8 @@ allowBuilds:
   re2: false
   # Only add extra newrelic stats. The app works fine without them.
   '@newrelic/native-metrics': false
+  # Function-level profiling helper for newrelic. Optional telemetry only.
+  '@newrelic/fn-inspect': false
   '@contrast/fn-inspect': false
   # Only prints a warning message. Nothing breaks without it.
   protobufjs: false

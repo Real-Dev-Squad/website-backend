@@ -1,7 +1,6 @@
-const chai = require("chai");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 const sinon = require("sinon");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
 const logsQuery = require("../../models/logs");
 const app = require("../../server");
 const extensionRequests = require("../../models/extensionRequests");
@@ -15,8 +14,6 @@ const { DINERO, NEELAM } = require("../../constants/wallets");
 const cleanDb = require("../utils/cleanDb");
 const { EXTENSION_REQUEST_STATUS } = require("../../constants/extensionRequests");
 const { LOGS_FETCHED_SUCCESSFULLY } = require("../../constants/logs");
-
-chai.use(chaiHttp);
 
 const user = userData[6];
 const appOwner = userData[3];
@@ -47,7 +44,7 @@ describe("Extension Requests", function () {
     superUserId = await addUser(superUser);
     appOwnerjwt = authService.generateAuthToken({ userId: appOwnerUserId });
     superUserJwt = authService.generateAuthToken({ userId: superUserId });
-    jwt = authService.generateAuthToken({ userId: userId });
+    jwt = authService.generateAuthToken({ userId });
     user2Jwt = authService.generateAuthToken({ userId: userId2 });
 
     const taskData = [
@@ -262,8 +259,8 @@ describe("Extension Requests", function () {
 
   describe("GET /extension-requests/self", function () {
     it("should return success response and extension request of the authenticated user", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/extension-requests/self`)
         .set("cookie", `${cookieName}=${appOwnerjwt}`)
         .end((err, res) => {
@@ -284,8 +281,8 @@ describe("Extension Requests", function () {
     });
 
     it("should return 5 extension requests by default when size query is not provided", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/extension-requests`)
         .set("cookie", `${cookieName}=${appOwnerjwt}`)
         .end((err, res) => {
@@ -302,8 +299,8 @@ describe("Extension Requests", function () {
     });
 
     it("should return success response and all extension requests with query params", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/extension-requests/self`)
         .query({ taskId: taskId2, status: "APPROVED" })
         .set("cookie", `${cookieName}=${appOwnerjwt}`)
@@ -323,8 +320,8 @@ describe("Extension Requests", function () {
     });
 
     it("should return success response and an empty array of extensionRequest if assignee is not same as latest one", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/extension-requests/self`)
         .query({ taskId: taskId7 })
         .set("cookie", `${cookieName}=${appOwnerjwt}`)
@@ -342,8 +339,8 @@ describe("Extension Requests", function () {
     });
 
     it("should return success response and a single latestExtensionRequest if assignee same as latest one", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/extension-requests/self`)
         .query({ taskId: taskId2 })
         .set("cookie", `${cookieName}=${appOwnerjwt}`)
@@ -361,8 +358,8 @@ describe("Extension Requests", function () {
     });
 
     it("Should return 401 if not logged in", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/extension-requests/self")
         .end((err, res) => {
           if (err) {
@@ -384,8 +381,8 @@ describe("Extension Requests", function () {
 
   describe("GET /extension-requests/user/:userId", function () {
     it("should return success response and extension request of the authenticated user", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/extension-requests/user/${appOwner.id}?dev=true`)
         .set("cookie", `${cookieName}=${appOwnerjwt}`)
         .end((err, res) => {
@@ -406,8 +403,8 @@ describe("Extension Requests", function () {
     });
 
     it("should return success response and all extension requests with query params", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/extension-requests/user/${appOwner.id}?dev=true`)
         .query({ taskId: taskId2, status: "APPROVED" })
         .set("cookie", `${cookieName}=${appOwnerjwt}`)
@@ -427,8 +424,8 @@ describe("Extension Requests", function () {
     });
 
     it("should return success response and an empty array of extensionRequest if assignee is not same as latest one", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/extension-requests/user/${appOwner.id}?dev=true`)
         .query({ taskId: taskId7 })
         .set("cookie", `${cookieName}=${appOwnerjwt}`)
@@ -446,8 +443,8 @@ describe("Extension Requests", function () {
     });
 
     it("should return success response and a single latestExtensionRequest if assignee same as latest one", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/extension-requests/user/${appOwner.id}?dev=true`)
         .query({ taskId: taskId2 })
         .set("cookie", `${cookieName}=${appOwnerjwt}`)
@@ -465,8 +462,8 @@ describe("Extension Requests", function () {
     });
 
     it("Should return 401 if not logged in", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/extension-requests/user/${appOwner.id}?dev=true`)
         .end((err, res) => {
           if (err) {
@@ -488,8 +485,8 @@ describe("Extension Requests", function () {
 
   describe("POST /extension-requests - creates a new extension requests", function () {
     it("Should return success response after adding the extension request", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/extension-requests")
         .set("cookie", `${cookieName}=${appOwnerjwt}`)
         .send({
@@ -516,8 +513,8 @@ describe("Extension Requests", function () {
     });
 
     it("Should return success response after adding the extension request (sending assignee username)", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/extension-requests")
         .set("cookie", `${cookieName}=${appOwnerjwt}`)
         .send({
@@ -544,8 +541,8 @@ describe("Extension Requests", function () {
     });
 
     it("Should return failure response after adding the extension request (sending wrong assignee info)", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/extension-requests")
         .set("cookie", `${cookieName}=${appOwnerjwt}`)
         .send({
@@ -568,8 +565,8 @@ describe("Extension Requests", function () {
     });
 
     it("Should return fail response if someone try to create a extension request for someone else and is not a super user", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/extension-requests")
         .set("cookie", `${cookieName}=${appOwnerjwt}`)
         .send({
@@ -589,15 +586,15 @@ describe("Extension Requests", function () {
           expect(res).to.have.status(403);
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal(
-            "Only assigned user and super user can create an extension request for this task."
+            "Only assigned user and super user can create an extension request for this task.",
           );
           return done();
         });
     });
 
     it("Should return fail response if task with the taskId doesn't exists", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/extension-requests")
         .set("cookie", `${cookieName}=${appOwnerjwt}`)
         .send({
@@ -622,8 +619,8 @@ describe("Extension Requests", function () {
     });
 
     it("Should return fail response if task belongs to someone else", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/extension-requests")
         .set("cookie", `${cookieName}=${appOwnerjwt}`)
         .send({
@@ -648,8 +645,8 @@ describe("Extension Requests", function () {
     });
 
     it("Should return fail response if the new ETA falls before old ETA", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/extension-requests")
         .set("cookie", `${cookieName}=${appOwnerjwt}`)
         .send({
@@ -683,8 +680,8 @@ describe("Extension Requests", function () {
         status: "PENDING",
       };
 
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post("/extension-requests")
         .set("cookie", `${cookieName}=${appOwnerjwt}`)
         .send(requestData);
@@ -707,8 +704,8 @@ describe("Extension Requests", function () {
         status: "PENDING",
       };
 
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post("/extension-requests")
         .set("cookie", `${cookieName}=${appOwnerjwt}`)
         .send(requestData);
@@ -718,8 +715,8 @@ describe("Extension Requests", function () {
     });
 
     it("Should return success response after adding the extension request and also there should be a log for the same", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .post("/extension-requests")
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
@@ -740,8 +737,8 @@ describe("Extension Requests", function () {
           expect(res.body).to.be.a("object");
           expect(res.body.message).to.equal("Extension Request created successfully!");
           const extensionRequestId1 = res.body.extensionRequest.id;
-          chai
-            .request(app)
+          request
+            .execute(app)
             .get(`/logs/extensionRequests/?body.assignee=${user.id}&meta.taskId=${taskId2}`)
             .set("cookie", `${cookieName}=${superUserJwt}`)
             .end((err, res) => {
@@ -766,8 +763,8 @@ describe("Extension Requests", function () {
 
   describe("GET /extension-requests/:id", function () {
     it("should return success response and extension request with the id that is provided", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/extension-requests/${extensionRequestId1}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
@@ -785,8 +782,8 @@ describe("Extension Requests", function () {
     });
 
     it("should return failure response if no extension request found with :id", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/extension-requests/1234567890`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
@@ -803,8 +800,8 @@ describe("Extension Requests", function () {
 
   describe("GET /extension-requests", function () {
     it("should return success response and all extension requests", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/extension-requests`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
@@ -822,8 +819,8 @@ describe("Extension Requests", function () {
     });
 
     it("should return success response and all extension requests with query params", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/extension-requests`)
         .query({ q: `assignee:${appOwner.id},taskId:${taskId3}` })
         .set("cookie", `${cookieName}=${superUserJwt}`)
@@ -843,8 +840,8 @@ describe("Extension Requests", function () {
 
     it("Should return paginated response when size is passed", function (done) {
       const fetchPaginatedExtensionRequestStub = sinon.stub(extensionRequests, "fetchPaginatedExtensionRequests");
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get("/extension-requests?size=10")
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
@@ -858,8 +855,8 @@ describe("Extension Requests", function () {
     });
 
     it("Should have the link to get next set of results", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/extension-requests?size=10`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
@@ -874,8 +871,8 @@ describe("Extension Requests", function () {
     });
 
     it("Should get all extension requests filtered with status when multiple params are passed", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .get(`/extension-requests?q=status:${EXTENSION_REQUEST_STATUS.APPROVED}+${EXTENSION_REQUEST_STATUS.PENDING}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .end((err, res) => {
@@ -902,8 +899,8 @@ describe("Extension Requests", function () {
 
   describe("PATCH /extension-requests/:id/status", function () {
     it("Should return 401 if someone other than superuser logged in", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/extension-requests/${extensionRequestId1}/status`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -924,8 +921,8 @@ describe("Extension Requests", function () {
     });
 
     it("Should update the extensionRequest status for the given extensionRequestId", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/extension-requests/${extensionRequestId1}/status`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
@@ -942,8 +939,8 @@ describe("Extension Requests", function () {
           expect(res.body.extensionLog.type).to.equal("extensionRequests");
           expect(res.body.extensionLog.body.status).to.equal("APPROVED");
 
-          chai
-            .request(app)
+          request
+            .execute(app)
             .get(`/tasks/${taskId3}/details`)
             .set("cookie", `${cookieName}=${superUserJwt}`)
             .end((err, res) => {
@@ -963,8 +960,8 @@ describe("Extension Requests", function () {
     });
 
     it('Should return 400 if payload has anything other than "status" to update extensionRequest', function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/extension-requests/${extensionRequestId1}/status`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
@@ -984,8 +981,8 @@ describe("Extension Requests", function () {
     });
 
     it('Should return 400 if payload doesn\'t have "status" to update extensionRequest', function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/extension-requests/${extensionRequestId1}/status`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
@@ -1006,8 +1003,8 @@ describe("Extension Requests", function () {
 
   describe("PATCH /extension-requests/:id", function () {
     it("Should return 401 if someone other than superuser logged in", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/extension-requests/${extensionRequestId1}`)
         .set("cookie", `${cookieName}=${jwt}`)
         .end((err, res) => {
@@ -1028,8 +1025,8 @@ describe("Extension Requests", function () {
     });
 
     it("Should update the extensionRequest for the given extensionRequestId", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/extension-requests/${extensionRequestId1}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
@@ -1046,8 +1043,8 @@ describe("Extension Requests", function () {
     });
 
     it("User should be able to update the extensionRequest for the given extensionRequestId", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/extension-requests/${extensionRequestId4}?dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -1063,8 +1060,8 @@ describe("Extension Requests", function () {
     });
 
     it("User should not be able to update the extensionRequest if already approved", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/extension-requests/${extensionRequestId1}?dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({
@@ -1080,8 +1077,8 @@ describe("Extension Requests", function () {
     });
 
     it("Super user should be able to update the extensionRequest if already approved", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/extension-requests/${extensionRequestId1}?dev=true`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
@@ -1097,8 +1094,8 @@ describe("Extension Requests", function () {
     });
 
     it("should return forbidden response if superuser or request owner does not update the request when dev is enabled", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/extension-requests/${extensionRequestId4}?dev=true`)
         .set("cookie", `${cookieName}=${user2Jwt}`)
         .send({
@@ -1117,8 +1114,8 @@ describe("Extension Requests", function () {
     });
 
     it("Should return 400 if assignee of the extensionrequest is upated with a different user", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/extension-requests/${extensionRequestId1}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
@@ -1137,8 +1134,8 @@ describe("Extension Requests", function () {
     });
 
     it('Should return 400 if payload has "status" to update extensionRequest', function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/extension-requests/${extensionRequestId1}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
@@ -1157,8 +1154,8 @@ describe("Extension Requests", function () {
     });
 
     it("Extension request log should contain extensionRequestId upon approving", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/extension-requests/${extensionRequestId3}/status`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
@@ -1175,8 +1172,8 @@ describe("Extension Requests", function () {
           expect(res.body.extensionLog.type).to.equal("extensionRequests");
           expect(res.body.extensionLog.body.status).to.equal("APPROVED");
 
-          chai
-            .request(app)
+          request
+            .execute(app)
             .get(`/logs/extensionRequests?body.status=APPROVED&meta.extensionRequestId=${extensionRequestId3}`)
             .set("cookie", `${cookieName}=${superUserJwt}`)
             .end((err, res) => {
@@ -1194,8 +1191,8 @@ describe("Extension Requests", function () {
     });
 
     it("Extension request log should contain extensionRequestId upon denying request", function (done) {
-      chai
-        .request(app)
+      request
+        .execute(app)
         .patch(`/extension-requests/${extensionRequestId4}/status`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
@@ -1212,8 +1209,8 @@ describe("Extension Requests", function () {
           expect(res.body.extensionLog.type).to.equal("extensionRequests");
           expect(res.body.extensionLog.body.status).to.equal("DENIED");
 
-          chai
-            .request(app)
+          request
+            .execute(app)
             .get(`/logs/extensionRequests?body.status=DENIED&meta.extensionRequestId=${extensionRequestId4}`)
             .set("cookie", `${cookieName}=${superUserJwt}`)
             .end((err, res) => {
@@ -1235,8 +1232,8 @@ describe("Extension Requests", function () {
     it("Should create a log when SU changes the extension request's title", async function () {
       const newTitle = "new-title";
       const oldTitle = "change ETA";
-      await chai
-        .request(app)
+      await request
+        .execute(app)
         .patch(`/extension-requests/${extensionRequestId5}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
@@ -1244,7 +1241,7 @@ describe("Extension Requests", function () {
         });
       const logs = await logsQuery.fetchLogs({ "meta.extensionRequestId": extensionRequestId5 }, "extensionRequests");
       const updationLogs = logs.find(
-        (log) => log.meta.userId === superUserId && log.body.newTitle === newTitle && log.body.oldTitle === oldTitle
+        (log) => log.meta.userId === superUserId && log.body.newTitle === newTitle && log.body.oldTitle === oldTitle,
       );
       expect(updationLogs.meta.extensionRequestId).to.equal(extensionRequestId5);
       expect(updationLogs.body.newTitle).to.equal(newTitle);
@@ -1255,8 +1252,8 @@ describe("Extension Requests", function () {
     it("Should create a log when SU changes the extension request's ETA", async function () {
       const usersETA = 1235;
       const suETA = 4444; // from above
-      await chai
-        .request(app)
+      await request
+        .execute(app)
         .patch(`/extension-requests/${extensionRequestId5}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
@@ -1264,7 +1261,7 @@ describe("Extension Requests", function () {
         });
       const logs = await logsQuery.fetchLogs({ "meta.extensionRequestId": extensionRequestId5 }, "extensionRequests");
       const updationLogs = logs.find(
-        (log) => log.meta.userId === superUserId && log.body.newEndsOn === suETA && log.body.oldEndsOn === usersETA
+        (log) => log.meta.userId === superUserId && log.body.newEndsOn === suETA && log.body.oldEndsOn === usersETA,
       );
       expect(updationLogs.meta.extensionRequestId).to.equal(extensionRequestId5);
       expect(updationLogs.body.newEndsOn).to.equal(suETA);
@@ -1275,8 +1272,8 @@ describe("Extension Requests", function () {
     it("Should create a log when SU changes the extension request's reason", async function () {
       const newReason = "office work";
       const oldReason = "family event"; // from above
-      await chai
-        .request(app)
+      await request
+        .execute(app)
         .patch(`/extension-requests/${extensionRequestId5}`)
         .set("cookie", `${cookieName}=${superUserJwt}`)
         .send({
@@ -1284,7 +1281,8 @@ describe("Extension Requests", function () {
         });
       const logs = await logsQuery.fetchLogs({ "meta.extensionRequestId": extensionRequestId5 }, "extensionRequests");
       const updationLogs = logs.find(
-        (log) => log.meta.userId === superUserId && log.body.newReason === newReason && log.body.oldReason === oldReason
+        (log) =>
+          log.meta.userId === superUserId && log.body.newReason === newReason && log.body.oldReason === oldReason,
       );
       expect(updationLogs.meta.extensionRequestId).to.equal(extensionRequestId5);
       expect(updationLogs.body.newReason).to.equal(newReason);

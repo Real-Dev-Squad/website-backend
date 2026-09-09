@@ -50,7 +50,7 @@ const generateDiscordInviteLink = async () => {
     });
 
     const inviteOptions = {
-      channelId: channelId,
+      channelId,
     };
     const response = await fetch(`${DISCORD_BASE_URL}/invite`, {
       method: "POST",

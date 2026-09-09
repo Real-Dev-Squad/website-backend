@@ -1,6 +1,5 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 
 const app = require("../../server");
 const authService = require("../../services/authService");
@@ -13,8 +12,6 @@ const { getDiscordMembers } = require("../fixtures/discordResponse/discord-respo
 const cookieName = config.get("userToken.cookieName");
 const unrestrictedUser = userData[0];
 const restrictedUser = userData[2];
-
-chai.use(chaiHttp);
 
 describe("checkRestrictedUser", function () {
   let restrictedJwt;
@@ -32,7 +29,7 @@ describe("checkRestrictedUser", function () {
       Promise.resolve({
         status: 200,
         json: () => Promise.resolve(getDiscordMembers),
-      })
+      }),
     );
   });
 
@@ -42,8 +39,8 @@ describe("checkRestrictedUser", function () {
   });
 
   it("should allow GET request coming from restricted user", function (done) {
-    chai
-      .request(app)
+    request
+      .execute(app)
       .get("/users/self")
       .set("cookie", `${cookieName}=${restrictedJwt}`)
       .end((err, res) => {
@@ -58,8 +55,8 @@ describe("checkRestrictedUser", function () {
   });
 
   it("should allow non-GET request coming from unrestricted user", function (done) {
-    chai
-      .request(app)
+    request
+      .execute(app)
       .patch("/users/self")
       .set("cookie", `${cookieName}=${unrestrictedJwt}`)
       .send({
@@ -76,8 +73,8 @@ describe("checkRestrictedUser", function () {
   });
 
   it("should deny non-GET request coming from restricted user", function (done) {
-    chai
-      .request(app)
+    request
+      .execute(app)
       .patch("/users/self")
       .set("cookie", `${cookieName}=${restrictedJwt}`)
       .send({

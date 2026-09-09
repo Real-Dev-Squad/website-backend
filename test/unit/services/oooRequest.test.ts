@@ -1,3 +1,4 @@
+import { expect } from "chai";
 import sinon from "sinon";
 import cleanDb from "../../utils/cleanDb";
 import {
@@ -18,7 +19,6 @@ import {
   acknowledgeOooRequest,
   validateOooAcknowledgeRequest,
 } from "../../../services/oooRequest";
-import { expect } from "chai";
 import {
   testUserStatus,
   validOooStatusRequests,

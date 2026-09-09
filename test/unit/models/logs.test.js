@@ -1,6 +1,5 @@
-const chai = require("chai");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 const cleanDb = require("../../utils/cleanDb");
 const logsQuery = require("../../../models/logs");
 const cacheData = require("../../fixtures/cloudflareCache/data");
@@ -17,7 +16,6 @@ const { extensionRequestLogs } = require("../../fixtures/logs/extensionRequests"
 const { LOGS_FETCHED_SUCCESSFULLY } = require("../../../constants/logs");
 const tasks = require("../../../models/tasks");
 const tasksData = require("../../fixtures/tasks/tasks")();
-chai.use(chaiHttp);
 const superUser = userData[4];
 const userToBeMadeMember = userData[1];
 
@@ -73,7 +71,7 @@ describe("Logs", function () {
       addLogsStub.throws(new Error(INTERNAL_SERVER_ERROR));
 
       await addUser(userToBeMadeMember);
-      const res = await chai.request(app).get("/logs/archived-details").set("cookie", `${cookieName}=${jwt}`).send();
+      const res = await request.execute(app).get("/logs/archived-details").set("cookie", `${cookieName}=${jwt}`).send();
 
       expect(res.body.message).to.equal(SOMETHING_WENT_WRONG);
     });
@@ -124,7 +122,7 @@ describe("Logs", function () {
       };
       await logsQuery.addLog(type, meta, body);
       const data = await logsQuery.fetchLogs(query, type);
-      const response = await chai.request(app).get(`/logs/${type}/${query}`);
+      const response = await request.execute(app).get(`/logs/${type}/${query}`);
 
       expect(data).to.be.an("array").with.lengthOf(0);
       expect(response).to.have.status(404);
@@ -335,8 +333,8 @@ describe("Logs", function () {
       Sinon.stub(logsQuery, "fetchLogs").returns(extensionRequestLogs);
 
       const extensionRequestId = "y79PXir0s82qNAzeIn8S";
-      const response = await chai
-        .request(app)
+      const response = await request
+        .execute(app)
         .get(`/logs/extensionRequests?meta.extensionRequestId=${extensionRequestId}&dev=true`)
         .set("cookie", `${cookieName}=${jwt}`)
         .send();

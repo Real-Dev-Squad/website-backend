@@ -121,7 +121,7 @@ const updateTask = async (req, res, next) => {
 
 const updateSelfTask = async (req, res, next) => {
   const validStatus = [...TASK_STATUS_ENUM, ...Object.values(TASK_STATUS_OLD)].filter(
-    (item) => item !== TASK_STATUS.AVAILABLE
+    (item) => item !== TASK_STATUS.AVAILABLE,
   );
   const schema = joi
     .object()
@@ -176,7 +176,7 @@ const getTasksValidator = async (req, res, next) => {
         joi.when("next", {
           is: joi.exist(),
           then: joi.custom((_, helpers) => helpers.message("Both prev and next cannot be passed")),
-        })
+        }),
       ),
     size: joi.number().integer().positive().min(1).max(100).optional(),
     q: joi
@@ -217,7 +217,7 @@ const getUsersValidator = async (req, res, next) => {
         joi.object().keys({
           value: joi.string().valid(...Object.values(tasksUsersStatus)),
           operator: joi.string().valid(Operators.INCLUDE),
-        })
+        }),
       )
       .required(),
     "days-count": joi
@@ -226,7 +226,7 @@ const getUsersValidator = async (req, res, next) => {
         joi.object().keys({
           value: joi.number().integer().min(1).max(10),
           operator: joi.string().valid(Operators.EXCLUDE),
-        })
+        }),
       )
       .max(1)
       .optional(),
@@ -236,7 +236,7 @@ const getUsersValidator = async (req, res, next) => {
         joi.object().keys({
           value: joi.string().valid(...Object.keys(daysOfWeek)),
           operator: joi.string().valid(Operators.EXCLUDE),
-        })
+        }),
       )
       .max(7)
       .optional(),
@@ -246,7 +246,7 @@ const getUsersValidator = async (req, res, next) => {
         joi.object().keys({
           value: joi.date().timestamp(),
           operator: joi.string().valid(Operators.EXCLUDE),
-        })
+        }),
       )
       .max(20)
       .optional(),

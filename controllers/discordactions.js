@@ -1,5 +1,5 @@
 const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
-const admin = require("firebase-admin");
+const { Timestamp } = require("firebase-admin/firestore");
 const config = require("config");
 const jwt = require("jsonwebtoken");
 const discordRolesModel = require("../models/discordactions");
@@ -41,7 +41,7 @@ const createGroupRole = async (req, res) => {
       rolename,
       createdBy: req.userData.id,
       description: req.body.description || "",
-      date: admin.firestore.Timestamp.fromDate(new Date()),
+      date: Timestamp.fromDate(new Date()),
     };
 
     const headers = generateCloudFlareHeaders(req.userData);
@@ -103,7 +103,7 @@ const deleteGroupRole = async (req, res) => {
         userId: req.userData.id,
       },
       body: {
-        groupId: groupId,
+        groupId,
         roleName: roleData.rolename,
         discordRoleId: roleData.roleid,
         action: "delete",
@@ -189,7 +189,7 @@ const addGroupRoleToMember = async (req, res) => {
   try {
     const memberGroupRole = {
       ...req.body,
-      date: admin.firestore.Timestamp.fromDate(new Date()),
+      date: Timestamp.fromDate(new Date()),
     };
     const roleExistsPromise = discordRolesModel.isGroupRoleExists({
       roleid: memberGroupRole.roleid,
@@ -360,7 +360,7 @@ const updateDiscordNicknames = async (req, res) => {
         } catch (error) {
           logger.error(`error getting user with matching discordId ${error.message}`);
         }
-      })
+      }),
     );
 
     const totalNicknamesUpdated = { count: 0 };
@@ -440,7 +440,7 @@ const syncDiscordGroupRolesInFirestore = async (req, res) => {
             {
               roleid: role.id,
             },
-            roleInFirestore.id
+            roleInFirestore.id,
           );
         }
       } else {
@@ -448,7 +448,7 @@ const syncDiscordGroupRolesInFirestore = async (req, res) => {
           createdBy: req.userData.id,
           rolename: role.name,
           roleid: role.id,
-          date: admin.firestore.Timestamp.fromDate(new Date()),
+          date: Timestamp.fromDate(new Date()),
         });
       }
     });
@@ -511,7 +511,7 @@ const generateInviteForUser = async (req, res) => {
     });
 
     const inviteOptions = {
-      channelId: channelId,
+      channelId,
       role,
     };
     const response = await fetch(`${DISCORD_BASE_URL}/invite`, {

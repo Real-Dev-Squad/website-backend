@@ -1,5 +1,5 @@
-const chai = require("chai");
-const expect = chai.expect;
+const { expect, should } = require("chai");
+should();
 const sinon = require("sinon");
 const config = require("config");
 const firestore = require("../../../utils/firestore");
@@ -8,7 +8,7 @@ const discordRoleModel = firestore.collection("discord-roles");
 const userStatusCollection = firestore.collection("usersStatus");
 const memberRoleModel = firestore.collection("member-group-roles");
 const userModel = firestore.collection("users");
-const admin = require("firebase-admin");
+const { getFirestore, Timestamp } = require("firebase-admin/firestore");
 const tasksData = require("../../fixtures/tasks/tasks")();
 
 const addUser = require("../../utils/addUser");
@@ -69,8 +69,6 @@ const { userState } = require("../../../constants/userStatus");
 const { REQUEST_TYPE, REQUEST_STATE } = require("../../../constants/requests");
 const { createRequest } = require("../../../models/requests");
 const getSundayGapFixture = require("../../fixtures/missedUpdates/sundayGap");
-
-chai.should();
 
 describe("discordactions", function () {
   describe("createGroupRoles", function () {
@@ -253,12 +251,9 @@ describe("discordactions", function () {
   describe("deleteGroupRole", function () {
     const groupId = "1234";
     const deletedBy = "4321";
-    let firestoreOriginal;
 
     beforeEach(async function () {
-      firestoreOriginal = admin.firestore;
-
-      const roleRef = admin.firestore().collection("discord-roles").doc(groupId);
+      const roleRef = getFirestore().collection("discord-roles").doc(groupId);
       await roleRef.set({
         isDeleted: false,
       });
@@ -267,18 +262,16 @@ describe("discordactions", function () {
     it("should mark the group role as deleted", async function () {
       const result = await deleteGroupRole(groupId, deletedBy);
 
-      const updatedDoc = await admin.firestore().collection("discord-roles").doc(groupId).get();
+      const updatedDoc = await getFirestore().collection("discord-roles").doc(groupId).get();
 
       const data = updatedDoc.data();
       expect(data.isDeleted).to.equal(true);
       expect(data.deletedBy).to.equal(deletedBy);
-      expect(data.deletedAt).to.be.an.instanceof(admin.firestore.Timestamp);
+      expect(data.deletedAt).to.be.an.instanceof(Timestamp);
       expect(result.isSuccess).to.equal(true);
     });
 
     it("should return isSuccess as false if Firestore update fails", async function () {
-      delete require.cache[require.resolve("firebase-admin")];
-
       const mockFirestore = {
         collection: () => ({
           doc: () => ({
@@ -289,22 +282,31 @@ describe("discordactions", function () {
         }),
       };
 
-      Object.defineProperty(admin, "firestore", {
-        configurable: true,
-        get: () => () => mockFirestore,
-      });
+      // Swap the firestore module in the require cache so a fresh copy of the
+      // model binds to the failing db handle (the model destructures
+      // getFirestore at require time, so stubbing the export afterwards would
+      // have no effect on the already-loaded copy).
 
-      const result = await deleteGroupRole(groupId, deletedBy);
+      const firestoreModulePath = require.resolve("firebase-admin/firestore");
+      const modelPath = require.resolve("../../../models/discordactions");
+      /* eslint-disable security/detect-object-injection -- intentional require-cache manipulation for this stub test */
+      const originalFirestoreModule = require.cache[firestoreModulePath];
+      require.cache[firestoreModulePath] = {
+        ...originalFirestoreModule,
+        exports: { ...originalFirestoreModule.exports, getFirestore: () => mockFirestore },
+      };
+      delete require.cache[modelPath];
+      const { deleteGroupRole: deleteGroupRoleWithFailingDb } = require("../../../models/discordactions");
+      require.cache[firestoreModulePath] = originalFirestoreModule;
+      delete require.cache[modelPath];
+      /* eslint-enable security/detect-object-injection */
+
+      const result = await deleteGroupRoleWithFailingDb(groupId, deletedBy);
       expect(result.isSuccess).to.equal(false);
     });
 
     afterEach(async function () {
-      Object.defineProperty(admin, "firestore", {
-        configurable: true,
-        value: firestoreOriginal,
-      });
-
-      const roleRef = admin.firestore().collection("discord-roles").doc(groupId);
+      const roleRef = getFirestore().collection("discord-roles").doc(groupId);
       await roleRef.delete();
     });
   });
@@ -385,7 +387,7 @@ describe("discordactions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({ user: { avatar: 12345 } }),
-        })
+        }),
       );
 
       const result = await updateDiscordImageForVerification(userDiscordId);
@@ -398,7 +400,7 @@ describe("discordactions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({ user: { avatar: 12345 } }),
-        })
+        }),
       );
 
       try {
@@ -416,7 +418,7 @@ describe("discordactions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve({ user: { avatar: 12345 } }),
-        })
+        }),
       );
       sinon.stub(logger, "error");
 
@@ -518,7 +520,7 @@ describe("discordactions", function () {
         return addGroupRoleToMember({
           roleid: roleId,
           userid: index,
-          date: admin.firestore.Timestamp.fromDate(new Date()),
+          date: Timestamp.fromDate(new Date()),
         });
       });
       await Promise.all(addGroupRolesPromises);
@@ -615,7 +617,7 @@ describe("discordactions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(fetchStubResponse),
-        })
+        }),
       );
 
       const lastTimestamp = Date.now() - ONE_DAY_IN_MS * 3;
@@ -641,7 +643,7 @@ describe("discordactions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(fetchStubResponse),
-        })
+        }),
       );
 
       const lastTimestamp = Date.now() - ONE_DAY_IN_MS * 3;
@@ -663,7 +665,7 @@ describe("discordactions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(fetchStubResponse),
-        })
+        }),
       );
 
       const lastTimestamp = Date.now() - ONE_DAY_IN_MS * 3;
@@ -1018,7 +1020,7 @@ describe("discordactions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getDiscordMembers),
-        })
+        }),
       );
     });
 
@@ -1109,7 +1111,7 @@ describe("discordactions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getDiscordMembers),
-        })
+        }),
       );
     });
 
@@ -1160,15 +1162,15 @@ describe("discordactions", function () {
 
       await userStatusModel.updateUserStatus(
         userId0,
-        generateUserStatusData(userState.ONBOARDING, 1690829925336, 1690829925336)
+        generateUserStatusData(userState.ONBOARDING, 1690829925336, 1690829925336),
       );
       await userStatusModel.updateUserStatus(
         userId1,
-        generateUserStatusData(userState.ONBOARDING, 1690829925336, 1690829925336)
+        generateUserStatusData(userState.ONBOARDING, 1690829925336, 1690829925336),
       );
       await userStatusModel.updateUserStatus(
         userId2,
-        generateUserStatusData(userState.IDLE, 1690829925336, 1690829925336)
+        generateUserStatusData(userState.IDLE, 1690829925336, 1690829925336),
       );
 
       const addRolesPromises = [discordRoleModel.add(groupOnboarding31dPlus)];
@@ -1191,7 +1193,7 @@ describe("discordactions", function () {
         Promise.resolve({
           status: 200,
           json: () => Promise.resolve(getDiscordMembers),
-        })
+        }),
       );
     });
 
@@ -1512,7 +1514,7 @@ describe("discordactions", function () {
         developerUserId,
         developerTaskId,
         sundayFixture.saturdayProgressTimestamp,
-        sundayFixture.saturdayProgressTimestamp
+        sundayFixture.saturdayProgressTimestamp,
       );
 
       await firestore.collection("progresses").add(saturdayProgress);

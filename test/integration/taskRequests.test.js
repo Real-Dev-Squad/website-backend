@@ -1,7 +1,6 @@
-const chai = require("chai");
+const { expect } = require("chai");
+const { request } = require("chai-http");
 const sinon = require("sinon");
-const { expect } = chai;
-const chaiHttp = require("chai-http");
 
 const app = require("../../server");
 const authService = require("../../services/authService");
@@ -18,8 +17,6 @@ const firestore = require("../../utils/firestore");
 const logsModel = firestore.collection("logs");
 const { MIGRATION_TYPE } = require("../../constants/taskRequests");
 const taskRequestsCollection = firestore.collection("taskRequests");
-
-chai.use(chaiHttp);
 
 const config = require("config");
 const { TASK_REQUEST_TYPE, TASK_REQUEST_STATUS, TASK_REQUEST_ACTIONS } = require("../../constants/taskRequests");
@@ -71,8 +68,8 @@ describe("Task Requests", function () {
       });
 
       it("should have status 200 when taskRequests are empty", function (done) {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .get("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
           .end((err, res) => {
@@ -88,8 +85,8 @@ describe("Task Requests", function () {
       it("should fetch taskRequests", async function () {
         await taskRequestsModel.addOrUpdate(taskId, userId);
 
-        chai
-          .request(app)
+        request
+          .execute(app)
           .get("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
           .then(function (err, res) {
@@ -111,7 +108,7 @@ describe("Task Requests", function () {
         const userId = await addUser(userData[19]);
         const taskId = (await tasksModel.updateTask(taskData[0])).taskId;
         await taskRequestsModel.addOrUpdate(taskId, userId);
-        const res = await chai.request(app).get(`/taskRequests`).set("cookie", `${cookieName}=${jwt}`);
+        const res = await request.execute(app).get(`/taskRequests`).set("cookie", `${cookieName}=${jwt}`);
         expect(res).to.have.status(200);
         expect(res.body.message).to.be.equal("Task requests returned successfully");
       });
@@ -130,8 +127,8 @@ describe("Task Requests", function () {
       });
 
       it("should be successful when the user is not a super user", function (done) {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .get("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
           .end((err, res) => {
@@ -160,8 +157,8 @@ describe("Task Requests", function () {
       });
 
       it("should fetch the task request", function (done) {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .get(`/taskRequests/${taskRequestId}`)
           .set("cookie", `${cookieName}=${jwt}`)
           .end((err, res) => {
@@ -177,8 +174,8 @@ describe("Task Requests", function () {
       });
 
       it("should return 404 if the task request is not found for the given Id", function (done) {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .get(`/taskRequests/1234`)
           .set("cookie", `${cookieName}=${jwt}`)
           .end((err, res) => {
@@ -195,8 +192,8 @@ describe("Task Requests", function () {
       it("should return 404 if the resource is not found", function (done) {
         sinon.stub(taskRequestsModel, "fetchTaskRequestById").callsFake(() => []);
 
-        chai
-          .request(app)
+        request
+          .execute(app)
           .get(`/taskRequests/taskRequestId`)
           .set("cookie", `${cookieName}=${jwt}`)
           .end((err, res) => {
@@ -229,8 +226,8 @@ describe("Task Requests", function () {
       });
 
       it("should be successful when the user is not a super user", function (done) {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .get(`/taskRequests/${taskRequestId}`)
           .set("cookie", `${cookieName}=${jwt}`)
           .end((err, res) => {
@@ -256,8 +253,8 @@ describe("Task Requests", function () {
       });
 
       it("should match response on success", function (done) {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .post("/taskRequests/addOrUpdate")
           .set("cookie", `${cookieName}=${jwt}`)
           .send({
@@ -278,8 +275,8 @@ describe("Task Requests", function () {
       });
 
       it("should match response on bad request", function (done) {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .post("/taskRequests/addOrUpdate")
           .set("cookie", `${cookieName}=${jwt}`)
           .send({
@@ -298,8 +295,8 @@ describe("Task Requests", function () {
       });
 
       it("should match response when user id is not provided", function (done) {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .post("/taskRequests/addOrUpdate")
           .set("cookie", `${cookieName}=${jwt}`)
           .send({ taskId })
@@ -327,8 +324,8 @@ describe("Task Requests", function () {
       });
 
       it("should return 409 error", function (done) {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .post("/taskRequests/addOrUpdate")
           .set("cookie", `${cookieName}=${jwt}`)
           .send({
@@ -363,8 +360,8 @@ describe("Task Requests", function () {
       });
 
       it("should update the requestor when a new user is requesting", function (done) {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .post("/taskRequests/addOrUpdate")
           .set("cookie", `${cookieName}=${jwt}`)
           .send({
@@ -383,8 +380,8 @@ describe("Task Requests", function () {
       });
 
       it("should throw 409 error when requestor already exists", function (done) {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .post("/taskRequests/addOrUpdate")
           .set("cookie", `${cookieName}=${jwt}`)
           .send({
@@ -453,8 +450,8 @@ describe("Task Requests", function () {
 
       it("should match response for successfull approval", function (done) {
         sinon.stub(taskRequestsModel, "approveTaskRequest").resolves({ approvedTo: member.username, taskRequest: {} });
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch("/taskRequests/approve")
           .set("cookie", `${cookieName}=${jwt}`)
           .send({
@@ -473,8 +470,8 @@ describe("Task Requests", function () {
       });
 
       it("should throw 400 error when taskRequestId is missing", function (done) {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch("/taskRequests/approve")
           .set("cookie", `${cookieName}=${jwt}`)
           .send({
@@ -492,8 +489,8 @@ describe("Task Requests", function () {
 
       it("should throw 400 error when task request id provided doesn't exist", function (done) {
         sinon.stub(taskRequestsModel, "approveTaskRequest").resolves({ taskRequestNotFound: true });
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch("/taskRequests/approve")
           .set("cookie", `${cookieName}=${jwt}`)
           .send({ taskRequestId: taskId, userId, activeUserId })
@@ -511,8 +508,8 @@ describe("Task Requests", function () {
 
       it("should throw 400 error when user did not request for a task", function (done) {
         sinon.stub(taskRequestsModel, "approveTaskRequest").resolves({ isUserInvalid: true });
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch("/taskRequests/approve")
           .set("cookie", `${cookieName}=${jwt}`)
           .send({ taskRequestId: taskId, userId, activeUserId })
@@ -530,8 +527,8 @@ describe("Task Requests", function () {
 
       it("should throw 400 error when task was previously approved or rejected.", function (done) {
         sinon.stub(taskRequestsModel, "approveTaskRequest").resolves({ isTaskRequestInvalid: true });
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch("/taskRequests/approve")
           .set("cookie", `${cookieName}=${jwt}`)
           .send({ taskRequestId: taskId, userId, activeUserId })
@@ -548,8 +545,8 @@ describe("Task Requests", function () {
       });
 
       it("should throw 400 error when userId is missing", function (done) {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch("/taskRequests/approve")
           .set("cookie", `${cookieName}=${jwt}`)
           .send({ taskRequestId: taskId })
@@ -569,8 +566,8 @@ describe("Task Requests", function () {
           sinon
             .stub(taskRequestsModel, "approveTaskRequest")
             .resolves({ approvedTo: member.username, taskRequest: { taskRequestId: taskId } });
-          const res = await chai
-            .request(app)
+          const res = await request
+            .execute(app)
             .patch("/taskRequests/approve")
             .set("cookie", `${cookieName}=${jwt}`)
             .send({
@@ -585,8 +582,8 @@ describe("Task Requests", function () {
 
         it("Should not change the user status to ACTIVE when request is unsuccessful", async function () {
           sinon.stub(taskRequestsModel, "approveTaskRequest").resolves({ isTaskRequestInvalid: true });
-          const res = await chai
-            .request(app)
+          const res = await request
+            .execute(app)
             .patch("/taskRequests/approve")
             .set("cookie", `${cookieName}=${jwt}`)
             .send({
@@ -621,7 +618,7 @@ describe("Task Requests", function () {
         sinon
           .stub(taskRequestsModel, "approveTaskRequest")
           .resolves({ approvedTo: member.username, taskRequest: { taskRequestId: taskId } });
-        await chai.request(app).patch("/taskRequests/approve").set("cookie", `${cookieName}=${jwt}`).send({
+        await request.execute(app).patch("/taskRequests/approve").set("cookie", `${cookieName}=${jwt}`).send({
           taskRequestId: taskId,
           userId,
         });
@@ -635,7 +632,7 @@ describe("Task Requests", function () {
 
       it("should not save logs of failed requests", async function () {
         sinon.stub(taskRequestsModel, "approveTaskRequest").resolves({ taskRequestNotFound: true });
-        await chai.request(app).patch("/taskRequests/approve").set("cookie", `${cookieName}=${jwt}`).send({
+        await request.execute(app).patch("/taskRequests/approve").set("cookie", `${cookieName}=${jwt}`).send({
           taskRequestId: taskId,
           userId,
         });
@@ -660,8 +657,8 @@ describe("Task Requests", function () {
       });
 
       it("should return unauthorized user response", function (done) {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch("/taskRequests/approve")
           .set("cookie", `${cookieName}=${jwt}`)
           .send({
@@ -715,13 +712,13 @@ describe("Task Requests", function () {
       it("should match response for successful approval", async function () {
         const existingTaskRequest = { ...mockData.existingTaskRequest, requestType: TASK_REQUEST_TYPE.CREATION };
         await taskRequestsCollection.doc(taskRequestId).set(existingTaskRequest);
-        const res = await chai
-          .request(app)
+        const res = await request
+          .execute(app)
           .patch("/taskRequests/")
           .set("cookie", `${cookieName}=${jwt}`)
           .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
           .send({
-            taskRequestId: taskRequestId,
+            taskRequestId,
             userId,
           });
         expect(res.body.message).to.equal(`Task updated successfully.`);
@@ -729,13 +726,13 @@ describe("Task Requests", function () {
       });
 
       it("should match response for successful rejection", async function () {
-        const res = await chai
-          .request(app)
+        const res = await request
+          .execute(app)
           .patch("/taskRequests/")
           .set("cookie", `${cookieName}=${jwt}`)
           .query({ action: TASK_REQUEST_ACTIONS.REJECT })
           .send({
-            taskRequestId: taskRequestId,
+            taskRequestId,
             userId,
           });
 
@@ -744,8 +741,8 @@ describe("Task Requests", function () {
       });
 
       it("should throw 400 error when taskRequestId is missing", function (done) {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
           .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
@@ -763,8 +760,8 @@ describe("Task Requests", function () {
       });
 
       it("should throw 400 error when task request id provided doesn't exist", function (done) {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
           .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
@@ -782,8 +779,8 @@ describe("Task Requests", function () {
       });
 
       it("should throw 400 error when task request id provided doesn't exist for rejection", function (done) {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
           .query({ action: TASK_REQUEST_ACTIONS.REJECT })
@@ -801,12 +798,12 @@ describe("Task Requests", function () {
       });
 
       it("should throw 400 error when user did not request for a task", async function () {
-        const res = await chai
-          .request(app)
+        const res = await request
+          .execute(app)
           .patch("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
           .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
-          .send({ taskRequestId: taskRequestId, userId: activeUserId, activeUserId });
+          .send({ taskRequestId, userId: activeUserId, activeUserId });
 
         expect(res.body.message).to.equal("User request not available.");
         expect(res).to.have.status(400);
@@ -815,12 +812,12 @@ describe("Task Requests", function () {
       it("should throw 400 error when task was previously approved or rejected.", async function () {
         const existingTaskRequest = { ...mockData.existingTaskRequest, status: TASK_REQUEST_STATUS.APPROVED };
         await taskRequestsCollection.doc(taskRequestId).set(existingTaskRequest);
-        const res = await chai
-          .request(app)
+        const res = await request
+          .execute(app)
           .patch("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
           .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
-          .send({ taskRequestId: taskRequestId, userId, activeUserId });
+          .send({ taskRequestId, userId, activeUserId });
 
         expect(res.body.message).to.equal("Task request was previously approved or rejected.");
         expect(res).to.have.status(400);
@@ -829,20 +826,20 @@ describe("Task Requests", function () {
       it("should throw 400 error when task was previously approved or rejected for rejection", async function () {
         const existingTaskRequest = { ...mockData.existingTaskRequest, status: TASK_REQUEST_STATUS.APPROVED };
         await taskRequestsCollection.doc(taskRequestId).set(existingTaskRequest);
-        const res = await chai
-          .request(app)
+        const res = await request
+          .execute(app)
           .patch("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
           .query({ action: TASK_REQUEST_ACTIONS.REJECT })
-          .send({ taskRequestId: taskRequestId, userId, activeUserId });
+          .send({ taskRequestId, userId, activeUserId });
 
         expect(res.body.message).to.equal("Task request was previously approved or rejected.");
         expect(res).to.have.status(400);
       });
 
       it("should throw 400 error when userId is missing", function (done) {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
           .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
@@ -860,13 +857,13 @@ describe("Task Requests", function () {
 
       describe("Checks the user status", function () {
         it("Should change the user status to ACTIVE when request is successful for approval", async function () {
-          const res = await chai
-            .request(app)
+          const res = await request
+            .execute(app)
             .patch("/taskRequests")
             .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
             .set("cookie", `${cookieName}=${jwt}`)
             .send({
-              taskRequestId: taskRequestId,
+              taskRequestId,
               userId,
             });
 
@@ -876,13 +873,13 @@ describe("Task Requests", function () {
         });
 
         it("Should not change the user status to ACTIVE when request is successful for rejection", async function () {
-          const res = await chai
-            .request(app)
+          const res = await request
+            .execute(app)
             .patch("/taskRequests")
             .query({ action: TASK_REQUEST_ACTIONS.REJECT })
             .set("cookie", `${cookieName}=${jwt}`)
             .send({
-              taskRequestId: taskRequestId,
+              taskRequestId,
               userId,
             });
 
@@ -892,8 +889,8 @@ describe("Task Requests", function () {
         });
 
         it("Should not change the user status to ACTIVE when request is unsuccessful", async function () {
-          const res = await chai
-            .request(app)
+          const res = await request
+            .execute(app)
             .patch("/taskRequests/approve")
             .set("cookie", `${cookieName}=${jwt}`)
             .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
@@ -926,13 +923,13 @@ describe("Task Requests", function () {
       });
 
       it("should save logs of approved requests", async function () {
-        await chai
-          .request(app)
+        await request
+          .execute(app)
           .patch("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
           .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
           .send({
-            taskRequestId: taskRequestId,
+            taskRequestId,
             userId,
           });
         const logsRef = await logsModel.where("type", "==", "taskRequests").get();
@@ -945,13 +942,13 @@ describe("Task Requests", function () {
       });
 
       it("should save logs of rejected requests", async function () {
-        await chai
-          .request(app)
+        await request
+          .execute(app)
           .patch("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
           .query({ action: TASK_REQUEST_ACTIONS.REJECT })
           .send({
-            taskRequestId: taskRequestId,
+            taskRequestId,
             userId,
           });
         const logsRef = await logsModel.where("type", "==", "taskRequests").get();
@@ -963,8 +960,8 @@ describe("Task Requests", function () {
       });
 
       it("should not save logs of failed requests", async function () {
-        await chai
-          .request(app)
+        await request
+          .execute(app)
           .patch("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
           .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
@@ -993,8 +990,8 @@ describe("Task Requests", function () {
       });
 
       it("should return unauthorized user response", function (done) {
-        chai
-          .request(app)
+        request
+          .execute(app)
           .patch("/taskRequests")
           .set("cookie", `${cookieName}=${jwt}`)
           .query({ action: TASK_REQUEST_ACTIONS.APPROVE })
@@ -1045,8 +1042,8 @@ describe("Task Requests", function () {
         isCreate: true,
         alreadyRequesting: false,
       });
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post(url)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ ...mockData.taskRequestData, userId });
@@ -1057,8 +1054,8 @@ describe("Task Requests", function () {
     it("should allow users to request the same task (Creation)", async function () {
       fetchIssuesByIdStub.resolves({ url: mockData.taskRequestData.externalIssueUrl });
       createRequestStub.resolves({ id: "request123", taskRequest: mockData.existingTaskRequest, isCreate: false });
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post(url)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ ...mockData.taskRequestData, userId });
@@ -1069,8 +1066,8 @@ describe("Task Requests", function () {
     it("should not allow users to request a issue which was previously approved (Creation)", async function () {
       fetchIssuesByIdStub.resolves({ url: mockData.taskRequestData.externalIssueUrl });
       createRequestStub.resolves({ isCreationRequestApproved: true });
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post(url)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ ...mockData.taskRequestData, userId });
@@ -1087,7 +1084,7 @@ describe("Task Requests", function () {
       };
       fetchTaskStub.resolves({ taskData: { ...taskData, id: requestData.taskId } });
       createRequestStub.resolves({ id: "request123", taskRequest: mockData.existingTaskRequest, isCreate: false });
-      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
+      const res = await request.execute(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
       expect(res).to.have.status(200);
       expect(res.body.message).to.equal("Task request successful.");
     });
@@ -1098,15 +1095,15 @@ describe("Task Requests", function () {
         externalIssueUrl: "https://api.github.com/repos/Real-Dev-Squad/website/atus/issues/1564672",
         userId,
       };
-      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
+      const res = await request.execute(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
       expect(res.body.message).to.equal("Issue does not exist");
       expect(res).to.have.status(400);
     });
 
     it("should handle valid external issue URL not is RDS repo", async function () {
       fetchIssuesByIdStub.resolves(null);
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post(url)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ ...mockData.taskRequestData, userId });
@@ -1120,14 +1117,14 @@ describe("Task Requests", function () {
         proposedStartDate: mockData.taskRequestData.proposedDeadline + 10000,
         userId,
       };
-      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
+      const res = await request.execute(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
       expect(res.body.message).to.equal("Task deadline cannot be before the start date");
       expect(res).to.have.status(400);
     });
 
     it("should handle user not authorized", async function () {
       const requestData = { ...mockData.taskRequestData, userId: "abc" };
-      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
+      const res = await request.execute(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
       expect(res.body.message).to.equal("Not authorized to create the request");
       expect(res).to.have.status(403);
     });
@@ -1135,7 +1132,7 @@ describe("Task Requests", function () {
     it("should handle user not found", async function () {
       const requestData = { ...mockData.taskRequestData, userId };
       getUsernameStub.resolves(null);
-      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
+      const res = await request.execute(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
       expect(res.body.message).to.equal("User not found");
       expect(res).to.have.status(400);
     });
@@ -1148,7 +1145,7 @@ describe("Task Requests", function () {
         userId,
       };
       fetchTaskStub.resolves({ taskData: null });
-      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
+      const res = await request.execute(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
       expect(res).to.have.status(400);
       expect(res.body.message).to.equal("Task does not exist");
     });
@@ -1161,8 +1158,8 @@ describe("Task Requests", function () {
         isCreate: true,
         alreadyRequesting: false,
       });
-      await chai
-        .request(app)
+      await request
+        .execute(app)
         .post(url)
         .set("cookie", `${cookieName}=${jwt}`)
         .send({ ...mockData.taskRequestData, userId });
@@ -1182,7 +1179,7 @@ describe("Task Requests", function () {
         requestType: TASK_REQUEST_TYPE.ASSIGNMENT,
       };
       fetchTaskStub.resolves({ taskData: null });
-      await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
+      await request.execute(app).post(url).set("cookie", `${cookieName}=${jwt}`).send(requestData);
       const logsRef = await logsModel.where("type", "==", "taskRequests").get();
       let taskRequestLogs;
       logsRef.forEach((data) => {
@@ -1210,8 +1207,8 @@ describe("Task Requests", function () {
       const addNewFieldsStub = sinon
         .stub(taskRequestsModel, "addNewFields")
         .resolves({ documentsModified: 1, totalDocuments: 2 });
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post(url)
         .set("cookie", `${cookieName}=${jwt}`)
         .query({ action: MIGRATION_TYPE.ADD_NEW_FIELDS });
@@ -1226,8 +1223,8 @@ describe("Task Requests", function () {
       const removeOldFieldsStub = sinon
         .stub(taskRequestsModel, "removeOldField")
         .resolves({ documentsModified: 1, totalDocuments: 2 });
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post(url)
         .set("cookie", `${cookieName}=${jwt}`)
         .query({ action: MIGRATION_TYPE.REMOVE_OLD_FIELDS });
@@ -1242,8 +1239,8 @@ describe("Task Requests", function () {
       const addsUsersCountCreatedStub = sinon
         .stub(taskRequestsModel, "addUsersCountAndCreatedAt")
         .resolves({ documentsModified: 1, totalDocuments: 2 });
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post(url)
         .set("cookie", `${cookieName}=${jwt}`)
         .query({ action: MIGRATION_TYPE.ADD_COUNT_CREATED });
@@ -1256,8 +1253,8 @@ describe("Task Requests", function () {
 
     it("should should handle any error thrown", async function () {
       sinon.stub(taskRequestsModel, "removeOldField").throws(new Error("Error message"));
-      const res = await chai
-        .request(app)
+      const res = await request
+        .execute(app)
         .post(url)
         .set("cookie", `${cookieName}=${jwt}`)
         .query({ action: MIGRATION_TYPE.REMOVE_OLD_FIELDS });
@@ -1266,7 +1263,7 @@ describe("Task Requests", function () {
     });
 
     it("should should invalid query param", async function () {
-      const res = await chai.request(app).post(url).set("cookie", `${cookieName}=${jwt}`).query({ action: "abc" });
+      const res = await request.execute(app).post(url).set("cookie", `${cookieName}=${jwt}`).query({ action: "abc" });
       expect(res).to.have.status(400);
       expect(res.body.message).to.be.equal("Unknown action");
     });

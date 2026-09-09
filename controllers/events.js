@@ -111,10 +111,10 @@ const joinEvent = async (req, res) => {
           message: "Provided event code is invalid for the role!",
         });
       }
-      const token = tokenService.getAuthToken({ ...payload, roomId: roomId });
+      const token = tokenService.getAuthToken({ ...payload, roomId });
 
       return res.status(201).json({
-        token: token,
+        token,
         message: "Token generated successfully!",
       });
     }
@@ -127,28 +127,28 @@ const joinEvent = async (req, res) => {
       }
 
       if (role === EVENT_ROLES.HOST && req.userData.roles.super_user) {
-        const token = tokenService.getAuthToken({ ...payload, roomId: roomId });
+        const token = tokenService.getAuthToken({ ...payload, roomId });
 
         return res.status(201).json({
-          token: token,
+          token,
           message: "Token generated successfully!",
         });
       }
 
       if (role === EVENT_ROLES.MODERATOR && req.userData.roles.member) {
-        const token = tokenService.getAuthToken({ ...payload, roomId: roomId });
+        const token = tokenService.getAuthToken({ ...payload, roomId });
 
         return res.status(201).json({
-          token: token,
+          token,
           message: "Token generated successfully!",
         });
       }
     }
 
-    const token = tokenService.getAuthToken({ ...payload, roomId: roomId });
+    const token = tokenService.getAuthToken({ ...payload, roomId });
 
     return res.status(201).json({
-      token: token,
+      token,
       message: "Token generated successfully!",
     });
   } catch (error) {
@@ -212,7 +212,7 @@ const updateEvent = async (req, res) => {
   } catch (error) {
     logger.error({ error });
     return res.status(500).json({
-      error: error,
+      error,
       message: "Couldn't update event. Please try again later.",
     });
   }
@@ -302,7 +302,7 @@ const kickoutPeer = async (req, res) => {
     addLog(
       logType.EVENTS_REMOVE_PEER,
       { removed_by_id: req.userData.id, removed_by_username: req.userData.username },
-      { ...payload, event_id: id, peer_name: peer.name }
+      { ...payload, event_id: id, peer_name: peer.name },
     );
 
     return res.status(200).json({

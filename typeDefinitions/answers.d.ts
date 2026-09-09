@@ -1,5 +1,5 @@
 import { Response } from "express";
-import * as admin from "firebase-admin";
+import { Timestamp } from "firebase-admin/firestore";
 
 export type AnswerBody = {
   id: string;
@@ -21,9 +21,9 @@ export type Answer = {
   reviewed_by: string | null;
   event_id: string;
   answer: string;
-  updated_at: admin.firestore.Timestamp;
+  updated_at: Timestamp;
   answered_by: string;
-  created_at: admin.firestore.Timestamp;
+  created_at: Timestamp;
   question_id: string;
   status: AnswerStatus;
 };
