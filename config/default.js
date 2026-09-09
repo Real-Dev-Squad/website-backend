@@ -80,11 +80,8 @@ module.exports = {
   },
 
   cors: {
-    // Stored as a string (not a RegExp): node-config wraps objects in an
-    // immutable Proxy, which breaks RegExp internal slots (V8 throws
-    // "Method RegExp.prototype.exec called on incompatible receiver").
-    // middlewares/index.js builds the RegExp from this pattern.
-    allowedOrigins: "(https://([a-zA-Z0-9-_]+\\.)?realdevsquad\\.com$)", // Allow realdevsquad.com, *.realdevsquad.com
+    // eslint-disable-next-line security/detect-unsafe-regex
+    allowedOrigins: [/https:\/\/([a-zA-Z0-9-]+\.)?realdevsquad\.com$/], // Allow realdevsquad.com, *.realdevsquad.com
   },
 
   userToken: {

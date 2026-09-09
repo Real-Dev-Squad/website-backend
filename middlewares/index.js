@@ -44,11 +44,7 @@ const middleware = (app) => {
 
   app.use(
     cors({
-      // Config stores the pattern as a string (see config/default.js), so
-      // build a real RegExp here. A RegExp stored in config would come back
-      // wrapped in node-config's immutable Proxy and crash cors.
-      // eslint-disable-next-line security/detect-non-literal-regexp
-      origin: new RegExp(config.get("cors.allowedOrigins")),
+      origin: config.get("cors.allowedOrigins"),
       credentials: true,
       optionsSuccessStatus: 200,
     }),
