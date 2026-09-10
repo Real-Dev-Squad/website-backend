@@ -227,8 +227,8 @@ importers:
         specifier: 4.17.21
         version: 4.17.21
       morgan:
-        specifier: 1.10.0
-        version: 1.10.0(supports-color@5.5.0)
+        specifier: 1.12.0
+        version: 1.12.0(supports-color@5.5.0)
       multer:
         specifier: 1.4.5-lts.1
         version: 1.4.5-lts.1
@@ -3458,8 +3458,8 @@ packages:
   module-details-from-path@1.0.4:
     resolution: {integrity: sha512-EGWKgxALGMgzvxYF1UyGTy0HXX/2vHLkw6+NvDKW2jypWbHpjQuj4UMcqQWXHERJhVGKikolT06G3bcKe4fi7w==}
 
-  morgan@1.10.0:
-    resolution: {integrity: sha512-AbegBVI4sh6El+1gNwvD5YIck7nSA36weD7xvIxG4in80j/UoK8AEGaWnnz8v1GxonMCltmlNs5ZKbGvl9b1XQ==}
+  morgan@1.12.0:
+    resolution: {integrity: sha512-OHpTRQwn2ezasILW8iKe+Yww1XsfWsZIpUOLF7RDb2g5GwO3trPaRwi7+8BDiJ7HFx2Kg2mfUdCBcVhwYlOz2g==}
     engines: {node: '>= 0.8.0'}
 
   ms@2.0.0:
@@ -3777,10 +3777,6 @@ packages:
 
   on-finished@2.4.1:
     resolution: {integrity: sha512-oVlzkg3ENAhCk2zdv7IJwd/QUD4z2RxRwpkcGY8psCVcCYZNq4wYnVWALHM+brtuJjePWiYF/ClmuDr8Ch5+kg==}
-    engines: {node: '>= 0.8'}
-
-  on-headers@1.0.2:
-    resolution: {integrity: sha512-pZAE+FJLoyITytdqK0U5s+FIpjN0JP3OzFi/u8Rx+EV5/W+JTWGXG8xFzevE7AjBfDqHv/8vL8qQsIhHnqRkrA==}
     engines: {node: '>= 0.8'}
 
   on-headers@1.1.0:
@@ -7537,7 +7533,7 @@ snapshots:
       marked-terminal: 5.2.0(marked@4.3.0)
       mime: 2.6.0
       minimatch: 3.1.5
-      morgan: 1.10.0(supports-color@5.5.0)
+      morgan: 1.12.0(supports-color@5.5.0)
       node-fetch: 2.7.0(encoding@0.1.13)
       open: 6.4.0
       ora: 5.4.1
@@ -8946,13 +8942,13 @@ snapshots:
 
   module-details-from-path@1.0.4: {}
 
-  morgan@1.10.0(supports-color@5.5.0):
+  morgan@1.12.0(supports-color@5.5.0):
     dependencies:
       basic-auth: 2.0.1
       debug: 2.6.9(supports-color@5.5.0)
       depd: 2.0.0
-      on-finished: 2.3.0
-      on-headers: 1.0.2
+      on-finished: 2.4.1
+      on-headers: 1.1.0
     transitivePeerDependencies:
       - supports-color
 
@@ -9221,8 +9217,6 @@ snapshots:
   on-finished@2.4.1:
     dependencies:
       ee-first: 1.1.1
-
-  on-headers@1.0.2: {}
 
   on-headers@1.1.0: {}
 
@@ -10154,7 +10148,7 @@ snapshots:
       lodash: 4.17.21
       mime-types: 2.1.35
       minimatch: 6.2.3
-      morgan: 1.10.0(supports-color@5.5.0)
+      morgan: 1.12.0(supports-color@5.5.0)
       on-finished: 2.4.1
       on-headers: 1.1.0
       path-to-regexp: 1.9.0
