@@ -10,8 +10,9 @@ const { INTERNAL_SERVER_ERROR } = require("../constants/errorMessages");
 
 const addTagsToItem = async (req, res) => {
   try {
-    const { itemId } = await ItemTagsModel.addTagsToItem(req.body);
-    return res.json({
+    const { itemId, wasSuccess } = await ItemTagsModel.addTagsToItem(req.body);
+    if (!wasSuccess) return res.status(403).json({ message: "Tags already exists!" });
+    return res.status(201).json({
       message: "Tags added successfully!",
       itemId,
     });
